@@ -4,13 +4,13 @@ FROM node:18-alpine
 # Set working directory
 WORKDIR /app
 
-# Copy package files
+# Copy package files from resume-frontend directory
 COPY resume-frontend/package*.json ./
 
 # Install dependencies
 RUN npm install
 
-# Copy source code
+# Copy source code from resume-frontend directory
 COPY resume-frontend/ .
 
 # Build the React app
