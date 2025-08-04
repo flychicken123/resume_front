@@ -8,7 +8,7 @@ WORKDIR /app
 # Copy package files from resume-frontend directory
 COPY resume-frontend/package*.json ./
 
-# Install dependencies
+# Install all dependencies
 RUN npm install
 
 # Copy source code from resume-frontend directory
