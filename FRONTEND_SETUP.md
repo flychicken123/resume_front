@@ -17,11 +17,13 @@ This guide will help you set up the frontend deployment to EC2 instance `3.142.6
 ### **Required Secrets:**
 
 ```
-AWS_ACCESS_KEY_ID=your_aws_access_key
-AWS_SECRET_ACCESS_KEY=your_aws_secret_key
+AWS_ACCESS_KEY_ID=<your-actual-aws-access-key>
+AWS_SECRET_ACCESS_KEY=<your-actual-aws-secret-key>
 FRONTEND_EC2_HOST=3.142.69.155
-FRONTEND_EC2_SSH_KEY=your_private_key_content
+FRONTEND_EC2_SSH_KEY=<your-actual-private-key-content>
 ```
+
+**⚠️ Security Note**: Replace the placeholder values with your actual credentials. Never commit real secrets to the repository.
 
 ## 🔧 Step 2: Set Up Frontend EC2 Instance
 
