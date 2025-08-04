@@ -6,6 +6,7 @@ This guide will help you set up the frontend deployment to EC2 instance `3.142.6
 
 <!-- Test: Trigger frontend workflow -->
 <!-- Second test: Trigger workflow again -->
+<!-- Third test: Check Docker build process -->
 
 ## 🔧 Step 1: Set Up GitHub Secrets
 
