@@ -28,9 +28,9 @@ jobs:
         username: ec2-user
         key: ${{ secrets.FRONTEND_EC2_SSH_KEY }}
         script: |
-          # Update system and install essential packages
+          # Update system and install essential packages (handle conflicts)
           sudo yum update -y
-          sudo yum install -y git curl wget
+          sudo yum install -y git wget --allowerasing || sudo yum install -y git wget --skip-broken
           
           # Install Docker if not installed
           if ! command -v docker &> /dev/null; then
