@@ -5,13 +5,13 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Copy package files
-COPY resume-frontend/package*.json ./
+COPY front/resume-frontend/package*.json ./
 
 # Install dependencies
 RUN npm install
 
 # Copy source code
-COPY resume-frontend/ .
+COPY front/resume-frontend/ .
 
 # Build the React app
 RUN npm run build
