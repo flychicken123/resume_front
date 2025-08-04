@@ -46,12 +46,10 @@ jobs:
             sudo chmod +x /usr/local/bin/docker-compose
           fi
           
-          # Create directory and navigate to it
+          # Remove existing directory completely and recreate
+          rm -rf ~/ai-resume-frontend
           mkdir -p ~/ai-resume-frontend
           cd ~/ai-resume-frontend
-          
-          # Remove existing repository if it exists
-          rm -rf .git resume-frontend
           
           # Clone the repository using HTTPS (public repo)
           git clone https://github.com/flychicken123/resume_front.git .
