@@ -47,28 +47,8 @@ jobs:
           mkdir -p ~/ai-resume-frontend
           cd ~/ai-resume-frontend
           
-          # Create docker-compose file
-          cat > docker-compose.frontend.yml << 'EOF'
-          version: '3.8'
-          
-          services:
-            frontend:
-              image: node:18-alpine
-              working_dir: /app
-              ports:
-                - "3000:3000"
-              environment:
-                - REACT_APP_API_URL=http://52.14.146.43:8081
-                - NODE_ENV=production
-              volumes:
-                - ./resume-frontend:/app
-              command: >
-                sh -c "npm install && npm start"
-              restart: unless-stopped
-          EOF
-          
-          # Clone repository if not exists
-          if [ ! -d "resume-frontend" ]; then
+          # Clone repository if not exists, or pull latest
+          if [ ! -d ".git" ]; then
             git clone https://github.com/flychicken123/resume_front.git .
           else
             git pull origin master
@@ -77,7 +57,8 @@ jobs:
           # Stop existing containers
           docker-compose -f docker-compose.frontend.yml down || true
           
-          # Start containers
+          # Build and start containers
+          docker-compose -f docker-compose.frontend.yml build --no-cache
           docker-compose -f docker-compose.frontend.yml up -d
           
           # Clean up

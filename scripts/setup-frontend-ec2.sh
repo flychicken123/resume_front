@@ -26,7 +26,7 @@ cd ~/ai-resume-frontend
 
 # Clone the repository
 echo "📥 Cloning repository..."
-git clone https://github.com/your-username/AIResume.git .
+git clone https://github.com/flychicken123/resume_front.git .
 
 # Make deploy script executable
 chmod +x scripts/deploy-frontend.sh
