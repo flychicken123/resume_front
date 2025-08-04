@@ -5,6 +5,7 @@
 This guide will help you set up the frontend deployment to EC2 instance `3.142.69.155`.
 
 <!-- Test: Trigger frontend workflow -->
+<!-- Second test: Trigger workflow again -->
 
 ## 🔧 Step 1: Set Up GitHub Secrets
 
