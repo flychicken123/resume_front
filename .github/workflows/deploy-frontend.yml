@@ -2,9 +2,9 @@ name: Deploy Frontend to EC2
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
 
 jobs:
   deploy-frontend:
@@ -51,8 +51,8 @@ jobs:
           mkdir -p ~/ai-resume-frontend
           cd ~/ai-resume-frontend
           
-          # Clone the repository using HTTPS (public repo)
-          git clone https://github.com/flychicken123/resume_front.git .
+          # Clone the main branch of the repository using HTTPS (public repo)
+          git clone -b main https://github.com/flychicken123/resume_front.git .
           
           # Debug: Check what files are in the directory
           echo "=== DEBUG: Current directory contents ==="
