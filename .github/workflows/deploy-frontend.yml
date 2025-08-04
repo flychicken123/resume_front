@@ -28,9 +28,12 @@ jobs:
         username: ec2-user
         key: ${{ secrets.FRONTEND_EC2_SSH_KEY }}
         script: |
+          # Update system and install essential packages
+          sudo yum update -y
+          sudo yum install -y git curl wget
+          
           # Install Docker if not installed
           if ! command -v docker &> /dev/null; then
-            sudo yum update -y
             sudo yum install -y docker
             sudo systemctl start docker
             sudo systemctl enable docker
@@ -43,16 +46,15 @@ jobs:
             sudo chmod +x /usr/local/bin/docker-compose
           fi
           
-          # Create directory if it doesn't exist
+          # Create directory and navigate to it
           mkdir -p ~/ai-resume-frontend
           cd ~/ai-resume-frontend
           
-          # Clone repository if not exists, or pull latest
-          if [ ! -d ".git" ]; then
-            git clone https://github.com/flychicken123/resume_front.git .
-          else
-            git pull origin master
-          fi
+          # Remove existing repository if it exists
+          rm -rf .git resume-frontend
+          
+          # Clone the repository fresh
+          git clone https://github.com/flychicken123/resume_front.git .
           
           # Stop existing containers
           docker-compose -f docker-compose.frontend.yml down || true
