@@ -53,8 +53,8 @@ jobs:
           # Remove existing repository if it exists
           rm -rf .git resume-frontend
           
-          # Clone the repository using SSH (public repo)
-          git clone git@github.com:flychicken123/resume_front.git . || git clone https://github.com/flychicken123/resume_front.git .
+          # Clone the repository using HTTPS (public repo)
+          git clone https://github.com/flychicken123/resume_front.git .
           
           # Check if clone was successful
           if [ ! -f "docker-compose.frontend.yml" ]; then
