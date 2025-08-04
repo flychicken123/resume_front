@@ -54,6 +54,23 @@ jobs:
           # Clone the repository using HTTPS (public repo)
           git clone https://github.com/flychicken123/resume_front.git .
           
+          # Debug: Check what files are in the directory
+          echo "=== DEBUG: Current directory contents ==="
+          ls -la
+          echo "=== DEBUG: Checking for Dockerfile ==="
+          if [ -f "Dockerfile" ]; then
+            echo "✅ Dockerfile found"
+            cat Dockerfile
+          else
+            echo "❌ Dockerfile NOT found"
+          fi
+          echo "=== DEBUG: Checking for docker-compose file ==="
+          if [ -f "docker-compose.frontend.yml" ]; then
+            echo "✅ docker-compose.frontend.yml found"
+          else
+            echo "❌ docker-compose.frontend.yml NOT found"
+          fi
+          
           # Check if clone was successful
           if [ ! -f "docker-compose.frontend.yml" ]; then
             echo "Failed to clone repository or docker-compose file missing"
