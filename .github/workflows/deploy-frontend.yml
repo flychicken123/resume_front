@@ -57,6 +57,8 @@ jobs:
           # Debug: Check what files are in the directory
           echo "=== DEBUG: Current directory contents ==="
           ls -la
+          echo "=== DEBUG: Current working directory ==="
+          pwd
           echo "=== DEBUG: Checking for Dockerfile ==="
           if [ -f "Dockerfile" ]; then
             echo "✅ Dockerfile found"
@@ -67,6 +69,8 @@ jobs:
           echo "=== DEBUG: Checking for docker-compose file ==="
           if [ -f "docker-compose.frontend.yml" ]; then
             echo "✅ docker-compose.frontend.yml found"
+            echo "=== DEBUG: docker-compose file contents ==="
+            cat docker-compose.frontend.yml
           else
             echo "❌ docker-compose.frontend.yml NOT found"
           fi
@@ -79,6 +83,12 @@ jobs:
           
           # Stop existing containers
           docker-compose -f docker-compose.frontend.yml down || true
+          
+          # Debug: Show the exact command being run
+          echo "=== DEBUG: Running docker-compose build ==="
+          echo "Command: docker-compose -f docker-compose.frontend.yml build --no-cache"
+          echo "Working directory: $(pwd)"
+          echo "Dockerfile exists: $([ -f "Dockerfile" ] && echo "YES" || echo "NO")"
           
           # Build and start containers
           docker-compose -f docker-compose.frontend.yml build --no-cache

@@ -1,0 +1,5 @@
+[33mbbf0b0d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m Add debug commands to diagnose Dockerfile issue
+[33m2abc479[m Fix Dockerfile paths to match actual repository structure
+[33m6fece44[m Fix Dockerfile location and paths for correct repository structure
+[33ma83bbf6[m Fix Docker build context to point to front directory
+[33m368e26a[m Fix: Properly clean directory before Git clone
