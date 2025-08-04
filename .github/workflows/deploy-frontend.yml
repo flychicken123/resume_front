@@ -28,9 +28,57 @@ jobs:
         username: ec2-user
         key: ${{ secrets.FRONTEND_EC2_SSH_KEY }}
         script: |
+          # Install Docker if not installed
+          if ! command -v docker &> /dev/null; then
+            sudo yum update -y
+            sudo yum install -y docker
+            sudo systemctl start docker
+            sudo systemctl enable docker
+            sudo usermod -aG docker ec2-user
+          fi
+          
+          # Install Docker Compose if not installed
+          if ! command -v docker-compose &> /dev/null; then
+            sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            sudo chmod +x /usr/local/bin/docker-compose
+          fi
+          
+          # Create directory if it doesn't exist
+          mkdir -p ~/ai-resume-frontend
           cd ~/ai-resume-frontend
-          git pull origin master
-          docker-compose -f docker-compose.frontend.yml down
-          docker-compose -f docker-compose.frontend.yml build
+          
+          # Create docker-compose file
+          cat > docker-compose.frontend.yml << 'EOF'
+          version: '3.8'
+          
+          services:
+            frontend:
+              image: node:18-alpine
+              working_dir: /app
+              ports:
+                - "3000:3000"
+              environment:
+                - REACT_APP_API_URL=http://52.14.146.43:8081
+                - NODE_ENV=production
+              volumes:
+                - ./resume-frontend:/app
+              command: >
+                sh -c "npm install && npm start"
+              restart: unless-stopped
+          EOF
+          
+          # Clone repository if not exists
+          if [ ! -d "resume-frontend" ]; then
+            git clone https://github.com/flychicken123/resume_front.git .
+          else
+            git pull origin master
+          fi
+          
+          # Stop existing containers
+          docker-compose -f docker-compose.frontend.yml down || true
+          
+          # Start containers
           docker-compose -f docker-compose.frontend.yml up -d
+          
+          # Clean up
           docker system prune -f 
