@@ -14,7 +14,9 @@ RUN npm install
 # Copy source code from resume-frontend directory
 COPY resume-frontend/ .
 
-# Build the React app
+# Build the React app with environment variables
+ARG REACT_APP_API_URL
+ENV REACT_APP_API_URL=$REACT_APP_API_URL
 RUN npm run build
 
 # Install serve to run the built app
