@@ -6,9 +6,14 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8081';
 // Helper function to get auth headers
 const getAuthHeaders = () => {
   const token = localStorage.getItem('resumeToken');
-  if (!token) return { 'Content-Type': 'application/json' };
-  return {
+  const baseHeaders = {
     'Content-Type': 'application/json',
+    'X-API-Key': 'hihired-secure-api-2024'
+  };
+  
+  if (!token) return baseHeaders;
+  return {
+    ...baseHeaders,
     'Authorization': `Bearer ${token}`
   };
 };
@@ -77,7 +82,9 @@ export async function parseResumeFile(file) {
   formData.append('resume', file);
 
   const token = localStorage.getItem('resumeToken');
-  const headers = {};
+  const headers = {
+    'X-API-Key': 'hihired-secure-api-2024'
+  };
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
