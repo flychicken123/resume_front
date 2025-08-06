@@ -84,22 +84,14 @@ jobs:
           # Stop existing containers
           docker-compose -f docker-compose.frontend.yml down || true
           
-          # Create .env file for docker-compose with GitHub secrets
-          cat > .env << EOF
-          REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }}
-          NODE_ENV=production
-          EOF
-          
           # Debug: Show the exact command being run
           echo "=== DEBUG: Running docker-compose build ==="
           echo "Command: docker-compose -f docker-compose.frontend.yml build --no-cache"
           echo "Working directory: $(pwd)"
           echo "Dockerfile exists: $([ -f "Dockerfile" ] && echo "YES" || echo "NO")"
-          echo "=== DEBUG: .env file contents ==="
-          cat .env
           
-          # Build and start containers
-          docker-compose -f docker-compose.frontend.yml build --no-cache
+          # Build and start containers with environment variable
+          REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }} docker-compose -f docker-compose.frontend.yml build --no-cache
           docker-compose -f docker-compose.frontend.yml up -d
           
           # Clean up
