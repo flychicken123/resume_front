@@ -294,7 +294,7 @@ function BuilderApp() {
               margin: 0,
               letterSpacing: '-1px'
             }}>
-              AI Resume Builder
+              HiHired - AI Resume Builder
             </h1>
           </div>
 

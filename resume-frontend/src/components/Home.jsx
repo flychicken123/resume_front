@@ -38,7 +38,7 @@ const Home = () => {
       />
       <nav className="home-navbar">
         <div className="home-navbar-left">
-          <span className="home-logo">ResumeNow</span>
+          <span className="home-logo">HiHired</span>
         </div>
         <div className="home-navbar-center">
           <Link to="/" className="home-nav-link">Home</Link>
@@ -118,9 +118,9 @@ const Home = () => {
       
       <div className="home-hero">
         <div className="home-hero-content">
-          <h1 className="home-title">AI Resume Builder (Fast, Easy & Free to Use)</h1>
+          <h1 className="home-title">HiHired - AI Resume Builder (Fast, Easy & Free to Use)</h1>
           <p className="home-subtitle">
-            Land your next job with one of the best AI resume builders online. Work from your computer or phone with dozens of recruiter-approved templates and add ready-to-use skills and phrases in one click. Millions have trusted our resume maker — and it’s free to use!
+            Land your next job with one of the best AI resume builders online. Work from your computer or phone with dozens of recruiter-approved templates and add ready-to-use skills and phrases in one click. Millions have trusted HiHired — and it’s free to use!
           </p>
           <div className="home-cta-buttons">
             <button className="home-btn secondary" onClick={() => navigate('/builder')}>
