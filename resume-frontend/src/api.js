@@ -1,5 +1,8 @@
 // src/api.js
 
+// Get API URL from environment variable or default to localhost
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8081';
+
 // Helper function to get auth headers
 const getAuthHeaders = () => {
   const token = localStorage.getItem('resumeToken');
@@ -11,7 +14,7 @@ const getAuthHeaders = () => {
 };
 
 export async function generateResume(data) {
-  const res = await fetch("http://localhost:8081/api/resume/generate", {
+  const res = await fetch(`${API_BASE_URL}/api/resume/generate`, {
     method: "POST",
     headers: getAuthHeaders(),
     body: JSON.stringify(data),
@@ -25,7 +28,7 @@ export async function generateResume(data) {
 
 // AI assistant endpoints
 export async function generateExperienceAI(experience, jobDescription = '') {
-  const res = await fetch("http://localhost:8081/api/experience/optimize", {
+  const res = await fetch(`${API_BASE_URL}/api/experience/optimize`, {
     method: "POST",
     headers: getAuthHeaders(),
     body: JSON.stringify({ 
@@ -42,7 +45,7 @@ export async function generateExperienceAI(experience, jobDescription = '') {
 }
 
 export async function generateEducationAI(education) {
-  const res = await fetch("http://localhost:8081/api/ai/education", {
+  const res = await fetch(`${API_BASE_URL}/api/ai/education`, {
     method: "POST",
     headers: getAuthHeaders(),
     body: JSON.stringify({ education }),
@@ -56,7 +59,7 @@ export async function generateEducationAI(education) {
 }
 
 export async function generateSummaryAI({ experience, education, skills }) {
-  const res = await fetch("http://localhost:8081/api/ai/summary", {
+  const res = await fetch(`${API_BASE_URL}/api/ai/summary`, {
     method: "POST",
     headers: getAuthHeaders(),
     body: JSON.stringify({ experience, education, skills }),
@@ -79,7 +82,7 @@ export async function parseResumeFile(file) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const res = await fetch('http://localhost:8081/api/resume/parse', {
+  const res = await fetch(`${API_BASE_URL}/api/resume/parse`, {
     method: 'POST',
     headers,
     body: formData,

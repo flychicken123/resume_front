@@ -190,7 +190,8 @@ function BuilderApp() {
       };
       console.log('Request headers:', requestHeaders);
       
-      const response = await fetch('http://localhost:8081/api/resume/generate-pdf', {
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8081';
+      const response = await fetch(`${API_BASE_URL}/api/resume/generate-pdf`, {
         method: 'POST',
         headers: requestHeaders,
         body: JSON.stringify(resumeData),
@@ -215,7 +216,7 @@ function BuilderApp() {
       const result = await response.json();
       
       // Download the generated PDF file
-      const downloadUrl = `http://localhost:8081${result.filePath}`;
+      const downloadUrl = `${API_BASE_URL}${result.filePath}`;
       
       // Fetch the PDF file as a blob
       const pdfResponse = await fetch(downloadUrl, {
