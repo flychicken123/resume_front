@@ -41,10 +41,22 @@ const Home = () => {
           <span className="home-logo">HiHired</span>
         </div>
         <div className="home-navbar-center">
-          <Link to="/" className="home-nav-link">Home</Link>
+          <button 
+            className="home-nav-link" 
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', font: 'inherit' }}
+          >
+            Home
+          </button>
           <Link to="/builder" className="home-nav-link">Builder</Link>
-          <a href="#about" className="home-nav-link">About</a>
-          <a href="#contact" className="home-nav-link">Contact</a>
+          <a href="#about" className="home-nav-link" onClick={(e) => {
+            e.preventDefault();
+            document.getElementById('about').scrollIntoView({ behavior: 'smooth' });
+          }}>About</a>
+          <a href="#contact" className="home-nav-link" onClick={(e) => {
+            e.preventDefault();
+            document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
+          }}>Contact</a>
         </div>
         <div className="home-navbar-right">
           {user ? (
