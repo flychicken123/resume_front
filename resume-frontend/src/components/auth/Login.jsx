@@ -33,6 +33,8 @@ const Login = ({ onLogin, onClose }) => {
     try {
       const endpoint = mode === 'signup' ? '/api/auth/register' : '/api/auth/login';
       const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8081';
+      console.log('API_BASE_URL:', API_BASE_URL);
+      console.log('process.env.REACT_APP_API_URL:', process.env.REACT_APP_API_URL);
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: 'POST',
         headers: {
