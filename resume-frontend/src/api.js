@@ -2,8 +2,6 @@
 
 // Get API URL from environment variable or default to localhost
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8081';
-console.log('API_BASE_URL from api.js:', API_BASE_URL);
-console.log('process.env.REACT_APP_API_URL from api.js:', process.env.REACT_APP_API_URL);
 
 // Helper function to get auth headers
 const getAuthHeaders = () => {
