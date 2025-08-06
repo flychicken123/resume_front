@@ -15,6 +15,7 @@ import StepSummary from './components/StepSummary';
 import StepPreview from './components/StepPreview';
 import AuthModal from './components/auth/AuthModal';
 import JobDescModal from './components/JobDescModal';
+import SEO from './components/SEO';
 import './App.css';
 
 const steps = [
@@ -276,9 +277,12 @@ function BuilderApp() {
 
   return (
     <>
-      <Helmet>
-        <title>AI Resume Builder</title>
-      </Helmet>
+      <SEO 
+        title="Build Your Resume - HiHired AI Resume Builder"
+        description="Build your professional resume step by step with our AI-powered resume builder. Create ATS-friendly resumes with personalized templates and expert guidance."
+        keywords="build resume, create resume, resume builder, AI resume builder, professional resume, resume maker, write resume, resume template"
+        canonical="https://hihired.org/builder"
+      />
       <div style={{ display: 'flex', minHeight: '100vh', width: '100%' }}>
         {/* Left Side - Resume Builder */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#f8fafc' }}>

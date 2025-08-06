@@ -6,6 +6,7 @@ import Login from './auth/Login';
 import JobDescModal from './JobDescModal';
 import About from './About';
 import Contact from './Contact';
+import SEO from './SEO';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -29,6 +30,12 @@ const Home = () => {
   
   return (
     <div>
+      <SEO 
+        title="HiHired - Free AI Resume Builder | Build Professional Resumes Online"
+        description="Create professional resumes in minutes with our free AI resume builder. Build ATS-friendly resumes, optimize for job descriptions, and land your dream job. No registration required."
+        keywords="resume builder, AI resume builder, free resume builder, professional resume, resume maker, build resume, write resume, create resume, resume template, ATS resume, job resume, career resume, online resume builder"
+        canonical="https://hihired.org/"
+      />
       <nav className="home-navbar">
         <div className="home-navbar-left">
           <span className="home-logo">ResumeNow</span>

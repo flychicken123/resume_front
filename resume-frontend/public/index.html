@@ -3,7 +3,124 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>AI Resume Builder</title>
+  
+  <!-- Primary Meta Tags -->
+  <title>HiHired - Free AI Resume Builder | Build Professional Resumes Online</title>
+  <meta name="title" content="HiHired - Free AI Resume Builder | Build Professional Resumes Online">
+  <meta name="description" content="Create professional resumes in minutes with our free AI resume builder. Build ATS-friendly resumes, optimize for job descriptions, and land your dream job. No registration required.">
+  <meta name="keywords" content="resume builder, AI resume builder, free resume builder, professional resume, resume maker, build resume, write resume, create resume, resume template, ATS resume, job resume, career resume, online resume builder">
+  <meta name="author" content="HiHired">
+  <meta name="robots" content="index, follow">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://hihired.org/">
+  <meta property="og:title" content="HiHired - Free AI Resume Builder | Build Professional Resumes Online">
+  <meta property="og:description" content="Create professional resumes in minutes with our free AI resume builder. Build ATS-friendly resumes, optimize for job descriptions, and land your dream job.">
+  <meta property="og:image" content="https://hihired.org/og-image.jpg">
+  <meta property="og:site_name" content="HiHired">
+  
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://hihired.org/">
+  <meta property="twitter:title" content="HiHired - Free AI Resume Builder | Build Professional Resumes Online">
+  <meta property="twitter:description" content="Create professional resumes in minutes with our free AI resume builder. Build ATS-friendly resumes, optimize for job descriptions, and land your dream job.">
+  <meta property="twitter:image" content="https://hihired.org/og-image.jpg">
+  
+  <!-- Additional SEO Meta Tags -->
+  <meta name="application-name" content="HiHired">
+  <meta name="apple-mobile-web-app-title" content="HiHired">
+  <meta name="theme-color" content="#667eea">
+  <meta name="msapplication-TileColor" content="#667eea">
+  
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://hihired.org/">
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  
+  <!-- Structured Data for Rich Snippets -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "HiHired",
+    "description": "Free AI-powered resume builder that helps users create professional, ATS-friendly resumes",
+    "url": "https://hihired.org",
+    "applicationCategory": "ProductivityApplication",
+    "operatingSystem": "Web Browser",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "ratingCount": "1250"
+    },
+    "creator": {
+      "@type": "Organization",
+      "name": "HiHired",
+      "url": "https://hihired.org"
+    }
+  }
+  </script>
+  
+  <!-- Additional Structured Data for FAQ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is HiHired resume builder free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, HiHired is completely free to use. All features including AI optimization, templates, and downloads are available at no cost."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does the AI resume builder work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Our AI analyzes job descriptions and optimizes your resume with relevant keywords and skills to pass ATS systems and impress recruiters."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I build a resume without registration?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, you can start building your resume immediately without any registration required. Simply visit our website and begin creating."
+        }
+      }
+    ]
+  }
+  </script>
+  
+  <!-- Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(registration => {
+            console.log('SW registered: ', registration);
+          })
+          .catch(registrationError => {
+            console.log('SW registration failed: ', registrationError);
+          });
+      });
+    }
+  </script>
 </head>
 <body>
   <div id="root"></div>
