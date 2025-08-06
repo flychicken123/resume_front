@@ -54,6 +54,27 @@ jobs:
           # Clone the main branch of the repository using HTTPS (public repo)
           git clone -b main https://github.com/flychicken123/resume_front.git .
           
+          # Debug: Check what files are in the directory
+          echo "=== DEBUG: Current directory contents ==="
+          ls -la
+          echo "=== DEBUG: Current working directory ==="
+          pwd
+          echo "=== DEBUG: Checking for Dockerfile ==="
+          if [ -f "Dockerfile" ]; then
+            echo "✅ Dockerfile found"
+            cat Dockerfile
+          else
+            echo "❌ Dockerfile NOT found"
+          fi
+          echo "=== DEBUG: Checking for docker-compose file ==="
+          if [ -f "docker-compose.frontend.yml" ]; then
+            echo "✅ docker-compose.frontend.yml found"
+            echo "=== DEBUG: docker-compose file contents ==="
+            cat docker-compose.frontend.yml
+          else
+            echo "❌ docker-compose.frontend.yml NOT found"
+          fi
+          
           # Check if clone was successful
           if [ ! -f "docker-compose.frontend.yml" ]; then
             echo "Failed to clone repository or docker-compose file missing"
@@ -62,6 +83,20 @@ jobs:
           
           # Stop existing containers
           docker-compose -f docker-compose.frontend.yml down || true
+          
+          # Create .env file for docker-compose with GitHub secrets
+          cat > .env << EOF
+          REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }}
+          NODE_ENV=production
+          EOF
+          
+          # Debug: Show the exact command being run
+          echo "=== DEBUG: Running docker-compose build ==="
+          echo "Command: docker-compose -f docker-compose.frontend.yml build --no-cache"
+          echo "Working directory: $(pwd)"
+          echo "Dockerfile exists: $([ -f "Dockerfile" ] && echo "YES" || echo "NO")"
+          echo "=== DEBUG: .env file contents ==="
+          cat .env
           
           # Build and start containers
           docker-compose -f docker-compose.frontend.yml build --no-cache
