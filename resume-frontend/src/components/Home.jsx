@@ -4,6 +4,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Login from './auth/Login';
 import JobDescModal from './JobDescModal';
+import About from './About';
+import Contact from './Contact';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -35,6 +37,7 @@ const Home = () => {
           <Link to="/" className="home-nav-link">Home</Link>
           <Link to="/builder" className="home-nav-link">Builder</Link>
           <a href="#about" className="home-nav-link">About</a>
+          <a href="#contact" className="home-nav-link">Contact</a>
         </div>
         <div className="home-navbar-right">
           {user ? (
@@ -149,6 +152,12 @@ const Home = () => {
       {showJobDescModal && (
         <JobDescModal onClose={() => setShowJobDescModal(false)} />
       )}
+      
+      {/* About Section */}
+      <About />
+      
+      {/* Contact Section */}
+      <Contact />
     </div>
   );
 };
