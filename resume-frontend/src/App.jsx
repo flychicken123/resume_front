@@ -375,20 +375,36 @@ function BuilderApp() {
                   </button>
                 )}
                 {step === steps.length && (
-                  <button
-                    onClick={handleDownload}
-                    style={{
-                      padding: '0.75rem 1.5rem',
-                      border: 'none',
-                      borderRadius: '6px',
-                      background: '#10b981',
-                      color: 'white',
-                      cursor: 'pointer',
-                      fontWeight: 500
-                    }}
-                  >
-                    Download PDF Resume
-                  </button>
+                  <>
+                    <button
+                      onClick={handleDownload}
+                      style={{
+                        padding: '0.75rem 1.5rem',
+                        border: 'none',
+                        borderRadius: '6px',
+                        background: '#10b981',
+                        color: 'white',
+                        cursor: 'pointer',
+                        fontWeight: 500
+                      }}
+                    >
+                      Download PDF Resume
+                    </button>
+                    <button
+                      onClick={() => window.location.href = '/'}
+                      style={{
+                        padding: '0.75rem 1.5rem',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '6px',
+                        background: 'white',
+                        color: '#374151',
+                        cursor: 'pointer',
+                        fontWeight: 500
+                      }}
+                    >
+                      Complete & Return Home
+                    </button>
+                  </>
                 )}
               </div>
             </div>
