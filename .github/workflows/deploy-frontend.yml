@@ -63,10 +63,25 @@ jobs:
           # Stop existing containers
           docker-compose -f docker-compose.frontend.yml down || true
           
+          # Create external network if it doesn't exist
+          docker network create ai-resume-network 2>/dev/null || echo "Network already exists"
+          
           # Build and start containers with environment variable
           export REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }}
           docker-compose -f docker-compose.frontend.yml build --no-cache
           docker-compose -f docker-compose.frontend.yml up -d
+          
+          # Wait for container to be ready
+          sleep 10
+          
+          # Check if container is running
+          if ! docker ps | grep -q "ai-resume-frontend"; then
+            echo "❌ Frontend container failed to start"
+            docker-compose -f docker-compose.frontend.yml logs
+            exit 1
+          fi
+          
+          echo "✅ Frontend deployed successfully"
           
           # Clean up
           docker system prune -f 
