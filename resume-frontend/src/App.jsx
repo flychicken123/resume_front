@@ -298,7 +298,7 @@ function BuilderApp() {
               onClick={() => window.location.href = '/'}
               style={{
                 position: 'absolute',
-                left: '2rem',
+                right: '2rem',
                 top: '50%',
                 transform: 'translateY(-50%)',
                 padding: '0.75rem 1.5rem',
@@ -318,7 +318,7 @@ function BuilderApp() {
               }}
               onMouseEnter={(e) => {
                 e.target.style.background = '#f3f4f6';
-                e.target.style.transform = 'translateY(-50%) translateX(-2px)';
+                e.target.style.transform = 'translateY(-50%) translateX(2px)';
                 e.target.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.15)';
               }}
               onMouseLeave={(e) => {
