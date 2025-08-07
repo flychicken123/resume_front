@@ -292,7 +292,29 @@ function BuilderApp() {
       <div style={{ display: 'flex', minHeight: '100vh', width: '100%' }}>
         {/* Left Side - Resume Builder */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#f8fafc' }}>
-          <div className="site-header" style={{ width: '100%', paddingTop: '2.5rem', paddingBottom: '1.5rem', textAlign: 'center', background: 'transparent' }}>
+          <div className="site-header" style={{ width: '100%', paddingTop: '2.5rem', paddingBottom: '1.5rem', textAlign: 'center', background: 'transparent', position: 'relative' }}>
+            <button
+              onClick={() => window.location.href = '/'}
+              style={{
+                position: 'absolute',
+                left: '2rem',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                padding: '0.5rem 1rem',
+                border: '1px solid #d1d5db',
+                borderRadius: '6px',
+                background: 'white',
+                color: '#374151',
+                cursor: 'pointer',
+                fontWeight: 500,
+                fontSize: '0.875rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}
+            >
+              ← Back to Home
+            </button>
             <h1 style={{
               fontSize: '2.5rem',
               fontWeight: 700,
