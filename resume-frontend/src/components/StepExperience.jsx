@@ -1,15 +1,21 @@
 // src/components/StepExperience.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useResume } from '../context/ResumeContext';
 import { generateExperienceAI } from '../api';
-import { useParams } from 'react-router-dom';
 
 const StepExperience = () => {
   const { data, setData } = useResume();
   const [loadingIndex, setLoadingIndex] = useState(null);
   const [aiExperiences, setAiExperiences] = useState({});
-  const params = useParams();
-  const jobDescription = params.jobDescription ? decodeURIComponent(params.jobDescription) : '';
+  const [jobDescription, setJobDescription] = useState('');
+
+  // Load job description from localStorage
+  useEffect(() => {
+    const savedJobDesc = localStorage.getItem('jobDescription');
+    if (savedJobDesc) {
+      setJobDescription(savedJobDesc);
+    }
+  }, []);
 
   // Initialize experiences as structured objects if not already
   React.useEffect(() => {

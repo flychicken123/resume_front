@@ -278,6 +278,7 @@ function BuilderApp() {
   // Handler for job description submission
   const handleJobDescSubmit = (description) => {
     setJobDescription(description);
+    localStorage.setItem('jobDescription', description);
     setShowJobDescModal(false);
   };
 
