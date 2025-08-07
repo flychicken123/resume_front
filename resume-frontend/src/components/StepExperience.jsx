@@ -69,8 +69,8 @@ const StepExperience = () => {
         return;
       }
       
-      // Create a formatted experience text for AI processing
-      const experienceText = `${experience.jobTitle} at ${experience.company} (${experience.startDate} - ${experience.currentlyWorking ? 'Present' : experience.endDate}): ${experience.description}`;
+      // Send only the description to AI for optimization
+      const experienceText = experience.description;
       
       const suggestion = await generateExperienceAI(experienceText, jobDescription);
       setAiExperiences(prev => ({ ...prev, [idx]: suggestion }));
