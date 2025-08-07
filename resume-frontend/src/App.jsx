@@ -192,7 +192,7 @@ function BuilderApp() {
       console.log('Request headers:', requestHeaders);
       
       const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8081';
-      const response = await fetch(`${API_BASE_URL}/api/resume/generate-pdf`, {
+              const response = await fetch(`${API_BASE_URL}/resume/generate-pdf`, {
         method: 'POST',
         headers: requestHeaders,
         body: JSON.stringify(resumeData),
