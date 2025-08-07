@@ -375,36 +375,59 @@ function BuilderApp() {
                   </button>
                 )}
                 {step === steps.length && (
-                  <>
+                  <div style={{ display: 'flex', gap: '1rem', width: '100%', justifyContent: 'center' }}>
                     <button
                       onClick={handleDownload}
                       style={{
-                        padding: '0.75rem 1.5rem',
+                        padding: '0.75rem 2rem',
                         border: 'none',
-                        borderRadius: '6px',
+                        borderRadius: '8px',
                         background: '#10b981',
                         color: 'white',
                         cursor: 'pointer',
-                        fontWeight: 500
+                        fontWeight: 600,
+                        fontSize: '0.95rem',
+                        boxShadow: '0 2px 4px rgba(16, 185, 129, 0.2)',
+                        transition: 'all 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.background = '#059669';
+                        e.target.style.transform = 'translateY(-1px)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.background = '#10b981';
+                        e.target.style.transform = 'translateY(0)';
                       }}
                     >
-                      Download PDF Resume
+                      📄 Download PDF Resume
                     </button>
                     <button
                       onClick={() => window.location.href = '/'}
                       style={{
-                        padding: '0.75rem 1.5rem',
-                        border: '1px solid #d1d5db',
-                        borderRadius: '6px',
+                        padding: '0.75rem 2rem',
+                        border: '2px solid #3b82f6',
+                        borderRadius: '8px',
                         background: 'white',
-                        color: '#374151',
+                        color: '#3b82f6',
                         cursor: 'pointer',
-                        fontWeight: 500
+                        fontWeight: 600,
+                        fontSize: '0.95rem',
+                        transition: 'all 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.background = '#3b82f6';
+                        e.target.style.color = 'white';
+                        e.target.style.transform = 'translateY(-1px)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.background = 'white';
+                        e.target.style.color = '#3b82f6';
+                        e.target.style.transform = 'translateY(0)';
                       }}
                     >
-                      Complete & Return Home
+                      ✅ Complete & Return Home
                     </button>
-                  </>
+                  </div>
                 )}
               </div>
             </div>
