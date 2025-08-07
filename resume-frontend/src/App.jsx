@@ -347,32 +347,67 @@ function BuilderApp() {
                   <button
                     onClick={() => setStep(step - 1)}
                     style={{
-                      padding: '0.75rem 1.5rem',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '6px',
+                      padding: '1rem 2.5rem',
+                      border: '2px solid #d1d5db',
+                      borderRadius: '8px',
                       background: 'white',
                       color: '#374151',
                       cursor: 'pointer',
-                      fontWeight: 500
+                      fontWeight: 600,
+                      fontSize: '1rem',
+                      transition: 'all 0.2s ease',
+                      minWidth: '200px',
+                      height: '48px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.background = '#f3f4f6';
+                      e.target.style.transform = 'translateY(-2px)';
+                      e.target.style.boxShadow = '0 6px 12px rgba(0, 0, 0, 0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.background = 'white';
+                      e.target.style.transform = 'translateY(0)';
+                      e.target.style.boxShadow = 'none';
                     }}
                   >
-                    Previous
+                    ← Previous
                   </button>
                 )}
                 {step < steps.length && (
                   <button
                     onClick={() => setStep(step + 1)}
                     style={{
-                      padding: '0.75rem 1.5rem',
+                      padding: '1rem 2.5rem',
                       border: 'none',
-                      borderRadius: '6px',
+                      borderRadius: '8px',
                       background: '#3b82f6',
                       color: 'white',
                       cursor: 'pointer',
-                      fontWeight: 500
+                      fontWeight: 600,
+                      fontSize: '1rem',
+                      transition: 'all 0.2s ease',
+                      minWidth: '200px',
+                      height: '48px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 4px 6px rgba(59, 130, 246, 0.25)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.background = '#2563eb';
+                      e.target.style.transform = 'translateY(-2px)';
+                      e.target.style.boxShadow = '0 6px 12px rgba(59, 130, 246, 0.3)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.background = '#3b82f6';
+                      e.target.style.transform = 'translateY(0)';
+                      e.target.style.boxShadow = '0 4px 6px rgba(59, 130, 246, 0.25)';
                     }}
                   >
-                    Next
+                    Next →
                   </button>
                 )}
                 {step === steps.length && (
