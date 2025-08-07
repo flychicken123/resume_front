@@ -1,8 +1,6 @@
-const CACHE_NAME = 'hihired-v2';
+const CACHE_NAME = 'hihired-v3';
 const urlsToCache = [
   '/',
-  '/static/js/main.bundle.js',
-  '/static/css/main.css',
   '/manifest.json'
 ];
 
@@ -14,30 +12,14 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('fetch', event => {
-  // Skip service worker for API calls
-  if (event.request.url.includes('/api/')) {
+  // Skip service worker for API calls and navigation
+  if (event.request.url.includes('/api/') || event.request.mode === 'navigate') {
     return;
   }
 
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        // If it's a navigation request, always try network first
-        if (event.request.mode === 'navigate') {
-          return fetch(event.request)
-            .then(response => {
-              // If the fetch fails, return the cached version
-              if (!response || response.status !== 200) {
-                return caches.match('/');
-              }
-              return response;
-            })
-            .catch(() => {
-              // If network fails, return the cached home page
-              return caches.match('/');
-            });
-        }
-        
         // For other requests, return cached version or fetch from network
         return response || fetch(event.request);
       })
