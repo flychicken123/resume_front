@@ -71,7 +71,7 @@ const StepExperience = () => {
       }
       
       if (!jobDescription.trim()) {
-        alert('No job description available. Please start building with a job description to use this feature.');
+        alert('AI conversion requires a job description. You can still build your resume without AI optimization, or go back to the home page to start with a job description.');
         return;
       }
       
@@ -124,7 +124,21 @@ const StepExperience = () => {
           marginBottom: '1.5rem' 
         }}>
           <p style={{ margin: 0, color: '#0369a1', fontSize: '0.9rem' }}>
-            🎯 <strong>Job Description Available:</strong> Use the "AI Convert" button below each experience to optimize it based on the job requirements.
+            🎯 <strong>AI Optimization Available:</strong> Use the "AI Convert" button below each experience to optimize it based on your job description.
+          </p>
+        </div>
+      )}
+      
+      {!jobDescription && (
+        <div style={{ 
+          background: '#fef3c7', 
+          border: '1px solid #f59e0b', 
+          borderRadius: '8px', 
+          padding: '1rem', 
+          marginBottom: '1.5rem' 
+        }}>
+          <p style={{ margin: 0, color: '#92400e', fontSize: '0.9rem' }}>
+            💡 <strong>Tip:</strong> You can build your resume without a job description. For AI-powered optimization, start from the home page with a job description.
           </p>
         </div>
       )}
