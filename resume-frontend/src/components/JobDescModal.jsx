@@ -5,14 +5,21 @@ const JobDescModal = ({ onClose, onJobDescriptionSubmit }) => {
   const [jobDescription, setJobDescription] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmitWithJobDesc = (e) => {
     e.preventDefault();
     if (jobDescription.trim()) {
-      // Pass job description to parent component instead of URL
       onJobDescriptionSubmit(jobDescription);
       navigate('/builder');
       onClose();
+    } else {
+      alert('Please enter a job description to use AI optimization features.');
     }
+  };
+
+  const handleSubmitWithoutJobDesc = () => {
+    // Navigate to builder without job description
+    navigate('/builder');
+    onClose();
   };
 
   return (
@@ -30,11 +37,12 @@ const JobDescModal = ({ onClose, onJobDescriptionSubmit }) => {
     }}>
       <div style={{
         background: 'white',
-        borderRadius: '8px',
+        borderRadius: '12px',
         padding: '2rem',
         width: '90%',
-        maxWidth: '600px',
-        position: 'relative'
+        maxWidth: '500px',
+        position: 'relative',
+        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
       }}>
         <button
           onClick={onClose}
@@ -46,69 +54,123 @@ const JobDescModal = ({ onClose, onJobDescriptionSubmit }) => {
             border: 'none',
             fontSize: 24,
             cursor: 'pointer',
-            color: '#64748b'
+            color: '#64748b',
+            width: '32px',
+            height: '32px',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'background-color 0.2s'
           }}
+          onMouseEnter={(e) => e.target.style.background = '#f3f4f6'}
+          onMouseLeave={(e) => e.target.style.background = 'transparent'}
           aria-label="Close modal"
         >×</button>
         
-        <h2 style={{ margin: '0 0 1rem 0', color: '#1f2937' }}>
-          Tell us about the job you're applying for
+        <h2 style={{ margin: '0 0 1rem 0', color: '#1f2937', fontSize: '1.5rem', fontWeight: 600 }}>
+          Build Your Resume
         </h2>
         
-        <p style={{ color: '#6b7280', marginBottom: '1.5rem' }}>
-          We'll use this information to tailor your resume and optimize your experience descriptions.
+        <p style={{ color: '#6b7280', marginBottom: '1.5rem', fontSize: '0.95rem' }}>
+          Choose how you'd like to build your resume:
         </p>
         
-        <form onSubmit={handleSubmit}>
+        <div style={{ marginBottom: '1.5rem' }}>
+          <label style={{ 
+            display: 'block', 
+            marginBottom: '0.5rem', 
+            fontWeight: 600, 
+            color: '#374151',
+            fontSize: '0.9rem'
+          }}>
+            Job Description (Optional)
+          </label>
           <textarea
             value={jobDescription}
             onChange={(e) => setJobDescription(e.target.value)}
-            placeholder="Paste the job description here..."
+            placeholder="Paste the job description here to enable AI optimization..."
             style={{
               width: '100%',
-              minHeight: '200px',
-              padding: '1rem',
+              minHeight: '120px',
+              maxHeight: '200px',
+              padding: '0.75rem',
               border: '1px solid #d1d5db',
-              borderRadius: '6px',
-              fontSize: '0.95rem',
+              borderRadius: '8px',
+              fontSize: '0.9rem',
               resize: 'vertical',
-              fontFamily: 'inherit'
+              fontFamily: 'inherit',
+              lineHeight: '1.5'
             }}
-            required
           />
+          <p style={{ 
+            color: '#6b7280', 
+            fontSize: '0.8rem', 
+            marginTop: '0.5rem',
+            marginBottom: 0
+          }}>
+            💡 With a job description, you'll get AI-powered optimization of your experience descriptions.
+          </p>
+        </div>
+        
+        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+          <button
+            type="button"
+            onClick={handleSubmitWithoutJobDesc}
+            style={{
+              padding: '0.875rem 1.5rem',
+              border: '2px solid #d1d5db',
+              borderRadius: '8px',
+              background: 'white',
+              color: '#374151',
+              cursor: 'pointer',
+              fontWeight: 600,
+              fontSize: '0.95rem',
+              transition: 'all 0.2s ease',
+              minWidth: '160px'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.background = '#f3f4f6';
+              e.target.style.transform = 'translateY(-1px)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = 'white';
+              e.target.style.transform = 'translateY(0)';
+            }}
+          >
+            🚀 Build Without Job Description
+          </button>
           
-          <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
-            <button
-              type="button"
-              onClick={onClose}
-              style={{
-                padding: '0.75rem 1.5rem',
-                border: '1px solid #d1d5db',
-                borderRadius: '6px',
-                background: 'white',
-                color: '#374151',
-                cursor: 'pointer',
-                fontWeight: 500
-              }}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              style={{
-                padding: '0.75rem 1.5rem',
-                border: 'none',
-                borderRadius: '6px',
-                background: '#3b82f6',
-                color: 'white',
-                cursor: 'pointer',
-                fontWeight: 500
-              }}
-            >
-              Start Building Resume
-            </button>
-          </div>
-        </form>
+          <button
+            type="button"
+            onClick={handleSubmitWithJobDesc}
+            style={{
+              padding: '0.875rem 1.5rem',
+              border: 'none',
+              borderRadius: '8px',
+              background: '#3b82f6',
+              color: 'white',
+              cursor: 'pointer',
+              fontWeight: 600,
+              fontSize: '0.95rem',
+              transition: 'all 0.2s ease',
+              minWidth: '160px',
+              boxShadow: '0 2px 4px rgba(59, 130, 246, 0.2)'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.background = '#2563eb';
+              e.target.style.transform = 'translateY(-1px)';
+              e.target.style.boxShadow = '0 4px 8px rgba(59, 130, 246, 0.3)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = '#3b82f6';
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = '0 2px 4px rgba(59, 130, 246, 0.2)';
+            }}
+          >
+            🤖 Build with AI Optimization
+          </button>
+        </div>
       </div>
     </div>
   );
