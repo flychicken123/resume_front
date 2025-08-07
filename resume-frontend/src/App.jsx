@@ -375,28 +375,42 @@ function BuilderApp() {
                   </button>
                 )}
                 {step === steps.length && (
-                  <div style={{ display: 'flex', gap: '1rem', width: '100%', justifyContent: 'center' }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    gap: '1.5rem', 
+                    width: '100%', 
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginTop: '2rem'
+                  }}>
                     <button
                       onClick={handleDownload}
                       style={{
-                        padding: '0.75rem 2rem',
+                        padding: '1rem 2.5rem',
                         border: 'none',
                         borderRadius: '8px',
                         background: '#10b981',
                         color: 'white',
                         cursor: 'pointer',
                         fontWeight: 600,
-                        fontSize: '0.95rem',
-                        boxShadow: '0 2px 4px rgba(16, 185, 129, 0.2)',
-                        transition: 'all 0.2s ease'
+                        fontSize: '1rem',
+                        boxShadow: '0 4px 6px rgba(16, 185, 129, 0.25)',
+                        transition: 'all 0.2s ease',
+                        minWidth: '200px',
+                        height: '48px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
                       }}
                       onMouseEnter={(e) => {
                         e.target.style.background = '#059669';
-                        e.target.style.transform = 'translateY(-1px)';
+                        e.target.style.transform = 'translateY(-2px)';
+                        e.target.style.boxShadow = '0 6px 12px rgba(16, 185, 129, 0.3)';
                       }}
                       onMouseLeave={(e) => {
                         e.target.style.background = '#10b981';
                         e.target.style.transform = 'translateY(0)';
+                        e.target.style.boxShadow = '0 4px 6px rgba(16, 185, 129, 0.25)';
                       }}
                     >
                       📄 Download PDF Resume
@@ -404,25 +418,32 @@ function BuilderApp() {
                     <button
                       onClick={() => window.location.href = '/'}
                       style={{
-                        padding: '0.75rem 2rem',
+                        padding: '1rem 2.5rem',
                         border: '2px solid #3b82f6',
                         borderRadius: '8px',
                         background: 'white',
                         color: '#3b82f6',
                         cursor: 'pointer',
                         fontWeight: 600,
-                        fontSize: '0.95rem',
-                        transition: 'all 0.2s ease'
+                        fontSize: '1rem',
+                        transition: 'all 0.2s ease',
+                        minWidth: '200px',
+                        height: '48px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
                       }}
                       onMouseEnter={(e) => {
                         e.target.style.background = '#3b82f6';
                         e.target.style.color = 'white';
-                        e.target.style.transform = 'translateY(-1px)';
+                        e.target.style.transform = 'translateY(-2px)';
+                        e.target.style.boxShadow = '0 6px 12px rgba(59, 130, 246, 0.3)';
                       }}
                       onMouseLeave={(e) => {
                         e.target.style.background = 'white';
                         e.target.style.color = '#3b82f6';
                         e.target.style.transform = 'translateY(0)';
+                        e.target.style.boxShadow = 'none';
                       }}
                     >
                       ✅ Complete & Return Home
