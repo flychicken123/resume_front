@@ -301,17 +301,30 @@ function BuilderApp() {
                 left: '2rem',
                 top: '50%',
                 transform: 'translateY(-50%)',
-                padding: '0.5rem 1rem',
-                border: '1px solid #d1d5db',
-                borderRadius: '6px',
+                padding: '0.75rem 1.5rem',
+                border: '2px solid #d1d5db',
+                borderRadius: '8px',
                 background: 'white',
                 color: '#374151',
                 cursor: 'pointer',
-                fontWeight: 500,
-                fontSize: '0.875rem',
+                fontWeight: 600,
+                fontSize: '0.95rem',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.5rem'
+                gap: '0.5rem',
+                zIndex: 20,
+                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = '#f3f4f6';
+                e.target.style.transform = 'translateY(-50%) translateX(-2px)';
+                e.target.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.15)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = 'white';
+                e.target.style.transform = 'translateY(-50%)';
+                e.target.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
               }}
             >
               ← Back to Home
