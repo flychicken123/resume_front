@@ -13,7 +13,6 @@ const Home = () => {
   const { user, login } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showJobDescModal, setShowJobDescModal] = useState(false);
-  const [jobDescription, setJobDescription] = useState('');
   const [usernameWidth, setUsernameWidth] = useState(100);
   const usernameRef = useRef(null);
   const buttonRef = useRef(null);
@@ -27,6 +26,13 @@ const Home = () => {
       setUsernameWidth(optimalSpacing);
     }
   }, [user]);
+
+  // Handler for job description submission
+  const handleJobDescSubmit = (description) => {
+    // Store job description in localStorage for the builder to access
+    localStorage.setItem('jobDescription', description);
+    setShowJobDescModal(false);
+  };
   
   return (
     <div>
@@ -168,9 +174,9 @@ const Home = () => {
       )}
 
       {/* Job Description Modal */}
-      {showJobDescModal && (
-        <JobDescModal onClose={() => setShowJobDescModal(false)} />
-      )}
+              {showJobDescModal && (
+          <JobDescModal onClose={() => setShowJobDescModal(false)} onJobDescriptionSubmit={handleJobDescSubmit} />
+        )}
       
       {/* About Section */}
       <About />

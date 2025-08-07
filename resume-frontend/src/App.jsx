@@ -32,6 +32,14 @@ function BuilderApp() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showJobDescModal, setShowJobDescModal] = useState(false);
   const [jobDescription, setJobDescription] = useState('');
+  
+  // Load job description from localStorage on component mount
+  useEffect(() => {
+    const savedJobDesc = localStorage.getItem('jobDescription');
+    if (savedJobDesc) {
+      setJobDescription(savedJobDesc);
+    }
+  }, []);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { user, login, logout } = useAuth();
   const { data, saveToDatabaseNow } = useResume();
@@ -93,15 +101,7 @@ function BuilderApp() {
   
 
   
-  // Get job description from URL params if available
-  const params = useParams();
-  React.useEffect(() => {
-    if (params.jobDescription) {
-      setJobDescription(decodeURIComponent(params.jobDescription));
-    } else {
-      setJobDescription('');
-    }
-  }, [params.jobDescription]);
+
 
   // Handler for download action
   const handleDownload = async () => {
@@ -275,6 +275,12 @@ function BuilderApp() {
     }
   };
 
+  // Handler for job description submission
+  const handleJobDescSubmit = (description) => {
+    setJobDescription(description);
+    setShowJobDescModal(false);
+  };
+
   return (
     <>
       <SEO 
@@ -439,7 +445,7 @@ function BuilderApp() {
 
       {/* Modals */}
       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
-      {showJobDescModal && <JobDescModal onClose={() => setShowJobDescModal(false)} />}
+              {showJobDescModal && <JobDescModal onClose={() => setShowJobDescModal(false)} onJobDescriptionSubmit={handleJobDescSubmit} />}
     </>
   );
 }
@@ -452,8 +458,7 @@ function App() {
           <Router>
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/builder" element={<BuilderApp />} />
-              <Route path="/builder/:jobDescription" element={<BuilderApp />} />
+                      <Route path="/builder" element={<BuilderApp />} />
             </Routes>
           </Router>
         </ResumeProvider>

@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const JobDescModal = ({ onClose }) => {
+const JobDescModal = ({ onClose, onJobDescriptionSubmit }) => {
   const [jobDescription, setJobDescription] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (jobDescription.trim()) {
-      const encodedJobDesc = encodeURIComponent(jobDescription);
-      navigate(`/builder/${encodedJobDesc}`);
+      // Pass job description to parent component instead of URL
+      onJobDescriptionSubmit(jobDescription);
+      navigate('/builder');
       onClose();
     }
   };
