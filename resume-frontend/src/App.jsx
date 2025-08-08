@@ -380,6 +380,7 @@ function BuilderApp() {
       const result = await response.json();
       
       // Download the generated PDF file
+      // Remove /api prefix for static files
       const downloadUrl = `${API_BASE_URL}${result.filePath}`;
       
       // Fetch the PDF file as a blob
