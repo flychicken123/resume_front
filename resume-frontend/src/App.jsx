@@ -386,6 +386,10 @@ function BuilderApp() {
       const downloadBaseUrl = window.location.origin;
       const downloadUrl = `${downloadBaseUrl}/download/${filename}`;
       
+      console.log('Download URL:', downloadUrl);
+      console.log('Filename:', filename);
+      console.log('File path from backend:', result.filePath);
+      
       // Fetch the PDF file as a blob
       // Static files don't need authorization
       const pdfResponse = await fetch(downloadUrl);
