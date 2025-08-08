@@ -18,7 +18,7 @@ const getAuthHeaders = () => {
 };
 
 export async function generateResume(data) {
-  const res = await fetch(`${API_BASE_URL}/resume/generate`, {
+  const res = await fetch(`${API_BASE_URL}/api/resume/generate`, {
     method: "POST",
     headers: getAuthHeaders(),
     body: JSON.stringify(data),
@@ -51,7 +51,7 @@ export async function generateExperienceAI(experience, jobDescription = '') {
 }
 
 export async function generateEducationAI(education) {
-  const res = await fetch(`${API_BASE_URL}/ai/education`, {
+  const res = await fetch(`${API_BASE_URL}/api/ai/education`, {
     method: "POST",
     headers: getAuthHeaders(),
     body: JSON.stringify({ education }),
@@ -65,7 +65,7 @@ export async function generateEducationAI(education) {
 }
 
 export async function generateSummaryAI({ experience, education, skills }) {
-  const res = await fetch(`${API_BASE_URL}/ai/summary`, {
+  const res = await fetch(`${API_BASE_URL}/api/ai/summary`, {
     method: "POST",
     headers: getAuthHeaders(),
     body: JSON.stringify({ experience, education, skills }),
@@ -89,7 +89,7 @@ export async function parseResumeFile(file) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const res = await fetch(`${API_BASE_URL}/resume/parse`, {
+  const res = await fetch(`${API_BASE_URL}/api/resume/parse`, {
     method: 'POST',
     headers,
     body: formData,

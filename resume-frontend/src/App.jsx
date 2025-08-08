@@ -356,15 +356,9 @@ function BuilderApp() {
       
       const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8081';
       
-      // Determine if we're in development (localhost) or production
-      const isDevelopment = API_BASE_URL.includes('localhost') || API_BASE_URL.includes('127.0.0.1');
-      const apiPrefix = isDevelopment ? '/api' : '';
-      
       console.log('API_BASE_URL:', API_BASE_URL);
-      console.log('isDevelopment:', isDevelopment);
-      console.log('apiPrefix:', apiPrefix);
       
-      const response = await fetch(`${API_BASE_URL}${apiPrefix}/resume/generate-pdf`, {
+      const response = await fetch(`${API_BASE_URL}/api/resume/generate-pdf`, {
         method: 'POST',
         headers: requestHeaders,
         body: JSON.stringify(resumeData),

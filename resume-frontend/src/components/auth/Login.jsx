@@ -31,7 +31,7 @@ const Login = ({ onLogin, onClose }) => {
     setError('');
 
     try {
-      const endpoint = mode === 'signup' ? '/auth/register' : '/auth/login';
+      const endpoint = mode === 'signup' ? '/api/auth/register' : '/api/auth/login';
       const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8081';
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: 'POST',
