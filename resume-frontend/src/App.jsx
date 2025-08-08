@@ -223,11 +223,14 @@ function BuilderApp() {
         const timestamp = Date.now();
         const cacheBustedCssText = filteredCssText.replace(/\.preview\s*\{/g, `.preview { /* Cache-busted at ${timestamp} */`);
         
-        // Remove old CSS values completely and simplify
+        // Remove old CSS values completely and simplify - reduce padding further
         const cleanedCssText = cacheBustedCssText
-          .replace(/padding:\s*0\.75in/g, 'padding: 0.5in')
-          .replace(/margin-top:\s*15pt/g, 'margin-top: 10pt')
-          .replace(/margin-bottom:\s*8pt/g, 'margin-bottom: 6pt')
+          .replace(/padding:\s*0\.75in/g, 'padding: 0.3in')
+          .replace(/padding:\s*0\.5in/g, 'padding: 0.3in')
+          .replace(/margin-top:\s*15pt/g, 'margin-top: 8pt')
+          .replace(/margin-top:\s*10pt/g, 'margin-top: 8pt')
+          .replace(/margin-bottom:\s*8pt/g, 'margin-bottom: 4pt')
+          .replace(/margin-bottom:\s*6pt/g, 'margin-bottom: 4pt')
           // Remove any external CSS that might interfere
           .replace(/@import[^;]+;/g, '')
           .replace(/@media[^{}]*\{\s*\}/g, '')
@@ -267,10 +270,21 @@ function BuilderApp() {
         
         // Create HTML document with filtered, cleaned CSS
         const pdfOverrides = `
-          /* PDF-only overrides to avoid blank trailing pages */
-          .preview { min-height: auto !important; box-shadow: none !important; border: none !important; }
-          .preview * { page-break-inside: avoid; }
+          /* PDF-only overrides to minimize whitespace */
+          .preview { 
+            min-height: auto !important; 
+            box-shadow: none !important; 
+            border: none !important; 
+            padding: 0.2in !important;
+            margin: 0 !important;
+          }
+          .preview * { 
+            page-break-inside: avoid; 
+            margin-top: 0.1em !important;
+            margin-bottom: 0.1em !important;
+          }
           .preview::after { display: none !important; content: none !important; }
+          body { margin: 0 !important; padding: 0 !important; }
         `;
         htmlContent = `
 <!DOCTYPE html>
