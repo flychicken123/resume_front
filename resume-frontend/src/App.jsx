@@ -354,7 +354,8 @@ function BuilderApp() {
       };
       console.log('Request headers:', requestHeaders);
       
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8081';
+      // Use the current page's origin to avoid CORS issues between www and non-www
+      const API_BASE_URL = window.location.origin;
       
       console.log('API_BASE_URL:', API_BASE_URL);
       
