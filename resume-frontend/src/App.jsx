@@ -382,7 +382,11 @@ function BuilderApp() {
       // Download the generated PDF file using the dedicated download endpoint
       // Extract filename from the filePath (e.g., "/static/resume_20250808.pdf" -> "resume_20250808.pdf")
       const filename = result.filePath.split('/').pop();
-      const downloadUrl = `${API_BASE_URL}/download/${filename}`;
+      // Remove /api prefix for download endpoint since it's not under /api
+      const downloadBaseUrl = process.env.REACT_APP_API_URL ? 
+        process.env.REACT_APP_API_URL.replace('/api', '') : 
+        API_BASE_URL.replace('/api', '');
+      const downloadUrl = `${downloadBaseUrl}/download/${filename}`;
       
       // Fetch the PDF file as a blob
       // Static files don't need authorization
