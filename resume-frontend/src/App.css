@@ -215,24 +215,7 @@ button:disabled {
   border: 2px solid #e0e7ff;
 }
 
-.preview {
-  background: white;
-  padding: 0.75in;
-  border-radius: 0;
-  border: none;
-  font-family: Calibri, Arial, sans-serif;
-  font-size: 11pt;
-  line-height: 1.15;
-  color: #000;
-  max-width: 8.5in;
-  width: 8.5in;
-  margin: 0 auto;
-  box-sizing: border-box;
-  min-height: 11in;
-  aspect-ratio: 8.5/11;
-  overflow-y: auto;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
+
 
 .preview .header {
   text-align: center;
@@ -313,7 +296,7 @@ button:disabled {
 /* Modern template preview styles */
 .preview.modern {
   background: white;
-  padding: 0.75in;
+  padding: 0.5in;
   border-radius: 0;
   border: none;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -356,8 +339,8 @@ button:disabled {
   font-size: 11pt;
   font-weight: 600;
   text-transform: uppercase;
-  margin-top: 15pt;
-  margin-bottom: 8pt;
+  margin-top: 10pt;
+  margin-bottom: 6pt;
   border-bottom: 1px solid #000;
   padding-bottom: 2pt;
   color: #3498db;
@@ -389,7 +372,7 @@ button:disabled {
 /* Industry manager template preview styles - Single Column Layout */
 .preview.industry-manager {
   background: white;
-  padding: 0.75in;
+  padding: 0.5in;
   border-radius: 0;
   border: none;
   font-family: Georgia, serif;
@@ -426,8 +409,8 @@ button:disabled {
   font-size: 11pt;
   font-weight: bold;
   text-transform: uppercase;
-  margin-top: 15pt;
-  margin-bottom: 8pt;
+  margin-top: 10pt;
+  margin-bottom: 6pt;
   border-bottom: 1px solid #000;
   padding-bottom: 2pt;
   color: #2c3e50;
@@ -483,7 +466,7 @@ button:disabled {
 /* Temp1 template preview styles (Classic Professional) */
 .preview {
   background: white;
-  padding: 0.75in;
+  padding: 0.5in;
   border-radius: 0;
   border: none;
   font-family: Calibri, Arial, sans-serif;
@@ -520,8 +503,8 @@ button:disabled {
   font-size: 11pt;
   font-weight: bold;
   text-transform: uppercase;
-  margin-top: 15pt;
-  margin-bottom: 8pt;
+  margin-top: 10pt;
+  margin-bottom: 6pt;
   border-bottom: 1px solid #000;
   padding-bottom: 2pt;
   color: #1f2937;

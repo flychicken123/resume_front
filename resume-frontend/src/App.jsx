@@ -128,6 +128,168 @@ function BuilderApp() {
         downloadButton.disabled = true;
       }
 
+      // Capture the HTML content from the live preview
+      const previewElement = document.querySelector('.preview');
+      let htmlContent = '';
+      
+      if (previewElement) {
+        // Clone the preview element
+        const clonedElement = previewElement.cloneNode(true);
+        
+        // Remove the download button from the cloned element
+        const downloadBtn = clonedElement.querySelector('button');
+        if (downloadBtn) {
+          downloadBtn.remove();
+        }
+        
+        // Fit the cloned element to a single page height if needed
+        const inchesToPx = (inches) => inches * 96; // wkhtmltopdf uses ~96 DPI
+        const pageHeightPx = inchesToPx(11);
+        
+        // Temporarily attach to DOM to measure
+        const measureHost = document.createElement('div');
+        measureHost.style.position = 'fixed';
+        measureHost.style.left = '-10000px';
+        measureHost.style.top = '0';
+        measureHost.style.width = '8.5in';
+        measureHost.style.zIndex = '-1';
+        measureHost.appendChild(clonedElement);
+        document.body.appendChild(measureHost);
+        
+        // Measure full height
+        const fullHeight = clonedElement.scrollHeight || clonedElement.getBoundingClientRect().height;
+        
+        // Only scale down when overflow is tiny (e.g., < 0.5in) to remove a blank trailing page
+        const overflowPx = fullHeight - pageHeightPx;
+        const smallOverflowThreshold = inchesToPx(0.5); // 0.5in threshold
+        if (overflowPx > 0 && overflowPx <= smallOverflowThreshold) {
+          const scale = (pageHeightPx - 2) / fullHeight; // leave 2px buffer
+          clonedElement.style.transform = `scale(${scale})`;
+          clonedElement.style.transformOrigin = 'top left';
+          // Do NOT clamp height or hide overflow so real multi-page content is preserved
+        }
+        
+        // Detach the measure host; the clonedElement stays referenced
+        measureHost.remove();
+        
+        // Simply capture the live preview HTML with its current styles
+        const cssText = Array.from(document.styleSheets)
+          .map(sheet => {
+            try {
+              return Array.from(sheet.cssRules)
+                .map(rule => rule.cssText)
+                .join('\n');
+            } catch (e) {
+              // Handle cross-origin stylesheets
+              return '';
+            }
+          })
+          .join('\n');
+        
+        // Build filtered CSS: include only rules that target `.preview` (including template variants)
+        const filteredCssText = Array.from(document.styleSheets)
+          .map(sheet => {
+            try {
+              return Array.from(sheet.cssRules)
+                .map(rule => {
+                  // STYLE RULES
+                  if (rule.type === CSSRule.STYLE_RULE) {
+                    const sel = rule.selectorText || '';
+                    return sel.includes('.preview') ? rule.cssText : '';
+                  }
+                  // MEDIA RULES
+                  if (rule.type === CSSRule.MEDIA_RULE) {
+                    const inner = Array.from(rule.cssRules)
+                      .map(r => {
+                        const s = r.selectorText || '';
+                        return s.includes('.preview') ? r.cssText : '';
+                      })
+                      .filter(Boolean)
+                      .join('\n');
+                    return inner ? `@media ${rule.media.mediaText} {\n${inner}\n}` : '';
+                  }
+                  return '';
+                })
+                .filter(Boolean)
+                .join('\n');
+            } catch (e) {
+              return '';
+            }
+          })
+          .filter(Boolean)
+          .join('\n');
+        
+        // Force cache refresh by adding timestamp to CSS
+        const timestamp = Date.now();
+        const cacheBustedCssText = filteredCssText.replace(/\.preview\s*\{/g, `.preview { /* Cache-busted at ${timestamp} */`);
+        
+        // Remove old CSS values completely and simplify
+        const cleanedCssText = cacheBustedCssText
+          .replace(/padding:\s*0\.75in/g, 'padding: 0.5in')
+          .replace(/margin-top:\s*15pt/g, 'margin-top: 10pt')
+          .replace(/margin-bottom:\s*8pt/g, 'margin-bottom: 6pt')
+          // Remove any external CSS that might interfere
+          .replace(/@import[^;]+;/g, '')
+          .replace(/@media[^{}]*\{\s*\}/g, '')
+          // Prevent blank extra page by removing properties that can force tiny overflow
+          .replace(/min-height:\s*[^;]+;?/g, '')
+          .replace(/aspect-ratio:\s*[^;]+;?/g, '')
+          .replace(/overflow-y:\s*[^;]+;?/g, '')
+          .replace(/box-shadow:\s*[^;]+;?/g, '');
+
+        // Extra PDF tuning to ensure single page
+        const pdfTuningCss = `
+          @page { size: Letter; margin: 0; }
+          .preview { min-height: auto !important; height: auto !important; box-shadow: none !important; overflow: visible !important; }
+          .preview > *:last-child { margin-bottom: 0 !important; padding-bottom: 0 !important; }
+        `;
+        
+        // Debug: Check what CSS is being captured after cleaning
+        console.log('Cleaned CSS includes padding 0.5in:', cleanedCssText.includes('padding: 0.5in'));
+        console.log('Cleaned CSS includes padding 0.75in:', cleanedCssText.includes('padding: 0.75in'));
+        console.log('Cleaned CSS includes margin-top 10pt:', cleanedCssText.includes('margin-top: 10pt'));
+        console.log('Cleaned CSS includes margin-top 15pt:', cleanedCssText.includes('margin-top 15pt'));
+        
+        // Debug: Check for other spacing issues
+        console.log('CSS includes margin:', cleanedCssText.includes('margin:'));
+        console.log('CSS includes padding:', cleanedCssText.includes('padding:'));
+        console.log('CSS includes line-height:', cleanedCssText.includes('line-height:'));
+        
+        // Debug: Show actual CSS for .preview class
+        const previewCssMatch = cleanedCssText.match(/\.preview\s*\{[^}]*\}/g);
+        if (previewCssMatch) {
+          console.log('Preview CSS rules:', previewCssMatch);
+        }
+        
+        // Debug: Show the actual HTML being sent
+        console.log('HTML Content length:', htmlContent.length);
+        console.log('HTML Content preview:', htmlContent.substring(0, 500));
+        
+        // Create HTML document with filtered, cleaned CSS
+        const pdfOverrides = `
+          /* PDF-only overrides to avoid blank trailing pages */
+          .preview { min-height: auto !important; box-shadow: none !important; border: none !important; }
+          .preview * { page-break-inside: avoid; }
+          .preview::after { display: none !important; content: none !important; }
+        `;
+        htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>${data.name || 'Resume'}</title>
+  <style>
+    body { margin: 0; padding: 0; background-color: white; }
+    ${cleanedCssText}
+    ${pdfOverrides}
+  </style>
+</head>
+<body>
+  ${clonedElement.outerHTML}
+</body>
+</html>`;
+      }
+
       const resumeData = {
         name: data.name || '',
         email: data.email || '',
@@ -162,7 +324,8 @@ function BuilderApp() {
             ).join('\n\n')
           : data.education || '',
         skills: data.skills ? data.skills.split(',').map(s => s.trim()).filter(s => s.length > 0) : [],
-        format: data.selectedFormat || 'temp1'
+        format: data.selectedFormat || 'temp1',
+        htmlContent: htmlContent
       };
 
       // Debug: Log the actual data being sent
