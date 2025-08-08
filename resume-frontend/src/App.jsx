@@ -355,7 +355,16 @@ function BuilderApp() {
       console.log('Request headers:', requestHeaders);
       
       const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8081';
-              const response = await fetch(`${API_BASE_URL}/resume/generate-pdf`, {
+      
+      // Determine if we're in development (localhost) or production
+      const isDevelopment = API_BASE_URL.includes('localhost') || API_BASE_URL.includes('127.0.0.1');
+      const apiPrefix = isDevelopment ? '/api' : '';
+      
+      console.log('API_BASE_URL:', API_BASE_URL);
+      console.log('isDevelopment:', isDevelopment);
+      console.log('apiPrefix:', apiPrefix);
+      
+      const response = await fetch(`${API_BASE_URL}${apiPrefix}/resume/generate-pdf`, {
         method: 'POST',
         headers: requestHeaders,
         body: JSON.stringify(resumeData),
@@ -381,6 +390,8 @@ function BuilderApp() {
       
       // Download the generated PDF file
       const downloadUrl = `${API_BASE_URL}${result.filePath}`;
+      
+      console.log('Download URL:', downloadUrl);
       
       // Fetch the PDF file as a blob
       const pdfResponse = await fetch(downloadUrl, {
