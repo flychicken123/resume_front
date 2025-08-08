@@ -358,7 +358,13 @@ function BuilderApp() {
       
       console.log('API_BASE_URL:', API_BASE_URL);
       
-      const response = await fetch(`${API_BASE_URL}/api/resume/generate-pdf`, {
+      // Ensure we don't have double /api in the URL
+      const baseUrl = API_BASE_URL.endsWith('/api') ? API_BASE_URL : `${API_BASE_URL}/api`;
+      const apiUrl = `${baseUrl}/resume/generate-pdf`;
+      
+      console.log('Final API URL:', apiUrl);
+      
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: requestHeaders,
         body: JSON.stringify(resumeData),
