@@ -382,17 +382,29 @@ function BuilderApp() {
 
       const result = await response.json();
       
-      // Download the generated PDF file
-      const downloadUrl = `${API_BASE_URL}${result.filePath}`;
+      // Use S3 download URL if available, otherwise fallback to local endpoint
+      let downloadUrl;
+      if (result.downloadURL) {
+        // Use S3 URL directly - no authorization needed for public S3 files
+        downloadUrl = result.downloadURL;
+        console.log('Using S3 download URL:', downloadUrl);
+      } else {
+        // Fallback to local download endpoint
+        downloadUrl = `${API_BASE_URL}${result.filePath}`;
+        console.log('Using local download URL:', downloadUrl);
+      }
       
-      console.log('Download URL:', downloadUrl);
+      console.log('Final download URL:', downloadUrl);
       
       // Fetch the PDF file as a blob
-      const pdfResponse = await fetch(downloadUrl, {
+      // S3 files are public, local files need authorization
+      const fetchOptions = result.downloadURL ? {} : {
         headers: {
           'Authorization': `Bearer ${token}`
         }
-      });
+      };
+      
+      const pdfResponse = await fetch(downloadUrl, fetchOptions);
       
       if (!pdfResponse.ok) {
         throw new Error('Failed to download PDF file');
