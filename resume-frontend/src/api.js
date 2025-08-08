@@ -34,7 +34,9 @@ export async function generateResume(data) {
 export async function generateExperienceAI(experience, jobDescription = '') {
   const res = await fetch(`${API_BASE_URL}/experience/optimize`, {
     method: "POST",
-    headers: getAuthHeaders(),
+    headers: {
+      'Content-Type': 'application/json'
+    },
     body: JSON.stringify({ 
       userExperience: experience,
       jobDescription: jobDescription 
