@@ -380,15 +380,12 @@ function BuilderApp() {
       const result = await response.json();
       
       // Download the generated PDF file
-      // Remove /api prefix for static files
+      // The backend returns /static/filename.pdf, so we need to construct the full URL
       const downloadUrl = `${API_BASE_URL}${result.filePath}`;
       
       // Fetch the PDF file as a blob
-      const pdfResponse = await fetch(downloadUrl, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      // Static files don't need authorization
+      const pdfResponse = await fetch(downloadUrl);
       
       if (!pdfResponse.ok) {
         throw new Error('Failed to download PDF file');
