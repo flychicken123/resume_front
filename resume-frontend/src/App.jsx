@@ -379,15 +379,21 @@ function BuilderApp() {
 
       const result = await response.json();
       
-      // Download the generated PDF file using the dedicated download endpoint
-      // Extract filename from the filePath (e.g., "/static/resume_20250808.pdf" -> "resume_20250808.pdf")
-      const filename = result.filePath.split('/').pop();
-      // Use the same origin as the frontend to avoid CORS issues
-      const downloadBaseUrl = window.location.origin;
-      const downloadUrl = `${downloadBaseUrl}/download/${filename}`;
+      // Use S3 download URL if available, otherwise fallback to local endpoint
+      let downloadUrl;
+      if (result.downloadURL) {
+        // Use S3 URL directly
+        downloadUrl = result.downloadURL;
+        console.log('Using S3 download URL:', downloadUrl);
+      } else {
+        // Fallback to local download endpoint
+        const filename = result.filePath.split('/').pop();
+        const downloadBaseUrl = window.location.origin;
+        downloadUrl = `${downloadBaseUrl}/download/${filename}`;
+        console.log('Using local download URL:', downloadUrl);
+      }
       
-      console.log('Download URL:', downloadUrl);
-      console.log('Filename:', filename);
+      console.log('Final download URL:', downloadUrl);
       console.log('File path from backend:', result.filePath);
       
       // Fetch the PDF file as a blob
