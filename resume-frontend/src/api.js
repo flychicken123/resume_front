@@ -32,7 +32,7 @@ export async function generateResume(data) {
 
 // AI assistant endpoints
 export async function generateExperienceAI(experience, jobDescription = '') {
-  const res = await fetch(`${API_BASE_URL}/experience/optimize`, {
+  const res = await fetch(`${API_BASE_URL}/api/experience/optimize`, {
     method: "POST",
     headers: {
       'Content-Type': 'application/json'
