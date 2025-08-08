@@ -354,8 +354,10 @@ function BuilderApp() {
       };
       console.log('Request headers:', requestHeaders);
       
-      // Use the current page's origin to avoid CORS issues between www and non-www
-      const API_BASE_URL = window.location.origin;
+      // Use the backend domain (non-www) for API calls, but use current origin for downloads
+      const API_BASE_URL = window.location.hostname === 'www.hihired.org' 
+        ? 'https://hihired.org' 
+        : window.location.origin;
       
       console.log('API_BASE_URL:', API_BASE_URL);
       
