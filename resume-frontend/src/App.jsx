@@ -382,9 +382,8 @@ function BuilderApp() {
       // Download the generated PDF file
       // The backend returns /static/filename.pdf, so we need to construct the full URL
       // For production, static files are served from the same domain without /api prefix
-      const staticBaseUrl = process.env.REACT_APP_API_URL ? 
-        process.env.REACT_APP_API_URL.replace('/api', '') : 
-        API_BASE_URL;
+      // Use the current origin to avoid CORS issues
+      const staticBaseUrl = window.location.origin;
       const downloadUrl = `${staticBaseUrl}${result.filePath}`;
       
       // Fetch the PDF file as a blob
