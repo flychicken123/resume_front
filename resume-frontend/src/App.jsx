@@ -395,8 +395,9 @@ function BuilderApp() {
         downloadUrl = result.downloadURL;
         console.log('Using S3 download URL:', downloadUrl);
       } else {
-        // Fallback to local download endpoint
-        downloadUrl = `${API_BASE_URL}${result.filePath}`;
+        // Fallback to local download endpoint using the dedicated download endpoint
+        const filename = result.filePath.split('/').pop();
+        downloadUrl = `${API_BASE_URL}/download/${filename}`;
         console.log('Using local download URL:', downloadUrl);
       }
       
