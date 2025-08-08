@@ -29,9 +29,9 @@ global.fetch = jest.fn();
 // Mock Google OAuth
 jest.mock('@react-oauth/google', () => ({
   GoogleLogin: ({ onSuccess, onError }) => (
-    <button 
+    <button
       data-testid="google-login"
-      onClick={() => onSuccess({ credential: 'mock-credential' })}
+      onClick={() => onSuccess({ credential: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c' })}
     >
       Google Login
     </button>

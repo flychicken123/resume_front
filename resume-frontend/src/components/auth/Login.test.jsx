@@ -25,7 +25,7 @@ describe('Login Component', () => {
     expect(screen.getByText('Login')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Enter your email')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Enter your password')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /login/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /login/i, type: 'submit' })).toBeInTheDocument();
   });
 
   it('switches to signup mode when toggle button is clicked', () => {
@@ -64,7 +64,7 @@ describe('Login Component', () => {
     
     const emailInput = screen.getByPlaceholderText('Enter your email');
     const passwordInput = screen.getByPlaceholderText('Enter your password');
-    const submitButton = screen.getByRole('button', { name: /login/i });
+    const submitButton = screen.getAllByRole('button').find(button => button.textContent === 'Login' && button.type === 'submit');
 
     await userEvent.type(emailInput, 'test@example.com');
     await userEvent.type(passwordInput, 'password123');
@@ -104,10 +104,12 @@ describe('Login Component', () => {
     
     const emailInput = screen.getByPlaceholderText('Enter your email');
     const passwordInput = screen.getByPlaceholderText('Enter your password');
+    const confirmPasswordInput = screen.getByPlaceholderText('Confirm your password');
     const submitButton = screen.getByRole('button', { name: /sign up/i });
 
     await userEvent.type(emailInput, 'new@example.com');
     await userEvent.type(passwordInput, 'newpassword123');
+    await userEvent.type(confirmPasswordInput, 'newpassword123');
     fireEvent.click(submitButton);
 
     await waitFor(() => {
@@ -140,7 +142,7 @@ describe('Login Component', () => {
     
     const emailInput = screen.getByPlaceholderText('Enter your email');
     const passwordInput = screen.getByPlaceholderText('Enter your password');
-    const submitButton = screen.getByRole('button', { name: /login/i });
+    const submitButton = screen.getByRole('button', { name: /login/i, type: 'submit' });
 
     await userEvent.type(emailInput, 'test@example.com');
     await userEvent.type(passwordInput, 'wrongpassword');
@@ -168,10 +170,12 @@ describe('Login Component', () => {
     
     const emailInput = screen.getByPlaceholderText('Enter your email');
     const passwordInput = screen.getByPlaceholderText('Enter your password');
+    const confirmPasswordInput = screen.getByPlaceholderText('Confirm your password');
     const submitButton = screen.getByRole('button', { name: /sign up/i });
 
     await userEvent.type(emailInput, 'existing@example.com');
     await userEvent.type(passwordInput, 'password123');
+    await userEvent.type(confirmPasswordInput, 'password123');
     fireEvent.click(submitButton);
 
     await waitFor(() => {
@@ -188,7 +192,7 @@ describe('Login Component', () => {
     
     const emailInput = screen.getByPlaceholderText('Enter your email');
     const passwordInput = screen.getByPlaceholderText('Enter your password');
-    const submitButton = screen.getByRole('button', { name: /login/i });
+    const submitButton = screen.getByRole('button', { name: /login/i, type: 'submit' });
 
     await userEvent.type(emailInput, 'test@example.com');
     await userEvent.type(passwordInput, 'password123');
@@ -210,10 +214,12 @@ describe('Login Component', () => {
     
     const emailInput = screen.getByPlaceholderText('Enter your email');
     const passwordInput = screen.getByPlaceholderText('Enter your password');
+    const confirmPasswordInput = screen.getByPlaceholderText('Confirm your password');
     const submitButton = screen.getByRole('button', { name: /sign up/i });
 
     await userEvent.type(emailInput, 'test@example.com');
     await userEvent.type(passwordInput, 'password123');
+    await userEvent.type(confirmPasswordInput, 'password123');
     fireEvent.click(submitButton);
 
     await waitFor(() => {
@@ -224,12 +230,11 @@ describe('Login Component', () => {
   it('validates required fields for login', async () => {
     renderLogin();
     
-    const submitButton = screen.getByRole('button', { name: /login/i });
+    const submitButton = screen.getByRole('button', { name: /login/i, type: 'submit' });
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText('Please enter your email')).toBeInTheDocument();
-      expect(screen.getByText('Please enter your password')).toBeInTheDocument();
+      expect(screen.getByText('Please enter both email and password.')).toBeInTheDocument();
     });
 
     expect(fetch).not.toHaveBeenCalled();
@@ -246,8 +251,7 @@ describe('Login Component', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText('Please enter your email')).toBeInTheDocument();
-      expect(screen.getByText('Please enter your password')).toBeInTheDocument();
+      expect(screen.getByText('Please enter both email and password.')).toBeInTheDocument();
     });
 
     expect(fetch).not.toHaveBeenCalled();
@@ -258,7 +262,7 @@ describe('Login Component', () => {
     
     const emailInput = screen.getByPlaceholderText('Enter your email');
     const passwordInput = screen.getByPlaceholderText('Enter your password');
-    const submitButton = screen.getByRole('button', { name: /login/i });
+    const submitButton = screen.getByRole('button', { name: /login/i, type: 'submit' });
 
     await userEvent.type(emailInput, 'invalid-email');
     await userEvent.type(passwordInput, 'password123');
@@ -280,10 +284,12 @@ describe('Login Component', () => {
     
     const emailInput = screen.getByPlaceholderText('Enter your email');
     const passwordInput = screen.getByPlaceholderText('Enter your password');
+    const confirmPasswordInput = screen.getByPlaceholderText('Confirm your password');
     const submitButton = screen.getByRole('button', { name: /sign up/i });
 
     await userEvent.type(emailInput, 'invalid-email');
     await userEvent.type(passwordInput, 'password123');
+    await userEvent.type(confirmPasswordInput, 'password123');
     fireEvent.click(submitButton);
 
     await waitFor(() => {
@@ -302,10 +308,12 @@ describe('Login Component', () => {
     
     const emailInput = screen.getByPlaceholderText('Enter your email');
     const passwordInput = screen.getByPlaceholderText('Enter your password');
+    const confirmPasswordInput = screen.getByPlaceholderText('Confirm your password');
     const submitButton = screen.getByRole('button', { name: /sign up/i });
 
     await userEvent.type(emailInput, 'test@example.com');
     await userEvent.type(passwordInput, '123');
+    await userEvent.type(confirmPasswordInput, '123');
     fireEvent.click(submitButton);
 
     await waitFor(() => {
@@ -346,7 +354,7 @@ describe('Login Component', () => {
     // Trigger an error in login mode
     const emailInput = screen.getByPlaceholderText('Enter your email');
     const passwordInput = screen.getByPlaceholderText('Enter your password');
-    const submitButton = screen.getByRole('button', { name: /login/i });
+    const submitButton = screen.getByRole('button', { name: /login/i, type: 'submit' });
 
     await userEvent.type(emailInput, 'invalid-email');
     await userEvent.type(passwordInput, 'password123');
