@@ -379,12 +379,10 @@ function BuilderApp() {
 
       const result = await response.json();
       
-      // Download the generated PDF file
-      // The backend returns /static/filename.pdf, so we need to construct the full URL
-      // For production, static files are served from the same domain without /api prefix
-      // Use the current origin to avoid CORS issues
-      const staticBaseUrl = window.location.origin;
-      const downloadUrl = `${staticBaseUrl}${result.filePath}`;
+      // Download the generated PDF file using the dedicated download endpoint
+      // Extract filename from the filePath (e.g., "/static/resume_20250808.pdf" -> "resume_20250808.pdf")
+      const filename = result.filePath.split('/').pop();
+      const downloadUrl = `${API_BASE_URL}/download/${filename}`;
       
       // Fetch the PDF file as a blob
       // Static files don't need authorization
