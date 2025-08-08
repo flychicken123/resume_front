@@ -31,7 +31,7 @@ describe('Login Component', () => {
   it('switches to signup mode when toggle button is clicked', () => {
     renderLogin();
     
-    const toggleButton = screen.getByText(/don't have an account/i);
+    const toggleButton = screen.getByText(/sign up/i);
     fireEvent.click(toggleButton);
     
     expect(screen.getByText('Sign Up')).toBeInTheDocument();
@@ -84,7 +84,7 @@ describe('Login Component', () => {
     renderLogin();
     
     // Switch to signup mode
-    const toggleButton = screen.getByText(/don't have an account/i);
+    const toggleButton = screen.getByText(/sign up/i);
     fireEvent.click(toggleButton);
     
     const emailInput = screen.getByPlaceholderText('Enter your email');
