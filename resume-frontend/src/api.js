@@ -1,7 +1,18 @@
 // src/api.js
 
-// Get API URL from environment variable or default to localhost
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8081';
+// Get API URL - use same logic as App.jsx to prevent double /api
+const getAPIBaseURL = () => {
+  if (typeof window !== 'undefined') {
+    // Use the backend domain (non-www) for API calls
+    return window.location.hostname === 'www.hihired.org' 
+      ? 'https://hihired.org' 
+      : window.location.origin;
+  }
+  // Fallback for server-side rendering
+  return process.env.REACT_APP_API_URL || 'http://localhost:8081';
+};
+
+const API_BASE_URL = getAPIBaseURL();
 
 // Helper function to get auth headers
 const getAuthHeaders = () => {

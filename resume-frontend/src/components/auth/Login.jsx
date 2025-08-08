@@ -32,7 +32,20 @@ const Login = ({ onLogin, onClose }) => {
 
     try {
       const endpoint = mode === 'signup' ? '/api/auth/register' : '/api/auth/login';
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8081';
+      
+      // Use same API_BASE_URL logic as other files
+      const getAPIBaseURL = () => {
+        if (typeof window !== 'undefined') {
+          // Use the backend domain (non-www) for API calls
+          return window.location.hostname === 'www.hihired.org' 
+            ? 'https://hihired.org' 
+            : window.location.origin;
+        }
+        // Fallback for server-side rendering
+        return process.env.REACT_APP_API_URL || 'http://localhost:8081';
+      };
+      
+      const API_BASE_URL = getAPIBaseURL();
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: 'POST',
         headers: {

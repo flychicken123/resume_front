@@ -1,6 +1,20 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 
+// Get API URL - use same logic as other files
+const getAPIBaseURL = () => {
+  if (typeof window !== 'undefined') {
+    // Use the backend domain (non-www) for API calls
+    return window.location.hostname === 'www.hihired.org' 
+      ? 'https://hihired.org' 
+      : window.location.origin;
+  }
+  // Fallback for server-side rendering
+  return process.env.REACT_APP_API_URL || 'http://localhost:8081';
+};
+
+const API_BASE_URL = getAPIBaseURL();
+
 const ResumeContext = createContext();
 
 // Helper function to get data from localStorage with user-specific key
@@ -38,7 +52,7 @@ const clearStoredData = (userId) => {
 // API functions for database operations
 const saveToDatabase = async (data, userEmail) => {
   try {
-    const response = await fetch('/api/user/save', {
+    const response = await fetch(`${API_BASE_URL}/api/user/save`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -62,7 +76,7 @@ const saveToDatabase = async (data, userEmail) => {
 
 const loadFromDatabase = async (userEmail) => {
   try {
-    const response = await fetch(`/api/user/load?userEmail=${encodeURIComponent(userEmail)}`, {
+    const response = await fetch(`${API_BASE_URL}/api/user/load?userEmail=${encodeURIComponent(userEmail)}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
