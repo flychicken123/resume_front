@@ -103,110 +103,69 @@ function BuilderApp() {
   
 
 
-  // Handler for download action
-  const handleDownload = async () => {
+  // Function to format date
+  const formatDate = (dateString) => {
+    if (!dateString || dateString === 'Present') return dateString;
+    const date = new Date(dateString);
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${months[date.getMonth()]} ${date.getFullYear()}`;
+  };
+
+  // API base URL function
+  const getAPIBaseURL = () => {
+    if (typeof window !== 'undefined') {
+      // For local development, use localhost:8081
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        return 'http://localhost:8081';
+      }
+      // Use the backend domain (non-www) for API calls
+      return window.location.hostname === 'www.hihired.org' 
+        ? 'https://hihired.org' 
+        : window.location.origin;
+    }
+    // Fallback for server-side rendering
+    return process.env.REACT_APP_API_URL || 'http://localhost:8081';
+  };
+
+  // Handler for view resume action
+  const handleViewResume = () => {
     try {
       // Check if user is authenticated
       if (!user) {
-        alert('Please log in to download your resume.');
+        alert('Please log in to view your resume.');
         setShowAuthModal(true);
         return;
       }
 
-      // Function to format date
-      const formatDate = (dateString) => {
-        if (!dateString || dateString === 'Present') return dateString;
-        const date = new Date(dateString);
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        return `${months[date.getMonth()]} ${date.getFullYear()}`;
-      };
-
       // Update button state
-      const downloadButton = document.querySelector('button[onClick]');
-      if (downloadButton) {
-        downloadButton.textContent = 'Generating PDF...';
-        downloadButton.disabled = true;
+      const viewButton = document.querySelector('button[onClick]');
+      if (viewButton) {
+        viewButton.textContent = 'Generating PDF...';
+        viewButton.disabled = true;
       }
 
       // Capture the HTML content from the live preview
       const previewElement = document.querySelector('.preview');
-      let htmlContent = '';
       
       if (previewElement) {
         // Clone the preview element
         const clonedElement = previewElement.cloneNode(true);
         
-        // Remove the download button from the cloned element
-        const downloadBtn = clonedElement.querySelector('button');
-        if (downloadBtn) {
-          downloadBtn.remove();
+        // Remove the view button from the cloned element
+        const viewBtn = clonedElement.querySelector('button');
+        if (viewBtn) {
+          viewBtn.remove();
         }
         
-        // Fit the cloned element to a single page height if needed
-        const inchesToPx = (inches) => inches * 96; // wkhtmltopdf uses ~96 DPI
-        const pageHeightPx = inchesToPx(11);
-        
-        // Temporarily attach to DOM to measure
-        const measureHost = document.createElement('div');
-        measureHost.style.position = 'fixed';
-        measureHost.style.left = '-10000px';
-        measureHost.style.top = '0';
-        measureHost.style.width = '8.5in';
-        measureHost.style.zIndex = '-1';
-        measureHost.appendChild(clonedElement);
-        document.body.appendChild(measureHost);
-        
-        // Measure full height
-        const fullHeight = clonedElement.scrollHeight || clonedElement.getBoundingClientRect().height;
-        
-        // Only scale down when overflow is tiny (e.g., < 0.5in) to remove a blank trailing page
-        const overflowPx = fullHeight - pageHeightPx;
-        const smallOverflowThreshold = inchesToPx(0.5); // 0.5in threshold
-        if (overflowPx > 0 && overflowPx <= smallOverflowThreshold) {
-          const scale = (pageHeightPx - 2) / fullHeight; // leave 2px buffer
-          clonedElement.style.transform = `scale(${scale})`;
-          clonedElement.style.transformOrigin = 'top left';
-          // Do NOT clamp height or hide overflow so real multi-page content is preserved
-        }
-        
-        // Detach the measure host; the clonedElement stays referenced
-        measureHost.remove();
-        
-        // Simply capture the live preview HTML with its current styles
-        const cssText = Array.from(document.styleSheets)
-          .map(sheet => {
-            try {
-              return Array.from(sheet.cssRules)
-                .map(rule => rule.cssText)
-                .join('\n');
-            } catch (e) {
-              // Handle cross-origin stylesheets
-              return '';
-            }
-          })
-          .join('\n');
-        
-        // Build filtered CSS: include only rules that target `.preview` (including template variants)
+        // Build filtered CSS: include only rules that target `.preview`
         const filteredCssText = Array.from(document.styleSheets)
           .map(sheet => {
             try {
               return Array.from(sheet.cssRules)
                 .map(rule => {
-                  // STYLE RULES
                   if (rule.type === CSSRule.STYLE_RULE) {
                     const sel = rule.selectorText || '';
                     return sel.includes('.preview') ? rule.cssText : '';
-                  }
-                  // MEDIA RULES
-                  if (rule.type === CSSRule.MEDIA_RULE) {
-                    const inner = Array.from(rule.cssRules)
-                      .map(r => {
-                        const s = r.selectorText || '';
-                        return s.includes('.preview') ? r.cssText : '';
-                      })
-                      .filter(Boolean)
-                      .join('\n');
-                    return inner ? `@media ${rule.media.mediaText} {\n${inner}\n}` : '';
                   }
                   return '';
                 })
@@ -218,75 +177,23 @@ function BuilderApp() {
           })
           .filter(Boolean)
           .join('\n');
-        
-        // Force cache refresh by adding timestamp to CSS
-        const timestamp = Date.now();
-        const cacheBustedCssText = filteredCssText.replace(/\.preview\s*\{/g, `.preview { /* Cache-busted at ${timestamp} */`);
-        
-        // Remove old CSS values completely and simplify - reduce padding further
-        const cleanedCssText = cacheBustedCssText
-          .replace(/padding:\s*0\.75in/g, 'padding: 0.3in')
-          .replace(/padding:\s*0\.5in/g, 'padding: 0.3in')
-          .replace(/margin-top:\s*15pt/g, 'margin-top: 8pt')
-          .replace(/margin-top:\s*10pt/g, 'margin-top: 8pt')
-          .replace(/margin-bottom:\s*8pt/g, 'margin-bottom: 4pt')
-          .replace(/margin-bottom:\s*6pt/g, 'margin-bottom: 4pt')
-          // Remove any external CSS that might interfere
-          .replace(/@import[^;]+;/g, '')
-          .replace(/@media[^{}]*\{\s*\}/g, '')
-          // Prevent blank extra page by removing properties that can force tiny overflow
-          .replace(/min-height:\s*[^;]+;?/g, '')
-          .replace(/aspect-ratio:\s*[^;]+;?/g, '')
-          .replace(/overflow-y:\s*[^;]+;?/g, '')
-          .replace(/box-shadow:\s*[^;]+;?/g, '');
 
-        // Extra PDF tuning to ensure single page
-        const pdfTuningCss = `
-          @page { size: Letter; margin: 0; }
-          .preview { min-height: auto !important; height: auto !important; box-shadow: none !important; overflow: visible !important; }
-          .preview > *:last-child { margin-bottom: 0 !important; padding-bottom: 0 !important; }
-        `;
-        
-        // Debug: Check what CSS is being captured after cleaning
-        console.log('Cleaned CSS includes padding 0.5in:', cleanedCssText.includes('padding: 0.5in'));
-        console.log('Cleaned CSS includes padding 0.75in:', cleanedCssText.includes('padding: 0.75in'));
-        console.log('Cleaned CSS includes margin-top 10pt:', cleanedCssText.includes('margin-top: 10pt'));
-        console.log('Cleaned CSS includes margin-top 15pt:', cleanedCssText.includes('margin-top 15pt'));
-        
-        // Debug: Check for other spacing issues
-        console.log('CSS includes margin:', cleanedCssText.includes('margin:'));
-        console.log('CSS includes padding:', cleanedCssText.includes('padding:'));
-        console.log('CSS includes line-height:', cleanedCssText.includes('line-height:'));
-        
-        // Debug: Show actual CSS for .preview class
-        const previewCssMatch = cleanedCssText.match(/\.preview\s*\{[^}]*\}/g);
-        if (previewCssMatch) {
-          console.log('Preview CSS rules:', previewCssMatch);
-        }
-        
-        // Debug: Show the actual HTML being sent
-        console.log('HTML Content length:', htmlContent.length);
-        console.log('HTML Content preview:', htmlContent.substring(0, 500));
-        
-        // Create HTML document with filtered, cleaned CSS
+        // Remove screen-only visual effects that cause a visible edge in PDFs
+        const cleanedCssText = filteredCssText
+          .replace(/box-shadow\s*:[^;]+;?/gi, '')
+          .replace(/-webkit-box-shadow\s*:[^;]+;?/gi, '')
+          .replace(/border-radius\s*:[^;]+;?/gi, '');
+
+        // PDF-specific overrides to ensure a flat, edge-free page
         const pdfOverrides = `
-          /* PDF-only overrides to minimize whitespace */
-          .preview { 
-            min-height: auto !important; 
-            box-shadow: none !important; 
-            border: none !important; 
-            padding: 0.2in !important;
-            margin: 0 !important;
-          }
-          .preview * { 
-            page-break-inside: avoid; 
-            margin-top: 0.1em !important;
-            margin-bottom: 0.1em !important;
-          }
-          .preview::after { display: none !important; content: none !important; }
-          body { margin: 0 !important; padding: 0 !important; }
+          @page { size: Letter; margin: 0; }
+          html, body { background: #ffffff !important; }
+          .preview { box-shadow: none !important; border: 0 !important; outline: none !important; margin: 0 auto !important; }
+          .preview::before, .preview::after { display: none !important; content: none !important; }
         `;
-        htmlContent = `
+ 
+        // Create complete HTML document
+        const htmlContent = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -302,163 +209,53 @@ function BuilderApp() {
   ${clonedElement.outerHTML}
 </body>
 </html>`;
-      }
 
-      const resumeData = {
-        name: data.name || '',
-        email: data.email || '',
-        phone: data.phone || '',
-        summary: data.summary || '',
-        experience: Array.isArray(data.experiences) 
-          ? data.experiences.map(exp => {
-              let formatted = `${exp.jobTitle} at ${exp.company}`;
-              if (exp.remote) {
-                formatted += ` • Remote`;
-              } else if (exp.city && exp.state) {
-                formatted += ` • ${exp.city}, ${exp.state}`;
-              } else if (exp.city || exp.state) {
-                formatted += ` • ${exp.city || exp.state}`;
-              }
-              if (exp.startDate || exp.endDate) {
-                const startDate = formatDate(exp.startDate);
-                const endDate = formatDate(exp.endDate);
-                formatted += ` • ${startDate} - ${endDate}`;
-              }
-              if (exp.description) {
-                // Split description into individual bullet points
-                const bulletPoints = exp.description.split('\n').filter(point => point.trim());
-                formatted += '\n' + bulletPoints.join('\n');
-              }
-              return formatted;
-            }).join('\n\n')
-          : data.experiences || '',
-        education: Array.isArray(data.education) 
-          ? data.education.map(edu => 
-              `${edu.degree}${edu.field ? ` in ${edu.field}` : ''} from ${edu.school}${edu.graduationYear ? ` (${edu.graduationYear})` : ''}${edu.gpa ? ` - GPA: ${edu.gpa}` : ''}${edu.honors ? ` - ${edu.honors}` : ''}`
-            ).join('\n\n')
-          : data.education || '',
-        skills: data.skills ? data.skills.split(',').map(s => s.trim()).filter(s => s.length > 0) : [],
-        format: data.selectedFormat || 'temp1',
-        htmlContent: htmlContent
-      };
+        // Call the backend to generate PDF
+        fetch(`${getAPIBaseURL()}/api/resume/generate-pdf`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            htmlContent: htmlContent
+          })
+        })
+        .then(async (response) => {
+          const text = await response.text();
+          try {
+            const json = JSON.parse(text);
+            return { ok: response.ok, status: response.status, data: json, raw: text };
+          } catch (e) {
+            return { ok: response.ok, status: response.status, data: null, raw: text };
+          }
+        })
+        .then(result => {
+          if (result.ok && result.data && result.data.downloadURL) {
+            window.open(result.data.downloadURL, '_blank');
+            alert('PDF resume generated successfully!');
+          } else {
+            console.error('PDF generation failed response:', result);
+            throw new Error((result.data && (result.data.error || result.data.message)) || `Failed to generate PDF (status ${result.status})`);
+          }
+        })
+        .catch(error => {
+          console.error('PDF generation error:', error);
+          alert('Failed to generate PDF. Please try again.');
+        });
 
-      // Debug: Log the actual data being sent
-      console.log('Raw data:', data);
-      console.log('Raw experiences:', data.experiences);
-      console.log('Selected format:', data.selectedFormat);
-      console.log('Formatted experience:', resumeData.experience);
-      console.log('Formatted education:', resumeData.education);
-      console.log('Formatted skills:', resumeData.skills);
-
-      // Get auth token
-      const token = localStorage.getItem('resumeToken');
-      if (!token) {
-        alert('Authentication token not found. Please log in again.');
-        setShowAuthModal(true);
-        return;
-      }
-
-      // Call the backend API to generate PDF resume
-      console.log('Sending resume data for PDF generation:', resumeData);
-      console.log('Using token:', token.substring(0, 20) + '...');
-      
-      const requestHeaders = {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      };
-      console.log('Request headers:', requestHeaders);
-      
-      // Use the backend domain (non-www) for API calls, but use current origin for downloads
-      const API_BASE_URL = window.location.hostname === 'www.hihired.org' 
-        ? 'https://hihired.org' 
-        : window.location.origin;
-      
-      console.log('API_BASE_URL:', API_BASE_URL);
-      
-      // Ensure we don't have double /api in the URL
-      const baseUrl = API_BASE_URL.endsWith('/api') ? API_BASE_URL : `${API_BASE_URL}/api`;
-      const apiUrl = `${baseUrl}/resume/generate-pdf`;
-      
-      console.log('Final API URL:', apiUrl);
-      
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: requestHeaders,
-        body: JSON.stringify(resumeData),
-      });
-
-      console.log('Response status:', response.status);
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Backend error:', errorData);
-        
-        if (response.status === 401) {
-          alert('Authentication failed. Please log in again.');
-          setShowAuthModal(true);
-          return;
-        }
-        
-        throw new Error(errorData.message || 'Failed to generate resume');
-      }
-
-      const result = await response.json();
-      
-      // Use S3 download URL if available, otherwise fallback to local endpoint
-      let downloadUrl;
-      if (result.downloadURL) {
-        // Use S3 URL directly - no authorization needed for public S3 files
-        downloadUrl = result.downloadURL;
-        console.log('Using S3 download URL:', downloadUrl);
       } else {
-        // Fallback to local download endpoint using the dedicated download endpoint
-        const filename = result.filePath.split('/').pop();
-        downloadUrl = `${API_BASE_URL}/download/${filename}`;
-        console.log('Using local download URL:', downloadUrl);
+        alert('Could not find resume preview. Please try again.');
       }
-      
-      console.log('Final download URL:', downloadUrl);
-      
-      // Fetch the PDF file as a blob
-      // S3 files are public, local files need authorization
-      const fetchOptions = result.downloadURL ? {} : {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      };
-      
-      const pdfResponse = await fetch(downloadUrl, fetchOptions);
-      
-      if (!pdfResponse.ok) {
-        throw new Error('Failed to download PDF file');
-      }
-      
-      const pdfBlob = await pdfResponse.blob();
-      
-      // Create download link
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(pdfBlob);
-      link.download = `resume_${data.name || 'resume'}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      // Clean up the blob URL
-      URL.revokeObjectURL(link.href);
-
-      // Show success message
-      alert('PDF resume generated successfully! Your resume has been downloaded.');
 
     } catch (error) {
-      console.error('Download error:', error);
-      alert('Failed to download resume. Please try again.');
+      console.error('View resume error:', error);
+      alert('Failed to generate PDF. Please try again.');
     } finally {
       // Reset button state
-      const downloadButton = document.querySelector('button[onClick]');
-      if (downloadButton) {
-        downloadButton.textContent = 'Download PDF Resume';
-        downloadButton.disabled = false;
+      const viewButton = document.querySelector('button[onClick]');
+      if (viewButton) {
+        viewButton.textContent = 'View Resume';
+        viewButton.disabled = false;
       }
     }
   };
@@ -637,7 +434,7 @@ function BuilderApp() {
                     marginTop: '2rem'
                   }}>
                     <button
-                      onClick={handleDownload}
+                                              onClick={handleViewResume}
                       style={{
                         padding: '1rem 2.5rem',
                         border: 'none',
@@ -666,7 +463,7 @@ function BuilderApp() {
                         e.target.style.boxShadow = '0 4px 6px rgba(16, 185, 129, 0.25)';
                       }}
                     >
-                      📄 Download PDF Resume
+                      📄 View Resume
                     </button>
                     <button
                       onClick={() => window.location.href = '/'}
@@ -773,7 +570,7 @@ function BuilderApp() {
               background: 'white'
             }}
           >
-            <StepPreview onDownload={handleDownload} />
+                            <StepPreview onDownload={handleViewResume} />
           </div>
         </div>
       </div>
