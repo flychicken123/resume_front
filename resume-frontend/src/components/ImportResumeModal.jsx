@@ -76,3 +76,4 @@ const ImportResumeModal = ({ onClose }) => {
 };
 
 export default ImportResumeModal;
+
