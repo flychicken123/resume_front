@@ -17,6 +17,7 @@ import AuthModal from './components/auth/AuthModal';
 import JobDescModal from './components/JobDescModal';
 import SEO from './components/SEO';
 import './App.css';
+import ImportResumeModal from './components/ImportResumeModal';
 
 const steps = [
   "Personal Details",
@@ -31,6 +32,7 @@ function BuilderApp() {
   const [step, setStep] = useState(1); // Start with Personal Details step
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showJobDescModal, setShowJobDescModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [jobDescription, setJobDescription] = useState('');
   
   // Load job description from localStorage on component mount
@@ -186,9 +188,10 @@ function BuilderApp() {
 
         // PDF-specific overrides to ensure a flat, edge-free page
         const pdfOverrides = `
-          @page { size: Letter; margin: 0; }
-          html, body { background: #ffffff !important; }
-          .preview { box-shadow: none !important; border: 0 !important; outline: none !important; margin: 0 auto !important; }
+          @page { size: Letter; margin: 0.6in; }
+          html, body { background: #ffffff !important; margin: 0; padding: 0; }
+          .preview { box-shadow: none !important; border: 0 !important; outline: none !important; margin: 0 auto !important; padding: 0 !important; width: 7.3in !important; max-width: 7.3in !important; box-sizing: border-box !important; overflow: visible !important; }
+          .preview * { word-break: break-word !important; overflow-wrap: anywhere !important; hyphens: auto !important; }
           .preview::before, .preview::after { display: none !important; content: none !important; }
         `;
  
@@ -281,6 +284,11 @@ function BuilderApp() {
     setJobDescription(description);
     localStorage.setItem('jobDescription', description);
     setShowJobDescModal(false);
+  };
+
+  const handleProceedAfterChoice = () => {
+    setShowJobDescModal(false);
+    setShowImportModal(true);
   };
 
   return (
@@ -577,7 +585,9 @@ function BuilderApp() {
 
       {/* Modals */}
       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
-              {showJobDescModal && <JobDescModal onClose={() => setShowJobDescModal(false)} onJobDescriptionSubmit={handleJobDescSubmit} />}
+              {showJobDescModal && <JobDescModal onClose={() => setShowJobDescModal(false)} onJobDescriptionSubmit={handleJobDescSubmit} onProceed={handleProceedAfterChoice} />}
+
+      {showImportModal && <ImportResumeModal onClose={() => setShowImportModal(false)} />}
     </>
   );
 }

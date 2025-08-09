@@ -7,12 +7,14 @@ import JobDescModal from './JobDescModal';
 import About from './About';
 import Contact from './Contact';
 import SEO from './SEO';
+import ImportResumeModal from './ImportResumeModal';
 
 const Home = () => {
   const navigate = useNavigate();
   const { user, login } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showJobDescModal, setShowJobDescModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [usernameWidth, setUsernameWidth] = useState(100);
   const usernameRef = useRef(null);
   const buttonRef = useRef(null);
@@ -32,6 +34,11 @@ const Home = () => {
     // Store job description in localStorage for the builder to access
     localStorage.setItem('jobDescription', description);
     setShowJobDescModal(false);
+  };
+
+  const handleProceedAfterChoice = () => {
+    setShowJobDescModal(false);
+    setShowImportModal(true);
   };
   
   return (
@@ -174,9 +181,14 @@ const Home = () => {
       )}
 
       {/* Job Description Modal */}
-              {showJobDescModal && (
-          <JobDescModal onClose={() => setShowJobDescModal(false)} onJobDescriptionSubmit={handleJobDescSubmit} />
-        )}
+      {showJobDescModal && (
+        <JobDescModal onClose={() => setShowJobDescModal(false)} onJobDescriptionSubmit={handleJobDescSubmit} onProceed={handleProceedAfterChoice} />
+      )}
+
+      {/* Import/Manual Choice Modal */}
+      {showImportModal && (
+        <ImportResumeModal onClose={() => setShowImportModal(false)} />
+      )}
       
       {/* About Section */}
       <About />

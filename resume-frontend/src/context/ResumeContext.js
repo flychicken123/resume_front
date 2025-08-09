@@ -217,6 +217,47 @@ export const ResumeProvider = ({ children }) => {
     }
   };
 
+  // Map imported structured resume JSON into our state shape
+  const applyImportedData = (structured) => {
+    try {
+      if (!structured || typeof structured !== 'object') return;
+      const mapped = { ...data };
+      if (structured.name) mapped.name = structured.name;
+      if (structured.email) mapped.email = structured.email;
+      if (structured.phone) mapped.phone = structured.phone;
+      if (structured.summary) mapped.summary = structured.summary;
+      if (Array.isArray(structured.skills)) {
+        mapped.skills = structured.skills.join(', ');
+      }
+      if (Array.isArray(structured.experience) && structured.experience.length > 0) {
+        mapped.experiences = structured.experience.map((e) => ({
+          jobTitle: e.role || '',
+          company: e.company || '',
+          city: (e.location || '').split(',')[0] || '',
+          state: (e.location || '').split(',')[1]?.trim() || '',
+          startDate: e.startDate || '',
+          endDate: e.endDate || '',
+          currentlyWorking: (e.endDate || '').toLowerCase() === 'present',
+          description: Array.isArray(e.bullets) ? e.bullets.join('\n') : (e.description || '')
+        }));
+      }
+      if (Array.isArray(structured.education) && structured.education.length > 0) {
+        mapped.education = structured.education.map((ed) => ({
+          degree: ed.degree || '',
+          school: ed.school || '',
+          field: ed.field || '',
+          graduationYear: (ed.endDate || '').replace(/[^0-9-]/g, ''),
+          gpa: '',
+          honors: '',
+          location: ''
+        }));
+      }
+      setData(mapped);
+    } catch (e) {
+      console.error('Failed to apply imported data:', e);
+    }
+  };
+
   // Load user data when user changes (login/logout)
   useEffect(() => {
     if (user) {
@@ -225,7 +266,7 @@ export const ResumeProvider = ({ children }) => {
   }, [user]);
 
   return (
-    <ResumeContext.Provider value={{ data, setData, clearData, loadUserData, saveToDatabaseNow }}>
+    <ResumeContext.Provider value={{ data, setData, clearData, loadUserData, saveToDatabaseNow, applyImportedData }}>
       {children}
     </ResumeContext.Provider>
   );
