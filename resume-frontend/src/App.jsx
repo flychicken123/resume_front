@@ -357,15 +357,14 @@ function BuilderApp() {
         console.log('CSS Overrides position:', htmlContent.indexOf('font-size: 18pt !important'));
         console.log('=== DEBUGGING COMPLETE ===');
 
-        // Call the backend to generate PDF
-        fetch(`${getAPIBaseURL()}/api/resume/generate-pdf`, {
+        // Call the backend to generate PDF using multipart upload (smaller, proxy-friendly)
+        const htmlBlob = new Blob([htmlContent], { type: 'text/html' });
+        const formData = new FormData();
+        formData.append('html', htmlBlob, 'resume.html');
+
+        fetch(`${getAPIBaseURL()}/api/resume/generate-pdf-file`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            htmlContent: htmlContent
-          })
+          body: formData
         })
         .then(async (response) => {
           const text = await response.text();
