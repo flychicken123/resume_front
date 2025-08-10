@@ -193,11 +193,13 @@ function BuilderApp() {
           .preview { box-shadow: none !important; border: 0 !important; outline: none !important; margin: 0 auto !important; padding: 0 !important; width: 7.7in !important; max-width: 7.7in !important; box-sizing: border-box !important; overflow: visible !important; font-size: 12pt !important; }
           .preview * { word-break: break-word !important; overflow-wrap: anywhere !important; hyphens: auto !important; }
           .preview::before, .preview::after { display: none !important; content: none !important; }
-          .preview .name { font-size: 18pt !important; font-weight: bold !important; text-transform: uppercase !important; margin-bottom: 5pt !important; color: rgb(0, 0, 0) !important; }
-          .preview .contact-info { font-size: 11pt !important; margin-bottom: 10pt !important; color: rgb(0, 0, 0) !important; }
-          .preview .section-header { font-size: 14pt !important; font-weight: bold !important; text-transform: uppercase !important; margin-bottom: 8pt !important; margin-top: 15pt !important; color: rgb(0, 0, 0) !important; }
-          .preview .header { text-align: center !important; margin-bottom: 20pt !important; }
-          .preview .education-item, .preview .experience-item { margin-bottom: 12pt !important; }
+          
+          /* Force override captured CSS with higher specificity */
+          .preview .name, .preview .contact-info, .preview .name { font-size: 18pt !important; font-weight: bold !important; text-transform: uppercase !important; margin-bottom: 5pt !important; color: rgb(0, 0, 0) !important; }
+          .preview .contact-info, .preview .contact-info { font-size: 11pt !important; margin-bottom: 10pt !important; color: rgb(0, 0, 0) !important; }
+          .preview .section-header, .preview .section-header { font-size: 14pt !important; font-weight: bold !important; text-transform: uppercase !important; margin-bottom: 8pt !important; margin-top: 15pt !important; color: rgb(0, 0, 0) !important; }
+          .preview .header, .preview .header { text-align: center !important; margin-bottom: 20pt !important; }
+          .preview .education-item, .preview .experience-item, .preview .education-item, .preview .experience-item { margin-bottom: 12pt !important; }
         `;
         
         // Debug: Log the CSS overrides to see if they're being generated
@@ -213,6 +215,8 @@ function BuilderApp() {
   <style>
     body { margin: 0; padding: 0; background-color: white; }
     ${cleanedCssText}
+    
+    /* PDF-specific overrides - MUST be last to override captured CSS */
     ${pdfOverrides}
   </style>
 </head>
