@@ -199,6 +199,9 @@ function BuilderApp() {
           .preview .header { text-align: center !important; margin-bottom: 20pt !important; }
           .preview .education-item, .preview .experience-item { margin-bottom: 12pt !important; }
         `;
+        
+        // Debug: Log the CSS overrides to see if they're being generated
+        console.log('PDF Overrides being applied:', pdfOverrides);
  
         // Create complete HTML document
         const htmlContent = `
@@ -217,6 +220,10 @@ function BuilderApp() {
   ${clonedElement.outerHTML}
 </body>
 </html>`;
+
+        // Debug: Log the HTML content length and preview
+        console.log('HTML Content Length:', htmlContent.length);
+        console.log('HTML Content Preview:', htmlContent.substring(0, 1000));
 
         // Call the backend to generate PDF
         fetch(`${getAPIBaseURL()}/api/resume/generate-pdf`, {
