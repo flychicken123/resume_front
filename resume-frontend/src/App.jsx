@@ -159,26 +159,53 @@ function BuilderApp() {
           viewBtn.remove();
         }
         
-        // Build filtered CSS: include only rules that target `.preview`
-        const filteredCssText = Array.from(document.styleSheets)
-          .map(sheet => {
-            try {
-              return Array.from(sheet.cssRules)
-                .map(rule => {
-                  if (rule.type === CSSRule.STYLE_RULE) {
-                    const sel = rule.selectorText || '';
-                    return sel.includes('.preview') ? rule.cssText : '';
-                  }
-                  return '';
-                })
-                .filter(Boolean)
-                .join('\n');
-            } catch (e) {
-              return '';
+        // Comprehensive CSS debugging
+        console.log('=== CSS DEBUGGING START ===');
+        console.log('Environment:', window.location.hostname);
+        console.log('URL:', window.location.href);
+        console.log('User Agent:', navigator.userAgent);
+        console.log('Number of stylesheets:', document.styleSheets.length);
+        
+        // Debug each stylesheet
+        const stylesheetDebug = Array.from(document.styleSheets).map((sheet, index) => {
+          try {
+            const debug = {
+              index,
+              href: sheet.href || 'inline',
+              disabled: sheet.disabled,
+              media: sheet.media ? sheet.media.mediaText : 'all',
+              title: sheet.title || 'none'
+            };
+            
+            console.log(`Stylesheet ${index}:`, debug);
+            
+            const rules = Array.from(sheet.cssRules);
+            const previewRules = rules.filter(rule => {
+              if (rule.type === CSSRule.STYLE_RULE) {
+                const sel = rule.selectorText || '';
+                return sel.includes('.preview');
+              }
+              return false;
+            });
+            
+            console.log(`Stylesheet ${index} total rules:`, rules.length);
+            console.log(`Stylesheet ${index} preview rules:`, previewRules.length);
+            
+            if (previewRules.length > 0) {
+              console.log(`Stylesheet ${index} preview rule examples:`, previewRules.slice(0, 3).map(r => r.selectorText));
             }
-          })
-          .filter(Boolean)
-          .join('\n');
+            
+            return previewRules.map(rule => rule.cssText).join('\n');
+          } catch (e) {
+            console.log(`Stylesheet ${index} error:`, e.message);
+            return '';
+          }
+        });
+        
+        const filteredCssText = stylesheetDebug.filter(Boolean).join('\n');
+        
+        console.log('Total preview CSS rules captured:', filteredCssText.split('\n').filter(line => line.includes('.preview')).length);
+        console.log('=== CSS DEBUGGING END ===');
 
         // Remove screen-only visual effects that cause a visible edge in PDFs
         const cleanedCssText = filteredCssText
@@ -203,6 +230,11 @@ function BuilderApp() {
         `;
         
         // Debug: Log the CSS overrides to see if they're being generated
+        console.log('=== PDF GENERATION DEBUG ===');
+        console.log('Current template/format:', data.format || 'default');
+        console.log('Current step:', step);
+        console.log('Preview element found:', !!previewElement);
+        console.log('Preview element classes:', previewElement ? previewElement.className : 'N/A');
         console.log('PDF Overrides being applied:', pdfOverrides);
  
         // Create complete HTML document
@@ -226,8 +258,13 @@ function BuilderApp() {
 </html>`;
 
         // Debug: Log the HTML content length and preview
+        console.log('=== FINAL HTML DEBUG ===');
         console.log('HTML Content Length:', htmlContent.length);
-        console.log('HTML Content Preview:', htmlContent.substring(0, 1000));
+        console.log('Captured CSS Length:', cleanedCssText.length);
+        console.log('Overrides CSS Length:', pdfOverrides.length);
+        console.log('Preview Element HTML Length:', clonedElement.outerHTML.length);
+        console.log('HTML Content Preview (first 1000 chars):', htmlContent.substring(0, 1000));
+        console.log('=== DEBUGGING COMPLETE ===');
 
         // Call the backend to generate PDF
         fetch(`${getAPIBaseURL()}/api/resume/generate-pdf`, {
