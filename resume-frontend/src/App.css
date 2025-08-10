@@ -5,6 +5,7 @@ body {
   padding: 0;
   color: #111;
   line-height: 1.5;
+  overflow: visible;
 }
 
 /* Remove all borders and box-shadows globally */
@@ -19,6 +20,7 @@ body {
   min-height: 100vh;
   background: #f3f4f6;
   box-shadow: none;
+  overflow: visible;
 }
 
 /* Sidebar vertical stepper styles - light blue only */
@@ -95,6 +97,7 @@ body {
   max-width: 1200px;
   margin: 0 auto 32px auto;
   gap: 2rem;
+  overflow: visible;
 }
 
 /* Main content area - solid white */
@@ -105,6 +108,7 @@ body {
   border-radius: 8px;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
   max-width: calc(100% - 140px - 2rem); /* Account for sidebar width and gap */
+  overflow: visible;
 }
 
 /* Center step-content children */

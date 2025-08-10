@@ -648,7 +648,7 @@ function BuilderApp() {
             id="resume-preview-container"
             style={{ 
               flex: 1, 
-              overflow: 'auto', 
+              overflow: 'visible', 
               padding: '1rem',
               background: 'white'
             }}
