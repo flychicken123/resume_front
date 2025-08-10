@@ -120,10 +120,8 @@ function BuilderApp() {
       if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
         return 'http://localhost:8081';
       }
-      // Use the backend domain (non-www) for API calls
-      return window.location.hostname === 'www.hihired.org' 
-        ? 'https://hihired.org' 
-        : window.location.origin;
+      // In production, use same-origin to avoid CORS
+      return '';
     }
     // Fallback for server-side rendering
     return process.env.REACT_APP_API_URL || 'http://localhost:8081';
