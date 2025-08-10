@@ -307,9 +307,9 @@ button:disabled {
   width: 8.5in;
   margin: 0 auto;
   box-sizing: border-box;
-  min-height: 11in;
-  aspect-ratio: 8.5/11;
-  overflow-y: auto;
+  min-height: auto;
+  height: auto;
+  overflow: visible;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
@@ -383,9 +383,9 @@ button:disabled {
   width: 8.5in;
   margin: 0 auto;
   box-sizing: border-box;
-  min-height: 11in;
-  aspect-ratio: 8.5/11;
-  overflow-y: auto;
+  min-height: auto;
+  height: auto;
+  overflow: visible;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
@@ -477,9 +477,9 @@ button:disabled {
   width: 8.5in;
   margin: 0 auto;
   box-sizing: border-box;
-  min-height: 11in;
-  aspect-ratio: 8.5/11;
-  overflow-y: auto;
+  min-height: auto;
+  height: auto;
+  overflow: visible;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 

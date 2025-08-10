@@ -7,16 +7,12 @@ const StepPreview = ({ onDownload }) => {
   // Get template class based on selected format
   const getTemplateClass = () => {
     const format = data.selectedFormat || 'temp1';
-    console.log('Selected format for preview:', format);
     switch (format) {
       case 'modern':
-        console.log('Applying modern template styles');
         return 'preview modern';
       case 'industry-manager':
-        console.log('Applying industry-manager template styles');
         return 'preview industry-manager';
       default:
-        console.log('Applying temp1 template styles');
         return 'preview'; // temp1 template
     }
   };
@@ -74,49 +70,51 @@ const StepPreview = ({ onDownload }) => {
   };
   
   return (
-    <div className={getTemplateClass()}>
-      <div className="header">
-        <div className="name">{data.name || 'Your Name'}</div>
-        <div className="contact-info">
-          {data.email && data.phone ? `${data.email} • ${data.phone}` : (data.email || data.phone || 'your.email@example.com • (555) 123-4567')}
+    <div className="preview-container">
+      <div className={getTemplateClass()}>
+        <div className="header">
+          <div className="name">{data.name || 'Your Name'}</div>
+          <div className="contact-info">
+            {data.email && data.phone ? `${data.email} • ${data.phone}` : (data.email || data.phone || 'your.email@example.com • (555) 123-4567')}
+          </div>
         </div>
-      </div>
-      
-      {data.summary && (
-        <>
-          <div className="section-header">Summary</div>
-          <p>{data.summary}</p>
-        </>
-      )}
-      
-      {formatExperiences() && (
-        <>
-          <div className="section-header">Experience</div>
-          {formatExperiences()}
-        </>
-      )}
-      
-      {formatEducation() && (
-        <>
-          <div className="section-header">Education</div>
-          {formatEducation()}
-        </>
-      )}
-      
-      {data.skills && (
-        <>
-          <div className="section-header">Skills</div>
-          <p>{data.skills}</p>
-        </>
-      )}
-      
-      <div style={{ textAlign: 'center', marginTop: '2rem' }}>
-        <button onClick={onDownload} style={{ padding: '0.75rem 2rem', fontSize: '0.9rem', fontWeight: 600 }}>
-          Download Resume
-        </button>
+        
+        {data.summary && (
+          <>
+            <div className="section-header">Summary</div>
+            <p>{data.summary}</p>
+          </>
+        )}
+        
+        {formatExperiences() && (
+          <>
+            <div className="section-header">Experience</div>
+            {formatExperiences()}
+          </>
+        )}
+        
+        {formatEducation() && (
+          <>
+            <div className="section-header">Education</div>
+            {formatEducation()}
+          </>
+        )}
+        
+        {data.skills && (
+          <>
+            <div className="section-header">Skills</div>
+            <p>{data.skills}</p>
+          </>
+        )}
+        
+        <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+          <button onClick={onDownload} style={{ padding: '0.75rem 2rem', fontSize: '0.9rem', fontWeight: 600 }}>
+            Download Resume
+          </button>
+        </div>
       </div>
     </div>
   );
-}
+};
 
 export default StepPreview;
