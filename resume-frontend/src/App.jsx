@@ -159,8 +159,32 @@ function BuilderApp() {
           viewBtn.remove();
         }
         
-        // Skip CSS capture to ensure consistent rendering - rely only on our overrides
-        const cleanedCssText = '';
+        // Build filtered CSS: include only rules that target `.preview`
+        const filteredCssText = Array.from(document.styleSheets)
+          .map(sheet => {
+            try {
+              return Array.from(sheet.cssRules)
+                .map(rule => {
+                  if (rule.type === CSSRule.STYLE_RULE) {
+                    const sel = rule.selectorText || '';
+                    return sel.includes('.preview') ? rule.cssText : '';
+                  }
+                  return '';
+                })
+                .filter(Boolean)
+                .join('\n');
+            } catch (e) {
+              return '';
+            }
+          })
+          .filter(Boolean)
+          .join('\n');
+
+        // Remove screen-only visual effects that cause a visible edge in PDFs
+        const cleanedCssText = filteredCssText
+          .replace(/box-shadow\s*:[^;]+;?/gi, '')
+          .replace(/-webkit-box-shadow\s*:[^;]+;?/gi, '')
+          .replace(/border-radius\s*:[^;]+;?/gi, '');
 
         // PDF-specific overrides to ensure consistent rendering - these MUST override any existing styles
         const pdfOverrides = `
