@@ -154,21 +154,24 @@ function BuilderApp() {
         const clonedElement = previewElement.cloneNode(true);
 
         // Inline computed styles from the live preview into the cloned HTML
-        const inlineComputedStyles = (sourceEl, targetEl) => {
+        const inlineComputedStyles = (sourceEl, targetEl, isRoot = false) => {
           if (!sourceEl || !targetEl) return;
 
-          // Copy a curated set of style properties that affect layout/appearance
-          const propertiesToCopy = [
+          // Copy curated properties; avoid overriding page sizing on the root .preview
+          const commonProps = [
             'color', 'background-color', 'font-family', 'font-size', 'font-weight', 'font-style',
             'line-height', 'letter-spacing', 'text-transform', 'text-align', 'vertical-align',
-            'margin', 'margin-top', 'margin-right', 'margin-bottom', 'margin-left',
-            'padding', 'padding-top', 'padding-right', 'padding-bottom', 'padding-left',
             'border', 'border-top', 'border-right', 'border-bottom', 'border-left',
             'border-color', 'border-style', 'border-width',
             'list-style', 'list-style-type', 'list-style-position',
-            'white-space', 'word-break', 'overflow-wrap', 'hyphens',
+            'white-space', 'word-break', 'overflow-wrap', 'hyphens'
+          ];
+          const layoutProps = [
+            'margin', 'margin-top', 'margin-right', 'margin-bottom', 'margin-left',
+            'padding', 'padding-top', 'padding-right', 'padding-bottom', 'padding-left',
             'width', 'max-width', 'min-width', 'height', 'max-height', 'min-height'
           ];
+          const propertiesToCopy = isRoot ? commonProps : [...commonProps, ...layoutProps];
 
           try {
             const computed = window.getComputedStyle(sourceEl);
@@ -187,11 +190,11 @@ function BuilderApp() {
           const sourceChildren = Array.from(sourceEl.children || []);
           const targetChildren = Array.from(targetEl.children || []);
           for (let i = 0; i < sourceChildren.length; i += 1) {
-            inlineComputedStyles(sourceChildren[i], targetChildren[i]);
+            inlineComputedStyles(sourceChildren[i], targetChildren[i], false);
           }
         };
 
-        inlineComputedStyles(previewElement, clonedElement);
+        inlineComputedStyles(previewElement, clonedElement, true);
         
         // Remove the view button from the cloned element
         const viewBtn = clonedElement.querySelector('button');
