@@ -296,7 +296,15 @@ function BuilderApp() {
               fetch(u, { cache: 'no-store' })
                 .then(r => r.arrayBuffer())
                 .then(buf => {
-                  const base64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
+                  // Convert ArrayBuffer to base64 without blowing the call stack
+                  const bytes = new Uint8Array(buf);
+                  const chunkSize = 0x8000; // 32KB chunks
+                  let binary = '';
+                  for (let i = 0; i < bytes.length; i += chunkSize) {
+                    const chunk = bytes.subarray(i, i + chunkSize);
+                    binary += String.fromCharCode.apply(null, Array.from(chunk));
+                  }
+                  const base64 = btoa(binary);
                   return { src: u, dataUrl: `data:font/woff2;base64,${base64}` };
                 })
             );
