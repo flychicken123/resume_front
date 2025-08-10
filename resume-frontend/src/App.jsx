@@ -130,7 +130,7 @@ function BuilderApp() {
   };
 
   // Handler for view resume action
-  const handleViewResume = () => {
+  const handleViewResume = async () => {
     try {
       // Check if user is authenticated
       if (!user) {
@@ -278,6 +278,39 @@ function BuilderApp() {
         console.log('Preview element classes:', previewElement ? previewElement.className : 'N/A');
         console.log('PDF Overrides being applied:', pdfOverrides);
  
+        // Fetch and inline Google Fonts CSS as data: URLs so wkhtmltopdf uses the exact same font
+        const fontCssUrl = 'https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&display=swap';
+        let inlinedFontCSS = '';
+        try {
+          const cssResponse = await fetch(fontCssUrl, { cache: 'no-store' });
+          const cssText = await cssResponse.text();
+          const urlRegex = /url\((https:[^\)]+\.woff2)\)/g;
+          const fontFetches = [];
+          const fontUrls = [];
+          let match;
+          while ((match = urlRegex.exec(cssText)) !== null) {
+            fontUrls.push(match[1]);
+          }
+          for (const u of fontUrls) {
+            fontFetches.push(
+              fetch(u, { cache: 'no-store' })
+                .then(r => r.arrayBuffer())
+                .then(buf => {
+                  const base64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
+                  return { src: u, dataUrl: `data:font/woff2;base64,${base64}` };
+                })
+            );
+          }
+          const mappings = await Promise.all(fontFetches);
+          let cssInlined = cssText;
+          mappings.forEach(({ src, dataUrl }) => {
+            cssInlined = cssInlined.split(src).join(dataUrl);
+          });
+          inlinedFontCSS = cssInlined;
+        } catch (e) {
+          console.log('Font inline failed (fallback to live link):', e.message);
+        }
+
         // Create complete HTML document with CSS overrides LAST
         const htmlContent = `
 <!DOCTYPE html>
@@ -285,9 +318,7 @@ function BuilderApp() {
 <head>
   <meta charset="UTF-8">
   <title>${data.name || 'Resume'}</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  ${inlinedFontCSS ? `<style>${inlinedFontCSS}</style>` : `<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&display=swap" rel="stylesheet">`}
   <style>
     /* Ensure same font in wkhtmltopdf */
     .preview, .preview * { font-family: 'Noto Sans', sans-serif !important; }
