@@ -152,6 +152,46 @@ function BuilderApp() {
       if (previewElement) {
         // Clone the preview element
         const clonedElement = previewElement.cloneNode(true);
+
+        // Inline computed styles from the live preview into the cloned HTML
+        const inlineComputedStyles = (sourceEl, targetEl) => {
+          if (!sourceEl || !targetEl) return;
+
+          // Copy a curated set of style properties that affect layout/appearance
+          const propertiesToCopy = [
+            'color', 'background-color', 'font-family', 'font-size', 'font-weight', 'font-style',
+            'line-height', 'letter-spacing', 'text-transform', 'text-align', 'vertical-align',
+            'margin', 'margin-top', 'margin-right', 'margin-bottom', 'margin-left',
+            'padding', 'padding-top', 'padding-right', 'padding-bottom', 'padding-left',
+            'border', 'border-top', 'border-right', 'border-bottom', 'border-left',
+            'border-color', 'border-style', 'border-width',
+            'list-style', 'list-style-type', 'list-style-position',
+            'white-space', 'word-break', 'overflow-wrap', 'hyphens',
+            'width', 'max-width', 'min-width', 'height', 'max-height', 'min-height'
+          ];
+
+          try {
+            const computed = window.getComputedStyle(sourceEl);
+            propertiesToCopy.forEach((prop) => {
+              const value = computed.getPropertyValue(prop);
+              if (value) {
+                // Use important to ensure inline values dominate stylesheet rules in wkhtmltopdf
+                targetEl.style.setProperty(prop, value, 'important');
+              }
+            });
+          } catch (e) {
+            // Best-effort; skip nodes that error (e.g., pseudo elements)
+          }
+
+          // Recurse for children
+          const sourceChildren = Array.from(sourceEl.children || []);
+          const targetChildren = Array.from(targetEl.children || []);
+          for (let i = 0; i < sourceChildren.length; i += 1) {
+            inlineComputedStyles(sourceChildren[i], targetChildren[i]);
+          }
+        };
+
+        inlineComputedStyles(previewElement, clonedElement);
         
         // Remove the view button from the cloned element
         const viewBtn = clonedElement.querySelector('button');
@@ -213,23 +253,18 @@ function BuilderApp() {
           .replace(/-webkit-box-shadow\s*:[^;]+;?/gi, '')
           .replace(/border-radius\s*:[^;]+;?/gi, '');
 
-        // PDF-specific overrides to ensure consistent rendering
+        // Detect the current template class for targeted overrides
+        const previewClasses = previewElement.className.split(' ');
+        const templateClass = previewClasses.find(cls => cls !== 'preview') || '';
+        console.log('Detected template class:', templateClass);
+        
+        // PDF-specific overrides to ensure consistent rendering (keep minimal)
         const pdfOverrides = `
           @page { size: Letter; margin: 0.4in; }
           html, body { background: #ffffff !important; margin: 0 !important; padding: 0 !important; }
           .preview { box-shadow: none !important; border: 0 !important; outline: none !important; margin: 0 auto !important; padding: 0 !important; width: 7.7in !important; max-width: 7.7in !important; box-sizing: border-box !important; overflow: visible !important; }
           .preview * { word-break: break-word !important; overflow-wrap: anywhere !important; hyphens: auto !important; }
           .preview::before, .preview::after { display: none !important; content: none !important; }
-          
-          /* Force override ALL existing styles with maximum specificity */
-          .preview .name, .preview .name { font-size: 18pt !important; font-weight: bold !important; text-transform: uppercase !important; margin-bottom: 5pt !important; color: rgb(0, 0, 0) !important; }
-          .preview .contact-info, .preview .contact-info { font-size: 11pt !important; margin-bottom: 10pt !important; color: rgb(0, 0, 0) !important; }
-          .preview .section-header, .preview .section-header { font-size: 14pt !important; font-weight: bold !important; text-transform: uppercase !important; margin-top: 15pt !important; margin-bottom: 8pt !important; border-bottom: 1px solid rgb(0, 0, 0) !important; padding-bottom: 2pt !important; color: rgb(0, 0, 0) !important; }
-          .preview .institution-header, .preview .institution-header { font-weight: bold !important; margin-bottom: 2pt !important; color: rgb(0, 0, 0) !important; font-size: 11pt !important; }
-          .preview .education-details, .preview .education-details { font-size: 11pt !important; color: rgb(0, 0, 0) !important; margin-top: 0px !important; }
-          
-          /* Additional specificity for combined selectors */
-          .preview .contact-info, .preview .name, .preview .contact-info, .preview .name { font-size: 11pt !important; color: rgb(0, 0, 0) !important; }
         `;
         
         // Debug: Log the CSS overrides to see if they're being generated
