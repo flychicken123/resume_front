@@ -159,43 +159,21 @@ function BuilderApp() {
           viewBtn.remove();
         }
         
-        // Build filtered CSS: include only rules that target `.preview`
-        const filteredCssText = Array.from(document.styleSheets)
-          .map(sheet => {
-            try {
-              return Array.from(sheet.cssRules)
-                .map(rule => {
-                  if (rule.type === CSSRule.STYLE_RULE) {
-                    const sel = rule.selectorText || '';
-                    return sel.includes('.preview') ? rule.cssText : '';
-                  }
-                  return '';
-                })
-                .filter(Boolean)
-                .join('\n');
-            } catch (e) {
-              return '';
-            }
-          })
-          .filter(Boolean)
-          .join('\n');
+        // Skip CSS capture to ensure consistent rendering - rely only on our overrides
+        const cleanedCssText = '';
 
-        // Remove screen-only visual effects that cause a visible edge in PDFs
-        const cleanedCssText = filteredCssText
-          .replace(/box-shadow\s*:[^;]+;?/gi, '')
-          .replace(/-webkit-box-shadow\s*:[^;]+;?/gi, '')
-          .replace(/border-radius\s*:[^;]+;?/gi, '');
-
-        // PDF-specific overrides to ensure consistent rendering
+        // PDF-specific overrides to ensure consistent rendering - these MUST override any existing styles
         const pdfOverrides = `
           @page { size: Letter; margin: 0.4in; }
-          html, body { background: #ffffff !important; margin: 0; padding: 0; font-size: 12pt !important; }
+          html, body { background: #ffffff !important; margin: 0 !important; padding: 0 !important; font-size: 12pt !important; }
           .preview { box-shadow: none !important; border: 0 !important; outline: none !important; margin: 0 auto !important; padding: 0 !important; width: 7.7in !important; max-width: 7.7in !important; box-sizing: border-box !important; overflow: visible !important; font-size: 12pt !important; }
           .preview * { word-break: break-word !important; overflow-wrap: anywhere !important; hyphens: auto !important; }
           .preview::before, .preview::after { display: none !important; content: none !important; }
-          .preview .name { font-size: 18pt !important; }
-          .preview .contact-info { font-size: 11pt !important; }
-          .preview .section-header { font-size: 14pt !important; }
+          .preview .name { font-size: 18pt !important; font-weight: bold !important; text-transform: uppercase !important; margin-bottom: 5pt !important; color: rgb(0, 0, 0) !important; }
+          .preview .contact-info { font-size: 11pt !important; margin-bottom: 10pt !important; color: rgb(0, 0, 0) !important; }
+          .preview .section-header { font-size: 14pt !important; font-weight: bold !important; text-transform: uppercase !important; margin-bottom: 8pt !important; margin-top: 15pt !important; color: rgb(0, 0, 0) !important; }
+          .preview .header { text-align: center !important; margin-bottom: 20pt !important; }
+          .preview .education-item, .preview .experience-item { margin-bottom: 12pt !important; }
         `;
  
         // Create complete HTML document
