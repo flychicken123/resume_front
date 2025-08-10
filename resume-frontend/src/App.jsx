@@ -263,10 +263,10 @@ function BuilderApp() {
         
         // PDF-specific overrides to ensure consistent rendering (keep minimal)
         const pdfOverrides = `
-          @page { size: Letter; margin: 0.4in; }
+          @page { size: Letter; margin: 0; }
           html, body { background: #ffffff !important; margin: 0 !important; padding: 0 !important; }
-          .preview { box-shadow: none !important; border: 0 !important; outline: none !important; margin: 0 auto !important; padding: 0 !important; width: 7.7in !important; max-width: 7.7in !important; box-sizing: border-box !important; overflow: visible !important; }
-          .preview * { word-break: break-word !important; overflow-wrap: anywhere !important; hyphens: auto !important; }
+          /* Keep the preview's own width/padding/margins exactly as in the live DOM */
+          .preview { box-shadow: none !important; border: 0 !important; outline: none !important; }
           .preview::before, .preview::after { display: none !important; content: none !important; }
         `;
         
