@@ -188,11 +188,14 @@ function BuilderApp() {
 
         // PDF-specific overrides to ensure consistent rendering
         const pdfOverrides = `
-          @page { size: Letter; margin: 0.6in; }
-          html, body { background: #ffffff !important; margin: 0; padding: 0; }
-          .preview { box-shadow: none !important; border: 0 !important; outline: none !important; margin: 0 auto !important; padding: 0 !important; width: 7.3in !important; max-width: 7.3in !important; box-sizing: border-box !important; overflow: visible !important; }
+          @page { size: Letter; margin: 0.4in; }
+          html, body { background: #ffffff !important; margin: 0; padding: 0; font-size: 12pt !important; }
+          .preview { box-shadow: none !important; border: 0 !important; outline: none !important; margin: 0 auto !important; padding: 0 !important; width: 7.7in !important; max-width: 7.7in !important; box-sizing: border-box !important; overflow: visible !important; font-size: 12pt !important; }
           .preview * { word-break: break-word !important; overflow-wrap: anywhere !important; hyphens: auto !important; }
           .preview::before, .preview::after { display: none !important; content: none !important; }
+          .preview .name { font-size: 18pt !important; }
+          .preview .contact-info { font-size: 11pt !important; }
+          .preview .section-header { font-size: 14pt !important; }
         `;
  
         // Create complete HTML document
