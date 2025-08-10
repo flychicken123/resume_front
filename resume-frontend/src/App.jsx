@@ -390,6 +390,15 @@ function BuilderApp() {
 
   return (
     <>
+      <Helmet>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
+        <style>{`
+          .preview { font-family: 'Noto Sans', sans-serif; }
+          .preview * { font-family: 'Noto Sans', sans-serif; }
+        `}</style>
+      </Helmet>
       <SEO 
         title="Build Your Resume - HiHired AI Resume Builder"
         description="Build your professional resume step by step with our AI-powered resume builder. Create ATS-friendly resumes with personalized templates and expert guidance."
