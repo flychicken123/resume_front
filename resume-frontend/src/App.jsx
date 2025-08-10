@@ -282,6 +282,13 @@ function BuilderApp() {
 <head>
   <meta charset="UTF-8">
   <title>${data.name || 'Resume'}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Ensure same font in wkhtmltopdf */
+    .preview, .preview * { font-family: 'Noto Sans', sans-serif !important; }
+  </style>
   <style>
     body { margin: 0; padding: 0; background-color: white; }
     ${cleanedCssText}
