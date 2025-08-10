@@ -221,12 +221,15 @@ function BuilderApp() {
           .preview * { word-break: break-word !important; overflow-wrap: anywhere !important; hyphens: auto !important; }
           .preview::before, .preview::after { display: none !important; content: none !important; }
           
-          /* Comprehensive font size overrides for consistent rendering */
-          .preview .name { font-size: 18pt !important; font-weight: bold !important; text-transform: uppercase !important; margin-bottom: 5pt !important; color: rgb(0, 0, 0) !important; }
-          .preview .contact-info { font-size: 11pt !important; margin-bottom: 10pt !important; color: rgb(0, 0, 0) !important; }
-          .preview .section-header { font-size: 14pt !important; font-weight: bold !important; text-transform: uppercase !important; margin-top: 15pt !important; margin-bottom: 8pt !important; border-bottom: 1px solid rgb(0, 0, 0) !important; padding-bottom: 2pt !important; color: rgb(0, 0, 0) !important; }
-          .preview .institution-header { font-weight: bold !important; margin-bottom: 2pt !important; color: rgb(0, 0, 0) !important; font-size: 11pt !important; }
-          .preview .education-details { font-size: 11pt !important; color: rgb(0, 0, 0) !important; margin-top: 0px !important; }
+          /* Force override ALL existing styles with maximum specificity */
+          .preview .name, .preview .name { font-size: 18pt !important; font-weight: bold !important; text-transform: uppercase !important; margin-bottom: 5pt !important; color: rgb(0, 0, 0) !important; }
+          .preview .contact-info, .preview .contact-info { font-size: 11pt !important; margin-bottom: 10pt !important; color: rgb(0, 0, 0) !important; }
+          .preview .section-header, .preview .section-header { font-size: 14pt !important; font-weight: bold !important; text-transform: uppercase !important; margin-top: 15pt !important; margin-bottom: 8pt !important; border-bottom: 1px solid rgb(0, 0, 0) !important; padding-bottom: 2pt !important; color: rgb(0, 0, 0) !important; }
+          .preview .institution-header, .preview .institution-header { font-weight: bold !important; margin-bottom: 2pt !important; color: rgb(0, 0, 0) !important; font-size: 11pt !important; }
+          .preview .education-details, .preview .education-details { font-size: 11pt !important; color: rgb(0, 0, 0) !important; margin-top: 0px !important; }
+          
+          /* Additional specificity for combined selectors */
+          .preview .contact-info, .preview .name, .preview .contact-info, .preview .name { font-size: 11pt !important; color: rgb(0, 0, 0) !important; }
         `;
         
         // Debug: Log the CSS overrides to see if they're being generated
@@ -237,7 +240,7 @@ function BuilderApp() {
         console.log('Preview element classes:', previewElement ? previewElement.className : 'N/A');
         console.log('PDF Overrides being applied:', pdfOverrides);
  
-        // Create complete HTML document
+        // Create complete HTML document with CSS overrides LAST
         const htmlContent = `
 <!DOCTYPE html>
 <html>
@@ -247,8 +250,9 @@ function BuilderApp() {
   <style>
     body { margin: 0; padding: 0; background-color: white; }
     ${cleanedCssText}
-    
-    /* PDF-specific overrides - MUST be last to override captured CSS */
+  </style>
+  <style>
+    /* PDF-specific overrides - MUST be in separate style tag to ensure they come last */
     ${pdfOverrides}
   </style>
 </head>
@@ -264,6 +268,11 @@ function BuilderApp() {
         console.log('Overrides CSS Length:', pdfOverrides.length);
         console.log('Preview Element HTML Length:', clonedElement.outerHTML.length);
         console.log('HTML Content Preview (first 1000 chars):', htmlContent.substring(0, 1000));
+        
+        // Debug: Check if our overrides are in the final HTML
+        const hasOverrides = htmlContent.includes('font-size: 18pt !important');
+        console.log('CSS Overrides found in HTML:', hasOverrides);
+        console.log('CSS Overrides position:', htmlContent.indexOf('font-size: 18pt !important'));
         console.log('=== DEBUGGING COMPLETE ===');
 
         // Call the backend to generate PDF
