@@ -1,6 +1,16 @@
 # Updated Dockerfile for correct repository structure
-# Use Node.js 18 as base image
-FROM node:18-alpine
+# Use Ubuntu + Node 18 to match backend OS family and avoid musl differences
+FROM ubuntu:22.04 AS base
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js 18 (LTS) from NodeSource
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs \
+    && node -v && npm -v
 
 # Set working directory
 WORKDIR /app
@@ -9,7 +19,7 @@ WORKDIR /app
 COPY resume-frontend/package*.json ./
 
 # Install all dependencies
-RUN npm install
+RUN npm ci || npm install
 
 # Copy source code from resume-frontend directory
 COPY resume-frontend/ .

@@ -148,51 +148,8 @@ function BuilderApp() {
       const previewElement = document.querySelector('.preview');
       
       if (previewElement) {
-        // Clone the preview element
+        // Clone the preview element (no inline style expansion to keep HTML small)
         const clonedElement = previewElement.cloneNode(true);
-
-        // Inline computed styles from the live preview into the cloned HTML
-        const inlineComputedStyles = (sourceEl, targetEl, isRoot = false) => {
-          if (!sourceEl || !targetEl) return;
-
-          // Copy curated properties; avoid overriding page sizing on the root .preview
-          const commonProps = [
-            'color', 'background-color', 'font-family', 'font-size', 'font-weight', 'font-style',
-            'line-height', 'letter-spacing', 'text-transform', 'text-align', 'vertical-align',
-            'border', 'border-top', 'border-right', 'border-bottom', 'border-left',
-            'border-color', 'border-style', 'border-width',
-            'list-style', 'list-style-type', 'list-style-position',
-            'white-space', 'word-break', 'overflow-wrap', 'hyphens'
-          ];
-          const layoutProps = [
-            'margin', 'margin-top', 'margin-right', 'margin-bottom', 'margin-left',
-            'padding', 'padding-top', 'padding-right', 'padding-bottom', 'padding-left',
-            'width', 'max-width', 'min-width', 'height', 'max-height', 'min-height'
-          ];
-          const propertiesToCopy = isRoot ? commonProps : [...commonProps, ...layoutProps];
-
-          try {
-            const computed = window.getComputedStyle(sourceEl);
-            propertiesToCopy.forEach((prop) => {
-              const value = computed.getPropertyValue(prop);
-              if (value) {
-                // Use important to ensure inline values dominate stylesheet rules in wkhtmltopdf
-                targetEl.style.setProperty(prop, value, 'important');
-              }
-            });
-          } catch (e) {
-            // Best-effort; skip nodes that error (e.g., pseudo elements)
-          }
-
-          // Recurse for children
-          const sourceChildren = Array.from(sourceEl.children || []);
-          const targetChildren = Array.from(targetEl.children || []);
-          for (let i = 0; i < sourceChildren.length; i += 1) {
-            inlineComputedStyles(sourceChildren[i], targetChildren[i], false);
-          }
-        };
-
-        inlineComputedStyles(previewElement, clonedElement, true);
         
         // Remove the view button from the cloned element
         const viewBtn = clonedElement.querySelector('button');
@@ -276,47 +233,6 @@ function BuilderApp() {
         console.log('Preview element classes:', previewElement ? previewElement.className : 'N/A');
         console.log('PDF Overrides being applied:', pdfOverrides);
  
-        // Fetch and inline Google Fonts CSS as data: URLs so wkhtmltopdf uses the exact same font
-        const fontCssUrl = 'https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&display=swap';
-        let inlinedFontCSS = '';
-        try {
-          const cssResponse = await fetch(fontCssUrl, { cache: 'no-store' });
-          const cssText = await cssResponse.text();
-          const urlRegex = /url\((https:[^\)]+\.woff2)\)/g;
-          const fontFetches = [];
-          const fontUrls = [];
-          let match;
-          while ((match = urlRegex.exec(cssText)) !== null) {
-            fontUrls.push(match[1]);
-          }
-          for (const u of fontUrls) {
-            fontFetches.push(
-              fetch(u, { cache: 'no-store' })
-                .then(r => r.arrayBuffer())
-                .then(buf => {
-                  // Convert ArrayBuffer to base64 without blowing the call stack
-                  const bytes = new Uint8Array(buf);
-                  const chunkSize = 0x8000; // 32KB chunks
-                  let binary = '';
-                  for (let i = 0; i < bytes.length; i += chunkSize) {
-                    const chunk = bytes.subarray(i, i + chunkSize);
-                    binary += String.fromCharCode.apply(null, Array.from(chunk));
-                  }
-                  const base64 = btoa(binary);
-                  return { src: u, dataUrl: `data:font/woff2;base64,${base64}` };
-                })
-            );
-          }
-          const mappings = await Promise.all(fontFetches);
-          let cssInlined = cssText;
-          mappings.forEach(({ src, dataUrl }) => {
-            cssInlined = cssInlined.split(src).join(dataUrl);
-          });
-          inlinedFontCSS = cssInlined;
-        } catch (e) {
-          console.log('Font inline failed (fallback to live link):', e.message);
-        }
-
         // Create complete HTML document with CSS overrides LAST
         const htmlContent = `
 <!DOCTYPE html>
@@ -324,7 +240,7 @@ function BuilderApp() {
 <head>
   <meta charset="UTF-8">
   <title>${data.name || 'Resume'}</title>
-  ${inlinedFontCSS ? `<style>${inlinedFontCSS}</style>` : `<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&display=swap" rel="stylesheet">`}
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     /* Ensure same font in wkhtmltopdf */
     .preview, .preview * { font-family: 'Noto Sans', sans-serif !important; }
@@ -343,13 +259,20 @@ function BuilderApp() {
 </body>
 </html>`;
 
+        // Minify HTML to keep payload very small
+        const minifyHtml = (html) => html
+          .replace(/>\s+</g, '><')
+          .replace(/\n+/g, '')
+          .replace(/\s{2,}/g, ' ');
+        const minHtmlContent = minifyHtml(htmlContent);
+
         // Debug: Log the HTML content length and preview
         console.log('=== FINAL HTML DEBUG ===');
-        console.log('HTML Content Length:', htmlContent.length);
+        console.log('HTML Content Length:', htmlContent.length, 'Minified Length:', minHtmlContent.length);
         console.log('Captured CSS Length:', cleanedCssText.length);
         console.log('Overrides CSS Length:', pdfOverrides.length);
         console.log('Preview Element HTML Length:', clonedElement.outerHTML.length);
-        console.log('HTML Content Preview (first 1000 chars):', htmlContent.substring(0, 1000));
+        console.log('HTML Content Preview (first 1000 chars):', minHtmlContent.substring(0, 1000));
         
         // Debug: Check if our overrides are in the final HTML
         const hasOverrides = htmlContent.includes('font-size: 18pt !important');
@@ -358,7 +281,7 @@ function BuilderApp() {
         console.log('=== DEBUGGING COMPLETE ===');
 
         // Call the backend to generate PDF using multipart upload (smaller, proxy-friendly)
-        const htmlBlob = new Blob([htmlContent], { type: 'text/html' });
+        const htmlBlob = new Blob([minHtmlContent], { type: 'text/html' });
         const formData = new FormData();
         formData.append('html', htmlBlob, 'resume.html');
 
