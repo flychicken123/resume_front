@@ -194,9 +194,12 @@ function BuilderApp() {
           .preview * { word-break: break-word !important; overflow-wrap: anywhere !important; hyphens: auto !important; }
           .preview::before, .preview::after { display: none !important; content: none !important; }
           
-          /* Font size overrides for consistent rendering */
-          .preview .name { font-size: 18pt !important; }
-          .preview .section-header { font-size: 14pt !important; }
+          /* Comprehensive font size overrides for consistent rendering */
+          .preview .name { font-size: 18pt !important; font-weight: bold !important; text-transform: uppercase !important; margin-bottom: 5pt !important; color: rgb(0, 0, 0) !important; }
+          .preview .contact-info { font-size: 11pt !important; margin-bottom: 10pt !important; color: rgb(0, 0, 0) !important; }
+          .preview .section-header { font-size: 14pt !important; font-weight: bold !important; text-transform: uppercase !important; margin-top: 15pt !important; margin-bottom: 8pt !important; border-bottom: 1px solid rgb(0, 0, 0) !important; padding-bottom: 2pt !important; color: rgb(0, 0, 0) !important; }
+          .preview .institution-header { font-weight: bold !important; margin-bottom: 2pt !important; color: rgb(0, 0, 0) !important; font-size: 11pt !important; }
+          .preview .education-details { font-size: 11pt !important; color: rgb(0, 0, 0) !important; margin-top: 0px !important; }
         `;
         
         // Debug: Log the CSS overrides to see if they're being generated
