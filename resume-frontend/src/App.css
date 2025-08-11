@@ -673,3 +673,46 @@ body > div > div[style*='flex-direction:column'] {
 .fullscreen-button:active {
   transform: scale(0.98);
 }
+
+/* Print styles for PDF generation */
+@media print {
+  /* Page break controls */
+  .preview .section-header {
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+    orphans: 3 !important;
+    widows: 3 !important;
+  }
+  
+  .preview .experience-item {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    orphans: 3 !important;
+    widows: 3 !important;
+  }
+  
+  .preview .education-item {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    orphans: 3 !important;
+    widows: 3 !important;
+  }
+  
+                /* Skills section - force to second page and keep together */
+              .preview .skills-section-header {
+                page-break-before: always !important;
+                break-before: page !important;
+                page-break-after: avoid !important;
+                break-after: avoid !important;
+                margin-top: 0 !important;
+              }
+
+              /* Skills content - keep with header */
+              .preview .skills-content {
+                page-break-before: avoid !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                orphans: 3 !important;
+                widows: 3 !important;
+              }
+}

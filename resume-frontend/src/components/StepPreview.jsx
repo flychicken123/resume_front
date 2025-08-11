@@ -102,8 +102,8 @@ const StepPreview = ({ onDownload }) => {
         
         {data.skills && (
           <>
-            <div className="section-header">Skills</div>
-            <p>{data.skills}</p>
+            <div className="section-header skills-section-header">Skills</div>
+            <p className="skills-content">{data.skills}</p>
           </>
         )}
         

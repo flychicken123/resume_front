@@ -223,6 +223,46 @@ function BuilderApp() {
           /* Keep the preview's own width/padding/margins exactly as in the live DOM */
           .preview { box-shadow: none !important; border: 0 !important; outline: none !important; }
           .preview::before, .preview::after { display: none !important; content: none !important; }
+          
+          /* Page break controls for PDF */
+          .preview .section-header {
+            page-break-after: avoid !important;
+            break-after: avoid !important;
+            orphans: 3 !important;
+            widows: 3 !important;
+          }
+          
+          .preview .experience-item {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            orphans: 3 !important;
+            widows: 3 !important;
+          }
+          
+          .preview .education-item {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            orphans: 3 !important;
+            widows: 3 !important;
+          }
+          
+                        /* Skills section - force to second page and keep together */
+              .preview .skills-section-header {
+                page-break-before: always !important;
+                break-before: page !important;
+                page-break-after: avoid !important;
+                break-after: avoid !important;
+                margin-top: 0 !important;
+              }
+              
+              /* Skills content - keep with header */
+              .preview .skills-content {
+                page-break-before: avoid !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                orphans: 3 !important;
+                widows: 3 !important;
+              }
         `;
         
         // Debug: Log the CSS overrides to see if they're being generated
