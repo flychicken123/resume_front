@@ -43,14 +43,72 @@ const ImportResumeModal = ({ onClose }) => {
       if (!resp.ok || !json) {
         throw new Error((json && (json.error || json.message)) || `Parse failed (${resp.status})`);
       }
+      
+      // Handle both AI-structured response and fallback response
+      let structuredData = null;
       if (json.structured) {
-        console.log('Applying imported data:', json.structured);
-        applyImportedData(json.structured);
-      } else {
-        console.log('No structured data in response');
+        console.log('Using AI-structured data:', json.structured);
+        // Check if structured data has any meaningful content
+        const hasContent = json.structured.name || json.structured.email || json.structured.phone || 
+                          json.structured.summary || (json.structured.experience && json.structured.experience.length > 0) ||
+                          (json.structured.education && json.structured.education.length > 0) ||
+                          (json.structured.skills && json.structured.skills.length > 0);
+        
+        if (hasContent) {
+          structuredData = json.structured;
+        } else {
+          console.log('AI-structured data is empty, trying extracted data');
+        }
       }
-      onClose();
-      navigate('/builder');
+      
+      if (!structuredData && json.extracted) {
+        console.log('Using extracted data:', json.extracted);
+        // Check if extracted data has any meaningful content
+        const hasExtractedContent = json.extracted.email || json.extracted.phone || 
+                                   (json.extracted.sections && Object.keys(json.extracted.sections).length > 0);
+        
+        if (hasExtractedContent) {
+          // Convert extracted format to structured format
+          structuredData = {
+            name: '',
+            email: json.extracted.email || '',
+            phone: json.extracted.phone || '',
+            summary: json.extracted.sections?.summary || '',
+            experience: json.extracted.sections?.experience ? [{
+              company: '',
+              role: '',
+              location: '',
+              startDate: '',
+              endDate: '',
+              bullets: json.extracted.sections.experience.split('\n').filter(line => line.trim())
+            }] : [],
+            education: json.extracted.sections?.education ? [{
+              school: '',
+              degree: '',
+              field: '',
+              startDate: '',
+              endDate: ''
+            }] : [],
+            skills: json.extracted.sections?.skills ? json.extracted.sections.skills.split('\n').filter(line => line.trim()) : []
+          };
+        }
+      }
+      
+      if (structuredData) {
+        console.log('Applying imported data:', structuredData);
+        applyImportedData(structuredData);
+        // Add a small delay to ensure state update completes
+        setTimeout(() => {
+          onClose();
+          navigate('/builder');
+        }, 100);
+      } else {
+        console.log('No usable data found in response');
+        console.log('Raw text length:', json.extracted?.raw_text?.length || 0);
+        console.log('Sections found:', Object.keys(json.extracted?.sections || {}));
+        alert('Could not extract any data from the resume. This might be due to:\n\n1. File format not supported\n2. File is corrupted or password protected\n3. Text extraction failed\n\nPlease try another file or continue manually.');
+        return;
+      }
     } catch (e) {
       console.error('Parse error:', e);
       alert('Failed to parse the resume. Please try another file or continue manually.');
