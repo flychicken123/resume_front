@@ -32,13 +32,22 @@ const ImportResumeModal = ({ onClose }) => {
         body: form,
       });
       const text = await resp.text();
+      console.log('Raw response text:', text);
       let json = null;
-      try { json = JSON.parse(text); } catch (e) {}
+      try { 
+        json = JSON.parse(text); 
+        console.log('Parsed JSON response:', json);
+      } catch (e) {
+        console.error('Failed to parse JSON:', e);
+      }
       if (!resp.ok || !json) {
         throw new Error((json && (json.error || json.message)) || `Parse failed (${resp.status})`);
       }
       if (json.structured) {
+        console.log('Applying imported data:', json.structured);
         applyImportedData(json.structured);
+      } else {
+        console.log('No structured data in response');
       }
       onClose();
       navigate('/builder');

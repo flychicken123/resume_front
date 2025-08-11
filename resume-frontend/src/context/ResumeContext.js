@@ -220,8 +220,14 @@ export const ResumeProvider = ({ children }) => {
   // Map imported structured resume JSON into our state shape
   const applyImportedData = (structured) => {
     try {
-      if (!structured || typeof structured !== 'object') return;
+      console.log('applyImportedData called with:', structured);
+      if (!structured || typeof structured !== 'object') {
+        console.log('Invalid structured data, returning early');
+        return;
+      }
       const mapped = { ...data };
+      console.log('Current data before mapping:', data);
+      
       if (structured.name) mapped.name = structured.name;
       if (structured.email) mapped.email = structured.email;
       if (structured.phone) mapped.phone = structured.phone;
@@ -252,7 +258,9 @@ export const ResumeProvider = ({ children }) => {
           location: ''
         }));
       }
+      console.log('Mapped data:', mapped);
       setData(mapped);
+      console.log('Data set successfully');
     } catch (e) {
       console.error('Failed to apply imported data:', e);
     }
