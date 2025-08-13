@@ -15,9 +15,39 @@ import StepSummary from './components/StepSummary';
 import StepPreview from './components/StepPreview';
 import AuthModal from './components/auth/AuthModal';
 import JobDescModal from './components/JobDescModal';
+import Login from './components/auth/Login';
 import SEO from './components/SEO';
 import './App.css';
 import ImportResumeModal from './components/ImportResumeModal';
+
+// LoginPage component that handles the standalone login page
+const LoginPage = () => {
+  const { login } = useAuth();
+  
+  const handleLogin = (email, token) => {
+    login(email, token);
+    // Redirect to home page after successful login
+    window.location.href = '/';
+  };
+  
+  const handleClose = () => {
+    // Redirect to home page if user closes login
+    window.location.href = '/';
+  };
+  
+  return (
+    <div style={{ 
+      minHeight: '100vh', 
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '1rem'
+    }}>
+      <Login onLogin={handleLogin} onClose={handleClose} />
+    </div>
+  );
+};
 
 const steps = [
   "Personal Details",
@@ -338,15 +368,48 @@ function BuilderApp() {
             return { ok: response.ok, status: response.status, data: null, raw: text };
           }
         })
-        .then(result => {
-          if (result.ok && result.data && result.data.downloadURL) {
-            window.open(result.data.downloadURL, '_blank');
-            alert('PDF resume generated successfully!');
-          } else {
-            console.error('PDF generation failed response:', result);
-            throw new Error((result.data && (result.data.error || result.data.message)) || `Failed to generate PDF (status ${result.status})`);
-          }
-        })
+                 .then(result => {
+           if (result.ok && result.data && result.data.downloadURL) {
+             // Extract filename from the downloadURL
+             const url = new URL(result.data.downloadURL);
+             const pathParts = url.pathname.split('/');
+             const filename = pathParts[pathParts.length - 1];
+             
+             // Use our download endpoint to record the history
+             const downloadEndpoint = `${getAPIBaseURL()}/api/resume/download/${filename}`;
+             
+             // For protected routes, we need to include auth headers
+             // Since we can't add headers to window.open, we'll use fetch first
+             if (user) {
+               fetch(downloadEndpoint, {
+                 method: 'GET',
+                 headers: {
+                   'Authorization': `Bearer ${localStorage.getItem('resumeToken')}`
+                 }
+               }).then(response => {
+                 if (response.ok) {
+                   // Get the redirect URL and open it
+                   return response.text();
+                 } else {
+                   throw new Error('Download failed');
+                 }
+               }).then(redirectUrl => {
+                 window.open(redirectUrl, '_blank');
+               }).catch(error => {
+                 console.error('Download error:', error);
+                 // Fallback to direct URL
+                 window.open(result.data.downloadURL, '_blank');
+               });
+             } else {
+               // If not logged in, use direct URL
+               window.open(result.data.downloadURL, '_blank');
+             }
+             alert('PDF resume generated successfully!');
+           } else {
+             console.error('PDF generation failed response:', result);
+             throw new Error((result.data && (result.data.error || result.data.message)) || `Failed to generate PDF (status ${result.status})`);
+           }
+         })
         .catch(error => {
           console.error('PDF generation error:', error);
           alert('Failed to generate PDF. Please try again.');
@@ -418,41 +481,38 @@ function BuilderApp() {
         {/* Left Side - Resume Builder */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#f8fafc' }}>
           <div className="site-header" style={{ width: '100%', paddingTop: '2.5rem', paddingBottom: '1.5rem', textAlign: 'center', background: 'transparent', position: 'relative' }}>
-            <button
-              onClick={() => window.location.href = '/'}
-              style={{
-                position: 'absolute',
-                right: '2rem',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                padding: '0.75rem 1.5rem',
-                border: '2px solid #d1d5db',
-                borderRadius: '8px',
-                background: 'white',
-                color: '#374151',
-                cursor: 'pointer',
-                fontWeight: 600,
-                fontSize: '0.95rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                zIndex: 20,
-                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.background = '#f3f4f6';
-                e.target.style.transform = 'translateY(-50%) translateX(2px)';
-                e.target.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.15)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.background = 'white';
-                e.target.style.transform = 'translateY(-50%)';
-                e.target.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
-              }}
-            >
-              ← Back to Home
-            </button>
+                         <div style={{ position: 'absolute', right: '2rem', top: '50%', transform: 'translateY(-50%)', display: 'flex', gap: '1rem', zIndex: 20 }}>
+              <button
+                onClick={() => window.location.href = '/'}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  border: '2px solid #d1d5db',
+                  borderRadius: '8px',
+                  background: 'white',
+                  color: '#374151',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  fontSize: '0.95rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.background = '#f3f4f6';
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.15)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = 'white';
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+                }}
+              >
+                ← Back to Home
+              </button>
+            </div>
             <h1 style={{
               fontSize: '2.5rem',
               fontWeight: 700,
@@ -478,152 +538,152 @@ function BuilderApp() {
               {step === 5 && <StepFormat />}
               {step === 6 && <StepSummary />}
               
-              {/* Navigation Buttons */}
-              <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                {step > 1 && (
-                  <button
-                    onClick={() => setStep(step - 1)}
-                    style={{
-                      padding: '1rem 2.5rem',
-                      border: '2px solid #d1d5db',
-                      borderRadius: '8px',
-                      background: 'white',
-                      color: '#374151',
-                      cursor: 'pointer',
-                      fontWeight: 600,
-                      fontSize: '1rem',
-                      transition: 'all 0.2s ease',
-                      minWidth: '200px',
-                      height: '48px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.background = '#f3f4f6';
-                      e.target.style.transform = 'translateY(-2px)';
-                      e.target.style.boxShadow = '0 6px 12px rgba(0, 0, 0, 0.1)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.background = 'white';
-                      e.target.style.transform = 'translateY(0)';
-                      e.target.style.boxShadow = 'none';
-                    }}
-                  >
-                    ← Previous
-                  </button>
-                )}
-                {step < steps.length && (
-                  <button
-                    onClick={() => setStep(step + 1)}
-                    style={{
-                      padding: '1rem 2.5rem',
-                      border: 'none',
-                      borderRadius: '8px',
-                      background: '#3b82f6',
-                      color: 'white',
-                      cursor: 'pointer',
-                      fontWeight: 600,
-                      fontSize: '1rem',
-                      transition: 'all 0.2s ease',
-                      minWidth: '200px',
-                      height: '48px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      boxShadow: '0 4px 6px rgba(59, 130, 246, 0.25)'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.background = '#2563eb';
-                      e.target.style.transform = 'translateY(-2px)';
-                      e.target.style.boxShadow = '0 6px 12px rgba(59, 130, 246, 0.3)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.background = '#3b82f6';
-                      e.target.style.transform = 'translateY(0)';
-                      e.target.style.boxShadow = '0 4px 6px rgba(59, 130, 246, 0.25)';
-                    }}
-                  >
-                    Next →
-                  </button>
-                )}
-                {step === steps.length && (
-                  <div style={{ 
-                    display: 'flex', 
-                    gap: '1.5rem', 
-                    width: '100%', 
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    marginTop: '2rem'
-                  }}>
-                    <button
-                                              onClick={handleViewResume}
-                      style={{
-                        padding: '1rem 2.5rem',
-                        border: 'none',
-                        borderRadius: '8px',
-                        background: '#10b981',
-                        color: 'white',
-                        cursor: 'pointer',
-                        fontWeight: 600,
-                        fontSize: '1rem',
-                        boxShadow: '0 4px 6px rgba(16, 185, 129, 0.25)',
-                        transition: 'all 0.2s ease',
-                        minWidth: '200px',
-                        height: '48px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.target.style.background = '#059669';
-                        e.target.style.transform = 'translateY(-2px)';
-                        e.target.style.boxShadow = '0 6px 12px rgba(16, 185, 129, 0.3)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.background = '#10b981';
-                        e.target.style.transform = 'translateY(0)';
-                        e.target.style.boxShadow = '0 4px 6px rgba(16, 185, 129, 0.25)';
-                      }}
-                    >
-                      📄 View Resume
-                    </button>
-                    <button
-                      onClick={() => window.location.href = '/'}
-                      style={{
-                        padding: '1rem 2.5rem',
-                        border: '2px solid #3b82f6',
-                        borderRadius: '8px',
-                        background: 'white',
-                        color: '#3b82f6',
-                        cursor: 'pointer',
-                        fontWeight: 600,
-                        fontSize: '1rem',
-                        transition: 'all 0.2s ease',
-                        minWidth: '200px',
-                        height: '48px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.target.style.background = '#3b82f6';
-                        e.target.style.color = 'white';
-                        e.target.style.transform = 'translateY(-2px)';
-                        e.target.style.boxShadow = '0 6px 12px rgba(59, 130, 246, 0.3)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.background = 'white';
-                        e.target.style.color = '#3b82f6';
-                        e.target.style.transform = 'translateY(0)';
-                        e.target.style.boxShadow = 'none';
-                      }}
-                    >
-                      ✅ Complete & Return Home
-                    </button>
-                  </div>
-                )}
-              </div>
+                             {/* Navigation Buttons */}
+               <div style={{ 
+                 display: 'flex', 
+                 gap: '1rem', 
+                 marginTop: '2rem',
+                 alignItems: 'center',
+                 justifyContent: 'center',
+                 width: '100%'
+               }}>
+                 {step > 1 && (
+                   <button
+                     onClick={() => setStep(step - 1)}
+                     style={{
+                       padding: '1rem 2.5rem',
+                       border: '2px solid #d1d5db',
+                       borderRadius: '8px',
+                       background: 'white',
+                       color: '#374151',
+                       cursor: 'pointer',
+                       fontWeight: 600,
+                       fontSize: '1rem',
+                       transition: 'all 0.2s ease',
+                       minWidth: '200px',
+                       height: '48px',
+                       display: 'flex',
+                       alignItems: 'center',
+                       justifyContent: 'center'
+                     }}
+                     onMouseEnter={(e) => {
+                       e.target.style.background = '#f3f4f6';
+                       e.target.style.transform = 'translateY(-2px)';
+                       e.target.style.boxShadow = '0 6px 12px rgba(0, 0, 0, 0.1)';
+                     }}
+                     onMouseLeave={(e) => {
+                       e.target.style.background = 'white';
+                       e.target.style.transform = 'translateY(0)';
+                       e.target.style.boxShadow = 'none';
+                     }}
+                   >
+                     ← Previous
+                   </button>
+                 )}
+                 {step < steps.length && (
+                   <button
+                     onClick={() => setStep(step + 1)}
+                     style={{
+                       padding: '1rem 2.5rem',
+                       border: 'none',
+                       borderRadius: '8px',
+                       background: '#3b82f6',
+                       color: 'white',
+                       cursor: 'pointer',
+                       fontWeight: 600,
+                       fontSize: '1rem',
+                       transition: 'all 0.2s ease',
+                       minWidth: '200px',
+                       height: '48px',
+                       display: 'flex',
+                       alignItems: 'center',
+                       justifyContent: 'center',
+                       boxShadow: '0 4px 6px rgba(59, 130, 246, 0.25)'
+                     }}
+                     onMouseEnter={(e) => {
+                       e.target.style.background = '#2563eb';
+                       e.target.style.transform = 'translateY(-2px)';
+                       e.target.style.boxShadow = '0 6px 12px rgba(59, 130, 246, 0.3)';
+                     }}
+                     onMouseLeave={(e) => {
+                       e.target.style.background = '#3b82f6';
+                       e.target.style.transform = 'translateY(0)';
+                       e.target.style.boxShadow = '0 4px 6px rgba(59, 130, 246, 0.25)';
+                     }}
+                   >
+                     Next →
+                   </button>
+                 )}
+                 {step === steps.length && (
+                   <>
+                     <button
+                       onClick={handleViewResume}
+                       style={{
+                         padding: '1rem 2.5rem',
+                         border: 'none',
+                         borderRadius: '8px',
+                         background: '#10b981',
+                         color: 'white',
+                         cursor: 'pointer',
+                         fontWeight: 600,
+                         fontSize: '1rem',
+                         boxShadow: '0 4px 6px rgba(16, 185, 129, 0.25)',
+                         transition: 'all 0.2s ease',
+                         minWidth: '200px',
+                         height: '48px',
+                         display: 'flex',
+                         alignItems: 'center',
+                         justifyContent: 'center'
+                       }}
+                       onMouseEnter={(e) => {
+                         e.target.style.background = '#059669';
+                         e.target.style.transform = 'translateY(-2px)';
+                         e.target.style.boxShadow = '0 6px 12px rgba(16, 185, 129, 0.3)';
+                       }}
+                       onMouseLeave={(e) => {
+                         e.target.style.background = '#10b981';
+                         e.target.style.transform = 'translateY(0)';
+                         e.target.style.boxShadow = '0 4px 6px rgba(16, 185, 129, 0.25)';
+                       }}
+                     >
+                       📄 View Resume
+                     </button>
+                     <button
+                       onClick={() => window.location.href = '/'}
+                       style={{
+                         padding: '1rem 2.5rem',
+                         border: '2px solid #3b82f6',
+                         borderRadius: '8px',
+                         background: 'white',
+                         color: '#3b82f6',
+                         cursor: 'pointer',
+                         fontWeight: 600,
+                         fontSize: '1rem',
+                         transition: 'all 0.2s ease',
+                         minWidth: '200px',
+                         height: '48px',
+                         display: 'flex',
+                         alignItems: 'center',
+                         justifyContent: 'center'
+                       }}
+                       onMouseEnter={(e) => {
+                         e.target.style.background = '#3b82f6';
+                         e.target.style.color = 'white';
+                         e.target.style.transform = 'translateY(-2px)';
+                         e.target.style.boxShadow = '0 6px 12px rgba(59, 130, 246, 0.3)';
+                       }}
+                       onMouseLeave={(e) => {
+                         e.target.style.background = 'white';
+                         e.target.style.color = '#3b82f6';
+                         e.target.style.transform = 'translateY(0)';
+                         e.target.style.boxShadow = 'none';
+                       }}
+                     >
+                       ✅ Complete & Return Home
+                     </button>
+                   </>
+                 )}
+               </div>
             </div>
           </div>
         </div>
@@ -690,7 +750,9 @@ function BuilderApp() {
               flex: 1, 
               overflow: 'visible', 
               padding: '1rem',
-              background: 'white'
+              background: 'white',
+              display: 'flex',
+              flexDirection: 'column'
             }}
           >
                             <StepPreview onDownload={handleViewResume} />
@@ -698,11 +760,10 @@ function BuilderApp() {
         </div>
       </div>
 
-      {/* Modals */}
-      {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
-              {showJobDescModal && <JobDescModal onClose={() => setShowJobDescModal(false)} onJobDescriptionSubmit={handleJobDescSubmit} onProceed={handleProceedAfterChoice} />}
-
-      {showImportModal && <ImportResumeModal onClose={() => setShowImportModal(false)} />}
+             {/* Modals */}
+       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
+       {showJobDescModal && <JobDescModal onClose={() => setShowJobDescModal(false)} onJobDescriptionSubmit={handleJobDescSubmit} onProceed={handleProceedAfterChoice} />}
+       {showImportModal && <ImportResumeModal onClose={() => setShowImportModal(false)} />}
     </>
   );
 }
@@ -712,12 +773,13 @@ function App() {
     <GoogleOAuthProvider clientId="978604541120-fmcim15k16vbatesna24ulke8m4buldp.apps.googleusercontent.com">
       <AuthProvider>
         <ResumeProvider>
-          <Router>
-            <Routes>
-              <Route path="/" element={<Home />} />
-                      <Route path="/builder" element={<BuilderApp />} />
-            </Routes>
-          </Router>
+                <Router>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/builder" element={<BuilderApp />} />
+        </Routes>
+      </Router>
         </ResumeProvider>
       </AuthProvider>
     </GoogleOAuthProvider>

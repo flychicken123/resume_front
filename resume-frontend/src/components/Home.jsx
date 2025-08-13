@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Login from './auth/Login';
 import JobDescModal from './JobDescModal';
+import ResumeHistory from './ResumeHistory';
 import About from './About';
 import Contact from './Contact';
 import SEO from './SEO';
@@ -15,9 +16,12 @@ const Home = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showJobDescModal, setShowJobDescModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [showResumeHistory, setShowResumeHistory] = useState(false);
   const [usernameWidth, setUsernameWidth] = useState(100);
   const usernameRef = useRef(null);
   const buttonRef = useRef(null);
+
+
 
   // Calculate optimal spacing based on button width
   useEffect(() => {
@@ -62,6 +66,15 @@ const Home = () => {
             Home
           </button>
           <Link to="/builder" className="home-nav-link">Builder</Link>
+          {user && (
+            <button 
+              className="home-nav-link" 
+              onClick={() => setShowResumeHistory(true)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', font: 'inherit' }}
+            >
+              Resume History
+            </button>
+          )}
           <a href="#about" className="home-nav-link" onClick={(e) => {
             e.preventDefault();
             document.getElementById('about').scrollIntoView({ behavior: 'smooth' });
@@ -188,6 +201,11 @@ const Home = () => {
       {/* Import/Manual Choice Modal */}
       {showImportModal && (
         <ImportResumeModal onClose={() => setShowImportModal(false)} />
+      )}
+
+      {/* Resume History Modal */}
+      {showResumeHistory && (
+        <ResumeHistory onClose={() => setShowResumeHistory(false)} />
       )}
       
       {/* About Section */}

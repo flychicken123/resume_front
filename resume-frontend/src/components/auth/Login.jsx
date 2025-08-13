@@ -8,6 +8,54 @@ const Login = ({ onLogin, onClose }) => {
   const [error, setError] = useState('');
   const [mode, setMode] = useState('login'); // 'login' or 'signup'
 
+  const handleGoogleLogin = async (googleToken, email) => {
+    try {
+      setError('');
+      
+      const getAPIBaseURL = () => {
+        if (typeof window !== 'undefined') {
+          if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            return 'http://localhost:8081';
+          }
+          return window.location.hostname === 'www.hihired.org' 
+            ? 'https://hihired.org' 
+            : window.location.origin;
+        }
+        return process.env.REACT_APP_API_URL || 'http://localhost:8081';
+      };
+      
+      const API_BASE_URL = getAPIBaseURL();
+      console.log('Making Google login request to:', `${API_BASE_URL}/api/auth/google`);
+      
+      const response = await fetch(`${API_BASE_URL}/api/auth/google`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          token: googleToken,
+          email: email
+        }),
+      });
+      
+      console.log('Google login response status:', response.status);
+      
+      const result = await response.json();
+      console.log('Google login backend response:', result);
+      
+      if (result.success) {
+        console.log('Google login successful, token:', result.token);
+        onLogin(email, result.token);
+      } else {
+        console.log('Google login failed:', result.message);
+        setError(result.message || 'Google authentication failed');
+      }
+    } catch (error) {
+      console.error('Google login error:', error);
+      setError('Google login failed. Please try email/password login instead.');
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email || !password) {
@@ -36,6 +84,10 @@ const Login = ({ onLogin, onClose }) => {
       // Use same API_BASE_URL logic as other files
       const getAPIBaseURL = () => {
         if (typeof window !== 'undefined') {
+          // For local development, use localhost:8081
+          if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            return 'http://localhost:8081';
+          }
           // Use the backend domain (non-www) for API calls
           return window.location.hostname === 'www.hihired.org' 
             ? 'https://hihired.org' 
@@ -46,6 +98,9 @@ const Login = ({ onLogin, onClose }) => {
       };
       
       const API_BASE_URL = getAPIBaseURL();
+      console.log('Making request to:', `${API_BASE_URL}${endpoint}`);
+      console.log('Request body:', { email: email, password: password });
+      
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: 'POST',
         headers: {
@@ -56,13 +111,19 @@ const Login = ({ onLogin, onClose }) => {
           password: password
         }),
       });
+      
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
 
       const result = await response.json();
+      console.log('Backend response:', result);
       
       if (result.success) {
+        console.log('Login successful, token:', result.token);
         // Pass both user data and token to the login function
         onLogin(email, result.token);
       } else {
+        console.log('Login failed:', result.message);
         setError(result.message || 'Authentication failed');
       }
     } catch (error) {
@@ -117,15 +178,19 @@ const Login = ({ onLogin, onClose }) => {
       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
         <GoogleLogin
           onSuccess={credentialResponse => {
+            console.log('Google login success:', credentialResponse);
             const info = decodeJwt(credentialResponse.credential);
             if (info && info.email) {
-              onLogin(info.email);
+              // For Google OAuth, we need to call the backend to validate the token
+              // and get a proper JWT token for our app
+              handleGoogleLogin(credentialResponse.credential, info.email);
             } else {
               setError('Google login failed: could not get email');
             }
           }}
-          onError={() => {
-            setError('Google login failed');
+          onError={(error) => {
+            console.error('Google login error:', error);
+            setError('Google OAuth not configured for localhost. Please use email/password login or configure Google OAuth client ID for localhost:3000.');
           }}
           width={400}
         />

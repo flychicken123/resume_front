@@ -627,6 +627,19 @@ body > div > div[style*='flex-direction:column'] {
   min-height: 100vh !important;
 }
 
+/* Preview container styles */
+#resume-preview-container {
+  overflow: visible !important;
+  min-height: 0;
+  flex: 1;
+}
+
+.preview-container {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
 /* Fullscreen styles */
 #resume-preview-container:fullscreen {
   padding: 20px !important;
@@ -634,6 +647,7 @@ body > div > div[style*='flex-direction:column'] {
   display: flex;
   justify-content: center;
   align-items: flex-start;
+  overflow: visible !important;
 }
 
 #resume-preview-container:-webkit-full-screen {

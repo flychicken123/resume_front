@@ -19,18 +19,27 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const savedUser = localStorage.getItem('resumeUser');
     const savedToken = localStorage.getItem('resumeToken');
-    if (savedUser && savedToken) {
+    console.log('AuthContext useEffect - savedUser:', savedUser);
+    console.log('AuthContext useEffect - savedToken:', savedToken);
+    
+    if (savedUser && savedToken && savedToken !== 'undefined' && savedToken !== 'null') {
+      console.log('AuthContext useEffect - setting user and token from localStorage');
       setUser(JSON.parse(savedUser));
       setToken(savedToken);
+    } else {
+      console.log('AuthContext useEffect - no valid saved user/token found, but not auto-logging out');
+      // Don't auto-logout, just set loading to false
     }
     setLoading(false);
   }, []);
 
   const login = (userData, authToken) => {
+    console.log('AuthContext login called with:', { userData, authToken });
     setUser(userData);
     setToken(authToken);
     localStorage.setItem('resumeUser', JSON.stringify(userData));
     localStorage.setItem('resumeToken', authToken);
+    console.log('AuthContext login completed, token saved to localStorage');
   };
 
   const logout = () => {
@@ -43,7 +52,15 @@ export const AuthProvider = ({ children }) => {
   };
 
   const getAuthHeaders = () => {
-    if (!token) return { 'Content-Type': 'application/json' };
+    console.log('AuthContext getAuthHeaders - token state:', token);
+    console.log('AuthContext getAuthHeaders - localStorage token:', localStorage.getItem('resumeToken'));
+    
+    if (!token || token === 'undefined' || token === 'null') {
+      console.log('AuthContext getAuthHeaders - no valid token, returning basic headers');
+      return { 'Content-Type': 'application/json' };
+    }
+    
+    console.log('AuthContext getAuthHeaders - returning headers with token');
     return {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`

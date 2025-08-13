@@ -19,7 +19,6 @@ const getAPIBaseURL = () => {
 
 const API_BASE_URL = getAPIBaseURL();
 
-// Helper function to get auth headers
 const getAuthHeaders = () => {
   const token = localStorage.getItem('resumeToken');
   const baseHeaders = {

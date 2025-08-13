@@ -70,8 +70,8 @@ const StepPreview = ({ onDownload }) => {
   };
   
   return (
-    <div className="preview-container">
-      <div className={getTemplateClass()}>
+    <div className="preview-container" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <div className={getTemplateClass()} style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <div className="header">
           <div className="name">{data.name || 'Your Name'}</div>
           <div className="contact-info">
@@ -107,8 +107,38 @@ const StepPreview = ({ onDownload }) => {
           </>
         )}
         
-        <div style={{ textAlign: 'center', marginTop: '2rem' }}>
-          <button onClick={onDownload} style={{ padding: '0.75rem 2rem', fontSize: '0.9rem', fontWeight: 600 }}>
+        <div style={{ 
+          textAlign: 'center', 
+          marginTop: 'auto',
+          marginBottom: '2rem',
+          padding: '1rem',
+          position: 'relative',
+          zIndex: 10,
+          flexShrink: 0
+        }}>
+          <button 
+            onClick={onDownload} 
+            style={{ 
+              padding: '0.75rem 2rem', 
+              fontSize: '0.9rem', 
+              fontWeight: 600,
+              backgroundColor: '#3b82f6',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseOver={(e) => {
+              e.target.style.backgroundColor = '#2563eb';
+              e.target.style.transform = 'translateY(-1px)';
+            }}
+            onMouseOut={(e) => {
+              e.target.style.backgroundColor = '#3b82f6';
+              e.target.style.transform = 'translateY(0)';
+            }}
+          >
             Download Resume
           </button>
         </div>
