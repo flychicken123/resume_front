@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
+import { trackUserLogin, trackGoogleUserRegistration } from '../Analytics';
 
 const Login = ({ onLogin, onClose }) => {
   const [email, setEmail] = useState('');
@@ -11,6 +12,10 @@ const Login = ({ onLogin, onClose }) => {
   const handleGoogleLogin = async (googleToken, email) => {
     try {
       setError('');
+      
+      // Decode the Google token to get user information
+      const decodedToken = decodeJwt(googleToken);
+      console.log('Decoded Google token:', decodedToken);
       
       const getAPIBaseURL = () => {
         if (typeof window !== 'undefined') {
@@ -34,7 +39,10 @@ const Login = ({ onLogin, onClose }) => {
         },
         body: JSON.stringify({
           token: googleToken,
-          email: email
+          email: email,
+          name: decodedToken.name || '',
+          picture: decodedToken.picture || '',
+          google_id: decodedToken.sub || ''
         }),
       });
       
@@ -45,6 +53,15 @@ const Login = ({ onLogin, onClose }) => {
       
       if (result.success) {
         console.log('Google login successful, token:', result.token);
+        
+        // Track Google login
+        trackUserLogin('google_oauth');
+        
+        // Check if this is a new user registration
+        if (result.message && result.message.includes('created')) {
+          trackGoogleUserRegistration();
+        }
+        
         onLogin(email, result.token);
       } else {
         console.log('Google login failed:', result.message);
@@ -120,6 +137,10 @@ const Login = ({ onLogin, onClose }) => {
       
       if (result.success) {
         console.log('Login successful, token:', result.token);
+        
+        // Track login method
+        trackUserLogin(mode === 'signup' ? 'email_registration' : 'email_login');
+        
         // Pass both user data and token to the login function
         onLogin(email, result.token);
       } else {

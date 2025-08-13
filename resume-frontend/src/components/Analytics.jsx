@@ -55,6 +55,11 @@ export const trackUserLogin = (method) => {
   trackEvent('user_logged_in', 'user', method, 1);
 };
 
+// Track Google user registration
+export const trackGoogleUserRegistration = () => {
+  trackEvent('google_user_registered', 'user', 'google_oauth', 1);
+};
+
 // Analytics component for automatic page tracking
 const Analytics = () => {
   const location = useLocation();
