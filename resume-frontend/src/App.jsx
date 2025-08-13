@@ -17,6 +17,7 @@ import AuthModal from './components/auth/AuthModal';
 import JobDescModal from './components/JobDescModal';
 import Login from './components/auth/Login';
 import SEO from './components/SEO';
+import Analytics, { trackResumeGeneration, trackUserLogin } from './components/Analytics';
 import './App.css';
 import ImportResumeModal from './components/ImportResumeModal';
 
@@ -166,6 +167,9 @@ function BuilderApp() {
         setShowAuthModal(true);
         return;
       }
+
+      // Track resume generation
+      trackResumeGeneration(data.selectedFormat || 'default');
 
       // Update button state
       const viewButton = document.querySelector('button[onClick]');
@@ -773,13 +777,14 @@ function App() {
     <GoogleOAuthProvider clientId="978604541120-fmcim15k16vbatesna24ulke8m4buldp.apps.googleusercontent.com">
       <AuthProvider>
         <ResumeProvider>
-                <Router>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/builder" element={<BuilderApp />} />
-        </Routes>
-      </Router>
+          <Router>
+            <Analytics />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/builder" element={<BuilderApp />} />
+            </Routes>
+          </Router>
         </ResumeProvider>
       </AuthProvider>
     </GoogleOAuthProvider>
