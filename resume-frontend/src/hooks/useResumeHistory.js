@@ -83,15 +83,26 @@ export const useResumeHistory = () => {
     fetch(downloadEndpoint, {
       method: 'GET',
       headers: getAuthHeaders(),
+      redirect: 'follow', // Explicitly follow redirects
     }).then(response => {
-      if (response.ok) {
-        // Get the redirect URL and open it
-        return response.text();
+      if (response.ok || response.status === 307) {
+        // For 307 redirects, get the Location header
+        if (response.status === 307) {
+          const redirectUrl = response.headers.get('Location');
+          if (redirectUrl) {
+            window.open(redirectUrl, '_blank');
+            return;
+          }
+        }
+        // For successful responses, try to get the URL from response
+        return response.url;
       } else {
         throw new Error('Download failed');
       }
-    }).then(redirectUrl => {
-      window.open(redirectUrl, '_blank');
+    }).then(url => {
+      if (url) {
+        window.open(url, '_blank');
+      }
     }).catch(error => {
       console.error('Download error:', error);
       // Fallback to direct URL

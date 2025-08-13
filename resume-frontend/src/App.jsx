@@ -389,16 +389,27 @@ function BuilderApp() {
                  method: 'GET',
                  headers: {
                    'Authorization': `Bearer ${localStorage.getItem('resumeToken')}`
-                 }
+                 },
+                 redirect: 'follow', // Explicitly follow redirects
                }).then(response => {
-                 if (response.ok) {
-                   // Get the redirect URL and open it
-                   return response.text();
+                 if (response.ok || response.status === 307) {
+                   // For 307 redirects, get the Location header
+                   if (response.status === 307) {
+                     const redirectUrl = response.headers.get('Location');
+                     if (redirectUrl) {
+                       window.open(redirectUrl, '_blank');
+                       return;
+                     }
+                   }
+                   // For successful responses, try to get the URL from response
+                   return response.url;
                  } else {
                    throw new Error('Download failed');
                  }
-               }).then(redirectUrl => {
-                 window.open(redirectUrl, '_blank');
+               }).then(url => {
+                 if (url) {
+                   window.open(url, '_blank');
+                 }
                }).catch(error => {
                  console.error('Download error:', error);
                  // Fallback to direct URL
@@ -699,8 +710,8 @@ function BuilderApp() {
           borderLeft: '1px solid #e5e7eb',
           display: 'flex',
           flexDirection: 'column',
-          height: '100vh',
-          overflow: 'hidden'
+          minHeight: '100vh',
+          overflow: 'auto'
         }}>
           <div style={{
             padding: '1rem',
