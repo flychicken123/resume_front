@@ -80,10 +80,7 @@ const Login = ({ onLogin, onClose }) => {
       setError('Please enter both email and password.');
       return;
     }
-    if (mode === 'signup' && !name) {
-      setError('Please enter your name.');
-      return;
-    }
+    // Remove name validation since we use email as name
     if (password.length < 6) {
       setError('Password must be at least 6 characters.');
       return;
