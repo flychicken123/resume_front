@@ -4,6 +4,7 @@ import { trackUserLogin, trackGoogleUserRegistration } from '../Analytics';
 
 const Login = ({ onLogin, onClose }) => {
   const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
@@ -79,6 +80,10 @@ const Login = ({ onLogin, onClose }) => {
       setError('Please enter both email and password.');
       return;
     }
+    if (mode === 'signup' && !name) {
+      setError('Please enter your name.');
+      return;
+    }
     if (password.length < 6) {
       setError('Password must be at least 6 characters.');
       return;
@@ -125,7 +130,8 @@ const Login = ({ onLogin, onClose }) => {
         },
         body: JSON.stringify({
           email: email,
-          password: password
+          password: password,
+          name: email  // Use email as name
         }),
       });
       
