@@ -119,13 +119,26 @@
     }
   </script>
 
-  <!-- Google Analytics 4 -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B327RPMPS5"></script>
+  <!-- Google Analytics 4 - Only load on production -->
   <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-B327RPMPS5');
+    // Only load Google Analytics if not on localhost
+    if (window.location.hostname !== 'localhost' && 
+        window.location.hostname !== '127.0.0.1' && 
+        window.location.hostname !== '0.0.0.0' &&
+        !window.location.hostname.includes('localhost')) {
+      
+      // Load Google Analytics script
+      const script = document.createElement('script');
+      script.async = true;
+      script.src = 'https://www.googletagmanager.com/gtag/js?id=G-B327RPMPS5';
+      document.head.appendChild(script);
+      
+      // Initialize gtag
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-B327RPMPS5');
+    }
   </script>
 </head>
 <body>

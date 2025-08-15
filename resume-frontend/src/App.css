@@ -227,7 +227,7 @@ button:disabled {
 }
 
 .preview .name {
-  font-size: 16pt;
+  font-size: var(--font-size-header);
   font-weight: bold;
   text-transform: uppercase;
   margin-bottom: 5pt;
@@ -235,13 +235,13 @@ button:disabled {
 }
 
 .preview .contact-info {
-  font-size: 11pt;
+  font-size: var(--font-size-details);
   margin-bottom: 10pt;
   color: #000;
 }
 
 .preview .section-header {
-  font-size: 11pt;
+  font-size: var(--font-size-section);
   font-weight: bold;
   text-transform: uppercase;
   margin-top: 15pt;
@@ -263,11 +263,11 @@ button:disabled {
   font-weight: bold;
   margin-bottom: 2pt;
   color: #000;
-  font-size: 11pt;
+  font-size: var(--font-size-content);
 }
 
 .preview .education-details {
-  font-size: 11pt;
+  font-size: var(--font-size-details);
   color: #000;
   margin-top: 0;
 }
@@ -276,7 +276,7 @@ button:disabled {
   color: #000;
   margin-bottom: 1rem;
   line-height: 1.15;
-  font-size: 11pt;
+  font-size: var(--font-size-base);
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
@@ -292,7 +292,7 @@ button:disabled {
   margin-bottom: 3pt;
   text-align: justify;
   line-height: 1.15;
-  font-size: 11pt;
+  font-size: var(--font-size-list);
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
@@ -304,7 +304,7 @@ button:disabled {
   border-radius: 0;
   border: none;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  font-size: 11pt;
+  font-size: var(--font-size-base);
   line-height: 1.15;
   color: #000;
   max-width: 8.5in;
@@ -324,7 +324,7 @@ button:disabled {
 }
 
 .preview.modern .name {
-  font-size: 16pt;
+  font-size: var(--font-size-header);
   font-weight: 600;
   text-transform: uppercase;
   margin-bottom: 5pt;
@@ -333,14 +333,14 @@ button:disabled {
 }
 
 .preview.modern .contact-info {
-  font-size: 11pt;
+  font-size: var(--font-size-content);
   margin-bottom: 10pt;
   color: #7f8c8d;
   text-align: center;
 }
 
 .preview.modern .section-header {
-  font-size: 11pt;
+  font-size: var(--font-size-section);
   font-weight: 600;
   text-transform: uppercase;
   margin-top: 10pt;
@@ -355,11 +355,11 @@ button:disabled {
   font-weight: 600;
   margin-bottom: 2pt;
   color: #2c3e50;
-  font-size: 11pt;
+  font-size: var(--font-size-content);
 }
 
 .preview.modern .education-details {
-  font-size: 11pt;
+  font-size: var(--font-size-details);
   color: #374151;
   margin-top: 0;
 }
@@ -368,7 +368,7 @@ button:disabled {
   color: #374151;
   margin-bottom: 1rem;
   line-height: 1.15;
-  font-size: 11pt;
+  font-size: var(--font-size-content);
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
@@ -380,7 +380,7 @@ button:disabled {
   border-radius: 0;
   border: none;
   font-family: Georgia, serif;
-  font-size: 11pt;
+  font-size: var(--font-size-base);
   line-height: 1.15;
   color: #000;
   max-width: 8.5in;
@@ -394,29 +394,29 @@ button:disabled {
 }
 
 .preview.industry-manager .name {
-  font-size: 16pt;
+  font-size: var(--font-size-header);
   font-weight: bold;
   text-transform: uppercase;
   margin-bottom: 5pt;
-  color: #2c3e50;
+  color: #1a1a1a;
   text-align: center;
 }
 
 .preview.industry-manager .contact-info {
-  font-size: 11pt;
+  font-size: var(--font-size-content);
   margin-bottom: 10pt;
   color: #7f8c8d;
   text-align: center;
 }
 
 .preview.industry-manager .section-header {
-  font-size: 11pt;
+  font-size: var(--font-size-section);
   font-weight: bold;
   text-transform: uppercase;
   margin-top: 10pt;
   margin-bottom: 6pt;
-  border-bottom: 1px solid #000;
-  padding-bottom: 2pt;
+  border-bottom: 2px solid #34495e;
+  padding-bottom: 3pt;
   color: #2c3e50;
 }
 
@@ -424,11 +424,11 @@ button:disabled {
   font-weight: bold;
   margin-bottom: 2pt;
   color: #2c3e50;
-  font-size: 11pt;
+  font-size: var(--font-size-content);
 }
 
 .preview.industry-manager .education-details {
-  font-size: 11pt;
+  font-size: var(--font-size-details);
   color: #374151;
   margin-top: 0;
 }
@@ -437,7 +437,7 @@ button:disabled {
   color: #374151;
   margin-bottom: 1rem;
   line-height: 1.15;
-  font-size: 11pt;
+  font-size: var(--font-size-content);
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
@@ -452,7 +452,7 @@ button:disabled {
   margin-bottom: 3pt;
   text-align: justify;
   line-height: 1.15;
-  font-size: 11pt;
+  font-size: var(--font-size-list);
   word-wrap: break-word;
   overflow-wrap: break-word;
   color: #374151;
@@ -467,6 +467,34 @@ button:disabled {
   margin-bottom: 4pt;
 }
 
+/* CSS Custom Properties for dynamic font sizing */
+:root {
+  --font-size-base: 11pt;
+  --font-size-header: 16pt;
+  --font-size-section: 11pt;
+  --font-size-content: 11pt;
+  --font-size-details: 11pt;
+  --font-size-list: 11pt;
+}
+
+/* Ensure ALL elements in preview use the font scaling */
+.preview * {
+  font-size: inherit !important;
+}
+
+/* Make sure bullet points scale in all templates */
+.preview ul li {
+  font-size: var(--font-size-list) !important;
+}
+
+.preview.modern ul li {
+  font-size: var(--font-size-list) !important;
+}
+
+.preview.industry-manager ul li {
+  font-size: var(--font-size-list) !important;
+}
+
 /* Temp1 template preview styles (Classic Professional) */
 .preview {
   background: white;
@@ -474,7 +502,7 @@ button:disabled {
   border-radius: 0;
   border: none;
   font-family: Calibri, Arial, sans-serif;
-  font-size: 11pt;
+  font-size: var(--font-size-base);
   line-height: 1.15;
   color: #000;
   max-width: 8.5in;
@@ -488,7 +516,7 @@ button:disabled {
 }
 
 .preview .name {
-  font-size: 16pt;
+  font-size: var(--font-size-header);
   font-weight: bold;
   text-transform: uppercase;
   margin-bottom: 5pt;
@@ -497,14 +525,14 @@ button:disabled {
 }
 
 .preview .contact-info {
-  font-size: 11pt;
+  font-size: var(--font-size-content);
   margin-bottom: 10pt;
   color: #6b7280;
   text-align: center;
 }
 
 .preview .section-header {
-  font-size: 11pt;
+  font-size: var(--font-size-section);
   font-weight: bold;
   text-transform: uppercase;
   margin-top: 10pt;
@@ -518,11 +546,11 @@ button:disabled {
   font-weight: bold;
   margin-bottom: 2pt;
   color: #374151;
-  font-size: 11pt;
+  font-size: var(--font-size-content);
 }
 
 .preview .education-details {
-  font-size: 11pt;
+  font-size: var(--font-size-details);
   color: #374151;
   margin-top: 0;
 }
@@ -531,7 +559,7 @@ button:disabled {
   color: #374151;
   margin-bottom: 1rem;
   line-height: 1.15;
-  font-size: 11pt;
+  font-size: var(--font-size-content);
   word-wrap: break-word;
   overflow-wrap: break-word;
 }

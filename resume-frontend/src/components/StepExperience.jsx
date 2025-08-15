@@ -115,7 +115,7 @@ const StepExperience = () => {
       <p style={{ color: '#6b7280', marginBottom: '1rem', fontSize: '0.875rem' }}>
         * Required fields. Experience will only appear in your resume when both Job Title and Employer are filled.
       </p>
-      {jobDescription && (
+      {jobDescription && jobDescription.trim() && (
         <div style={{ 
           background: '#f0f9ff', 
           border: '1px solid #0ea5e9', 
@@ -129,7 +129,7 @@ const StepExperience = () => {
         </div>
       )}
       
-      {!jobDescription && (
+      {(!jobDescription || !jobDescription.trim()) && (
         <div style={{ 
           background: '#fef3c7', 
           border: '1px solid #f59e0b', 
@@ -138,7 +138,7 @@ const StepExperience = () => {
           marginBottom: '1.5rem' 
         }}>
           <p style={{ margin: 0, color: '#92400e', fontSize: '0.9rem' }}>
-            💡 <strong>Tip:</strong> You can build your resume without a job description. For AI-powered optimization, start from the home page with a job description.
+            💡 <strong>Builder Mode:</strong> You're building your resume without a job description. For AI-powered optimization, go back to the home page and choose "Start Building with Job Description".
           </p>
         </div>
       )}
@@ -367,8 +367,8 @@ const StepExperience = () => {
             />
           </div>
 
-          {/* AI Conversion Section */}
-          {jobDescription && (
+          {/* AI Conversion Section - Only show if job description exists */}
+          {jobDescription && jobDescription.trim() && (
             <div style={{ 
               background: '#f8fafc', 
               border: '1px solid #e2e8f0', 

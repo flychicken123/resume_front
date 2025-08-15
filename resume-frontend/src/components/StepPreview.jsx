@@ -1,9 +1,48 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useResume } from '../context/ResumeContext';
 
 const StepPreview = ({ onDownload }) => {
-  const { data } = useResume();
+  const { data, setData } = useResume();
   
+  console.log('StepPreview component rendered');
+  console.log('Current format:', data.selectedFormat);
+  console.log('Current font size:', data.selectedFontSize);
+  
+  // Font size scaling factors - increased small and medium for better readability
+  const fontSizeScaling = {
+    'small': 0.9,   // Increased from 0.8
+    'medium': 1.1,  // Increased from 1.0  
+    'large': 1.2,
+    'extra-large': 1.4
+  };
+  
+  const scale = fontSizeScaling[data.selectedFontSize || 'medium'] || 1.0;
+  
+  // Helper function to scale font sizes (match LivePreview exactly)
+  const scaleFont = (baseSize) => {
+    const size = parseInt(baseSize);
+    return `${Math.round(size * scale)}pt`; // Use pt for consistency with CSS
+  };
+
+  // Update CSS custom properties when font size changes (match industry-manager template)
+  useEffect(() => {
+    const root = document.documentElement;
+    // Use the same font sizes as LivePreview industry-manager template
+    root.style.setProperty('--font-size-base', scaleFont('9pt'));      // Container base
+    root.style.setProperty('--font-size-header', scaleFont('18pt'));   // Header/name
+    root.style.setProperty('--font-size-section', scaleFont('12pt'));  // Section titles
+    root.style.setProperty('--font-size-content', scaleFont('10pt'));  // Company/job titles
+    root.style.setProperty('--font-size-details', scaleFont('9pt'));   // Contact/dates
+    root.style.setProperty('--font-size-list', scaleFont('9pt'));      // Bullet points
+    
+    console.log('StepPreview CSS custom properties updated:');
+    console.log('--font-size-base:', scaleFont('9pt'));
+    console.log('--font-size-header:', scaleFont('18pt'));
+    console.log('--font-size-section:', scaleFont('12pt'));
+    console.log('--font-size-content:', scaleFont('10pt'));
+    console.log('--font-size-details:', scaleFont('9pt'));
+  }, [data.selectedFontSize, scale]);
+
   // Get template class based on selected format
   const getTemplateClass = () => {
     const format = data.selectedFormat || 'temp1';
@@ -71,6 +110,72 @@ const StepPreview = ({ onDownload }) => {
   
   return (
     <div className="preview-container" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      {/* Live Format Controls */}
+      <div style={{ 
+        background: '#f8fafc', 
+        padding: '1rem', 
+        borderBottom: '1px solid #e5e7eb',
+        display: 'flex',
+        gap: '1rem',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        position: 'sticky',
+        top: 0,
+        zIndex: 100
+      }}>
+        <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#374151' }}>
+          Format Controls:
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <label style={{ fontSize: '0.9rem', fontWeight: 600, color: '#374151' }}>Template:</label>
+          <select 
+            value={data.selectedFormat || 'temp1'} 
+            onChange={(e) => setData(prev => ({ ...prev, selectedFormat: e.target.value }))}
+            style={{ 
+              padding: '0.5rem', 
+              border: '1px solid #d1d5db', 
+              borderRadius: '4px',
+              fontSize: '0.9rem'
+            }}
+          >
+            <option value="temp1">Classic Professional</option>
+            <option value="modern">Modern Clean</option>
+            <option value="industry-manager">Industry Manager</option>
+          </select>
+        </div>
+        
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <label style={{ fontSize: '0.9rem', fontWeight: 600, color: '#374151' }}>Font Size:</label>
+          <select 
+            value={data.selectedFontSize || 'medium'} 
+            onChange={(e) => setData(prev => ({ ...prev, selectedFontSize: e.target.value }))}
+            style={{ 
+              padding: '0.5rem', 
+              border: '1px solid #d1d5db', 
+              borderRadius: '4px',
+              fontSize: '0.9rem'
+            }}
+          >
+            <option value="small">Small</option>
+            <option value="medium">Medium</option>
+            <option value="large">Large</option>
+            <option value="extra-large">Extra Large</option>
+          </select>
+        </div>
+      </div>
+      
+      {/* Debug info - remove this in production */}
+      {process.env.NODE_ENV === 'development' && (
+        <div style={{ 
+          background: '#f0f9ff', 
+          padding: '4px 8px', 
+          fontSize: '10px', 
+          color: '#0369a1',
+          borderBottom: '1px solid #e5e7eb'
+        }}>
+          Font Size: {data.selectedFontSize || 'medium'} (Scale: {scale})
+        </div>
+      )}
       <div className={getTemplateClass()} style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <div className="header">
           <div className="name">{data.name || 'Your Name'}</div>
@@ -102,8 +207,8 @@ const StepPreview = ({ onDownload }) => {
         
         {data.skills && (
           <>
-            <div className="section-header skills-section-header">Skills</div>
-            <p className="skills-content">{data.skills}</p>
+            <div className="section-header">Skills</div>
+            <p>{data.skills}</p>
           </>
         )}
         

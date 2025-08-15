@@ -18,19 +18,14 @@ const Login = ({ onLogin, onClose }) => {
       const decodedToken = decodeJwt(googleToken);
       console.log('Decoded Google token:', decodedToken);
       
-      const getAPIBaseURL = () => {
-        if (typeof window !== 'undefined') {
-          if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            return 'http://localhost:8081';
-          }
-          return window.location.hostname === 'www.hihired.org' 
-            ? 'https://hihired.org' 
-            : window.location.origin;
+      const getApiUrl = () => {
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+          return 'http://localhost:8081';
         }
         return process.env.REACT_APP_API_URL || 'http://localhost:8081';
       };
       
-      const API_BASE_URL = getAPIBaseURL();
+      const API_BASE_URL = getApiUrl();
       console.log('Making Google login request to:', `${API_BASE_URL}/api/auth/google`);
       
       const response = await fetch(`${API_BASE_URL}/api/auth/google`, {
@@ -101,22 +96,14 @@ const Login = ({ onLogin, onClose }) => {
       const endpoint = mode === 'signup' ? '/api/auth/register' : '/api/auth/login';
       
       // Use same API_BASE_URL logic as other files
-      const getAPIBaseURL = () => {
-        if (typeof window !== 'undefined') {
-          // For local development, use localhost:8081
-          if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            return 'http://localhost:8081';
-          }
-          // Use the backend domain (non-www) for API calls
-          return window.location.hostname === 'www.hihired.org' 
-            ? 'https://hihired.org' 
-            : window.location.origin;
+      const getApiUrl = () => {
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+          return 'http://localhost:8081';
         }
-        // Fallback for server-side rendering
         return process.env.REACT_APP_API_URL || 'http://localhost:8081';
       };
       
-      const API_BASE_URL = getAPIBaseURL();
+      const API_BASE_URL = getApiUrl();
       console.log('Making request to:', `${API_BASE_URL}${endpoint}`);
       console.log('Request body:', { email: email, password: password });
       

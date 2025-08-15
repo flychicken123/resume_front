@@ -130,7 +130,8 @@ export const ResumeProvider = ({ children }) => {
       }],
       skills: "",
       summary: "",
-      selectedFormat: "temp1"  // Default format
+      selectedFormat: "temp1",  // Default format
+      selectedFontSize: "medium"  // Default font size
     };
   });
 
@@ -183,7 +184,8 @@ export const ResumeProvider = ({ children }) => {
       }],
       skills: "",
       summary: "",
-      selectedFormat: "temp1"
+      selectedFormat: "temp1",
+      selectedFontSize: "medium"
     });
   };
 

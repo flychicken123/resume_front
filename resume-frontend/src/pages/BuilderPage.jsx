@@ -7,21 +7,19 @@ import StepPersonal from '../components/StepPersonal';
 import StepExperience from '../components/StepExperience';
 import StepEducation from '../components/StepEducation';
 import StepSkills from '../components/StepSkills';
-import StepFormat from '../components/StepFormat';
 import StepSummary from '../components/StepSummary';
 import StepPreview from '../components/StepPreview';
 import AuthModal from '../components/auth/AuthModal';
 import JobDescModal from '../components/JobDescModal';
 import ImportResumeModal from '../components/ImportResumeModal';
 import SEO from '../components/SEO';
-import { trackResumeGeneration } from '../components/Analytics';
+import { trackResumeGeneration, trackReferrer, trackBuilderStart, trackStepCompletion } from '../components/Analytics';
 
 const steps = [
   "Personal Details",
   "Experience",
   "Education", 
   "Skills",
-  "Format",
   "Summary"
 ];
 
@@ -42,8 +40,15 @@ function BuilderPage() {
   
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { user, login, logout } = useAuth();
-  const { data, saveToDatabaseNow } = useResume();
+  const { data, saveToDatabaseNow, clearData } = useResume();
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [startTime] = useState(Date.now());
+
+  // Track referrer and builder start when component loads
+  useEffect(() => {
+    trackReferrer();
+    trackBuilderStart('builder_page');
+  }, []);
 
   const toggleFullscreen = () => {
     const previewElement = document.getElementById('resume-preview-container');
@@ -154,6 +159,112 @@ function BuilderPage() {
           viewBtn.remove();
         }
         
+        // Font size scaling for PDF - MUST be defined before any functions that use it
+        // Match StepPreview scaling factors exactly
+        const fontSizeScaling = {
+          'small': 0.9,   // Increased from 0.8
+          'medium': 1.1,  // Increased from 1.0
+          'large': 1.2,
+          'extra-large': 1.4
+        };
+        const scale = fontSizeScaling[data.selectedFontSize || 'medium'] || 1.0;
+        
+        // Define scaleFont function immediately after scale is defined
+        // This should match exactly with StepPreview.jsx scaleFont function
+        const scaleFont = (baseSize) => {
+          const size = parseInt(baseSize);
+          return `${Math.round(size * scale)}pt`; // Use pt to match CSS custom properties
+        };
+        
+        console.log('Font size debugging:');
+        console.log('Selected format:', data.selectedFormat);
+        console.log('Selected font size:', data.selectedFontSize);
+        console.log('Scale factor:', scale);
+        console.log('Font size mapping:', fontSizeScaling);
+        console.log('ScaleFont examples for industry-manager template:');
+        console.log('Container (9pt):', scaleFont('9pt'));
+        console.log('Header (18pt):', scaleFont('18pt'));
+        console.log('Section title (12pt):', scaleFont('12pt'));
+        console.log('Company (10pt):', scaleFont('10pt'));
+        console.log('Date/Contact (9pt):', scaleFont('9pt'));
+        console.log('=== FONT SIZE CHANGE VERIFICATION ===');
+        console.log('This should show different values when you change font size in the UI!');
+        
+        // Directly modify the cloned element's inline styles to match the selected font size
+        const applyScaledFontSizes = (element, depth = 0) => {
+          const indent = '  '.repeat(depth);
+          console.log(`${indent}Processing element:`, element.tagName, 'current fontSize:', element.style.fontSize);
+          
+          // Get the current font size or determine what it should be based on element properties
+          let currentFontSize = element.style.fontSize;
+          let newFontSize = scaleFont('9pt'); // default base size (match CSS --font-size-base)
+          
+          // Determine appropriate font size based on element characteristics
+          if (element.style.fontSize) {
+            // If element already has a font size, scale it (convert px to pt if needed)
+            const currentSize = parseInt(element.style.fontSize);
+            if (currentSize === 18 || currentSize === 22) newFontSize = scaleFont('18pt'); // Header
+            else if (currentSize === 12 || currentSize === 14) newFontSize = scaleFont('12pt'); // Section titles
+            else if (currentSize === 10 || currentSize === 12) newFontSize = scaleFont('10pt'); // Company/job titles
+            else if (currentSize === 9 || currentSize === 11) newFontSize = scaleFont('9pt'); // Base/contact/details
+            else newFontSize = scaleFont('9pt'); // Default fallback
+          } else {
+            // No font size set, determine based on other styles
+            if (element.style.fontWeight === 'bold' && element.style.textTransform === 'uppercase') {
+              newFontSize = scaleFont('12pt'); // Section titles (match --font-size-section)
+            } else if (element.style.fontWeight === 'bold' || element.style.fontWeight === '600') {
+              newFontSize = scaleFont('10pt'); // Company/job titles (match --font-size-content)
+            } else if (element.style.color === '#7f8c8d' || element.style.color === 'rgb(127, 140, 141)') {
+              newFontSize = scaleFont('9pt'); // Dates and details (match --font-size-details)
+            } else if (element.style.marginLeft === '15px') {
+              newFontSize = scaleFont('9pt'); // Bullet points (match --font-size-list)
+            } else {
+              newFontSize = scaleFont('9pt'); // Default base (match --font-size-base)
+            }
+          }
+          
+          // Apply the new font size
+          element.style.fontSize = newFontSize;
+          console.log(`${indent}Applied font size:`, newFontSize, 'to element with text:', element.textContent?.substring(0, 30));
+          
+          // Recursively process child elements
+          Array.from(element.children).forEach(child => applyScaledFontSizes(child, depth + 1));
+        };
+        
+        // Check if it's the first child (header/name)
+        if (clonedElement.children.length > 0) {
+          clonedElement.children[0].style.fontSize = scaleFont('18pt');
+          console.log('Set header font size to:', scaleFont('18pt'));
+        }
+        
+        // Debug: Check if education content exists in the cloned element
+        console.log('=== EDUCATION DEBUGGING ===');
+        console.log('Education data:', data.education);
+        console.log('Number of education items:', data.education ? data.education.length : 0);
+        
+        const educationHeaders = clonedElement.querySelectorAll('.section-header');
+        console.log('Found section headers:', educationHeaders.length);
+        educationHeaders.forEach((header, index) => {
+          console.log(`Header ${index}:`, header.textContent);
+          const nextElement = header.nextElementSibling;
+          console.log(`Next element after header:`, nextElement ? nextElement.outerHTML.substring(0, 200) : 'NONE');
+        });
+        
+        const educationItems = clonedElement.querySelectorAll('.education-item');
+        console.log('Found education items:', educationItems.length);
+        educationItems.forEach((item, index) => {
+          console.log(`Education item ${index}:`, item.outerHTML.substring(0, 200));
+        });
+        console.log('=== END EDUCATION DEBUGGING ===');
+        
+        // Apply scaled font sizes to all elements
+        console.log('Applying scaled font sizes to cloned element...');
+        applyScaledFontSizes(clonedElement);
+        
+
+        
+
+        
         // Comprehensive CSS debugging
         console.log('=== CSS DEBUGGING START ===');
         console.log('Environment:', window.location.hostname);
@@ -221,45 +332,61 @@ function BuilderPage() {
           .preview { box-shadow: none !important; border: 0 !important; outline: none !important; }
           .preview::before, .preview::after { display: none !important; content: none !important; }
           
-          /* Page break controls for PDF */
-          .preview .section-header {
-            page-break-after: avoid !important;
-            break-after: avoid !important;
-            orphans: 3 !important;
-            widows: 3 !important;
+          /* CSS Custom Properties for font size scaling (matching StepPreview exactly) */
+          :root {
+            --font-size-base: ${scaleFont('9pt')} !important;
+            --font-size-header: ${scaleFont('18pt')} !important;
+            --font-size-section: ${scaleFont('12pt')} !important;
+            --font-size-content: ${scaleFont('10pt')} !important;
+            --font-size-details: ${scaleFont('9pt')} !important;
+            --font-size-list: ${scaleFont('9pt')} !important;
+            --font-size-contact: ${scaleFont('9pt')} !important;
           }
           
-          .preview .experience-item {
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-            orphans: 3 !important;
-            widows: 3 !important;
-          }
+          /* Root level font size override */
+          html { font-size: var(--font-size-base) !important; }
+          body { font-size: var(--font-size-base) !important; }
           
-          .preview .education-item {
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-            orphans: 3 !important;
-            widows: 3 !important;
-          }
+          /* Font size overrides using exact LivePreview styling */
+          .preview { font-size: var(--font-size-base) !important; }
+          .preview > div:first-child { font-size: var(--font-size-header) !important; } /* Header/Name */
+          .preview > div:nth-child(2) { font-size: var(--font-size-contact) !important; } /* Contact info */
           
-                        /* Skills section - force to second page and keep together */
-              .preview .skills-section-header {
-                page-break-before: always !important;
-                break-before: page !important;
-                page-break-after: avoid !important;
-                break-after: avoid !important;
-                margin-top: 0 !important;
-              }
-              
-              /* Skills content - keep with header */
-              .preview .skills-content {
-                page-break-before: avoid !important;
-                page-break-inside: avoid !important;
-                break-inside: avoid !important;
-                orphans: 3 !important;
-                widows: 3 !important;
-              }
+          /* Section titles - multiple ways to target them */
+          .preview div[style*="text-transform: uppercase"] { font-size: var(--font-size-section) !important; }
+          .preview div[style*="TEXT-TRANSFORM: UPPERCASE"] { font-size: var(--font-size-section) !important; }
+          .preview div[style*="letter-spacing"] { font-size: var(--font-size-section) !important; }
+          
+          /* Company/job titles - multiple ways to target them */
+          .preview div[style*="font-weight: bold"] { font-size: var(--font-size-content) !important; }
+          .preview div[style*="font-weight:bold"] { font-size: var(--font-size-content) !important; }
+          .preview div[style*="fontWeight: bold"] { font-size: var(--font-size-content) !important; }
+          .preview div[style*="font-weight: 600"] { font-size: var(--font-size-content) !important; }
+          
+          /* Dates and details - multiple ways to target them */
+          .preview div[style*="color: #7f8c8d"] { font-size: var(--font-size-details) !important; }
+          .preview div[style*="color:#7f8c8d"] { font-size: var(--font-size-details) !important; }
+          .preview div[style*="color: rgb(127, 140, 141)"] { font-size: var(--font-size-details) !important; }
+          
+          /* Bullet points - multiple ways to target them */
+          .preview div[style*="margin-left: 15px"] { font-size: var(--font-size-list) !important; }
+          .preview div[style*="marginLeft: 15px"] { font-size: var(--font-size-list) !important; }
+          .preview div[style*="margin-left:15px"] { font-size: var(--font-size-list) !important; }
+          
+          /* Force font size on all elements as backup */
+          .preview * { font-size: var(--font-size-base) !important; }
+          .preview div { font-size: var(--font-size-base) !important; }
+          .preview span { font-size: var(--font-size-base) !important; }
+          
+          /* Override any inline styles with maximum specificity */
+          .preview [style*="font-size"] { font-size: var(--font-size-base) !important; }
+          .preview [style*="fontSize"] { font-size: var(--font-size-base) !important; }
+          
+          /* Completely natural page flow - no page break rules */
+          @page {
+            size: Letter;
+            margin: 0.5in;
+          }
         `;
         
         // Debug: Log the CSS overrides to see if they're being generated
@@ -268,7 +395,28 @@ function BuilderPage() {
         console.log('Current step:', step);
         console.log('Preview element found:', !!previewElement);
         console.log('Preview element classes:', previewElement ? previewElement.className : 'N/A');
+        console.log('Selected font size:', data.selectedFontSize);
+        console.log('Font size scale:', scale);
         console.log('PDF Overrides being applied:', pdfOverrides);
+        console.log('CSS Custom Properties being set:');
+        console.log('--font-size-base:', scaleFont('11pt'));
+        console.log('--font-size-header:', scaleFont('16pt'));
+        console.log('--font-size-section:', scaleFont('11pt'));
+        
+        // Debug: Check computed styles of preview element
+        if (previewElement) {
+          const computedStyle = window.getComputedStyle(previewElement);
+          console.log('Preview element computed font-size:', computedStyle.fontSize);
+          console.log('Preview element computed font-family:', computedStyle.fontFamily);
+          
+          // Get all child elements and their computed font sizes
+          const allElements = previewElement.querySelectorAll('*');
+          console.log('All elements in preview:', allElements.length);
+          allElements.forEach((el, index) => {
+            const style = window.getComputedStyle(el);
+            console.log(`Element ${index}:`, el.tagName, 'font-size:', style.fontSize, 'font-weight:', style.fontWeight);
+          });
+        }
  
         // Create complete HTML document with CSS overrides LAST
         const htmlContent = `
@@ -289,6 +437,17 @@ function BuilderPage() {
   <style>
     /* PDF-specific overrides - MUST be in separate style tag to ensure they come last */
     ${pdfOverrides}
+  </style>
+  <style>
+              /* Direct inline style overrides - highest specificity */
+          .preview [style*="font-size"] { font-size: var(--font-size-base) !important; }
+          .preview [style*="font-size:"] { font-size: var(--font-size-base) !important; }
+          
+          /* Override specific inline styles with matching selectors */
+          .preview div[style*="font-size: 18px"] { font-size: var(--font-size-header) !important; }
+          .preview div[style*="font-size: 12px"] { font-size: var(--font-size-section) !important; }
+          .preview div[style*="font-size: 10px"] { font-size: var(--font-size-content) !important; }
+          .preview div[style*="font-size: 9px"] { font-size: var(--font-size-details) !important; }
   </style>
 </head>
 <body>
@@ -345,43 +504,10 @@ function BuilderPage() {
              // Use our download endpoint to record the history
              const downloadEndpoint = `${getAPIBaseURL()}/api/resume/download/${filename}`;
              
-             // For protected routes, we need to include auth headers
-             // Since we can't add headers to window.open, we'll use fetch first
-             if (user) {
-               fetch(downloadEndpoint, {
-                 method: 'GET',
-                 headers: {
-                   'Authorization': `Bearer ${localStorage.getItem('resumeToken')}`
-                 },
-                 redirect: 'follow', // Explicitly follow redirects
-               }).then(response => {
-                 if (response.ok || response.status === 307) {
-                   // For 307 redirects, get the Location header
-                   if (response.status === 307) {
-                     const redirectUrl = response.headers.get('Location');
-                     if (redirectUrl) {
-                       window.open(redirectUrl, '_blank');
-                       return;
-                     }
-                   }
-                   // For successful responses, try to get the URL from response
-                   return response.url;
-                 } else {
-                   throw new Error('Download failed');
-                 }
-               }).then(url => {
-                 if (url) {
-                   window.open(url, '_blank');
-                 }
-               }).catch(error => {
-                 console.error('Download error:', error);
-                 // Fallback to direct URL
-                 window.open(result.data.downloadURL, '_blank');
-               });
-             } else {
-               // If not logged in, use direct URL
-               window.open(result.data.downloadURL, '_blank');
-             }
+             // Use the direct S3 URL since CORS prevents us from using fetch()
+             // The backend has already generated the PDF and returned a signed URL
+             console.log('Opening download URL:', result.data.downloadURL);
+             window.open(result.data.downloadURL, '_blank');
              alert('PDF resume generated successfully!');
            } else {
              console.error('PDF generation failed response:', result);
@@ -437,6 +563,61 @@ function BuilderPage() {
     setShowJobDescModal(false);
     setShowImportModal(true);
   };
+
+  const handleNext = () => {
+    if (step < steps.length) {
+      trackStepCompletion(steps[step - 1], step);
+      setStep(step + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (step > 1) {
+      setStep(step - 1);
+    }
+  };
+
+  const handleStepClick = (stepId) => {
+    if (stepId <= step) {
+      setStep(stepId);
+    }
+  };
+
+  const handleDownload = async () => {
+    try {
+      const response = await fetch('/api/resume/download', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${data.name || 'resume'}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        console.error('Download failed');
+      }
+    } catch (error) {
+      console.error('Download error:', error);
+    }
+  };
+
+  const handleStartOver = () => {
+    clearData();
+    setStep(1);
+  };
+
+  const CurrentStepComponent = steps[step - 1];
 
   return (
     <>
@@ -513,8 +694,7 @@ function BuilderPage() {
               {step === 2 && <StepExperience />}
               {step === 3 && <StepEducation />}
               {step === 4 && <StepSkills />}
-              {step === 5 && <StepFormat />}
-              {step === 6 && <StepSummary />}
+              {step === 5 && <StepSummary />}
               
                              {/* Navigation Buttons */}
                <div style={{ 

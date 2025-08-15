@@ -8,13 +8,29 @@ const LivePreview = ({ isVisible, onToggle }) => {
     return null;
   }
 
-  const getFormatStyles = (format) => {
+  const getFormatStyles = (format, fontSize = 'medium') => {
+    // Font size scaling factors
+    const fontSizeScaling = {
+      'small': 0.8,
+      'medium': 1.0,
+      'large': 1.2,
+      'extra-large': 1.4
+    };
+    
+    const scale = fontSizeScaling[fontSize] || 1.0;
+    
+    // Helper function to scale font sizes
+    const scaleFont = (baseSize) => {
+      const size = parseInt(baseSize);
+      return `${Math.round(size * scale)}px`;
+    };
+
     switch (format) {
       case 'temp1':
         return {
           container: { 
             fontFamily: 'Arial, sans-serif', 
-            fontSize: '9px', 
+            fontSize: scaleFont('9px'), 
             lineHeight: '1.2',
             padding: '10px',
             background: 'white',
@@ -22,7 +38,7 @@ const LivePreview = ({ isVisible, onToggle }) => {
             borderRadius: '4px'
           },
           header: { 
-            fontSize: '16px', 
+            fontSize: scaleFont('16px'), 
             fontWeight: 'bold', 
             color: '#1f2937', 
             marginBottom: '8px',
@@ -32,7 +48,7 @@ const LivePreview = ({ isVisible, onToggle }) => {
             marginBottom: '12px'
           },
           sectionTitle: { 
-            fontSize: '11px', 
+            fontSize: scaleFont('11px'), 
             fontWeight: 'bold', 
             color: '#1f2937', 
             marginBottom: '6px',
@@ -40,23 +56,23 @@ const LivePreview = ({ isVisible, onToggle }) => {
             letterSpacing: '0.5px'
           },
           contact: { 
-            fontSize: '8px', 
+            fontSize: scaleFont('8px'), 
             color: '#6b7280', 
             marginBottom: '8px',
             textAlign: 'center'
           },
           item: { marginBottom: '5px' },
-          company: { fontWeight: 'bold', color: '#1f2937', fontSize: '9px' },
-          date: { color: '#6b7280', fontSize: '8px' },
-          bullet: { marginLeft: '12px', marginBottom: '2px', fontSize: '8px' },
-          summary: { fontSize: '8px', lineHeight: '1.2' },
-          skills: { fontSize: '8px', lineHeight: '1.2' }
+          company: { fontWeight: 'bold', color: '#1f2937', fontSize: scaleFont('9px') },
+          date: { color: '#6b7280', fontSize: scaleFont('8px') },
+          bullet: { marginLeft: '12px', marginBottom: '2px', fontSize: scaleFont('8px') },
+          summary: { fontSize: scaleFont('8px'), lineHeight: '1.2' },
+          skills: { fontSize: scaleFont('8px'), lineHeight: '1.2' }
         };
       case 'industry-manager':
         return {
           container: { 
             fontFamily: 'Georgia, serif', 
-            fontSize: '9px', 
+            fontSize: scaleFont('9px'), 
             lineHeight: '1.3',
             padding: '12px',
             background: 'white',
@@ -64,7 +80,7 @@ const LivePreview = ({ isVisible, onToggle }) => {
             borderRadius: '4px'
           },
           header: { 
-            fontSize: '18px', 
+            fontSize: scaleFont('18px'), 
             fontWeight: 'bold', 
             color: '#1a1a1a', 
             marginBottom: '8px', 
@@ -72,7 +88,7 @@ const LivePreview = ({ isVisible, onToggle }) => {
           },
           section: { marginBottom: '16px' },
           sectionTitle: { 
-            fontSize: '12px', 
+            fontSize: scaleFont('12px'), 
             fontWeight: 'bold', 
             color: '#2c3e50', 
             borderBottom: '2px solid #34495e', 
@@ -82,23 +98,23 @@ const LivePreview = ({ isVisible, onToggle }) => {
             letterSpacing: '0.5px'
           },
           contact: { 
-            fontSize: '9px', 
+            fontSize: scaleFont('9px'), 
             color: '#7f8c8d', 
             marginBottom: '10px',
             textAlign: 'center'
           },
           item: { marginBottom: '8px' },
-          company: { fontWeight: 'bold', color: '#2c3e50', fontSize: '10px' },
-          date: { color: '#7f8c8d', fontSize: '9px' },
-          bullet: { marginLeft: '15px', marginBottom: '3px', fontSize: '9px' },
-          summary: { fontSize: '9px', lineHeight: '1.3' },
-          skills: { fontSize: '9px', lineHeight: '1.3' }
+          company: { fontWeight: 'bold', color: '#2c3e50', fontSize: scaleFont('10px') },
+          date: { color: '#7f8c8d', fontSize: scaleFont('9px') },
+          bullet: { marginLeft: '15px', marginBottom: '3px', fontSize: scaleFont('9px') },
+          summary: { fontSize: scaleFont('9px'), lineHeight: '1.3' },
+          skills: { fontSize: scaleFont('9px'), lineHeight: '1.3' }
         };
       case 'modern':
         return {
           container: { 
             fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif', 
-            fontSize: '9px', 
+            fontSize: scaleFont('9px'), 
             lineHeight: '1.4',
             padding: '12px',
             background: 'white',
@@ -106,7 +122,7 @@ const LivePreview = ({ isVisible, onToggle }) => {
             borderRadius: '4px'
           },
           header: { 
-            fontSize: '18px', 
+            fontSize: scaleFont('18px'), 
             fontWeight: '600', 
             color: '#2c3e50', 
             marginBottom: '8px',
@@ -118,7 +134,7 @@ const LivePreview = ({ isVisible, onToggle }) => {
             marginBottom: '16px'
           },
           sectionTitle: { 
-            fontSize: '11px', 
+            fontSize: scaleFont('11px'), 
             fontWeight: '600', 
             color: '#3498db', 
             borderBottom: '1px solid #bdc3c7', 
@@ -128,23 +144,23 @@ const LivePreview = ({ isVisible, onToggle }) => {
             letterSpacing: '1px'
           },
           contact: { 
-            fontSize: '9px', 
+            fontSize: scaleFont('9px'), 
             color: '#7f8c8d', 
             marginBottom: '8px',
             textAlign: 'left'
           },
           item: { marginBottom: '8px' },
-          company: { fontWeight: '600', color: '#2c3e50', fontSize: '10px' },
-          date: { color: '#7f8c8d', fontSize: '9px' },
-          bullet: { marginLeft: '15px', marginBottom: '3px', fontSize: '9px' },
-          summary: { fontSize: '9px', lineHeight: '1.5' },
-          skills: { fontSize: '9px', lineHeight: '1.5' }
+          company: { fontWeight: '600', color: '#2c3e50', fontSize: scaleFont('10px') },
+          date: { color: '#7f8c8d', fontSize: scaleFont('9px') },
+          bullet: { marginLeft: '15px', marginBottom: '3px', fontSize: scaleFont('9px') },
+          summary: { fontSize: scaleFont('9px'), lineHeight: '1.5' },
+          skills: { fontSize: scaleFont('9px'), lineHeight: '1.5' }
         };
       default:
         return {
           container: { 
             fontFamily: 'Arial, sans-serif', 
-            fontSize: '9px', 
+            fontSize: scaleFont('9px'), 
             lineHeight: '1.2',
             padding: '10px',
             background: 'white',
@@ -152,7 +168,7 @@ const LivePreview = ({ isVisible, onToggle }) => {
             borderRadius: '4px'
           },
           header: { 
-            fontSize: '16px', 
+            fontSize: scaleFont('16px'), 
             fontWeight: 'bold', 
             color: '#1f2937', 
             marginBottom: '8px',
@@ -162,7 +178,7 @@ const LivePreview = ({ isVisible, onToggle }) => {
             marginBottom: '12px'
           },
           sectionTitle: { 
-            fontSize: '11px', 
+            fontSize: scaleFont('11px'), 
             fontWeight: 'bold', 
             color: '#1f2937', 
             marginBottom: '6px',
@@ -170,22 +186,22 @@ const LivePreview = ({ isVisible, onToggle }) => {
             letterSpacing: '0.5px'
           },
           contact: { 
-            fontSize: '8px', 
+            fontSize: scaleFont('8px'), 
             color: '#6b7280', 
             marginBottom: '8px',
             textAlign: 'center'
           },
           item: { marginBottom: '5px' },
-          company: { fontWeight: 'bold', color: '#1f2937', fontSize: '9px' },
-          date: { color: '#6b7280', fontSize: '8px' },
-          bullet: { marginLeft: '12px', marginBottom: '2px', fontSize: '8px' },
-          summary: { fontSize: '8px', lineHeight: '1.2' },
-          skills: { fontSize: '8px', lineHeight: '1.2' }
+          company: { fontWeight: 'bold', color: '#1f2937', fontSize: scaleFont('9px') },
+          date: { color: '#6b7280', fontSize: scaleFont('8px') },
+          bullet: { marginLeft: '12px', marginBottom: '2px', fontSize: scaleFont('8px') },
+          summary: { fontSize: scaleFont('8px'), lineHeight: '1.2' },
+          skills: { fontSize: scaleFont('8px'), lineHeight: '1.2' }
         };
     }
   };
 
-  const styles = getFormatStyles(data.selectedFormat || 'temp1');
+  const styles = getFormatStyles(data.selectedFormat || 'temp1', data.selectedFontSize || 'medium');
 
   return (
     <div style={{
