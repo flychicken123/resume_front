@@ -60,26 +60,62 @@ jobs:
             exit 1
           fi
           
-          # Stop existing containers
-          docker-compose -f docker-compose.frontend.yml down || true
+          # Zero-downtime blue-green deployment
+          export REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }}
           
           # Create external network if it doesn't exist
           docker network create ai-resume-network 2>/dev/null || echo "Network already exists"
           
-          # Build and start containers with environment variable
-          export REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }}
+          # Build new image with timestamp tag
+          TIMESTAMP=$(date +%s)
+          NEW_TAG="ai-resume-frontend:${TIMESTAMP}"
+          
+          # Build new container with unique name
           docker-compose -f docker-compose.frontend.yml build --no-cache
-          docker-compose -f docker-compose.frontend.yml up -d
+          docker tag ai-resume-frontend-frontend:latest ${NEW_TAG}
           
-          # Wait for container to be ready
-          sleep 10
+          # Start new container on different port temporarily
+          docker run -d --name "ai-resume-frontend-new-${TIMESTAMP}" \
+            --network ai-resume-network \
+            -p 3001:3000 \
+            -e REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }} \
+            ${NEW_TAG}
           
-          # Check if container is running
-          if ! docker ps | grep -q "ai-resume-frontend"; then
-            echo "❌ Frontend container failed to start"
-            docker-compose -f docker-compose.frontend.yml logs
+          # Wait for new container to be ready
+          echo "Waiting for new container to be ready..."
+          sleep 15
+          
+          # Health check new container
+          if ! curl -f http://localhost:3001 >/dev/null 2>&1; then
+            echo "❌ New container failed health check"
+            docker logs "ai-resume-frontend-new-${TIMESTAMP}"
+            docker rm -f "ai-resume-frontend-new-${TIMESTAMP}"
             exit 1
           fi
+          
+          # Switch traffic: stop old container and start new one on port 3000
+          echo "Switching traffic to new container..."
+          docker stop ai-resume-frontend-frontend-1 2>/dev/null || echo "No old container running"
+          docker rm ai-resume-frontend-frontend-1 2>/dev/null || echo "No old container to remove"
+          
+          # Start new container on production port 3000
+          docker stop "ai-resume-frontend-new-${TIMESTAMP}"
+          docker run -d --name ai-resume-frontend-frontend-1 \
+            --network ai-resume-network \
+            -p 3000:3000 \
+            -e REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }} \
+            ${NEW_TAG}
+          
+          # Final health check
+          sleep 5
+          if ! docker ps | grep -q "ai-resume-frontend-frontend-1"; then
+            echo "❌ Final container failed to start"
+            docker logs ai-resume-frontend-frontend-1
+            exit 1
+          fi
+          
+          # Cleanup temporary container
+          docker rm "ai-resume-frontend-new-${TIMESTAMP}" 2>/dev/null || echo "Temp container already cleaned"
           
           echo "✅ Frontend deployed successfully"
           
