@@ -35,7 +35,7 @@ const Contact = () => {
                   className="contact-email-btn"
                   onClick={handleEmailClick}
                 >
-                  flychicken1991@gmail.com
+                  hihired_support@tactechs.net
                 </button>
               </div>
               
