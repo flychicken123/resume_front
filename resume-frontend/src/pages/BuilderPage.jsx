@@ -9,7 +9,7 @@ import StepEducation from '../components/StepEducation';
 import StepSkills from '../components/StepSkills';
 import StepFormat from '../components/StepFormat';
 import StepSummary from '../components/StepSummary';
-import LivePreview from '../components/LivePreview';
+import StepPreview from '../components/StepPreview';
 import AuthModal from '../components/auth/AuthModal';
 import JobDescModal from '../components/JobDescModal';
 import ImportResumeModal from '../components/ImportResumeModal';
@@ -142,134 +142,65 @@ function BuilderPage() {
       }
 
       // Capture the HTML content from the live preview
-      const previewElement = document.querySelector('.live-preview-container');
+      const previewElement = document.querySelector('.preview');
       
       if (previewElement) {
         // Clone the preview element (no inline style expansion to keep HTML small)
         const clonedElement = previewElement.cloneNode(true);
         
-
-        
-        // Remove the download button from the cloned element
-        const downloadBtns = clonedElement.querySelectorAll('button');
-        downloadBtns.forEach(btn => btn.remove());
-        
-        // Remove any control panels or debug elements
-        const controlPanels = clonedElement.querySelectorAll('.boundary-toggle, [style*="textAlign: center"], [style*="text-align: center"]');
-        controlPanels.forEach(panel => {
-          // Check if this panel contains a download button
-          const hasButton = panel.querySelector('button') || panel.innerHTML.includes('Download PDF');
-          if (hasButton) {
-            panel.remove();
-          }
-        });
-        
-        // Remove the download button container specifically
-        const downloadContainer = clonedElement.querySelector('div[style*="textAlign: center"]');
-        if (downloadContainer && downloadContainer.innerHTML.includes('Download PDF')) {
-          downloadContainer.remove();
+        // Remove the view button from the cloned element
+        const viewBtn = clonedElement.querySelector('button');
+        if (viewBtn) {
+          viewBtn.remove();
         }
         
-        // Debug: Log structure to identify empty page cause
-        console.log('=== PDF DEBUG ===');
-        console.log('Preview shows multi-page?', previewElement.querySelectorAll('.multi-page-container').length > 0);
-        console.log('Cloned has multi-page containers:', clonedElement.querySelectorAll('.multi-page-container').length);
-        console.log('Cloned has page wrappers:', clonedElement.querySelectorAll('.page-wrapper').length);
-        console.log('Cloned has single-page container:', clonedElement.querySelectorAll('.single-page-container').length);
-        console.log('Total cloned children:', clonedElement.children.length);
+        // Comprehensive CSS debugging
+        console.log('=== CSS DEBUGGING START ===');
+        console.log('Environment:', window.location.hostname);
+        console.log('URL:', window.location.href);
+        console.log('User Agent:', navigator.userAgent);
+        console.log('Number of stylesheets:', document.styleSheets.length);
         
-        // Handle both single-page and multi-page content
-        const singlePageContainer = clonedElement.querySelector('.single-page-container');
-        const multiPageContainer = clonedElement.querySelector('.multi-page-container');
-        
-        if (multiPageContainer && !singlePageContainer) {
-          console.log('Converting multi-page to single-page for PDF');
-          
-          // Extract content from all page wrappers and combine into single container
-          const pageWrappers = multiPageContainer.querySelectorAll('.page-wrapper');
-          const combinedContent = document.createElement('div');
-          combinedContent.className = 'single-page-container';
-          combinedContent.style.cssText = 'background: white; color: black; padding: 20px; margin: 0; box-sizing: border-box;';
-          
-          pageWrappers.forEach((wrapper, index) => {
-            const pageContent = wrapper.querySelector('.page-content');
-            if (pageContent) {
-              // Clone the page content
-              const contentClone = pageContent.cloneNode(true);
-              
-              // Add page break styling if not the first page
-              if (index > 0) {
-                const pageBreakDiv = document.createElement('div');
-                pageBreakDiv.style.cssText = 'page-break-before: always; break-before: page; height: 0; margin: 0; padding: 0;';
-                combinedContent.appendChild(pageBreakDiv);
-              }
-              
-              // Add the content
-              combinedContent.appendChild(contentClone);
-            }
-          });
-          
-          // Replace the multi-page container with our combined single-page container
-          multiPageContainer.parentNode.replaceChild(combinedContent, multiPageContainer);
-          console.log('Created combined single-page content, pages combined:', pageWrappers.length);
-        } else if (!singlePageContainer && !multiPageContainer) {
-          console.log('No content containers found!');
-        } else {
-          console.log('Using existing single-page container');
-        }
-        
-        // Remove any remaining multi-page elements
-        const remainingMultiPageElements = clonedElement.querySelectorAll('.multi-page-container, .page-wrapper');
-        remainingMultiPageElements.forEach(el => {
-          console.log('Removing remaining element:', el.className);
-          el.remove();
-        });
-        
-        console.log('After cleanup - children:', clonedElement.children.length);
-        console.log('HTML length:', clonedElement.innerHTML.length);
-        console.log('HTML content sample:', clonedElement.innerHTML.substring(0, 200));
-        console.log('Single page container exists:', !!clonedElement.querySelector('.single-page-container'));
-        console.log('Single page content length:', clonedElement.querySelector('.single-page-container')?.innerHTML.length || 0);
-        
-        // Debug: Check the final HTML structure for page breaks
-        const pageBreakElements = clonedElement.querySelectorAll('[style*="page-break-before"]');
-        console.log('Page break elements found:', pageBreakElements.length);
-        pageBreakElements.forEach((el, index) => {
-          console.log(`Page break ${index}:`, el.style.cssText, el.tagName);
-        });
-        
-        console.log('Final cloned element structure:');
-        console.log('- Single page containers:', clonedElement.querySelectorAll('.single-page-container').length);
-        console.log('- Multi page containers:', clonedElement.querySelectorAll('.multi-page-container').length);
-        console.log('- Page wrappers:', clonedElement.querySelectorAll('.page-wrapper').length);
-        
-        console.log('=== PDF DEBUG END ===');
-        
-        // Collect essential CSS for PDF generation
-        const stylesheets = Array.from(document.styleSheets);
-        const cssRules = [];
-        
-        stylesheets.forEach(sheet => {
+        // Debug each stylesheet
+        const stylesheetDebug = Array.from(document.styleSheets).map((sheet, index) => {
           try {
+            const debug = {
+              index,
+              href: sheet.href || 'inline',
+              disabled: sheet.disabled,
+              media: sheet.media ? sheet.media.mediaText : 'all',
+              title: sheet.title || 'none'
+            };
+            
+            console.log(`Stylesheet ${index}:`, debug);
+            
             const rules = Array.from(sheet.cssRules);
-            const relevantRules = rules.filter(rule => {
+            const previewRules = rules.filter(rule => {
               if (rule.type === CSSRule.STYLE_RULE) {
-                const selector = rule.selectorText || '';
-                return selector.includes('.live-preview-container') || 
-                       selector.includes('.page-wrapper') || 
-                       selector.includes('.single-page-container') ||
-                       selector.includes('.page-content');
+                const sel = rule.selectorText || '';
+                return sel.includes('.preview');
               }
               return false;
             });
             
-            cssRules.push(...relevantRules.map(rule => rule.cssText));
+            console.log(`Stylesheet ${index} total rules:`, rules.length);
+            console.log(`Stylesheet ${index} preview rules:`, previewRules.length);
+            
+            if (previewRules.length > 0) {
+              console.log(`Stylesheet ${index} preview rule examples:`, previewRules.slice(0, 3).map(r => r.selectorText));
+            }
+            
+            return previewRules.map(rule => rule.cssText).join('\n');
           } catch (e) {
-            // Skip inaccessible stylesheets
+            console.log(`Stylesheet ${index} error:`, e.message);
+            return '';
           }
         });
         
-        const filteredCssText = cssRules.join('\n');
+        const filteredCssText = stylesheetDebug.filter(Boolean).join('\n');
+        
+        console.log('Total preview CSS rules captured:', filteredCssText.split('\n').filter(line => line.includes('.preview')).length);
+        console.log('=== CSS DEBUGGING END ===');
 
         // Remove screen-only visual effects that cause a visible edge in PDFs
         const cleanedCssText = filteredCssText
@@ -279,168 +210,56 @@ function BuilderPage() {
 
         // Detect the current template class for targeted overrides
         const previewClasses = previewElement.className.split(' ');
-        const templateClass = previewClasses.find(cls => cls !== 'live-preview-container') || '';
+        const templateClass = previewClasses.find(cls => cls !== 'preview') || '';
         console.log('Detected template class:', templateClass);
         
         // PDF-specific overrides to ensure consistent rendering (keep minimal)
         const pdfOverrides = `
-          @page { 
-            size: Letter; 
-            margin: 0.5in;
+          @page { size: Letter; margin: 0; }
+          html, body { background: #ffffff !important; margin: 0 !important; padding: 0 !important; }
+          /* Keep the preview's own width/padding/margins exactly as in the live DOM */
+          .preview { box-shadow: none !important; border: 0 !important; outline: none !important; }
+          .preview::before, .preview::after { display: none !important; content: none !important; }
+          
+          /* Page break controls for PDF */
+          .preview .section-header {
+            page-break-after: avoid !important;
+            break-after: avoid !important;
+            orphans: 3 !important;
+            widows: 3 !important;
           }
           
-          /* Allow natural page breaks for long content */
-          body {
-            orphans: 2;
-            widows: 2;
-            page-break-inside: auto;
-            height: auto !important;
+          .preview .experience-item {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            orphans: 3 !important;
+            widows: 3 !important;
           }
           
-          /* Ensure sections can break naturally if needed */
-          .single-page-container {
-            page-break-inside: auto;
-            break-inside: auto;
-            height: auto !important;
-            max-height: none !important;
-            min-height: auto !important;
+          .preview .education-item {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            orphans: 3 !important;
+            widows: 3 !important;
           }
           
-          /* Ensure page break elements work correctly with multiple CSS approaches */
-          div[style*="page-break-before: always"], div[style*="break-before: page"] {
-            page-break-before: always !important;
-            break-before: page !important;
-            -webkit-break-before: page !important;
-            margin-top: 0 !important;
-            padding-top: 0 !important;
-            height: 0 !important;
-            min-height: 0 !important;
-            display: block !important;
-          }
-          
-          /* Additional page break support */
-          .page-content {
-            display: block !important;
-            visibility: visible !important;
-            height: auto !important;
-            overflow: visible !important;
-          }
-          
-          html, body { 
-            background: #ffffff !important; 
-            margin: 0 !important; 
-            padding: 0 !important; 
-            color: #000000 !important;
-            width: 100% !important;
-            max-width: none !important;
-            min-width: 100% !important;
-          }
-          
-          /* Ensure all containers are visible and match preview layout */
-          .live-preview-container { 
-            background: #ffffff !important; 
-            color: #000000 !important;
-            display: block !important;
-            visibility: visible !important;
-            height: auto !important;
-            max-height: none !important;
-            overflow: visible !important;
-            width: 100% !important;
-            max-width: none !important;
-            min-width: 100% !important;
-            padding: 0 !important;
-            margin: 0 !important;
-          }
-          
-          .single-page-container { 
-            background: #ffffff !important; 
-            color: #000000 !important;
-            display: block !important;
-            visibility: visible !important;
-            height: auto !important;
-            max-height: none !important;
-            overflow: visible !important;
-            width: 100% !important;
-            max-width: none !important;
-            min-width: 100% !important;
-            padding: 20px !important;
-            margin: 0 !important;
-            box-sizing: border-box !important;
-          }
-          
-          /* Hide multi-page containers since we convert to single-page */
-          .multi-page-container, .page-wrapper {
-            display: none !important;
-          }
-          
-          /* Remove borders from containers only */
-          .live-preview-container, .single-page-container {
-            border: none !important;
-            box-shadow: none !important;
-            outline: none !important;
-          }
-          
-          /* Remove 3D transform effects for straight PDF boundaries */
-          .single-page-container {
-            transform: none !important;
-            -webkit-transform: none !important;
-            -moz-transform: none !important;
-            -ms-transform: none !important;
-          }
-          
-          .single-page-container:hover {
-            transform: none !important;
-            -webkit-transform: none !important;
-            -moz-transform: none !important;
-            -ms-transform: none !important;
-          }
-          
-          /* Force all elements to use available width and prevent cutoff */
-          * {
-            color: #000000 !important;
-            word-wrap: break-word !important;
-            word-break: normal !important;
-            max-width: none !important;
-            overflow: visible !important;
-            box-sizing: border-box !important;
-          }
-          
-          /* Ensure all text containers have full width and proper text handling */
-          div, p, span {
-            max-width: none !important;
-            width: auto !important;
-            overflow: visible !important;
-            white-space: normal !important;
-            word-wrap: break-word !important;
-            overflow-wrap: break-word !important;
-            hyphens: auto !important;
-          }
-          
-          /* Ensure experience and content sections don't get truncated */
-          div[style*="marginBottom: 6px"], 
-          div[style*="margin-bottom: 6px"],
-          div[style*="lineHeight"],
-          div[style*="line-height"] {
-            width: 100% !important;
-            max-width: none !important;
-            overflow: visible !important;
-            word-wrap: break-word !important;
-            white-space: normal !important;
-          }
-          
-          /* Add section title borders for separators */
-          div[style*="fontSize: 11px"][style*="fontWeight: bold"][style*="textTransform: uppercase"],
-          div[style*="font-size: 11px"][style*="font-weight: bold"][style*="text-transform: uppercase"] {
-            border-bottom: 1px solid #000000 !important;
-            padding-bottom: 4px !important;
-            margin-bottom: 8px !important;
-            width: 100% !important;
-          }
-          
-          /* Hide buttons only */
-          button {
-            display: none !important;
-          }
+                        /* Skills section - force to second page and keep together */
+              .preview .skills-section-header {
+                page-break-before: always !important;
+                break-before: page !important;
+                page-break-after: avoid !important;
+                break-after: avoid !important;
+                margin-top: 0 !important;
+              }
+              
+              /* Skills content - keep with header */
+              .preview .skills-content {
+                page-break-before: avoid !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                orphans: 3 !important;
+                widows: 3 !important;
+              }
         `;
         
         // Debug: Log the CSS overrides to see if they're being generated
@@ -449,8 +268,6 @@ function BuilderPage() {
         console.log('Current step:', step);
         console.log('Preview element found:', !!previewElement);
         console.log('Preview element classes:', previewElement ? previewElement.className : 'N/A');
-        console.log('Preview element computed width:', previewElement ? window.getComputedStyle(previewElement).width : 'N/A');
-        console.log('Preview element computed max-width:', previewElement ? window.getComputedStyle(previewElement).maxWidth : 'N/A');
         console.log('PDF Overrides being applied:', pdfOverrides);
  
         // Create complete HTML document with CSS overrides LAST
@@ -475,7 +292,7 @@ function BuilderPage() {
   </style>
 </head>
 <body>
-            ${clonedElement.outerHTML}
+  ${clonedElement.outerHTML}
 </body>
 </html>`;
 
@@ -916,7 +733,7 @@ function BuilderPage() {
               flexDirection: 'column'
             }}
           >
-                            <LivePreview onDownload={handleViewResume} />
+                            <StepPreview onDownload={handleViewResume} />
           </div>
         </div>
       </div>
