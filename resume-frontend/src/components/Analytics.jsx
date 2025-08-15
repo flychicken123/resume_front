@@ -102,6 +102,9 @@ export const getUserSource = () => {
     userAgent: navigator.userAgent.includes('Chrome') ? 'Chrome' : 'Other'
   });
   
+  // Simple text debug
+  console.log(`🔍 Simple Debug: UTM Source=${urlParams.get('utm_source')}, Referrer="${referrer}", URL=${window.location.href}`);
+  
   // Check for UTM parameters first (highest priority)
   if (urlParams.get('utm_source')) {
     return {
