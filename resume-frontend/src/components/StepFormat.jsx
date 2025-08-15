@@ -39,61 +39,59 @@ const StepFormat = ({ onNext }) => {
   };
 
   return (
-    <div className="step-content">
-      <h2>Choose Your Resume Format</h2>
-      <p>Select a template style and font size that best represents your professional image.</p>
+    <div className="step-content" style={{ 
+      flex: 'none', 
+      height: 'fit-content', 
+      padding: '1rem',
+      maxWidth: '100%'
+    }}>
+      <h2 style={{ marginBottom: '0.25rem' }}>Choose Your Resume Format</h2>
+      <p style={{ marginBottom: '1rem' }}>Select a template style and font size that best represents your professional image.</p>
 
-      <div style={{ marginBottom: '2rem' }}>
-        <h3>Template Style</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem', marginTop: '1rem' }}>
+      <div style={{ marginBottom: '1rem' }}>
+        <h3 style={{ marginBottom: '0.75rem' }}>Template Style</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '0.75rem' }}>
           {formats.map((format) => (
             <div
               key={format.id}
               onClick={() => handleFormatSelect(format.id)}
               style={{
-                padding: '1.5rem',
+                padding: '0.75rem',
                 border: data.selectedFormat === format.id ? '2px solid #3b82f6' : '2px solid #e5e7eb',
-                borderRadius: '12px',
+                borderRadius: '6px',
                 cursor: 'pointer',
                 backgroundColor: data.selectedFormat === format.id ? '#f0f9ff' : 'white',
                 transition: 'all 0.2s ease'
               }}
             >
-              <h4 style={{ margin: '0 0 0.5rem 0', color: '#1f2937' }}>{format.name}</h4>
-              <p style={{ margin: 0, color: '#6b7280', fontSize: '0.9rem' }}>{format.description}</p>
+              <h4 style={{ margin: '0 0 0.25rem 0', color: '#1f2937', fontSize: '1rem' }}>{format.name}</h4>
+              <p style={{ margin: 0, color: '#6b7280', fontSize: '0.85rem' }}>{format.description}</p>
             </div>
           ))}
         </div>
       </div>
 
-      <div style={{ marginBottom: '2rem' }}>
-        <h3>Font Size</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginTop: '1rem' }}>
+      <div style={{ marginBottom: '0' }}>
+        <h3 style={{ marginBottom: '0.75rem' }}>Font Size</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem' }}>
           {fontSizes.map((fontSize) => (
             <div
               key={fontSize.id}
               onClick={() => handleFontSizeSelect(fontSize.id)}
               style={{
-                padding: '1.5rem',
+                padding: '0.75rem',
                 border: data.selectedFontSize === fontSize.id ? '2px solid #3b82f6' : '2px solid #e5e7eb',
-                borderRadius: '12px',
+                borderRadius: '6px',
                 cursor: 'pointer',
                 backgroundColor: data.selectedFontSize === fontSize.id ? '#f0f9ff' : 'white',
                 transition: 'all 0.2s ease'
               }}
             >
-              <h4 style={{ margin: '0 0 0.5rem 0', color: '#1f2937' }}>{fontSize.name}</h4>
-              <p style={{ margin: 0, color: '#6b7280', fontSize: '0.9rem' }}>{fontSize.description}</p>
+              <h4 style={{ margin: '0 0 0.25rem 0', color: '#1f2937', fontSize: '1rem' }}>{fontSize.name}</h4>
+              <p style={{ margin: 0, color: '#6b7280', fontSize: '0.85rem' }}>{fontSize.description}</p>
             </div>
           ))}
         </div>
-      </div>
-
-      <div className="navigation">
-        <div></div>
-        <button onClick={handleNext} disabled={!data.selectedFormat}>
-          {data.selectedFormat ? 'Format settings configured ✓' : 'Please select a format'}
-        </button>
       </div>
     </div>
   );

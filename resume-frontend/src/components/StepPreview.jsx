@@ -4,9 +4,7 @@ import { useResume } from '../context/ResumeContext';
 const StepPreview = ({ onDownload }) => {
   const { data, setData } = useResume();
   
-  console.log('StepPreview component rendered');
-  console.log('Current format:', data.selectedFormat);
-  console.log('Current font size:', data.selectedFontSize);
+
   
   // Font size scaling factors - increased small and medium for better readability
   const fontSizeScaling = {
@@ -35,12 +33,7 @@ const StepPreview = ({ onDownload }) => {
     root.style.setProperty('--font-size-details', scaleFont('9pt'));   // Contact/dates
     root.style.setProperty('--font-size-list', scaleFont('9pt'));      // Bullet points
     
-    console.log('StepPreview CSS custom properties updated:');
-    console.log('--font-size-base:', scaleFont('9pt'));
-    console.log('--font-size-header:', scaleFont('18pt'));
-    console.log('--font-size-section:', scaleFont('12pt'));
-    console.log('--font-size-content:', scaleFont('10pt'));
-    console.log('--font-size-details:', scaleFont('9pt'));
+
   }, [data.selectedFontSize, scale]);
 
   // Get template class based on selected format
@@ -110,72 +103,7 @@ const StepPreview = ({ onDownload }) => {
   
   return (
     <div className="preview-container" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-      {/* Live Format Controls */}
-      <div style={{ 
-        background: '#f8fafc', 
-        padding: '1rem', 
-        borderBottom: '1px solid #e5e7eb',
-        display: 'flex',
-        gap: '1rem',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        position: 'sticky',
-        top: 0,
-        zIndex: 100
-      }}>
-        <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#374151' }}>
-          Format Controls:
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <label style={{ fontSize: '0.9rem', fontWeight: 600, color: '#374151' }}>Template:</label>
-          <select 
-            value={data.selectedFormat || 'temp1'} 
-            onChange={(e) => setData(prev => ({ ...prev, selectedFormat: e.target.value }))}
-            style={{ 
-              padding: '0.5rem', 
-              border: '1px solid #d1d5db', 
-              borderRadius: '4px',
-              fontSize: '0.9rem'
-            }}
-          >
-            <option value="temp1">Classic Professional</option>
-            <option value="modern">Modern Clean</option>
-            <option value="industry-manager">Industry Manager</option>
-          </select>
-        </div>
-        
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <label style={{ fontSize: '0.9rem', fontWeight: 600, color: '#374151' }}>Font Size:</label>
-          <select 
-            value={data.selectedFontSize || 'medium'} 
-            onChange={(e) => setData(prev => ({ ...prev, selectedFontSize: e.target.value }))}
-            style={{ 
-              padding: '0.5rem', 
-              border: '1px solid #d1d5db', 
-              borderRadius: '4px',
-              fontSize: '0.9rem'
-            }}
-          >
-            <option value="small">Small</option>
-            <option value="medium">Medium</option>
-            <option value="large">Large</option>
-            <option value="extra-large">Extra Large</option>
-          </select>
-        </div>
-      </div>
-      
-      {/* Debug info - remove this in production */}
-      {process.env.NODE_ENV === 'development' && (
-        <div style={{ 
-          background: '#f0f9ff', 
-          padding: '4px 8px', 
-          fontSize: '10px', 
-          color: '#0369a1',
-          borderBottom: '1px solid #e5e7eb'
-        }}>
-          Font Size: {data.selectedFontSize || 'medium'} (Scale: {scale})
-        </div>
-      )}
+
       <div className={getTemplateClass()} style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <div className="header">
           <div className="name">{data.name || 'Your Name'}</div>

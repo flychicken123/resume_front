@@ -8,6 +8,7 @@ import StepExperience from '../components/StepExperience';
 import StepEducation from '../components/StepEducation';
 import StepSkills from '../components/StepSkills';
 import StepSummary from '../components/StepSummary';
+import StepFormat from '../components/StepFormat';
 import StepPreview from '../components/StepPreview';
 import AuthModal from '../components/auth/AuthModal';
 import JobDescModal from '../components/JobDescModal';
@@ -20,7 +21,8 @@ const steps = [
   "Experience",
   "Education", 
   "Skills",
-  "Summary"
+  "Summary",
+  "Format"
 ];
 
 function BuilderPage() {
@@ -176,24 +178,10 @@ function BuilderPage() {
           return `${Math.round(size * scale)}pt`; // Use pt to match CSS custom properties
         };
         
-        console.log('Font size debugging:');
-        console.log('Selected format:', data.selectedFormat);
-        console.log('Selected font size:', data.selectedFontSize);
-        console.log('Scale factor:', scale);
-        console.log('Font size mapping:', fontSizeScaling);
-        console.log('ScaleFont examples for industry-manager template:');
-        console.log('Container (9pt):', scaleFont('9pt'));
-        console.log('Header (18pt):', scaleFont('18pt'));
-        console.log('Section title (12pt):', scaleFont('12pt'));
-        console.log('Company (10pt):', scaleFont('10pt'));
-        console.log('Date/Contact (9pt):', scaleFont('9pt'));
-        console.log('=== FONT SIZE CHANGE VERIFICATION ===');
-        console.log('This should show different values when you change font size in the UI!');
+
         
         // Directly modify the cloned element's inline styles to match the selected font size
         const applyScaledFontSizes = (element, depth = 0) => {
-          const indent = '  '.repeat(depth);
-          console.log(`${indent}Processing element:`, element.tagName, 'current fontSize:', element.style.fontSize);
           
           // Get the current font size or determine what it should be based on element properties
           let currentFontSize = element.style.fontSize;
@@ -225,7 +213,6 @@ function BuilderPage() {
           
           // Apply the new font size
           element.style.fontSize = newFontSize;
-          console.log(`${indent}Applied font size:`, newFontSize, 'to element with text:', element.textContent?.substring(0, 30));
           
           // Recursively process child elements
           Array.from(element.children).forEach(child => applyScaledFontSizes(child, depth + 1));
@@ -234,57 +221,20 @@ function BuilderPage() {
         // Check if it's the first child (header/name)
         if (clonedElement.children.length > 0) {
           clonedElement.children[0].style.fontSize = scaleFont('18pt');
-          console.log('Set header font size to:', scaleFont('18pt'));
         }
         
-        // Debug: Check if education content exists in the cloned element
-        console.log('=== EDUCATION DEBUGGING ===');
-        console.log('Education data:', data.education);
-        console.log('Number of education items:', data.education ? data.education.length : 0);
-        
-        const educationHeaders = clonedElement.querySelectorAll('.section-header');
-        console.log('Found section headers:', educationHeaders.length);
-        educationHeaders.forEach((header, index) => {
-          console.log(`Header ${index}:`, header.textContent);
-          const nextElement = header.nextElementSibling;
-          console.log(`Next element after header:`, nextElement ? nextElement.outerHTML.substring(0, 200) : 'NONE');
-        });
-        
-        const educationItems = clonedElement.querySelectorAll('.education-item');
-        console.log('Found education items:', educationItems.length);
-        educationItems.forEach((item, index) => {
-          console.log(`Education item ${index}:`, item.outerHTML.substring(0, 200));
-        });
-        console.log('=== END EDUCATION DEBUGGING ===');
+
         
         // Apply scaled font sizes to all elements
-        console.log('Applying scaled font sizes to cloned element...');
         applyScaledFontSizes(clonedElement);
         
 
         
 
         
-        // Comprehensive CSS debugging
-        console.log('=== CSS DEBUGGING START ===');
-        console.log('Environment:', window.location.hostname);
-        console.log('URL:', window.location.href);
-        console.log('User Agent:', navigator.userAgent);
-        console.log('Number of stylesheets:', document.styleSheets.length);
-        
-        // Debug each stylesheet
-        const stylesheetDebug = Array.from(document.styleSheets).map((sheet, index) => {
+        // Capture CSS rules for the PDF
+        const filteredCssText = Array.from(document.styleSheets).map((sheet) => {
           try {
-            const debug = {
-              index,
-              href: sheet.href || 'inline',
-              disabled: sheet.disabled,
-              media: sheet.media ? sheet.media.mediaText : 'all',
-              title: sheet.title || 'none'
-            };
-            
-            console.log(`Stylesheet ${index}:`, debug);
-            
             const rules = Array.from(sheet.cssRules);
             const previewRules = rules.filter(rule => {
               if (rule.type === CSSRule.STYLE_RULE) {
@@ -293,25 +243,11 @@ function BuilderPage() {
               }
               return false;
             });
-            
-            console.log(`Stylesheet ${index} total rules:`, rules.length);
-            console.log(`Stylesheet ${index} preview rules:`, previewRules.length);
-            
-            if (previewRules.length > 0) {
-              console.log(`Stylesheet ${index} preview rule examples:`, previewRules.slice(0, 3).map(r => r.selectorText));
-            }
-            
             return previewRules.map(rule => rule.cssText).join('\n');
           } catch (e) {
-            console.log(`Stylesheet ${index} error:`, e.message);
             return '';
           }
-        });
-        
-        const filteredCssText = stylesheetDebug.filter(Boolean).join('\n');
-        
-        console.log('Total preview CSS rules captured:', filteredCssText.split('\n').filter(line => line.includes('.preview')).length);
-        console.log('=== CSS DEBUGGING END ===');
+        }).filter(Boolean).join('\n');
 
         // Remove screen-only visual effects that cause a visible edge in PDFs
         const cleanedCssText = filteredCssText
@@ -322,7 +258,7 @@ function BuilderPage() {
         // Detect the current template class for targeted overrides
         const previewClasses = previewElement.className.split(' ');
         const templateClass = previewClasses.find(cls => cls !== 'preview') || '';
-        console.log('Detected template class:', templateClass);
+
         
         // PDF-specific overrides to ensure consistent rendering (keep minimal)
         const pdfOverrides = `
@@ -389,34 +325,7 @@ function BuilderPage() {
           }
         `;
         
-        // Debug: Log the CSS overrides to see if they're being generated
-        console.log('=== PDF GENERATION DEBUG ===');
-        console.log('Current template/format:', data.format || 'default');
-        console.log('Current step:', step);
-        console.log('Preview element found:', !!previewElement);
-        console.log('Preview element classes:', previewElement ? previewElement.className : 'N/A');
-        console.log('Selected font size:', data.selectedFontSize);
-        console.log('Font size scale:', scale);
-        console.log('PDF Overrides being applied:', pdfOverrides);
-        console.log('CSS Custom Properties being set:');
-        console.log('--font-size-base:', scaleFont('11pt'));
-        console.log('--font-size-header:', scaleFont('16pt'));
-        console.log('--font-size-section:', scaleFont('11pt'));
-        
-        // Debug: Check computed styles of preview element
-        if (previewElement) {
-          const computedStyle = window.getComputedStyle(previewElement);
-          console.log('Preview element computed font-size:', computedStyle.fontSize);
-          console.log('Preview element computed font-family:', computedStyle.fontFamily);
-          
-          // Get all child elements and their computed font sizes
-          const allElements = previewElement.querySelectorAll('*');
-          console.log('All elements in preview:', allElements.length);
-          allElements.forEach((el, index) => {
-            const style = window.getComputedStyle(el);
-            console.log(`Element ${index}:`, el.tagName, 'font-size:', style.fontSize, 'font-weight:', style.fontWeight);
-          });
-        }
+
  
         // Create complete HTML document with CSS overrides LAST
         const htmlContent = `
@@ -463,18 +372,7 @@ function BuilderPage() {
         const minHtmlContent = minifyHtml(htmlContent);
 
         // Debug: Log the HTML content length and preview
-        console.log('=== FINAL HTML DEBUG ===');
-        console.log('HTML Content Length:', htmlContent.length, 'Minified Length:', minHtmlContent.length);
-        console.log('Captured CSS Length:', cleanedCssText.length);
-        console.log('Overrides CSS Length:', pdfOverrides.length);
-        console.log('Preview Element HTML Length:', clonedElement.outerHTML.length);
-        console.log('HTML Content Preview (first 1000 chars):', minHtmlContent.substring(0, 1000));
-        
-        // Debug: Check if our overrides are in the final HTML
-        const hasOverrides = htmlContent.includes('font-size: 18pt !important');
-        console.log('CSS Overrides found in HTML:', hasOverrides);
-        console.log('CSS Overrides position:', htmlContent.indexOf('font-size: 18pt !important'));
-        console.log('=== DEBUGGING COMPLETE ===');
+
 
         // Call the backend to generate PDF using multipart upload (smaller, proxy-friendly)
         const htmlBlob = new Blob([minHtmlContent], { type: 'text/html' });
@@ -506,7 +404,7 @@ function BuilderPage() {
              
              // Use the direct S3 URL since CORS prevents us from using fetch()
              // The backend has already generated the PDF and returned a signed URL
-             console.log('Opening download URL:', result.data.downloadURL);
+
              window.open(result.data.downloadURL, '_blank');
              alert('PDF resume generated successfully!');
            } else {
@@ -538,16 +436,16 @@ function BuilderPage() {
 
   // Handler for auth button
   const handleAuthButton = () => {
-    console.log('handleAuthButton called, user:', user);
+
     if (user) {
-      console.log('Logging out user:', user);
+
       // Immediately clear everything and redirect to home
       localStorage.removeItem('resumeUser');
       logout();
       // Navigate to home page to avoid any modal issues
       window.location.href = '/';
     } else {
-      console.log('Opening login modal');
+
       setShowAuthModal(true);
     }
   };
@@ -695,6 +593,7 @@ function BuilderPage() {
               {step === 3 && <StepEducation />}
               {step === 4 && <StepSkills />}
               {step === 5 && <StepSummary />}
+              {step === 6 && <StepFormat onNext={handleNext} />}
               
                              {/* Navigation Buttons */}
                <div style={{ 

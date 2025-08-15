@@ -4,12 +4,14 @@ import { useLocation } from 'react-router-dom';
 // Analytics configuration
 const GA_MEASUREMENT_ID = process.env.REACT_APP_GA_MEASUREMENT_ID || 'G-B327RPMPS5';
 
-// Check if we're in development/localhost
+// Check if we're in development/localhost - don't track analytics in development
 const isLocalhost = () => {
-  return window.location.hostname === 'localhost' || 
+  return process.env.NODE_ENV === 'development' ||
+         window.location.hostname === 'localhost' || 
          window.location.hostname === '127.0.0.1' || 
          window.location.hostname === '0.0.0.0' ||
-         window.location.hostname.includes('localhost');
+         window.location.hostname.includes('localhost') ||
+         window.location.hostname.includes('127.0.0.1');
 };
 
 // Initialize Google Analytics
@@ -96,7 +98,7 @@ export const trackReferrer = () => {
       'custom_parameter_2': window.location.search || 'no_params'
     });
     
-    console.log('Referrer tracked:', { referrer, currentPage });
+
   }
 };
 
