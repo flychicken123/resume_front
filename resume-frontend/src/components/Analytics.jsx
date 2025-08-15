@@ -90,6 +90,15 @@ export const getUserSource = () => {
   const urlParams = new URLSearchParams(window.location.search);
   const referrer = document.referrer;
   
+  // Debug UTM detection
+  console.log('🔍 UTM Debug:', {
+    fullURL: window.location.href,
+    searchParams: window.location.search,
+    utmSource: urlParams.get('utm_source'),
+    utmMedium: urlParams.get('utm_medium'),
+    referrer: referrer
+  });
+  
   // Check for UTM parameters first (highest priority)
   if (urlParams.get('utm_source')) {
     return {
