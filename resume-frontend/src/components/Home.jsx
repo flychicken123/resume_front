@@ -24,6 +24,12 @@ const Home = () => {
 
 
 
+  // Track user source when home page loads
+  useEffect(() => {
+    trackReferrer();
+    trackBuilderStart('home_page_load');
+  }, []);
+
   // Calculate optimal spacing based on button width
   useEffect(() => {
     if (buttonRef.current && user) {
