@@ -96,7 +96,10 @@ export const getUserSource = () => {
     searchParams: window.location.search,
     utmSource: urlParams.get('utm_source'),
     utmMedium: urlParams.get('utm_medium'),
-    referrer: referrer
+    referrer: referrer,
+    referrerLength: referrer.length,
+    documentReferrer: document.referrer,
+    userAgent: navigator.userAgent.includes('Chrome') ? 'Chrome' : 'Other'
   });
   
   // Check for UTM parameters first (highest priority)
