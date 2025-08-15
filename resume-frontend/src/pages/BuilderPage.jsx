@@ -397,12 +397,16 @@ function BuilderPage() {
           
           /* Force all elements to use available width and prevent cutoff */
           * {
-            color: #000000 !important;
             word-wrap: break-word !important;
             word-break: normal !important;
             max-width: none !important;
             overflow: visible !important;
             box-sizing: border-box !important;
+          }
+          
+          /* Only force black color on main containers, preserve template colors */
+          body, .live-preview-container, .single-page-container {
+            color: #000000 !important;
           }
           
           /* Ensure all text containers have full width and proper text handling */
