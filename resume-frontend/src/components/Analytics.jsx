@@ -90,20 +90,7 @@ export const getUserSource = () => {
   const urlParams = new URLSearchParams(window.location.search);
   const referrer = document.referrer;
   
-  // Debug UTM detection
-  console.log('🔍 UTM Debug:', {
-    fullURL: window.location.href,
-    searchParams: window.location.search,
-    utmSource: urlParams.get('utm_source'),
-    utmMedium: urlParams.get('utm_medium'),
-    referrer: referrer,
-    referrerLength: referrer.length,
-    documentReferrer: document.referrer,
-    userAgent: navigator.userAgent.includes('Chrome') ? 'Chrome' : 'Other'
-  });
-  
-  // Simple text debug
-  console.log(`🔍 Simple Debug: UTM Source=${urlParams.get('utm_source')}, Referrer="${referrer}", URL=${window.location.href}`);
+  // UTM parameter detection (debug logging removed for production)
   
   // Check for UTM parameters first (highest priority)
   if (urlParams.get('utm_source')) {
@@ -171,14 +158,7 @@ export const trackReferrer = () => {
   const userSource = getUserSource();
   const currentPage = window.location.pathname;
   
-  // Debug logging (remove after testing)
-  console.log('🔍 Analytics Debug:', {
-    gtagAvailable: typeof gtag !== 'undefined',
-    isLocalhost: isLocalhost(),
-    userSource,
-    currentPage,
-    hostname: window.location.hostname
-  });
+  // Analytics tracking (debug logging removed for production)
   
   if (typeof gtag !== 'undefined' && !isLocalhost()) {
     
