@@ -85,32 +85,132 @@ export const trackBuilderTimeSpent = (duration) => {
   trackEvent('builder_time_spent', 'engagement', 'resume_builder', duration);
 };
 
+// Enhanced user source tracking
+export const getUserSource = () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const referrer = document.referrer;
+  
+  // Check for UTM parameters first (highest priority)
+  if (urlParams.get('utm_source')) {
+    return {
+      source: urlParams.get('utm_source'),
+      medium: urlParams.get('utm_medium') || 'unknown',
+      campaign: urlParams.get('utm_campaign') || 'unknown',
+      term: urlParams.get('utm_term') || 'unknown',
+      content: urlParams.get('utm_content') || 'unknown',
+      type: 'utm'
+    };
+  }
+  
+  // Check for common social media and search engine referrers
+  if (referrer) {
+    const referrerDomain = new URL(referrer).hostname.toLowerCase();
+    
+    // Search engines
+    if (referrerDomain.includes('google')) {
+      return { source: 'google', medium: 'search', type: 'search_engine' };
+    }
+    if (referrerDomain.includes('bing')) {
+      return { source: 'bing', medium: 'search', type: 'search_engine' };
+    }
+    if (referrerDomain.includes('yahoo')) {
+      return { source: 'yahoo', medium: 'search', type: 'search_engine' };
+    }
+    if (referrerDomain.includes('duckduckgo')) {
+      return { source: 'duckduckgo', medium: 'search', type: 'search_engine' };
+    }
+    
+    // Social media
+    if (referrerDomain.includes('facebook')) {
+      return { source: 'facebook', medium: 'social', type: 'social_media' };
+    }
+    if (referrerDomain.includes('twitter') || referrerDomain.includes('x.com')) {
+      return { source: 'twitter', medium: 'social', type: 'social_media' };
+    }
+    if (referrerDomain.includes('linkedin')) {
+      return { source: 'linkedin', medium: 'social', type: 'social_media' };
+    }
+    if (referrerDomain.includes('instagram')) {
+      return { source: 'instagram', medium: 'social', type: 'social_media' };
+    }
+    if (referrerDomain.includes('tiktok')) {
+      return { source: 'tiktok', medium: 'social', type: 'social_media' };
+    }
+    if (referrerDomain.includes('reddit')) {
+      return { source: 'reddit', medium: 'social', type: 'social_media' };
+    }
+    if (referrerDomain.includes('youtube')) {
+      return { source: 'youtube', medium: 'video', type: 'social_media' };
+    }
+    
+    // Other referrers
+    return { source: referrerDomain, medium: 'referral', type: 'external_website' };
+  }
+  
+  // Direct traffic (no referrer)
+  return { source: 'direct', medium: 'none', type: 'direct' };
+};
+
 // Track referrer/source when user enters the builder
 export const trackReferrer = () => {
   if (typeof gtag !== 'undefined' && !isLocalhost()) {
-    const referrer = document.referrer || 'direct';
+    const userSource = getUserSource();
     const currentPage = window.location.pathname;
     
     gtag('event', 'page_referrer', {
-      'event_category': 'navigation',
-      'event_label': referrer,
-      'custom_parameter_1': currentPage,
-      'custom_parameter_2': window.location.search || 'no_params'
+      'event_category': 'user_acquisition',
+      'event_label': userSource.source,
+      'custom_parameter_1': userSource.medium,
+      'custom_parameter_2': userSource.type,
+      'custom_parameter_3': currentPage,
+      'custom_parameter_4': window.location.search || 'no_params'
     });
     
-
+    // Also track as a separate user source event for better analytics
+    gtag('event', 'user_source_detected', {
+      'event_category': 'user_acquisition',
+      'event_label': userSource.source,
+      'source_medium': userSource.medium,
+      'source_type': userSource.type,
+      'landing_page': currentPage
+    });
   }
 };
 
-// Track when user starts building resume
+// Track when user starts building resume (enhanced with source info)
 export const trackBuilderStart = (source) => {
   if (typeof gtag !== 'undefined' && !isLocalhost()) {
+    const userSource = getUserSource();
+    
     gtag('event', 'resume_builder_start', {
       'event_category': 'engagement',
       'event_label': source || 'unknown',
+      'user_source': userSource.source,
+      'user_medium': userSource.medium,
+      'user_source_type': userSource.type,
       'custom_parameter_1': document.referrer || 'direct'
     });
   }
+};
+
+// Function to get detailed source information (useful for debugging)
+export const getDetailedSourceInfo = () => {
+  const userSource = getUserSource();
+  const urlParams = new URLSearchParams(window.location.search);
+  
+  return {
+    ...userSource,
+    fullUrl: window.location.href,
+    referrer: document.referrer || 'none',
+    utmParams: {
+      source: urlParams.get('utm_source'),
+      medium: urlParams.get('utm_medium'),
+      campaign: urlParams.get('utm_campaign'),
+      term: urlParams.get('utm_term'),
+      content: urlParams.get('utm_content')
+    },
+    timestamp: new Date().toISOString()
+  };
 };
 
 // Track when user completes a step
