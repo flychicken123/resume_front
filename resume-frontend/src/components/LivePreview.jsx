@@ -349,181 +349,198 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
     return null;
   }
 
+  // Format styles copied exactly from StepFormat.jsx templates - scaled up for live preview
   const getFormatStyles = (format) => {
+    const scaleFactor = 2; // Scale up from StepFormat's 6-10px to 12-20px for readability
+    
     switch (format) {
       case 'temp1':
+        // Classic Professional - exactly like StepFormat temp1
         return {
           container: { 
-            fontFamily: 'Arial, sans-serif', 
-            fontSize: '9px', 
+            fontFamily: 'Calibri, Arial, sans-serif', 
+            fontSize: `${7 * scaleFactor}px`, 
             lineHeight: '1.2',
-            padding: '10px',
+            padding: `${8 * scaleFactor}px`,
             background: 'white',
             border: '1px solid #e5e7eb',
-            borderRadius: '4px'
+            borderRadius: '4px',
+            overflow: 'visible' // Changed from 'hidden' for full preview
           },
           header: { 
-            fontSize: '16px', 
+            textAlign: 'center', 
             fontWeight: 'bold', 
-            color: '#1f2937', 
-            marginBottom: '8px',
-            textAlign: 'center'
-          },
-          section: { 
-            marginBottom: '12px'
-          },
-          sectionTitle: { 
-            fontSize: '11px', 
-            fontWeight: 'bold', 
-            color: '#1f2937', 
-            marginBottom: '6px',
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px'
+            fontSize: `${10 * scaleFactor}px`, 
+            marginBottom: `${3 * scaleFactor}px`, 
+            color: '#1f2937'
           },
           contact: { 
-            fontSize: '8px', 
+            textAlign: 'center', 
             color: '#6b7280', 
-            marginBottom: '8px',
-            textAlign: 'center'
+            fontSize: `${6 * scaleFactor}px`, 
+            marginBottom: `${6 * scaleFactor}px`
           },
-          item: { marginBottom: '5px' },
-          company: { fontWeight: 'bold', color: '#1f2937', fontSize: '9px' },
-          date: { color: '#6b7280', fontSize: '9px' },
-          bullet: { marginLeft: '12px', marginBottom: '2px', fontSize: '8px' },
-          summary: { fontSize: '8px', lineHeight: '1.2' },
-          skills: { fontSize: '8px', lineHeight: '1.2' }
+          sectionTitle: { 
+            color: '#1f2937', 
+            fontWeight: 'bold', 
+            fontSize: `${6 * scaleFactor}px`, 
+            marginBottom: `${2 * scaleFactor}px`, 
+            borderBottom: '1px solid #000', 
+            paddingBottom: `${1 * scaleFactor}px`, 
+            textAlign: 'left'
+          },
+          company: { 
+            color: '#374151', 
+            fontWeight: 'bold', 
+            fontSize: `${6 * scaleFactor}px`
+          },
+          bullet: { 
+            color: '#374151', 
+            fontSize: `${6 * scaleFactor}px`, 
+            marginLeft: `${4 * scaleFactor}px`, 
+            marginBottom: `${2 * scaleFactor}px`
+          },
+          summary: { 
+            color: '#374151', 
+            fontSize: `${6 * scaleFactor}px`, 
+            marginBottom: `${4 * scaleFactor}px`
+          },
+          skills: { 
+            color: '#374151', 
+            fontSize: `${6 * scaleFactor}px`
+          },
+          item: { marginTop: `${3 * scaleFactor}px` }
         };
+      
       case 'industry-manager':
+        // Executive Professional - exactly like StepFormat industry-manager
         return {
           container: { 
             fontFamily: 'Georgia, serif', 
-            fontSize: '9px', 
-            lineHeight: '1.3',
-            padding: '12px',
+            fontSize: `${7 * scaleFactor}px`, 
+            lineHeight: '1.2',
+            padding: `${8 * scaleFactor}px`,
             background: 'white',
             border: '1px solid #e5e7eb',
-            borderRadius: '4px'
+            borderRadius: '4px',
+            overflow: 'visible'
           },
           header: { 
-            fontSize: '18px', 
+            textAlign: 'center', 
             fontWeight: 'bold', 
-            color: '#1a1a1a', 
-            marginBottom: '8px', 
-            textAlign: 'center' 
-          },
-          section: { marginBottom: '16px' },
-          sectionTitle: { 
-            fontSize: '12px', 
-            fontWeight: 'bold', 
-            color: '#2c3e50', 
-            borderBottom: '2px solid #34495e', 
-            paddingBottom: '3px', 
-            marginBottom: '8px', 
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px'
+            fontSize: `${10 * scaleFactor}px`, 
+            marginBottom: `${3 * scaleFactor}px`, 
+            color: '#2c3e50'
           },
           contact: { 
-            fontSize: '9px', 
+            textAlign: 'center', 
             color: '#7f8c8d', 
-            marginBottom: '10px',
-            textAlign: 'center'
-          },
-          item: { marginBottom: '8px' },
-          company: { fontWeight: 'bold', color: '#2c3e50', fontSize: '10px' },
-          date: { color: '#7f8c8d', fontSize: '9px' },
-          bullet: { marginLeft: '15px', marginBottom: '3px', fontSize: '9px' },
-          summary: { fontSize: '9px', lineHeight: '1.3' },
-          skills: { fontSize: '9px', lineHeight: '1.3' }
-        };
-      case 'modern':
-        return {
-          container: { 
-            fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif', 
-            fontSize: '9px', 
-            lineHeight: '1.4',
-            padding: '12px',
-            background: 'white',
-            border: '1px solid #e5e7eb',
-            borderRadius: '4px'
-          },
-          header: { 
-            fontSize: '18px', 
-            fontWeight: '600', 
-            color: '#2c3e50', 
-            marginBottom: '8px',
-            textAlign: 'left',
-            borderBottom: '3px solid #3498db',
-            textTransform: 'uppercase',
-            letterSpacing: '1px'
-          },
-          section: { 
-            marginBottom: '16px'
+            fontSize: `${6 * scaleFactor}px`, 
+            marginBottom: `${6 * scaleFactor}px`
           },
           sectionTitle: { 
-            fontSize: '11px', 
-            fontWeight: '600', 
-            color: '#3498db', 
-            borderBottom: '1px solid #bdc3c7', 
-            paddingBottom: '3px', 
-            marginBottom: '8px', 
-            textTransform: 'uppercase',
-            letterSpacing: '1px'
-          },
-          contact: { 
-            fontSize: '9px', 
-            color: '#7f8c8d', 
-            marginBottom: '8px',
+            color: '#2c3e50', 
+            fontWeight: 'bold', 
+            fontSize: `${6 * scaleFactor}px`, 
+            marginBottom: `${2 * scaleFactor}px`, 
+            borderBottom: '1px solid #000', 
+            paddingBottom: `${1 * scaleFactor}px`, 
             textAlign: 'left'
           },
-          item: { marginBottom: '8px' },
-          company: { fontWeight: '600', color: '#2c3e50', fontSize: '10px' },
-          date: { color: '#7f8c8d', fontSize: '9px' },
-          bullet: { marginLeft: '15px', marginBottom: '3px', fontSize: '9px' },
-          summary: { fontSize: '9px', lineHeight: '1.5' },
-          skills: { fontSize: '9px', lineHeight: '1.5' }
+          thickLine: {
+            borderBottom: '2px solid #34495e', 
+            marginBottom: `${4 * scaleFactor}px`
+          },
+          company: { 
+            color: '#2c3e50', 
+            fontWeight: 'bold', 
+            fontSize: `${6 * scaleFactor}px`
+          },
+          bullet: { 
+            color: '#374151', 
+            fontSize: `${6 * scaleFactor}px`, 
+            marginLeft: `${4 * scaleFactor}px`, 
+            marginBottom: `${2 * scaleFactor}px`
+          },
+          summary: { 
+            color: '#374151', 
+            fontSize: `${6 * scaleFactor}px`, 
+            marginBottom: `${4 * scaleFactor}px`
+          },
+          skills: { 
+            color: '#374151', 
+            fontSize: `${6 * scaleFactor}px`
+          },
+          item: { marginTop: `${3 * scaleFactor}px` }
         };
-      default:
+      
+      case 'modern':
+        // Contemporary Tech - exactly like StepFormat modern
         return {
           container: { 
-            fontFamily: 'Arial, sans-serif', 
-            fontSize: '9px', 
+            fontFamily: 'Segoe UI, sans-serif', 
+            fontSize: `${7 * scaleFactor}px`, 
             lineHeight: '1.2',
-            padding: '10px',
+            padding: `${8 * scaleFactor}px`,
             background: 'white',
             border: '1px solid #e5e7eb',
-            borderRadius: '4px'
+            borderRadius: '4px',
+            overflow: 'visible'
+          },
+          headerContainer: {
+            borderBottom: '3px solid #3498db', 
+            paddingBottom: `${4 * scaleFactor}px`, 
+            marginBottom: `${4 * scaleFactor}px`
           },
           header: { 
-            fontSize: '16px', 
-            fontWeight: 'bold', 
-            color: '#1f2937', 
-            marginBottom: '8px',
+            fontWeight: '600', 
+            fontSize: `${10 * scaleFactor}px`, 
+            marginBottom: `${2 * scaleFactor}px`, 
+            color: '#2c3e50',
             textAlign: 'center'
-          },
-          section: { 
-            marginBottom: '12px'
-          },
-          sectionTitle: { 
-            fontSize: '11px', 
-            fontWeight: 'bold', 
-            color: '#1f2937', 
-            marginBottom: '6px',
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px'
           },
           contact: { 
-            fontSize: '8px', 
-            color: '#6b7280', 
-            marginBottom: '8px',
+            color: '#7f8c8d', 
+            fontSize: `${6 * scaleFactor}px`,
             textAlign: 'center'
           },
-          item: { marginBottom: '5px' },
-          company: { fontWeight: 'bold', color: '#1f2937', fontSize: '9px' },
-          date: { color: '#6b7280', fontSize: '9px' },
-          bullet: { marginLeft: '12px', marginBottom: '2px', fontSize: '8px' },
-          summary: { fontSize: '8px', lineHeight: '1.2' },
-          skills: { fontSize: '8px', lineHeight: '1.2' }
+          sectionTitle: { 
+            color: '#3498db', 
+            fontWeight: '600', 
+            fontSize: `${6 * scaleFactor}px`, 
+            marginBottom: `${2 * scaleFactor}px`, 
+            textTransform: 'uppercase', 
+            letterSpacing: '1px', 
+            borderBottom: '1px solid #000', 
+            paddingBottom: `${1 * scaleFactor}px`, 
+            textAlign: 'left'
+          },
+          company: { 
+            color: '#2c3e50', 
+            fontWeight: '600', 
+            fontSize: `${6 * scaleFactor}px`
+          },
+          bullet: { 
+            color: '#374151', 
+            fontSize: `${6 * scaleFactor}px`, 
+            marginLeft: `${4 * scaleFactor}px`, 
+            marginBottom: `${2 * scaleFactor}px`
+          },
+          summary: { 
+            color: '#374151', 
+            fontSize: `${6 * scaleFactor}px`, 
+            marginBottom: `${4 * scaleFactor}px`
+          },
+          skills: { 
+            color: '#374151', 
+            fontSize: `${6 * scaleFactor}px`
+          },
+          item: { marginTop: `${3 * scaleFactor}px` }
         };
+      
+             default:
+         // Default to Classic Professional
+         return getFormatStyles('temp1');
     }
   };
 
@@ -580,10 +597,7 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
         return (
           <div key={idx} style={styles.item}>
             <div style={styles.company}>
-              {exp.jobTitle || 'Job Title'}
-            </div>
-            <div style={styles.date}>
-              {exp.company || 'Company'} {location && `• ${location}`} {dates && `• ${dates}`}
+              {exp.jobTitle || 'Job Title'} | {exp.company || 'Company'} {location && `• ${location}`} {dates && `• ${dates}`}
             </div>
             {exp.description && (
               <div style={{ marginTop: '2px' }}>
@@ -610,13 +624,10 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
       return education.map((edu, idx) => (
         <div key={idx} style={styles.item}>
           <div style={styles.company}>
-            {edu.degree} {edu.field && `in ${edu.field}`}
-          </div>
-          <div style={styles.date}>
-            {edu.school} {edu.graduationYear && `• ${edu.graduationYear}`}
+            {edu.degree} {edu.field && `in ${edu.field}`} | {edu.school} | {edu.graduationYear}
           </div>
           {edu.gpa && (
-            <div style={{ fontSize: '10px', color: '#7f8c8d' }}>
+            <div style={styles.date}>
               GPA: {edu.gpa}
             </div>
           )}
@@ -639,7 +650,11 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
     }
 
     return (
-      <div style={styles.section}>
+      <div>
+        {/* Add thick line for industry-manager template */}
+        {data.selectedFormat === 'industry-manager' && styles.thickLine && (
+          <div style={styles.thickLine}></div>
+        )}
         <div style={styles.sectionTitle}>{title}</div>
         {content}
       </div>
@@ -653,16 +668,32 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
         case 'header':
           return (
             <div key={idx}>
-              {section.content.name && (
-                <div style={styles.header}>
-                  {section.content.name}
+              {(data.selectedFormat === 'modern') ? (
+                <div style={styles.headerContainer}>
+                  {section.content.name && (
+                    <div style={styles.header}>
+                      {section.content.name}
+                    </div>
+                  )}
+                  {(section.content.email || section.content.phone) && (
+                    <div style={styles.contact}>
+                      {[section.content.email, section.content.phone].filter(Boolean).join(' • ')}
+                    </div>
+                  )}
                 </div>
-              )}
-              {(section.content.email || section.content.phone) && (
-                <div style={styles.contact}>
-                  {section.content.email && <div>{section.content.email}</div>}
-                  {section.content.phone && <div>{section.content.phone}</div>}
-                </div>
+              ) : (
+                <>
+                  {section.content.name && (
+                    <div style={styles.header}>
+                      {section.content.name}
+                    </div>
+                  )}
+                  {(section.content.email || section.content.phone) && (
+                    <div style={styles.contact}>
+                      {[section.content.email, section.content.phone].filter(Boolean).join(' • ')}
+                    </div>
+                  )}
+                </>
               )}
             </div>
           );
@@ -733,17 +764,33 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
         >
           {/* Resume Content */}
           <div style={{ height: 'auto', overflow: 'visible' }}>
-            {data.name && (
-              <div style={styles.header}>
-                {data.name}
+            {/* Header - handle modern template's special container */}
+            {(data.selectedFormat === 'modern') ? (
+              <div style={styles.headerContainer}>
+                {data.name && (
+                  <div style={styles.header}>
+                    {data.name}
+                  </div>
+                )}
+                {(data.email || data.phone) && (
+                  <div style={styles.contact}>
+                    {[data.email, data.phone].filter(Boolean).join(' • ')}
+                  </div>
+                )}
               </div>
-            )}
-
-            {(data.email || data.phone) && (
-              <div style={styles.contact}>
-                {data.email && <div>{data.email}</div>}
-                {data.phone && <div>{data.phone}</div>}
-              </div>
+            ) : (
+              <>
+                {data.name && (
+                  <div style={styles.header}>
+                    {data.name}
+                  </div>
+                )}
+                {(data.email || data.phone) && (
+                  <div style={styles.contact}>
+                    {[data.email, data.phone].filter(Boolean).join(' • ')}
+                  </div>
+                )}
+              </>
             )}
 
             {data.summary && (
