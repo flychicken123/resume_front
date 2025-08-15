@@ -153,9 +153,19 @@ export const getUserSource = () => {
 
 // Track referrer/source when user enters the builder
 export const trackReferrer = () => {
+  const userSource = getUserSource();
+  const currentPage = window.location.pathname;
+  
+  // Debug logging (remove after testing)
+  console.log('🔍 Analytics Debug:', {
+    gtagAvailable: typeof gtag !== 'undefined',
+    isLocalhost: isLocalhost(),
+    userSource,
+    currentPage,
+    hostname: window.location.hostname
+  });
+  
   if (typeof gtag !== 'undefined' && !isLocalhost()) {
-    const userSource = getUserSource();
-    const currentPage = window.location.pathname;
     
     gtag('event', 'page_referrer', {
       'event_category': 'user_acquisition',
@@ -172,7 +182,10 @@ export const trackReferrer = () => {
       'event_label': userSource.source,
       'source_medium': userSource.medium,
       'source_type': userSource.type,
-      'landing_page': currentPage
+      'landing_page': currentPage,
+      'custom_parameter_source': userSource.source,
+      'custom_parameter_medium': userSource.medium,
+      'custom_parameter_type': userSource.type
     });
   }
 };
