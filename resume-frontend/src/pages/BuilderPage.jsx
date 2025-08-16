@@ -171,19 +171,13 @@ function BuilderPage() {
         }
         
         // Debug: Log structure to identify empty page cause
-        console.log('=== PDF DEBUG ===');
-        console.log('Preview shows multi-page?', previewElement.querySelectorAll('.multi-page-container').length > 0);
-        console.log('Cloned has multi-page containers:', clonedElement.querySelectorAll('.multi-page-container').length);
-        console.log('Cloned has page wrappers:', clonedElement.querySelectorAll('.page-wrapper').length);
-        console.log('Cloned has single-page container:', clonedElement.querySelectorAll('.single-page-container').length);
-        console.log('Total cloned children:', clonedElement.children.length);
+
         
         // Handle both single-page and multi-page content
         const singlePageContainer = clonedElement.querySelector('.single-page-container');
         const multiPageContainer = clonedElement.querySelector('.multi-page-container');
         
         if (multiPageContainer && !singlePageContainer) {
-          console.log('Converting multi-page to single-page for PDF');
           
           // Extract content from all page wrappers and combine into single container
           const pageWrappers = multiPageContainer.querySelectorAll('.page-wrapper');
@@ -211,39 +205,17 @@ function BuilderPage() {
           
           // Replace the multi-page container with our combined single-page container
           multiPageContainer.parentNode.replaceChild(combinedContent, multiPageContainer);
-          console.log('Created combined single-page content, pages combined:', pageWrappers.length);
         } else if (!singlePageContainer && !multiPageContainer) {
-          console.log('No content containers found!');
+          // No content containers found
         } else {
-          console.log('Using existing single-page container');
+          // Using existing single-page container
         }
         
         // Remove any remaining multi-page elements
         const remainingMultiPageElements = clonedElement.querySelectorAll('.multi-page-container, .page-wrapper');
         remainingMultiPageElements.forEach(el => {
-          console.log('Removing remaining element:', el.className);
           el.remove();
         });
-        
-        console.log('After cleanup - children:', clonedElement.children.length);
-        console.log('HTML length:', clonedElement.innerHTML.length);
-        console.log('HTML content sample:', clonedElement.innerHTML.substring(0, 200));
-        console.log('Single page container exists:', !!clonedElement.querySelector('.single-page-container'));
-        console.log('Single page content length:', clonedElement.querySelector('.single-page-container')?.innerHTML.length || 0);
-        
-        // Debug: Check the final HTML structure for page breaks
-        const pageBreakElements = clonedElement.querySelectorAll('[style*="page-break-before"]');
-        console.log('Page break elements found:', pageBreakElements.length);
-        pageBreakElements.forEach((el, index) => {
-          console.log(`Page break ${index}:`, el.style.cssText, el.tagName);
-        });
-        
-        console.log('Final cloned element structure:');
-        console.log('- Single page containers:', clonedElement.querySelectorAll('.single-page-container').length);
-        console.log('- Multi page containers:', clonedElement.querySelectorAll('.multi-page-container').length);
-        console.log('- Page wrappers:', clonedElement.querySelectorAll('.page-wrapper').length);
-        
-        console.log('=== PDF DEBUG END ===');
         
         // Collect essential CSS for PDF generation
         const stylesheets = Array.from(document.styleSheets);
@@ -280,7 +252,6 @@ function BuilderPage() {
         // Detect the current template class for targeted overrides
         const previewClasses = previewElement.className.split(' ');
         const templateClass = previewClasses.find(cls => cls !== 'live-preview-container') || '';
-        console.log('Detected template class:', templateClass);
         
         // PDF-specific overrides to ensure consistent rendering (keep minimal)
         const pdfOverrides = `
@@ -447,15 +418,7 @@ function BuilderPage() {
           }
         `;
         
-        // Debug: Log the CSS overrides to see if they're being generated
-        console.log('=== PDF GENERATION DEBUG ===');
-        console.log('Current template/format:', data.format || 'default');
-        console.log('Current step:', step);
-        console.log('Preview element found:', !!previewElement);
-        console.log('Preview element classes:', previewElement ? previewElement.className : 'N/A');
-        console.log('Preview element computed width:', previewElement ? window.getComputedStyle(previewElement).width : 'N/A');
-        console.log('Preview element computed max-width:', previewElement ? window.getComputedStyle(previewElement).maxWidth : 'N/A');
-        console.log('PDF Overrides being applied:', pdfOverrides);
+
  
         // Create complete HTML document with CSS overrides LAST
         const htmlContent = `
@@ -490,19 +453,7 @@ function BuilderPage() {
           .replace(/\s{2,}/g, ' ');
         const minHtmlContent = minifyHtml(htmlContent);
 
-        // Debug: Log the HTML content length and preview
-        console.log('=== FINAL HTML DEBUG ===');
-        console.log('HTML Content Length:', htmlContent.length, 'Minified Length:', minHtmlContent.length);
-        console.log('Captured CSS Length:', cleanedCssText.length);
-        console.log('Overrides CSS Length:', pdfOverrides.length);
-        console.log('Preview Element HTML Length:', clonedElement.outerHTML.length);
-        console.log('HTML Content Preview (first 1000 chars):', minHtmlContent.substring(0, 1000));
-        
-        // Debug: Check if our overrides are in the final HTML
-        const hasOverrides = htmlContent.includes('font-size: 18pt !important');
-        console.log('CSS Overrides found in HTML:', hasOverrides);
-        console.log('CSS Overrides position:', htmlContent.indexOf('font-size: 18pt !important'));
-        console.log('=== DEBUGGING COMPLETE ===');
+
 
         // Call the backend to generate PDF using multipart upload (smaller, proxy-friendly)
         const htmlBlob = new Blob([minHtmlContent], { type: 'text/html' });
@@ -599,16 +550,13 @@ function BuilderPage() {
 
   // Handler for auth button
   const handleAuthButton = () => {
-    console.log('handleAuthButton called, user:', user);
     if (user) {
-      console.log('Logging out user:', user);
       // Immediately clear everything and redirect to home
       localStorage.removeItem('resumeUser');
       logout();
       // Navigate to home page to avoid any modal issues
       window.location.href = '/';
     } else {
-      console.log('Opening login modal');
       setShowAuthModal(true);
     }
   };

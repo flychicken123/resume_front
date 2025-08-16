@@ -25,7 +25,6 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
         // More realistic line estimation
         const lines = Math.ceil(content.length / 100); // More realistic chars per line
         const summaryHeight = Math.max(20, lines * 16); // More realistic line height
-        console.log(`Summary height estimate: ${summaryHeight}px for ${content.length} chars (${lines} lines)`);
         return summaryHeight;
         
       case 'experience':
@@ -38,7 +37,6 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
             }
             return total + height + 8; // Realistic spacing between jobs
           }, 0);
-          console.log(`Experience height estimate: ${totalHeight}px for ${content.length} jobs`);
           return totalHeight;
         }
         return 40;
@@ -46,7 +44,6 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
       case 'education':
         if (Array.isArray(content)) {
           const eduHeight = content.length * 30; // More realistic per education item
-          console.log(`Education height estimate: ${eduHeight}px for ${content.length} items`);
           return eduHeight;
         }
         return 30;
@@ -55,7 +52,6 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
         // More realistic skills section estimation
         const skillLines = Math.ceil(content.length / 120); // More realistic chars per line
         const skillsHeight = Math.max(20, skillLines * 16); // More realistic
-        console.log(`Skills height estimate: ${skillsHeight}px for ${content.length} chars (${skillLines} lines)`);
         return skillsHeight;
         
       default:
@@ -241,31 +237,19 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
     // Now pack sections into pages aggressively
     let sectionIndex = 0;
     
-    console.log('Starting pagination with available height:', AVAILABLE_HEIGHT);
-    
     while (sectionIndex < allSections.length) {
       const section = allSections[sectionIndex];
       
-      console.log(`Processing section ${section.type}:`, {
-        estimatedHeight: section.estimatedHeight,
-        currentHeight: currentHeight,
-        remainingHeight: AVAILABLE_HEIGHT - currentHeight,
-        canFit: canFitOnCurrentPage(section.estimatedHeight)
-      });
-      
       if (canFitOnCurrentPage(section.estimatedHeight)) {
         // Section fits completely on current page
-        console.log(`✅ ${section.type} fits on current page`);
         addToCurrentPage(section);
         sectionIndex++;
       } else if (section.canSplit && currentHeight < AVAILABLE_HEIGHT * 0.9) {
-        console.log(`🔄 Attempting to split ${section.type}`);
         // Try to split the section if there's reasonable space left
         const remainingHeight = AVAILABLE_HEIGHT - currentHeight;
         const parts = splitLongContent(section.content, section.type, remainingHeight - 5);
         
         if (parts.length > 1) {
-          console.log(`✂️ Split ${section.type} into ${parts.length} parts`);
           // Add first part to current page
           const firstPartHeight = estimateSectionHeight(parts[0], section.type);
           addToCurrentPage({
@@ -277,7 +261,6 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
           
           // Start new page for remaining parts
           startNewPage();
-          console.log(`📄 Started new page after splitting ${section.type}`);
           
           // Add remaining parts
           for (let i = 1; i < parts.length; i++) {
@@ -306,24 +289,20 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
           
           sectionIndex++;
         } else {
-          console.log(`❌ Cannot split ${section.type} effectively, moving to new page`);
           // Can't split effectively, move to new page
           startNewPage();
           addToCurrentPage(section);
           sectionIndex++;
         }
       } else {
-        console.log(`📄 ${section.type} doesn't fit, starting new page`);
         // Section doesn't fit, start new page
         startNewPage();
         
         // Try to fit it on the new page
         if (canFitOnCurrentPage(section.estimatedHeight)) {
-          console.log(`✅ ${section.type} fits on new page`);
           addToCurrentPage(section);
           sectionIndex++;
         } else {
-          console.log(`⚠️ ${section.type} too large even for new page, adding anyway`);
           // Section is too large even for a new page, add it anyway
           addToCurrentPage(section);
           sectionIndex++;
