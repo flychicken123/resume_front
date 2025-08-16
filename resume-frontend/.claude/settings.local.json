@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm start)",
+      "Bash(npm run lint)",
+      "Bash(npm run build:*)",
+      "Bash(npm test)",
+      "Bash(timeout 10 npm start)",
+      "Bash(powershell:*)",
+      "Bash(taskkill:*)",
+      "Bash(cmd /c:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -15,6 +15,7 @@ import JobDescModal from '../components/JobDescModal';
 import ImportResumeModal from '../components/ImportResumeModal';
 import SEO from '../components/SEO';
 import { trackResumeGeneration, trackReferrer, trackBuilderStart, trackStepCompletion } from '../components/Analytics';
+import './BuilderPage.css';
 
 const steps = [
   "Personal Details",
@@ -534,28 +535,16 @@ function BuilderPage() {
         keywords="build resume, create resume, resume builder, AI resume builder, professional resume, resume maker, write resume, resume template"
         canonical="https://hihired.org/builder"
       />
-      <div style={{ display: 'flex', minHeight: '100vh', width: '100%' }}>
+      <div className="builder-layout">
         {/* Left Side - Resume Builder */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#f8fafc' }}>
-          <div className="site-header" style={{ width: '100%', paddingTop: '2.5rem', paddingBottom: '1.5rem', textAlign: 'center', background: 'transparent', position: 'relative' }}>
-                         <div style={{ position: 'absolute', right: '2rem', top: '50%', transform: 'translateY(-50%)', display: 'flex', gap: '1rem', zIndex: 20 }}>
+        <div className="builder-left">
+          <div className="site-header">
+            <h1>
+              HiHired - AI Resume Builder
+            </h1>
+            <div className="header-controls">
               <button
                 onClick={() => window.location.href = '/'}
-                style={{
-                  padding: '0.75rem 1.5rem',
-                  border: '2px solid #d1d5db',
-                  borderRadius: '8px',
-                  background: 'white',
-                  color: '#374151',
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                  fontSize: '0.95rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-                  transition: 'all 0.2s ease'
-                }}
                 onMouseEnter={(e) => {
                   e.target.style.background = '#f3f4f6';
                   e.target.style.transform = 'translateY(-2px)';
@@ -570,24 +559,15 @@ function BuilderPage() {
                 ← Back to Home
               </button>
             </div>
-            <h1 style={{
-              fontSize: '2.5rem',
-              fontWeight: 700,
-              color: '#3b82f6',
-              margin: 0,
-              letterSpacing: '-1px'
-            }}>
-              HiHired - AI Resume Builder
-            </h1>
           </div>
 
           
           {/* Stepper and Content */}
-          <div style={{ display: 'flex', width: '100%', flex: 1 }}>
-            <div style={{ minWidth: 140, background: '#d1d5fa', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 0, paddingBottom: 0, position: 'sticky', left: 0, top: 0, height: '100vh', zIndex: 10 }}>
+          <div className="builder-main-section">
+            <div className="stepper-container">
               <Stepper steps={steps} currentStep={step} setStep={setStep} />
             </div>
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '2rem' }}>
+            <div className="builder-content">
               {step === 1 && <StepPersonal />}
               {step === 2 && <StepExperience />}
               {step === 3 && <StepEducation />}
@@ -595,191 +575,97 @@ function BuilderPage() {
               {step === 5 && <StepSummary />}
               {step === 6 && <StepFormat onNext={handleNext} />}
               
-                             {/* Navigation Buttons */}
-               <div style={{ 
-                 display: 'flex', 
-                 gap: '1rem', 
-                 marginTop: '2rem',
-                 alignItems: 'center',
-                 justifyContent: 'center',
-                 width: '100%'
-               }}>
-                 {step > 1 && (
-                   <button
-                     onClick={() => setStep(step - 1)}
-                     style={{
-                       padding: '1rem 2.5rem',
-                       border: '2px solid #d1d5db',
-                       borderRadius: '8px',
-                       background: 'white',
-                       color: '#374151',
-                       cursor: 'pointer',
-                       fontWeight: 600,
-                       fontSize: '1rem',
-                       transition: 'all 0.2s ease',
-                       minWidth: '200px',
-                       height: '48px',
-                       display: 'flex',
-                       alignItems: 'center',
-                       justifyContent: 'center'
-                     }}
-                     onMouseEnter={(e) => {
-                       e.target.style.background = '#f3f4f6';
-                       e.target.style.transform = 'translateY(-2px)';
-                       e.target.style.boxShadow = '0 6px 12px rgba(0, 0, 0, 0.1)';
-                     }}
-                     onMouseLeave={(e) => {
-                       e.target.style.background = 'white';
-                       e.target.style.transform = 'translateY(0)';
-                       e.target.style.boxShadow = 'none';
-                     }}
-                   >
-                     ← Previous
-                   </button>
-                 )}
-                 {step < steps.length && (
-                   <button
-                     onClick={() => setStep(step + 1)}
-                     style={{
-                       padding: '1rem 2.5rem',
-                       border: 'none',
-                       borderRadius: '8px',
-                       background: '#3b82f6',
-                       color: 'white',
-                       cursor: 'pointer',
-                       fontWeight: 600,
-                       fontSize: '1rem',
-                       transition: 'all 0.2s ease',
-                       minWidth: '200px',
-                       height: '48px',
-                       display: 'flex',
-                       alignItems: 'center',
-                       justifyContent: 'center',
-                       boxShadow: '0 4px 6px rgba(59, 130, 246, 0.25)'
-                     }}
-                     onMouseEnter={(e) => {
-                       e.target.style.background = '#2563eb';
-                       e.target.style.transform = 'translateY(-2px)';
-                       e.target.style.boxShadow = '0 6px 12px rgba(59, 130, 246, 0.3)';
-                     }}
-                     onMouseLeave={(e) => {
-                       e.target.style.background = '#3b82f6';
-                       e.target.style.transform = 'translateY(0)';
-                       e.target.style.boxShadow = '0 4px 6px rgba(59, 130, 246, 0.25)';
-                     }}
-                   >
-                     Next →
-                   </button>
-                 )}
-                 {step === steps.length && (
-                   <>
-                     <button
-                       onClick={handleViewResume}
-                       style={{
-                         padding: '1rem 2.5rem',
-                         border: 'none',
-                         borderRadius: '8px',
-                         background: '#10b981',
-                         color: 'white',
-                         cursor: 'pointer',
-                         fontWeight: 600,
-                         fontSize: '1rem',
-                         boxShadow: '0 4px 6px rgba(16, 185, 129, 0.25)',
-                         transition: 'all 0.2s ease',
-                         minWidth: '200px',
-                         height: '48px',
-                         display: 'flex',
-                         alignItems: 'center',
-                         justifyContent: 'center'
-                       }}
-                       onMouseEnter={(e) => {
-                         e.target.style.background = '#059669';
-                         e.target.style.transform = 'translateY(-2px)';
-                         e.target.style.boxShadow = '0 6px 12px rgba(16, 185, 129, 0.3)';
-                       }}
-                       onMouseLeave={(e) => {
-                         e.target.style.background = '#10b981';
-                         e.target.style.transform = 'translateY(0)';
-                         e.target.style.boxShadow = '0 4px 6px rgba(16, 185, 129, 0.25)';
-                       }}
-                     >
-                       📄 View Resume
-                     </button>
-                     <button
-                       onClick={() => window.location.href = '/'}
-                       style={{
-                         padding: '1rem 2.5rem',
-                         border: '2px solid #3b82f6',
-                         borderRadius: '8px',
-                         background: 'white',
-                         color: '#3b82f6',
-                         cursor: 'pointer',
-                         fontWeight: 600,
-                         fontSize: '1rem',
-                         transition: 'all 0.2s ease',
-                         minWidth: '200px',
-                         height: '48px',
-                         display: 'flex',
-                         alignItems: 'center',
-                         justifyContent: 'center'
-                       }}
-                       onMouseEnter={(e) => {
-                         e.target.style.background = '#3b82f6';
-                         e.target.style.color = 'white';
-                         e.target.style.transform = 'translateY(-2px)';
-                         e.target.style.boxShadow = '0 6px 12px rgba(59, 130, 246, 0.3)';
-                       }}
-                       onMouseLeave={(e) => {
-                         e.target.style.background = 'white';
-                         e.target.style.color = '#3b82f6';
-                         e.target.style.transform = 'translateY(0)';
-                         e.target.style.boxShadow = 'none';
-                       }}
-                     >
-                       ✅ Complete & Return Home
-                     </button>
-                   </>
-                 )}
-               </div>
+              {/* Navigation Buttons */}
+              <div className="navigation-buttons">
+                {step > 1 && (
+                  <button
+                    className="btn-previous"
+                    onClick={() => setStep(step - 1)}
+                    onMouseEnter={(e) => {
+                      e.target.style.background = '#f3f4f6';
+                      e.target.style.transform = 'translateY(-1px)';
+                      e.target.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.background = 'white';
+                      e.target.style.transform = 'translateY(0)';
+                      e.target.style.boxShadow = 'none';
+                    }}
+                  >
+                    ← Previous
+                  </button>
+                )}
+                {step < steps.length && (
+                  <button
+                    className="btn-next"
+                    onClick={() => setStep(step + 1)}
+                    onMouseEnter={(e) => {
+                      e.target.style.background = '#2563eb';
+                      e.target.style.transform = 'translateY(-1px)';
+                      e.target.style.boxShadow = '0 6px 12px rgba(59, 130, 246, 0.3)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.background = '#3b82f6';
+                      e.target.style.transform = 'translateY(0)';
+                      e.target.style.boxShadow = '0 4px 6px rgba(59, 130, 246, 0.25)';
+                    }}
+                  >
+                    Next →
+                  </button>
+                )}
+                {step === steps.length && (
+                  <>
+                    <button
+                      className="btn-view-resume"
+                      onClick={handleViewResume}
+                      onMouseEnter={(e) => {
+                        e.target.style.background = '#059669';
+                        e.target.style.transform = 'translateY(-1px)';
+                        e.target.style.boxShadow = '0 6px 12px rgba(16, 185, 129, 0.3)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.background = '#10b981';
+                        e.target.style.transform = 'translateY(0)';
+                        e.target.style.boxShadow = '0 4px 6px rgba(16, 185, 129, 0.25)';
+                      }}
+                    >
+                      📄 View Resume
+                    </button>
+                    <button
+                      className="btn-complete"
+                      onClick={() => window.location.href = '/'}
+                      onMouseEnter={(e) => {
+                        e.target.style.background = '#3b82f6';
+                        e.target.style.color = 'white';
+                        e.target.style.transform = 'translateY(-1px)';
+                        e.target.style.boxShadow = '0 6px 12px rgba(59, 130, 246, 0.3)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.background = 'white';
+                        e.target.style.color = '#3b82f6';
+                        e.target.style.transform = 'translateY(0)';
+                        e.target.style.boxShadow = 'none';
+                      }}
+                    >
+                      ✅ Complete & Return Home
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
         {/* Right Side - Live Resume Preview */}
-        <div style={{ 
-          flex: 1, 
-          background: 'white', 
-          borderLeft: '1px solid #e5e7eb',
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: '100vh',
-          overflow: 'auto'
-        }}>
-          <div style={{
-            padding: '1rem',
-            borderBottom: '1px solid #e5e7eb',
-            background: '#f9fafb',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}>
-            <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#374151' }}>Live Resume Preview</h2>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div className="builder-right">
+          <div className="preview-header">
+            <h2>Live Resume Preview</h2>
+            <div className="preview-controls">
               {user ? (
-                <span style={{ color: '#3b82f6', fontWeight: 500, fontSize: '0.9rem' }}>{user}</span>
+                <span>{user}</span>
               ) : null}
               <button
                 onClick={handleAuthButton}
-                style={{
-                  padding: '0.5rem 1rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '4px',
-                  background: 'white',
-                  color: '#3b82f6',
-                  cursor: 'pointer',
-                  fontSize: '0.875rem',
-                  fontWeight: 500
-                }}
               >
                 {user ? 'Logout' : 'Login / Signup'}
               </button>
@@ -787,15 +673,6 @@ function BuilderPage() {
                 onClick={toggleFullscreen}
                 className="fullscreen-button"
                 title={`${isFullscreen ? 'Exit' : 'Enter'} fullscreen mode (F11)`}
-                style={{
-                  padding: '0.5rem 1rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '4px',
-                  background: 'white',
-                  color: '#374151',
-                  cursor: 'pointer',
-                  fontSize: '0.875rem'
-                }}
               >
                 {isFullscreen ? 'Exit Full Screen' : 'Open Full Screen'}
               </button>
@@ -803,16 +680,9 @@ function BuilderPage() {
           </div>
           <div 
             id="resume-preview-container"
-            style={{ 
-              flex: 1, 
-              overflow: 'visible', 
-              padding: '1rem',
-              background: 'white',
-              display: 'flex',
-              flexDirection: 'column'
-            }}
+            className="preview-content"
           >
-                            <StepPreview onDownload={handleViewResume} />
+            <StepPreview onDownload={handleViewResume} />
           </div>
         </div>
       </div>

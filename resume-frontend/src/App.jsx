@@ -10,7 +10,7 @@ import './App.css';
 
 function App() {
   return (
-    <GoogleOAuthProvider clientId="978604541120-fmcim15k16vbatesna24ulke8m4buldp.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId={process.env.NODE_ENV === 'development' ? '' : "978604541120-fmcim15k16vbatesna24ulke8m4buldp.apps.googleusercontent.com"}>
       <AuthProvider>
         <ResumeProvider>
           <Router>
