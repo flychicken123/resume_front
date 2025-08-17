@@ -1,16 +1,5 @@
-# Updated Dockerfile for correct repository structure
-# Use Ubuntu + Node 18 to match backend OS family and avoid musl differences
-FROM ubuntu:22.04 AS base
-
-ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends curl ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install Node.js 18 (LTS) from NodeSource
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
-    && apt-get install -y nodejs \
-    && node -v && npm -v
+# Use official Node.js 18 image (Debian-based, not Alpine)
+FROM node:18-bullseye AS base
 
 # Set working directory
 WORKDIR /app
