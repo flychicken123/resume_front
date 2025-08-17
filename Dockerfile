@@ -1,6 +1,9 @@
 # Use official Node.js image for better compatibility
 FROM node:18-alpine AS builder
 
+# Install python and build tools needed for some npm packages
+RUN apk add --no-cache python3 make g++
+
 # Set working directory
 WORKDIR /app
 
@@ -8,8 +11,11 @@ WORKDIR /app
 COPY resume-frontend/package.json ./
 COPY resume-frontend/package-lock.json ./
 
-# Install ALL dependencies (including dev) needed for building
-RUN npm ci || npm install
+# Clear npm cache and install dependencies with retries
+RUN npm cache clean --force && \
+    npm config set registry https://registry.npmjs.org/ && \
+    npm install --no-package-lock --legacy-peer-deps || \
+    npm install --force
 
 # Copy source code from resume-frontend directory
 COPY resume-frontend/ .
