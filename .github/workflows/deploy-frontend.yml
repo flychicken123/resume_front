@@ -47,6 +47,14 @@ jobs:
             sleep 5
           fi
           
+          # Clean up disk space first
+          echo "🧹 Cleaning up disk space..."
+          df -h
+          docker system prune -af --volumes || true
+          docker rmi $(docker images -q) || true
+          sudo rm -rf /tmp/* || true
+          df -h
+          
           # Remove existing directory completely and recreate
           echo "🧹 Cleaning up existing directory..."
           rm -rf ~/ai-resume-frontend
