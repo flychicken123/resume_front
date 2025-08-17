@@ -1,35 +1,40 @@
-# Use a lighter base image
-FROM node:18-alpine
+# Updated Dockerfile for correct repository structure
+# Use Ubuntu + Node 18 to match backend OS family and avoid musl differences
+FROM ubuntu:22.04 AS base
 
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js 18 (LTS) from NodeSource
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs \
+    && node -v && npm -v
+
+# Set working directory
 WORKDIR /app
 
-# Copy package files first for better caching
-COPY resume-frontend/package.json resume-frontend/package-lock.json* ./
+# Copy package files from resume-frontend directory
+COPY resume-frontend/package*.json ./
 
-# Set memory limits and install dependencies
-ENV NODE_OPTIONS="--max-old-space-size=1024"
-ENV NPM_CONFIG_MAXSOCKETS=3
-# Install ALL dependencies (not just production) since we need build tools
-RUN npm ci --silent --no-audit --no-fund
+# Clear npm cache and install dependencies
+RUN npm cache clean --force \
+    && npm install --no-package-lock \
+    && npm install
 
-# Copy source files
-COPY resume-frontend/ ./
+# Copy source code from resume-frontend directory
+COPY resume-frontend/ .
 
-# Build the app with memory constraints
+# Build the React app with environment variables
+ARG REACT_APP_API_URL
+ENV REACT_APP_API_URL=$REACT_APP_API_URL
 RUN npm run build
 
-# Multi-stage build - use smaller runtime image
-FROM nginx:alpine
-
-# Copy built files from previous stage
-COPY --from=0 /app/build /usr/share/nginx/html
-
-# Simple nginx config for SPA
-RUN echo 'server { listen 80; root /usr/share/nginx/html; index index.html; location / { try_files $uri $uri/ /index.html; } }' > /etc/nginx/conf.d/default.conf
+# Install serve to run the built app
+RUN npm install -g serve
 
 EXPOSE 3000
 
-# Change nginx to listen on port 3000
-RUN sed -i 's/listen 80;/listen 3000;/g' /etc/nginx/conf.d/default.conf
-
-CMD ["nginx", "-g", "daemon off;"] 
+# Start the application
+CMD ["serve", "-s", "build", "-l", "3000"] 
