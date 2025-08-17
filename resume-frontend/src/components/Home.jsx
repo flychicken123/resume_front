@@ -336,9 +336,9 @@ const Home = () => {
               <div className="comparison-item after">
                 <div className="comparison-label">After</div>
                 <div className="comparison-content">
-                  <div className="keyword-match">✅ AI optimization</div>
-                  <div className="skill-alignment">✅ Smart matching</div>
-                  <div className="ats-score">✅ AI in seconds</div>
+                  <div className="keyword-match">✅ AI powered</div>
+                  <div className="skill-alignment">✅ Smart tools</div>
+                  <div className="ats-score">✅ Fast AI</div>
                 </div>
               </div>
             </div>
