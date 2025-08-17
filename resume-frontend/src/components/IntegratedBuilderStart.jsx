@@ -16,39 +16,32 @@ const IntegratedBuilderStart = ({ onClose }) => {
   const navigate = useNavigate();
   const { applyImportedData } = useResume();
   
-  const [step, setStep] = useState(1); // 1: choose path, 2: fill details
-  const [path, setPath] = useState(''); // 'job-first', 'resume-first', 'manual'
+  const [step, setStep] = useState(1); // 1: job description (optional), 2: resume import choice
   const [jobDescription, setJobDescription] = useState('');
   const [file, setFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Step 1: Choose your path
-  const handlePathChoice = (selectedPath) => {
-    setPath(selectedPath);
+  // Step 1: Continue to step 2 (save job description if provided)
+  const handleJobDescriptionNext = () => {
+    if (jobDescription.trim()) {
+      localStorage.setItem('jobDescription', jobDescription.trim());
+    }
     setStep(2);
   };
 
-  // Step 2: Process based on chosen path
-  const handleProceed = async () => {
+  // Handle import resume choice
+  const handleImportResume = async () => {
+    if (!file) {
+      setError('Please select a resume file to import');
+      return;
+    }
+    
     setError('');
     
     try {
       setIsLoading(true);
-
-      // Save job description if provided
-      if (jobDescription.trim()) {
-        localStorage.setItem('jobDescription', jobDescription.trim());
-      }
-
-      // If user uploaded a resume, parse it
-      if (file) {
-        await handleResumeUpload();
-      } else {
-        // No resume to parse, just go to builder
-        onClose();
-        navigate('/builder');
-      }
+      await handleResumeUpload();
     } catch (err) {
       console.error('Error:', err);
       setError(err.message || 'Something went wrong');
@@ -156,99 +149,61 @@ const IntegratedBuilderStart = ({ onClose }) => {
               🚀 Let's Build Your Resume
             </h2>
             <p style={{ color: '#6b7280', marginBottom: '2rem' }}>
-              Choose the best starting point for your resume. Our AI will help optimize it regardless of which path you choose!
+              Start by adding a job description if you have one. This is optional but helps our AI optimize your resume!
             </p>
 
-            <div style={{ display: 'grid', gap: '1rem', marginBottom: '1.5rem' }}>
-              {/* Option 1: I have a job posting */}
-              <div 
-                onClick={() => handlePathChoice('job-first')}
+            <div style={{ marginBottom: '1.5rem' }}>
+              <label style={{ 
+                display: 'block', 
+                marginBottom: '0.5rem', 
+                fontWeight: 500, 
+                color: '#374151' 
+              }}>
+                Job Description (Optional)
+              </label>
+              <textarea
+                value={jobDescription}
+                onChange={(e) => setJobDescription(e.target.value)}
+                placeholder="Paste the job description here to get AI-powered resume optimization... or leave empty to continue without it."
                 style={{
-                  border: '2px solid #e5e7eb',
-                  borderRadius: 12,
-                  padding: '1.5rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  background: '#fafafa'
+                  width: '100%',
+                  minHeight: '120px',
+                  maxHeight: '200px',
+                  padding: '0.75rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: 8,
+                  fontSize: '0.9rem',
+                  resize: 'vertical',
+                  fontFamily: 'inherit',
+                  lineHeight: 1.5
                 }}
-                onMouseEnter={(e) => {
-                  e.target.style.borderColor = '#3b82f6';
-                  e.target.style.background = '#f0f9ff';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.borderColor = '#e5e7eb';
-                  e.target.style.background = '#fafafa';
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
-                  <span style={{ fontSize: '1.5rem', marginRight: '0.75rem' }}>🎯</span>
-                  <h3 style={{ margin: 0, color: '#1f2937' }}>I have a specific job in mind</h3>
-                </div>
-                <p style={{ margin: 0, color: '#6b7280', fontSize: '0.9rem' }}>
-                  Perfect! Paste the job description and optionally upload your current resume. 
-                  Our AI will tailor everything to match the role.
-                </p>
-              </div>
+              />
+              <p style={{ 
+                fontSize: '0.8rem', 
+                color: '#6b7280', 
+                marginTop: '0.5rem', 
+                marginBottom: 0 
+              }}>
+                💡 Our AI will analyze the job requirements and optimize your resume accordingly
+              </p>
+            </div>
 
-              {/* Option 2: I have a resume to import */}
-              <div 
-                onClick={() => handlePathChoice('resume-first')}
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <button 
+                onClick={handleJobDescriptionNext}
                 style={{
-                  border: '2px solid #e5e7eb',
-                  borderRadius: 12,
-                  padding: '1.5rem',
+                  padding: '0.75rem 2rem',
+                  border: 'none',
+                  borderRadius: 8,
+                  background: '#3b82f6',
+                  color: 'white',
                   cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  background: '#fafafa'
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.borderColor = '#3b82f6';
-                  e.target.style.background = '#f0f9ff';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.borderColor = '#e5e7eb';
-                  e.target.style.background = '#fafafa';
+                  fontWeight: 500,
+                  fontSize: '1rem'
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
-                  <span style={{ fontSize: '1.5rem', marginRight: '0.75rem' }}>📄</span>
-                  <h3 style={{ margin: 0, color: '#1f2937' }}>I want to import my existing resume</h3>
-                </div>
-                <p style={{ margin: 0, color: '#6b7280', fontSize: '0.9rem' }}>
-                  Upload your current resume and we'll extract all the information. 
-                  Add a job description later for AI optimization.
-                </p>
-              </div>
-
-              {/* Option 3: Start from scratch */}
-              <div 
-                onClick={() => handlePathChoice('manual')}
-                style={{
-                  border: '2px solid #e5e7eb',
-                  borderRadius: 12,
-                  padding: '1.5rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  background: '#fafafa'
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.borderColor = '#3b82f6';
-                  e.target.style.background = '#f0f9ff';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.borderColor = '#e5e7eb';
-                  e.target.style.background = '#fafafa';
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
-                  <span style={{ fontSize: '1.5rem', marginRight: '0.75rem' }}>✨</span>
-                  <h3 style={{ margin: 0, color: '#1f2937' }}>I want to start fresh</h3>
-                </div>
-                <p style={{ margin: 0, color: '#6b7280', fontSize: '0.9rem' }}>
-                  Build your resume from scratch with our guided builder. 
-                  Add a job description for AI-powered suggestions.
-                </p>
-              </div>
+                Continue
+              </button>
             </div>
           </div>
         )}
@@ -270,9 +225,7 @@ const IntegratedBuilderStart = ({ onClose }) => {
                 ←
               </button>
               <h2 style={{ margin: 0, color: '#1f2937' }}>
-                {path === 'job-first' && '🎯 Job-Targeted Resume'}
-                {path === 'resume-first' && '📄 Import Your Resume'}
-                {path === 'manual' && '✨ Fresh Start'}
+                📄 Choose Your Starting Point
               </h2>
             </div>
 
@@ -289,63 +242,34 @@ const IntegratedBuilderStart = ({ onClose }) => {
               </div>
             )}
 
-            {/* Job Description Section */}
-            {(path === 'job-first' || path === 'manual') && (
-              <div style={{ marginBottom: '1.5rem' }}>
-                <label style={{ 
-                  display: 'block', 
-                  marginBottom: '0.5rem', 
-                  fontWeight: 500, 
-                  color: '#374151' 
-                }}>
-                  {path === 'job-first' ? 'Job Description *' : 'Job Description (Optional)'}
-                </label>
-                <textarea
-                  value={jobDescription}
-                  onChange={(e) => setJobDescription(e.target.value)}
-                  placeholder="Paste the job description here to get AI-powered resume optimization..."
-                  style={{
-                    width: '100%',
-                    minHeight: '120px',
-                    maxHeight: '200px',
-                    padding: '0.75rem',
-                    border: '1px solid #d1d5db',
-                    borderRadius: 8,
-                    fontSize: '0.9rem',
-                    resize: 'vertical',
-                    fontFamily: 'inherit',
-                    lineHeight: 1.5
-                  }}
-                />
-                <p style={{ 
-                  fontSize: '0.8rem', 
-                  color: '#6b7280', 
-                  marginTop: '0.5rem', 
-                  marginBottom: 0 
-                }}>
-                  💡 Our AI will analyze the job requirements and optimize your resume accordingly
-                </p>
-              </div>
-            )}
+            <p style={{ color: '#6b7280', marginBottom: '2rem', textAlign: 'center' }}>
+              Do you want to import an existing resume or start manually?
+            </p>
 
-            {/* Resume Upload Section */}
-            {(path === 'job-first' || path === 'resume-first') && (
-              <div style={{ marginBottom: '1.5rem' }}>
-                <label style={{ 
-                  display: 'block', 
-                  marginBottom: '0.5rem', 
-                  fontWeight: 500, 
-                  color: '#374151' 
-                }}>
-                  {path === 'resume-first' ? 'Your Resume *' : 'Current Resume (Optional)'}
-                </label>
+            <div style={{ display: 'grid', gap: '1rem', marginBottom: '2rem' }}>
+              {/* Import Resume Option */}
+              <div style={{
+                border: '2px solid #e5e7eb',
+                borderRadius: 12,
+                padding: '1.5rem',
+                background: '#fafafa'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem' }}>
+                  <span style={{ fontSize: '1.5rem', marginRight: '0.75rem' }}>📄</span>
+                  <h3 style={{ margin: 0, color: '#1f2937' }}>Import Resume</h3>
+                </div>
+                <p style={{ margin: '0 0 1rem 0', color: '#6b7280', fontSize: '0.9rem' }}>
+                  Upload your existing resume and we'll extract all the information automatically.
+                </p>
+                
                 <div style={{
                   border: file ? '2px solid #3b82f6' : '2px dashed #d1d5db',
                   borderRadius: 8,
                   padding: '1.5rem',
                   textAlign: 'center',
-                  background: file ? '#f0f9ff' : '#fafafa',
-                  transition: 'all 0.2s'
+                  background: file ? '#f0f9ff' : 'white',
+                  transition: 'all 0.2s',
+                  marginBottom: '1rem'
                 }}>
                   <input 
                     type="file" 
@@ -384,78 +308,70 @@ const IntegratedBuilderStart = ({ onClose }) => {
                     )}
                   </label>
                 </div>
+                
+                <button 
+                  onClick={handleImportResume}
+                  disabled={isLoading || !file}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: 'none',
+                    borderRadius: 8,
+                    background: file ? '#3b82f6' : '#d1d5db',
+                    color: 'white',
+                    cursor: file ? 'pointer' : 'not-allowed',
+                    fontWeight: 500
+                  }}
+                >
+                  {isLoading ? 'Importing...' : 'Import Resume'}
+                </button>
               </div>
-            )}
 
-            {/* Action Buttons */}
-            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
-              {path === 'manual' && (
+              {/* Start Manually Option */}
+              <div style={{
+                border: '2px solid #e5e7eb',
+                borderRadius: 12,
+                padding: '1.5rem',
+                background: '#fafafa'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem' }}>
+                  <span style={{ fontSize: '1.5rem', marginRight: '0.75rem' }}>✨</span>
+                  <h3 style={{ margin: 0, color: '#1f2937' }}>Start Manually</h3>
+                </div>
+                <p style={{ margin: '0 0 1rem 0', color: '#6b7280', fontSize: '0.9rem' }}>
+                  Build your resume from scratch using our guided builder.
+                </p>
+                
                 <button 
                   onClick={handleStartManual}
                   disabled={isLoading}
                   style={{
-                    padding: '0.75rem 1.5rem',
+                    width: '100%',
+                    padding: '0.75rem',
                     border: 'none',
                     borderRadius: 8,
-                    background: '#3b82f6',
+                    background: '#10b981',
                     color: 'white',
                     cursor: 'pointer',
-                    fontWeight: 500,
-                    minWidth: 160
+                    fontWeight: 500
                   }}
                 >
                   {isLoading ? 'Starting...' : 'Start Building'}
                 </button>
-              )}
-
-              {path !== 'manual' && (
-                <>
-                  <button 
-                    onClick={handleStartManual}
-                    disabled={isLoading}
-                    style={{
-                      padding: '0.75rem 1.5rem',
-                      border: '2px solid #d1d5db',
-                      borderRadius: 8,
-                      background: 'white',
-                      cursor: 'pointer',
-                      minWidth: 140
-                    }}
-                  >
-                    Skip & Build Manually
-                  </button>
-                  <button 
-                    onClick={handleProceed}
-                    disabled={isLoading || (path === 'job-first' && !jobDescription.trim()) || (path === 'resume-first' && !file)}
-                    style={{
-                      padding: '0.75rem 1.5rem',
-                      border: 'none',
-                      borderRadius: 8,
-                      background: '#3b82f6',
-                      color: 'white',
-                      cursor: 'pointer',
-                      fontWeight: 500,
-                      minWidth: 160,
-                      opacity: (path === 'job-first' && !jobDescription.trim()) || (path === 'resume-first' && !file) ? 0.5 : 1
-                    }}
-                  >
-                    {isLoading ? 'Processing...' : 'Continue to Builder'}
-                  </button>
-                </>
-              )}
+              </div>
             </div>
 
             {/* Help text */}
             <div style={{ 
-              marginTop: '1rem', 
               padding: '1rem', 
               background: '#f9fafb', 
               borderRadius: 8,
               fontSize: '0.85rem',
-              color: '#6b7280'
+              color: '#6b7280',
+              textAlign: 'center'
             }}>
-              <strong>💡 Pro Tip:</strong> Our new Go-based parser is faster and more reliable! 
-              We use AI only as a backup to ensure the best possible results.
+              <strong>💡 Pro Tip:</strong> Our Go-based parser is fast and reliable! 
+              We use AI as backup to ensure the best results.
             </div>
           </div>
         )}
