@@ -5,7 +5,6 @@ import { useAuth } from '../context/AuthContext';
 import Login from './auth/Login';
 import IntegratedBuilderStart from './IntegratedBuilderStart';
 import ResumeHistory from './ResumeHistory';
-import JobSubmit from './JobSubmit';
 import About from './About';
 import Contact from './Contact';
 import SEO from './SEO';
@@ -17,7 +16,6 @@ const Home = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showIntegratedModal, setShowIntegratedModal] = useState(false);
   const [showResumeHistory, setShowResumeHistory] = useState(false);
-  const [showJobSubmit, setShowJobSubmit] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [usernameWidth, setUsernameWidth] = useState(100);
   const usernameRef = useRef(null);
@@ -276,11 +274,6 @@ const Home = () => {
               <button className="home-btn primary" onClick={handleStartBuilding}>
                 {user ? '📝 Continue Building Resume' : '🚀 Start Building Your Resume - Free!'}
               </button>
-              {user && (
-                <button className="home-btn secondary" onClick={() => setShowJobSubmit(true)}>
-                  🎯 One-Click Apply
-                </button>
-              )}
             </div>
           </div>
           <div className="home-trusted">
@@ -530,14 +523,6 @@ const Home = () => {
       {/* Resume History Modal */}
       {showResumeHistory && (
         <ResumeHistory onClose={() => setShowResumeHistory(false)} />
-      )}
-
-      {showJobSubmit && (
-        <JobSubmit 
-          user={user}
-          resumeData={null} // TODO: Get actual resume data from context
-          onClose={() => setShowJobSubmit(false)} 
-        />
       )}
       
       {/* About Section */}
