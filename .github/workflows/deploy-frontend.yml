@@ -45,12 +45,10 @@ jobs:
             sleep 5
           fi
           
-          # Navigate to frontend directory
-          cd ~/ai-resume-frontend || {
-            echo "❌ Frontend directory not found"
-            mkdir -p ~/ai-resume-frontend
-            cd ~/ai-resume-frontend
-          }
+          # Remove existing directory completely and recreate
+          rm -rf ~/ai-resume-frontend
+          mkdir -p ~/ai-resume-frontend
+          cd ~/ai-resume-frontend
           
           # Clone the main branch of the repository using HTTPS (public repo)
           git clone -b main https://github.com/flychicken123/resume_front.git .
