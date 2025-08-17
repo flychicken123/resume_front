@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hihired-v3';
+const CACHE_NAME = 'hihired-v4-2024-08-17';
 const urlsToCache = [
   '/',
   '/manifest.json'
@@ -12,16 +12,29 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('fetch', event => {
-  // Skip service worker for API calls and navigation
-  if (event.request.url.includes('/api/') || event.request.mode === 'navigate') {
+  // Skip service worker for API calls, navigation, and JS/CSS files
+  if (event.request.url.includes('/api/') || 
+      event.request.mode === 'navigate' ||
+      event.request.url.includes('.js') ||
+      event.request.url.includes('.css')) {
     return;
   }
 
   event.respondWith(
-    caches.match(event.request)
+    // Network first, fallback to cache strategy
+    fetch(event.request)
       .then(response => {
-        // For other requests, return cached version or fetch from network
-        return response || fetch(event.request);
+        // Clone the response before caching
+        const responseToCache = response.clone();
+        caches.open(CACHE_NAME)
+          .then(cache => {
+            cache.put(event.request, responseToCache);
+          });
+        return response;
+      })
+      .catch(() => {
+        // If network fails, try cache
+        return caches.match(event.request);
       })
   );
 });
