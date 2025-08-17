@@ -8,14 +8,11 @@ WORKDIR /app
 COPY resume-frontend/package.json ./
 COPY resume-frontend/package-lock.json ./
 
-# Install dependencies with clean install
-RUN npm ci --only=production || npm install --production
+# Install ALL dependencies (including dev) needed for building
+RUN npm ci || npm install
 
 # Copy source code from resume-frontend directory
 COPY resume-frontend/ .
-
-# Install ALL dependencies (including dev) for building
-RUN npm install
 
 # Build the React app with environment variables
 ARG REACT_APP_API_URL
