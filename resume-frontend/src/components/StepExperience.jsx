@@ -1,12 +1,14 @@
 // src/components/StepExperience.jsx
 import React, { useState, useEffect } from 'react';
 import { useResume } from '../context/ResumeContext';
-import { generateExperienceAI } from '../api';
+import { generateExperienceAI, improveExperienceGrammarAI } from '../api';
 
 const StepExperience = () => {
   const { data, setData } = useResume();
   const [loadingIndex, setLoadingIndex] = useState(null);
+  const [grammarLoadingIndex, setGrammarLoadingIndex] = useState(null);
   const [aiExperiences, setAiExperiences] = useState({});
+  const [grammarImprovedExperiences, setGrammarImprovedExperiences] = useState({});
   const [jobDescription, setJobDescription] = useState('');
 
   // Load job description from localStorage
@@ -87,9 +89,35 @@ const StepExperience = () => {
     }
   };
 
+  const handleGrammarImprove = async (idx) => {
+    try {
+      setGrammarLoadingIndex(idx);
+      const experience = data.experiences[idx];
+      
+      if (!experience.description.trim()) {
+        alert('Please enter your experience description first.');
+        return;
+      }
+      
+      const experienceText = experience.description;
+      const improvedText = await improveExperienceGrammarAI(experienceText);
+      setGrammarImprovedExperiences(prev => ({ ...prev, [idx]: improvedText }));
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setGrammarLoadingIndex(null);
+    }
+  };
+
   const useAIExperience = (idx) => {
     if (aiExperiences[idx]) {
       handleChange(idx, 'description', aiExperiences[idx]);
+    }
+  };
+
+  const useGrammarImprovedExperience = (idx) => {
+    if (grammarImprovedExperiences[idx]) {
+      handleChange(idx, 'description', grammarImprovedExperiences[idx]);
     }
   };
 
@@ -367,36 +395,39 @@ const StepExperience = () => {
             />
           </div>
 
-          {/* AI Conversion Section - Only show if job description exists */}
-          {jobDescription && jobDescription.trim() && (
-            <div style={{ 
-              background: '#f8fafc', 
-              border: '1px solid #e2e8f0', 
-              borderRadius: '6px', 
-              padding: '1rem',
-              marginBottom: '1rem'
-            }}>
+          {/* AI Helper Section - Always available */}
+          <div style={{ 
+            background: '#f8fafc', 
+            border: '1px solid #e2e8f0', 
+            borderRadius: '6px', 
+            padding: '1rem',
+            marginBottom: '1rem'
+          }}>
+            <h4 style={{ margin: '0 0 1rem 0', color: '#374151', fontSize: '0.95rem' }}>🤖 AI Assistance</h4>
+            
+            {/* Grammar/Refactor Button - Always Available */}
+            <div style={{ marginBottom: '1rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
                 <button
-                  onClick={() => handleAIGenerate(idx)}
-                  disabled={loadingIndex === idx || !exp.description.trim()}
+                  onClick={() => handleGrammarImprove(idx)}
+                  disabled={grammarLoadingIndex === idx || !exp.description.trim()}
                   style={{
-                    background: '#3b82f6',
+                    background: '#059669',
                     color: 'white',
                     border: 'none',
                     borderRadius: '6px',
                     padding: '0.5rem 1rem',
                     fontSize: '0.875rem',
-                    cursor: loadingIndex === idx ? 'not-allowed' : 'pointer',
-                    opacity: loadingIndex === idx || !exp.description.trim() ? 0.5 : 1
+                    cursor: grammarLoadingIndex === idx ? 'not-allowed' : 'pointer',
+                    opacity: grammarLoadingIndex === idx || !exp.description.trim() ? 0.5 : 1
                   }}
                 >
-                  {loadingIndex === idx ? '🤖 Converting...' : '🤖 AI Convert Based on Job Description'}
+                  {grammarLoadingIndex === idx ? '✨ Improving...' : '✨ AI Improve Grammar & Style'}
                 </button>
                 
-                {aiExperiences[idx] && (
+                {grammarImprovedExperiences[idx] && (
                   <button
-                    onClick={() => useAIExperience(idx)}
+                    onClick={() => useGrammarImprovedExperience(idx)}
                     style={{
                       background: '#10b981',
                       color: 'white',
@@ -407,26 +438,95 @@ const StepExperience = () => {
                       cursor: 'pointer'
                     }}
                   >
-                    ✅ Use AI Version
+                    ✅ Use Improved Version
                   </button>
                 )}
               </div>
               
-              {aiExperiences[idx] && (
+              {grammarImprovedExperiences[idx] && (
                 <div style={{ 
                   background: 'white', 
                   border: '1px solid #d1d5db', 
                   borderRadius: '4px', 
                   padding: '0.75rem',
                   fontSize: '0.875rem',
-                  color: '#374151'
+                  color: '#374151',
+                  marginBottom: '1rem'
                 }}>
-                  <strong>AI-Optimized Description:</strong>
-                  <div style={{ marginTop: '0.5rem' }}>{aiExperiences[idx]}</div>
+                  <strong>AI-Improved Description:</strong>
+                  <div style={{ marginTop: '0.5rem' }}>{grammarImprovedExperiences[idx]}</div>
                 </div>
               )}
             </div>
-          )}
+
+            {/* Job Matching Button - Only with job description */}
+            {jobDescription && jobDescription.trim() && (
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
+                  <button
+                    onClick={() => handleAIGenerate(idx)}
+                    disabled={loadingIndex === idx || !exp.description.trim()}
+                    style={{
+                      background: '#3b82f6',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '6px',
+                      padding: '0.5rem 1rem',
+                      fontSize: '0.875rem',
+                      cursor: loadingIndex === idx ? 'not-allowed' : 'pointer',
+                      opacity: loadingIndex === idx || !exp.description.trim() ? 0.5 : 1
+                    }}
+                  >
+                    {loadingIndex === idx ? '🎯 Optimizing...' : '🎯 AI Optimize for Job Description'}
+                  </button>
+                  
+                  {aiExperiences[idx] && (
+                    <button
+                      onClick={() => useAIExperience(idx)}
+                      style={{
+                        background: '#10b981',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        padding: '0.5rem 1rem',
+                        fontSize: '0.875rem',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      ✅ Use Optimized Version
+                    </button>
+                  )}
+                </div>
+                
+                {aiExperiences[idx] && (
+                  <div style={{ 
+                    background: 'white', 
+                    border: '1px solid #d1d5db', 
+                    borderRadius: '4px', 
+                    padding: '0.75rem',
+                    fontSize: '0.875rem',
+                    color: '#374151'
+                  }}>
+                    <strong>Job-Optimized Description:</strong>
+                    <div style={{ marginTop: '0.5rem' }}>{aiExperiences[idx]}</div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {(!jobDescription || !jobDescription.trim()) && (
+              <div style={{ 
+                background: '#fef3c7', 
+                border: '1px solid #f59e0b', 
+                borderRadius: '4px', 
+                padding: '0.75rem',
+                fontSize: '0.85rem',
+                color: '#92400e'
+              }}>
+                💡 <strong>Job Optimization Unavailable:</strong> To get AI optimization based on job requirements, go back to the home page and start with a job description.
+              </div>
+            )}
+          </div>
         </div>
       ))}
       

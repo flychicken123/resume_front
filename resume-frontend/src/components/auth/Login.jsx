@@ -201,7 +201,11 @@ const Login = ({ onLogin, onClose }) => {
           }}
           onError={(error) => {
             console.error('Google login error:', error);
-            setError('Google OAuth not configured for localhost. Please use email/password login or configure Google OAuth client ID for localhost:3000.');
+            if (process.env.NODE_ENV === 'development') {
+              setError('Google OAuth not configured for localhost. Please use email/password login or configure Google OAuth client ID for localhost:3000.');
+            } else {
+              setError('Google login failed. Please try email/password login instead.');
+            }
           }}
           width={400}
         />

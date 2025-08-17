@@ -15,6 +15,7 @@ import JobDescModal from '../components/JobDescModal';
 import ImportResumeModal from '../components/ImportResumeModal';
 import SEO from '../components/SEO';
 import { trackResumeGeneration, trackReferrer, trackBuilderStart, trackStepCompletion } from '../components/Analytics';
+import { generateResumeAdviceAI, generateCoverLetterAI } from '../api';
 import './BuilderPage.css';
 
 const steps = [
@@ -32,6 +33,13 @@ function BuilderPage() {
   const [showJobDescModal, setShowJobDescModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [jobDescription, setJobDescription] = useState('');
+  const [showAdvice, setShowAdvice] = useState(false);
+  const [showCoverLetter, setShowCoverLetter] = useState(false);
+  const [resumeAdvice, setResumeAdvice] = useState('');
+  const [coverLetter, setCoverLetter] = useState('');
+  const [adviceLoading, setAdviceLoading] = useState(false);
+  const [coverLetterLoading, setCoverLetterLoading] = useState(false);
+  const [companyName, setCompanyName] = useState('');
   
   // Load job description from localStorage on component mount
   useEffect(() => {
@@ -516,6 +524,34 @@ function BuilderPage() {
     setStep(1);
   };
 
+  // AI Resume Advice Handler
+  const handleGetResumeAdvice = async () => {
+    try {
+      setAdviceLoading(true);
+      const advice = await generateResumeAdviceAI(data, jobDescription);
+      setResumeAdvice(advice);
+      setShowAdvice(true);
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setAdviceLoading(false);
+    }
+  };
+
+  // AI Cover Letter Handler
+  const handleGenerateCoverLetter = async () => {
+    try {
+      setCoverLetterLoading(true);
+      const letter = await generateCoverLetterAI(data, jobDescription, companyName);
+      setCoverLetter(letter);
+      setShowCoverLetter(true);
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setCoverLetterLoading(false);
+    }
+  };
+
   const CurrentStepComponent = steps[step - 1];
 
   return (
@@ -577,24 +613,6 @@ function BuilderPage() {
               
               {/* Navigation Buttons */}
               <div className="navigation-buttons">
-                {step > 1 && (
-                  <button
-                    className="btn-previous"
-                    onClick={() => setStep(step - 1)}
-                    onMouseEnter={(e) => {
-                      e.target.style.background = '#f3f4f6';
-                      e.target.style.transform = 'translateY(-1px)';
-                      e.target.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.background = 'white';
-                      e.target.style.transform = 'translateY(0)';
-                      e.target.style.boxShadow = 'none';
-                    }}
-                  >
-                    ← Previous
-                  </button>
-                )}
                 {step < steps.length && (
                   <button
                     className="btn-next"
@@ -615,40 +633,131 @@ function BuilderPage() {
                 )}
                 {step === steps.length && (
                   <>
-                    <button
-                      className="btn-view-resume"
-                      onClick={handleViewResume}
-                      onMouseEnter={(e) => {
-                        e.target.style.background = '#059669';
-                        e.target.style.transform = 'translateY(-1px)';
-                        e.target.style.boxShadow = '0 6px 12px rgba(16, 185, 129, 0.3)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.background = '#10b981';
-                        e.target.style.transform = 'translateY(0)';
-                        e.target.style.boxShadow = '0 4px 6px rgba(16, 185, 129, 0.25)';
-                      }}
-                    >
-                      📄 View Resume
-                    </button>
-                    <button
-                      className="btn-complete"
-                      onClick={() => window.location.href = '/'}
-                      onMouseEnter={(e) => {
-                        e.target.style.background = '#3b82f6';
-                        e.target.style.color = 'white';
-                        e.target.style.transform = 'translateY(-1px)';
-                        e.target.style.boxShadow = '0 6px 12px rgba(59, 130, 246, 0.3)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.background = 'white';
-                        e.target.style.color = '#3b82f6';
-                        e.target.style.transform = 'translateY(0)';
-                        e.target.style.boxShadow = 'none';
-                      }}
-                    >
-                      ✅ Complete & Return Home
-                    </button>
+                    {/* All Buttons Section */}
+                    <div style={{ 
+                      display: 'grid',
+                      gridTemplateColumns: '1fr 1fr',
+                      gap: '0.5rem',
+                      justifyContent: 'center',
+                      margin: '0 auto',
+                      maxWidth: '500px'
+                    }}>
+                      {/* Row 1: Navigation Buttons */}
+                      <button
+                        onClick={() => setStep(step - 1)}
+                        style={{
+                          background: 'white',
+                          color: '#374151',
+                          border: '2px solid #d1d5db',
+                          borderRadius: '6px',
+                          padding: '0.6rem 1rem',
+                          fontSize: '0.875rem',
+                          cursor: 'pointer',
+                          fontWeight: 600,
+                          transition: 'all 0.2s ease',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '0.4rem',
+                          height: '42px',
+                          width: '100%'
+                        }}
+                      >
+                        ← Previous
+                      </button>
+                      
+                      <button
+                        className="btn-view-resume"
+                        onClick={handleViewResume}
+                        style={{
+                          background: '#10b981',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '6px',
+                          padding: '0.6rem 1rem',
+                          fontSize: '0.875rem',
+                          cursor: 'pointer',
+                          fontWeight: 600,
+                          transition: 'all 0.2s ease',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '0.4rem',
+                          height: '42px',
+                          width: '100%'
+                        }}
+                      >
+                        📄 View Resume
+                      </button>
+                      
+                      {/* Row 2: AI Buttons */}
+                      <button
+                        onClick={handleGetResumeAdvice}
+                        disabled={adviceLoading}
+                        style={{
+                          background: '#8b5cf6',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '6px',
+                          padding: '0.6rem 1rem',
+                          fontSize: '0.875rem',
+                          cursor: adviceLoading ? 'not-allowed' : 'pointer',
+                          opacity: adviceLoading ? 0.7 : 1,
+                          fontWeight: 600,
+                          transition: 'all 0.2s ease',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '0.4rem',
+                          height: '42px',
+                          width: '100%'
+                        }}
+                      >
+                        {adviceLoading ? '🔍 Analyzing...' : '🔍 AI Resume Advice'}
+                      </button>
+                      
+                      <button
+                        onClick={handleGenerateCoverLetter}
+                        disabled={coverLetterLoading}
+                        style={{
+                          background: '#ec4899',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '6px',
+                          padding: '0.6rem 1rem',
+                          fontSize: '0.875rem',
+                          cursor: coverLetterLoading ? 'not-allowed' : 'pointer',
+                          opacity: coverLetterLoading ? 0.7 : 1,
+                          fontWeight: 600,
+                          transition: 'all 0.2s ease',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '0.4rem',
+                          height: '42px',
+                          width: '100%'
+                        }}
+                      >
+                        {coverLetterLoading ? '📝 Generating...' : '📝 AI Cover Letter'}
+                      </button>
+                    </div>
+                    
+                    {(!jobDescription || !jobDescription.trim()) && (
+                      <div style={{ 
+                        background: '#fef3c7', 
+                        border: '1px solid #f59e0b', 
+                        borderRadius: '4px', 
+                        padding: '0.5rem',
+                        fontSize: '0.8rem',
+                        color: '#92400e',
+                        textAlign: 'center',
+                        marginTop: '0.75rem',
+                        maxWidth: '500px',
+                        margin: '0.75rem auto 0'
+                      }}>
+                        💡 <strong>Tip:</strong> For personalized AI features, start with a job description!
+                      </div>
+                    )}
                   </>
                 )}
               </div>
@@ -691,6 +800,94 @@ function BuilderPage() {
        {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
        {showJobDescModal && <JobDescModal onClose={() => setShowJobDescModal(false)} onJobDescriptionSubmit={handleJobDescSubmit} onProceed={handleProceedAfterChoice} />}
        {showImportModal && <ImportResumeModal onClose={() => setShowImportModal(false)} />}
+       
+       {/* AI Advice Modal */}
+       {showAdvice && (
+         <div style={{
+           position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+           background: 'rgba(0,0,0,0.25)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center'
+         }}>
+           <div style={{
+             background: 'white', borderRadius: '12px', maxWidth: '600px', width: '90%', maxHeight: '80%',
+             overflow: 'auto', padding: '2rem', position: 'relative'
+           }}>
+             <button
+               onClick={() => setShowAdvice(false)}
+               style={{
+                 position: 'absolute', top: '16px', right: '16px', background: 'transparent',
+                 border: 'none', fontSize: '24px', cursor: 'pointer', color: '#999'
+               }}
+             >×</button>
+             <h2 style={{ marginBottom: '1rem', color: '#374151' }}>🔍 AI Resume Advice</h2>
+             <div style={{
+               background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px',
+               padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: '1.6', fontSize: '0.95rem'
+             }}>
+               {resumeAdvice}
+             </div>
+           </div>
+         </div>
+       )}
+       
+       {/* AI Cover Letter Modal */}
+       {showCoverLetter && (
+         <div style={{
+           position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+           background: 'rgba(0,0,0,0.25)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center'
+         }}>
+           <div style={{
+             background: 'white', borderRadius: '12px', maxWidth: '700px', width: '90%', maxHeight: '80%',
+             overflow: 'auto', padding: '2rem', position: 'relative'
+           }}>
+             <button
+               onClick={() => setShowCoverLetter(false)}
+               style={{
+                 position: 'absolute', top: '16px', right: '16px', background: 'transparent',
+                 border: 'none', fontSize: '24px', cursor: 'pointer', color: '#999'
+               }}
+             >×</button>
+             <h2 style={{ marginBottom: '1rem', color: '#374151' }}>📝 AI Generated Cover Letter</h2>
+             {jobDescription && jobDescription.trim() && (
+               <div style={{ marginBottom: '1rem' }}>
+                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#374151' }}>
+                   Company Name (Optional):
+                 </label>
+                 <input
+                   type="text"
+                   value={companyName}
+                   onChange={(e) => setCompanyName(e.target.value)}
+                   placeholder="Enter company name for personalized cover letter"
+                   style={{
+                     width: '100%', padding: '0.5rem', border: '1px solid #d1d5db',
+                     borderRadius: '4px', fontSize: '0.95rem'
+                   }}
+                 />
+               </div>
+             )}
+             <div style={{
+               background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px',
+               padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: '1.6', fontSize: '0.95rem',
+               minHeight: '200px'
+             }}>
+               {coverLetter}
+             </div>
+             <div style={{ marginTop: '1rem', textAlign: 'right' }}>
+               <button
+                 onClick={() => {
+                   navigator.clipboard.writeText(coverLetter);
+                   alert('Cover letter copied to clipboard!');
+                 }}
+                 style={{
+                   background: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px',
+                   padding: '0.5rem 1rem', fontSize: '0.875rem', cursor: 'pointer'
+                 }}
+               >
+                 📋 Copy to Clipboard
+               </button>
+             </div>
+           </div>
+         </div>
+       )}
     </>
   );
 }
