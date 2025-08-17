@@ -156,52 +156,87 @@ const Login = ({ onLogin, onClose }) => {
 
 
     return (
-    <div className="login-container" style={{ 
-      maxWidth: 400, 
-      width: 'calc(100vw - 2rem)',
-      margin: '1rem auto', 
-      padding: '1.5rem', 
-      background: 'white', 
-      borderRadius: 12, 
-      boxShadow: '0 4px 12px rgba(0,0,0,0.08)', 
-      position: 'relative',
-      maxHeight: 'calc(100vh - 2rem)',
-      overflowY: 'auto'
-    }}>
+      <div 
+        className="compact-login-modal"
+        style={{ 
+          maxWidth: '320px', 
+          width: 'calc(100vw - 2rem)',
+          padding: '1rem 0.75rem 0.75rem 0.75rem', 
+          background: 'white', 
+          borderRadius: '8px', 
+          boxShadow: '0 4px 12px rgba(0,0,0,0.1)', 
+          position: 'relative',
+          maxHeight: 'calc(100vh - 4rem)',
+          overflowY: 'auto',
+          fontSize: '14px',
+          boxSizing: 'border-box'
+        }}
+      >
+        <style>{`
+          .compact-login-modal * {
+            box-sizing: border-box;
+          }
+          .compact-login-modal input {
+            width: 100% !important;
+            padding: 0.4rem !important;
+            font-size: 0.85rem !important;
+            margin-bottom: 0.5rem !important;
+            border: 1px solid #ccc !important;
+            border-radius: 4px !important;
+          }
+          .compact-login-modal label {
+            font-size: 0.75rem !important;
+            margin-bottom: 0.2rem !important;
+            display: block !important;
+          }
+          .compact-login-modal h2 {
+            font-size: 1.1rem !important;
+            margin-bottom: 0.8rem !important;
+            text-align: center !important;
+          }
+          .compact-login-modal button[type="submit"] {
+            width: 100% !important;
+            padding: 0.5rem !important;
+            font-size: 0.85rem !important;
+            margin-top: 0.5rem !important;
+          }
+          .compact-login-modal > div:last-child {
+            margin-top: 0.5rem !important;
+            font-size: 0.75rem !important;
+          }
+        `}</style>
       <button
         onClick={onClose}
         style={{
           position: 'absolute',
           top: 12,
           right: 12,
-          background: '#f3f4f6',
+          background: 'transparent',
           border: 'none',
           fontSize: '20px',
           cursor: 'pointer',
-          color: '#6b7280',
+          color: '#dc2626',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 1000,
+          zIndex: 9999,
           fontWeight: 'bold',
-          padding: '8px',
-          width: '36px',
-          height: '36px',
-          borderRadius: '50%',
-          transition: 'all 0.2s ease'
+          padding: '4px',
+          width: '32px',
+          height: '32px'
         }}
         onMouseEnter={(e) => {
-          e.target.style.background = '#e5e7eb';
-          e.target.style.color = '#374151';
+          e.target.style.color = '#b91c1c';
+          e.target.style.transform = 'scale(1.1)';
         }}
         onMouseLeave={(e) => {
-          e.target.style.background = '#f3f4f6';
-          e.target.style.color = '#6b7280';
+          e.target.style.color = '#dc2626';
+          e.target.style.transform = 'scale(1)';
         }}
         aria-label="Close auth modal"
       >×</button>
-      <h2 style={{ textAlign: 'center', marginBottom: '2rem' }}>{mode === 'login' ? 'Login' : 'Sign Up'}</h2>
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
+      <h2 style={{ textAlign: 'center', marginBottom: '1rem', fontSize: '1.3rem' }}>{mode === 'login' ? 'Login' : 'Sign Up'}</h2>
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
         <GoogleLogin
           onSuccess={credentialResponse => {
             console.log('Google login success:', credentialResponse);
@@ -222,42 +257,43 @@ const Login = ({ onLogin, onClose }) => {
               setError('Google login failed. Please try email/password login instead.');
             }
           }}
-          width={400}
+          width="100%"
+          size="large"
         />
       </div>
       <form onSubmit={handleSubmit}>
-        <label>Email</label>
+        <label style={{ fontSize: '0.8rem', marginBottom: '0.2rem', display: 'block' }}>Email</label>
         <input
           type="email"
           value={email}
           onChange={e => setEmail(e.target.value)}
           placeholder="Enter your email"
-          style={{ marginBottom: '1rem' }}
+          style={{ marginBottom: '0.75rem', padding: '0.5rem', fontSize: '0.9rem' }}
         />
-        <label>Password</label>
+        <label style={{ fontSize: '0.8rem', marginBottom: '0.2rem', display: 'block' }}>Password</label>
         <input
           type="password"
           value={password}
           onChange={e => setPassword(e.target.value)}
           placeholder="Enter your password"
-          style={{ marginBottom: '1rem' }}
+          style={{ marginBottom: '0.75rem', padding: '0.5rem', fontSize: '0.9rem' }}
         />
         {mode === 'signup' && (
           <>
-            <label>Confirm Password</label>
+            <label style={{ fontSize: '0.8rem', marginBottom: '0.2rem', display: 'block' }}>Confirm Password</label>
             <input
               type="password"
               value={confirmPassword}
               onChange={e => setConfirmPassword(e.target.value)}
               placeholder="Confirm your password"
-              style={{ marginBottom: '1rem' }}
+              style={{ marginBottom: '0.75rem', padding: '0.5rem', fontSize: '0.9rem' }}
             />
           </>
         )}
-        {error && <div style={{ color: 'red', marginBottom: '1rem' }}>{error}</div>}
-        <button type="submit" style={{ width: '100%' }}>{mode === 'login' ? 'Login' : 'Sign Up'}</button>
+        {error && <div style={{ color: 'red', marginBottom: '0.75rem', fontSize: '0.85rem' }}>{error}</div>}
+        <button type="submit" style={{ width: '100%', padding: '0.6rem', fontSize: '0.9rem' }}>{mode === 'login' ? 'Login' : 'Sign Up'}</button>
       </form>
-      <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+      <div style={{ textAlign: 'center', marginTop: '0.75rem', fontSize: '0.85rem' }}>
         {mode === 'login' ? (
           <span>Don't have an account?{' '}
             <button type="button" style={{ color: '#3b82f6', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }} onClick={() => { setMode('signup'); setError(''); setConfirmPassword(''); }}>Sign up</button>
