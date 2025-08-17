@@ -1,34 +1,20 @@
-# Use official Node.js image
-FROM node:18-alpine AS builder
-
-# Install yarn
-RUN npm install -g yarn
-
-# Set working directory
-WORKDIR /app
-
-# Copy package files first
-COPY resume-frontend/package.json ./
-
-# Install dependencies with yarn
-RUN yarn install --frozen-lockfile --network-timeout 100000
-
-# Copy source code
-COPY resume-frontend/ ./
-
-# Build the React app
-RUN yarn build
-
-# Production stage
+# Simple Node.js approach
 FROM node:18-alpine
 
 WORKDIR /app
 
-# Install serve globally
-RUN npm install -g serve
+# Copy everything
+COPY resume-frontend/ ./
 
-# Copy built app from builder stage
-COPY --from=builder /app/build ./build
+# Set NODE_OPTIONS to increase memory and skip problematic checks
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+ENV CI=false
+
+# Install and build in one step to avoid caching issues
+RUN npm ci --only=production --no-audit --no-fund && npm run build
+
+# Install serve
+RUN npm install -g serve
 
 # Expose port 3000
 EXPOSE 3000
