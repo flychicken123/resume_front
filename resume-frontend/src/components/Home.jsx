@@ -74,7 +74,7 @@ const Home = () => {
           <button 
             className="home-nav-link" 
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', font: 'inherit' }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', font: 'inherit' }}
           >
             Home
           </button>
@@ -87,7 +87,7 @@ const Home = () => {
                 setShowIntegratedModal(true);
               }
             }}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', font: 'inherit' }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', font: 'inherit' }}
           >
             Builder
           </button>
@@ -95,7 +95,7 @@ const Home = () => {
             <button 
               className="home-nav-link" 
               onClick={() => setShowResumeHistory(true)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', font: 'inherit' }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', font: 'inherit' }}
             >
               Resume History
             </button>

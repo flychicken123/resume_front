@@ -11,7 +11,10 @@ function App() {
   return (
     <AuthProvider>
       <ResumeProvider>
-        <Router>
+        <Router future={{ 
+          v7_startTransition: true,
+          v7_relativeSplatPath: true 
+        }}>
           <Analytics />
           <Routes>
             <Route path="/" element={<Home />} />
