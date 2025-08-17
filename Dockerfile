@@ -9,7 +9,8 @@ COPY resume-frontend/package.json resume-frontend/package-lock.json* ./
 # Set memory limits and install dependencies
 ENV NODE_OPTIONS="--max-old-space-size=1024"
 ENV NPM_CONFIG_MAXSOCKETS=3
-RUN npm ci --only=production --silent --no-audit --no-fund
+# Install ALL dependencies (not just production) since we need build tools
+RUN npm ci --silent --no-audit --no-fund
 
 # Copy source files
 COPY resume-frontend/ ./
