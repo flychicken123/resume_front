@@ -3,11 +3,16 @@ name: Deploy Frontend to EC2
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    paths:
+      - 'resume-frontend/**'
+      - '.github/workflows/deploy-frontend.yml'
+      - 'Dockerfile'
+      - 'docker-compose.frontend.yml'
+      - 'nginx.frontend.conf'
+  workflow_dispatch:
 
 jobs:
-  deploy-frontend:
+  build-and-deploy:
     runs-on: ubuntu-latest
     
     steps:
@@ -28,28 +33,24 @@ jobs:
         username: ec2-user
         key: ${{ secrets.FRONTEND_EC2_SSH_KEY }}
         script: |
-          # Update system and install essential packages (handle conflicts)
-          sudo yum update -y
-          sudo yum install -y git wget --allowerasing || sudo yum install -y git wget --skip-broken
+          set -Eeuo pipefail
+          trap 'echo "❌ Error on line $LINENO"; exit 1' ERR
+
+          echo "🚀 Starting frontend deployment..."
           
-          # Install Docker if not installed
-          if ! command -v docker &> /dev/null; then
-            sudo yum install -y docker
-            sudo systemctl start docker
-            sudo systemctl enable docker
-            sudo usermod -aG docker ec2-user
+          # Ensure Docker is running
+          if ! docker info >/dev/null 2>&1; then
+            echo "❌ Docker is not running"
+            sudo systemctl start docker || exit 1
+            sleep 5
           fi
           
-          # Install Docker Compose if not installed
-          if ! command -v docker-compose &> /dev/null; then
-            sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-            sudo chmod +x /usr/local/bin/docker-compose
-          fi
-          
-          # Remove existing directory completely and recreate
-          rm -rf ~/ai-resume-frontend
-          mkdir -p ~/ai-resume-frontend
-          cd ~/ai-resume-frontend
+          # Navigate to frontend directory
+          cd ~/ai-resume-frontend || {
+            echo "❌ Frontend directory not found"
+            mkdir -p ~/ai-resume-frontend
+            cd ~/ai-resume-frontend
+          }
           
           # Clone the main branch of the repository using HTTPS (public repo)
           git clone -b main https://github.com/flychicken123/resume_front.git .
@@ -117,7 +118,27 @@ jobs:
           # Cleanup temporary container
           docker rm "ai-resume-frontend-new-${TIMESTAMP}" 2>/dev/null || echo "Temp container already cleaned"
           
-          echo "✅ Frontend deployed successfully"
+          # Test public endpoint
+          echo "🌐 Testing public endpoint..."
+          if curl -f https://www.hihired.org > /dev/null 2>&1; then
+            echo "✅ Public frontend is accessible!"
+          else
+            echo "❌ Public frontend is not accessible"
+            exit 1
+          fi
           
-          # Clean up
-          docker system prune -f 
+          # Clean up old Docker images
+          echo "🧹 Cleaning up old images..."
+          docker system prune -af || true
+          
+          echo "✅ Frontend deployment completed successfully!"
+          
+    - name: Send deployment notification
+      if: always()
+      run: |
+        if [ "${{ job.status }}" == "success" ]; then
+          echo "✅ Frontend deployed successfully to production"
+        else
+          echo "❌ Frontend deployment failed - check logs"
+          exit 1
+        fi 
