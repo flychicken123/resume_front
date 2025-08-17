@@ -159,16 +159,16 @@ const Login = ({ onLogin, onClose }) => {
       <div 
         className="compact-login-modal"
         style={{ 
-          maxWidth: '320px', 
-          width: 'calc(100vw - 2rem)',
-          padding: '1rem 0.75rem 0.75rem 0.75rem', 
+          maxWidth: window.innerWidth <= 768 ? '320px' : '480px', 
+          width: window.innerWidth <= 768 ? 'calc(100vw - 2rem)' : '480px',
+          padding: window.innerWidth <= 768 ? '1rem 0.75rem 0.75rem 0.75rem' : '2rem 1.5rem', 
           background: 'white', 
           borderRadius: '8px', 
           boxShadow: '0 4px 12px rgba(0,0,0,0.1)', 
           position: 'relative',
           maxHeight: 'calc(100vh - 4rem)',
           overflowY: 'auto',
-          fontSize: '14px',
+          fontSize: window.innerWidth <= 768 ? '14px' : '16px',
           boxSizing: 'border-box'
         }}
       >
@@ -176,6 +176,8 @@ const Login = ({ onLogin, onClose }) => {
           .compact-login-modal * {
             box-sizing: border-box;
           }
+          
+          /* Mobile styles (default) */
           .compact-login-modal input {
             width: 100% !important;
             padding: 0.4rem !important;
@@ -203,6 +205,32 @@ const Login = ({ onLogin, onClose }) => {
           .compact-login-modal > div:last-child {
             margin-top: 0.5rem !important;
             font-size: 0.75rem !important;
+          }
+          
+          /* Desktop styles */
+          @media (min-width: 769px) {
+            .compact-login-modal input {
+              padding: 0.75rem !important;
+              font-size: 1rem !important;
+              margin-bottom: 0.75rem !important;
+            }
+            .compact-login-modal label {
+              font-size: 0.9rem !important;
+              margin-bottom: 0.3rem !important;
+            }
+            .compact-login-modal h2 {
+              font-size: 1.5rem !important;
+              margin-bottom: 1.25rem !important;
+            }
+            .compact-login-modal button[type="submit"] {
+              padding: 0.75rem !important;
+              font-size: 1rem !important;
+              margin-top: 0.75rem !important;
+            }
+            .compact-login-modal > div:last-child {
+              margin-top: 0.75rem !important;
+              font-size: 0.9rem !important;
+            }
           }
         `}</style>
       <button
