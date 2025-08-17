@@ -50,7 +50,7 @@ function BuilderPage() {
   }, []);
   
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const { user, login, logout } = useAuth();
+  const { user, login, logout, getAuthHeaders } = useAuth();
   const { data, saveToDatabaseNow, clearData } = useResume();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [startTime] = useState(Date.now());
@@ -388,8 +388,20 @@ function BuilderPage() {
         const formData = new FormData();
         formData.append('html', htmlBlob, 'resume.html');
 
+        // Get auth headers using AuthContext
+        const authHeaders = getAuthHeaders();
+        
+        // Check auth headers are available
+        if (!authHeaders.Authorization) {
+          alert('Authentication error. Please log in again.');
+          return;
+        }
+
         fetch(`${getAPIBaseURL()}/api/resume/generate-pdf-file`, {
           method: 'POST',
+          headers: {
+            'Authorization': authHeaders.Authorization
+          },
           body: formData
         })
         .then(async (response) => {
@@ -418,6 +430,12 @@ function BuilderPage() {
              alert('PDF resume generated successfully!');
            } else {
              console.error('PDF generation failed response:', result);
+             // Handle 401 errors specifically
+             if (result.status === 401) {
+               alert('Authentication expired. Please log in again.');
+               logout(); // Clear invalid auth state
+               return;
+             }
              throw new Error((result.data && (result.data.error || result.data.message)) || `Failed to generate PDF (status ${result.status})`);
            }
          })
@@ -496,7 +514,7 @@ function BuilderPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('resumeToken')}`
         },
         body: JSON.stringify(data)
       });
