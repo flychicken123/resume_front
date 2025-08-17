@@ -9,9 +9,11 @@ WORKDIR /app
 
 # Copy package files
 COPY resume-frontend/package.json ./
+COPY resume-frontend/package-lock.json* ./
 
-# Try without package-lock.json first to avoid conflicts
-RUN npm install --verbose
+# Clear npm cache and install with clean slate
+RUN npm cache clean --force
+RUN npm install --verbose --no-audit --no-fund || (npm ls && npm install --legacy-peer-deps --verbose)
 
 # Copy source code
 COPY resume-frontend/ ./
