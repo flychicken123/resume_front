@@ -3,20 +3,18 @@ import './Home.css';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Login from './auth/Login';
-import JobDescModal from './JobDescModal';
+import IntegratedBuilderStart from './IntegratedBuilderStart';
 import ResumeHistory from './ResumeHistory';
 import About from './About';
 import Contact from './Contact';
 import SEO from './SEO';
-import ImportResumeModal from './ImportResumeModal';
 import { trackReferrer, trackBuilderStart } from './Analytics';
 
 const Home = () => {
   const navigate = useNavigate();
   const { user, login } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [showJobDescModal, setShowJobDescModal] = useState(false);
-  const [showImportModal, setShowImportModal] = useState(false);
+  const [showIntegratedModal, setShowIntegratedModal] = useState(false);
   const [showResumeHistory, setShowResumeHistory] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [usernameWidth, setUsernameWidth] = useState(100);
@@ -41,19 +39,6 @@ const Home = () => {
     }
   }, [user]);
 
-  // Handler for job description submission
-  const handleJobDescSubmit = (description) => {
-    // Store job description in localStorage for the builder to access
-    localStorage.setItem('jobDescription', description);
-    setShowJobDescModal(false);
-    navigate('/builder');
-  };
-
-  const handleProceedAfterChoice = () => {
-    setShowJobDescModal(false);
-    navigate('/builder');
-  };
-  
   const handleStartBuilding = () => {
     // Track referrer and builder start when user clicks the button
     trackReferrer();
@@ -61,7 +46,7 @@ const Home = () => {
     if (!user) {
       setShowAuthModal(true);
     } else {
-      setShowJobDescModal(true);
+      setShowIntegratedModal(true);
     }
   };
 
@@ -99,7 +84,7 @@ const Home = () => {
               if (!user) {
                 setShowAuthModal(true);
               } else {
-                setShowJobDescModal(true);
+                setShowIntegratedModal(true);
               }
             }}
             style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', font: 'inherit' }}
@@ -190,7 +175,7 @@ const Home = () => {
                 if (!user) {
                   setShowAuthModal(true);
                 } else {
-                  setShowJobDescModal(true);
+                  setShowIntegratedModal(true);
                 }
               }}
             >
@@ -258,7 +243,7 @@ const Home = () => {
               if (!user) {
                 setShowAuthModal(true);
               } else {
-                setShowJobDescModal(true);
+                setShowIntegratedModal(true);
               }
             }}
           >
@@ -529,15 +514,11 @@ const Home = () => {
         </div>
       )}
 
-      {/* Job Description Modal */}
-      {showJobDescModal && (
-        <JobDescModal onClose={() => setShowJobDescModal(false)} onJobDescriptionSubmit={handleJobDescSubmit} onProceed={handleProceedAfterChoice} />
+      {/* Integrated Builder Start Modal */}
+      {showIntegratedModal && (
+        <IntegratedBuilderStart onClose={() => setShowIntegratedModal(false)} />
       )}
 
-      {/* Import/Manual Choice Modal */}
-      {showImportModal && (
-        <ImportResumeModal onClose={() => setShowImportModal(false)} />
-      )}
 
       {/* Resume History Modal */}
       {showResumeHistory && (
