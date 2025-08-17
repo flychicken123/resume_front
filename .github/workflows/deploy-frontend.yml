@@ -25,6 +25,18 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-2
+    
+    - name: Check EC2 Instance Status
+      run: |
+        echo "🔍 Checking EC2 instance connectivity..."
+        # Try to get instance status if instance ID is available
+        if [ ! -z "${{ secrets.FRONTEND_EC2_INSTANCE_ID }}" ]; then
+          aws ec2 describe-instance-status --instance-ids ${{ secrets.FRONTEND_EC2_INSTANCE_ID }} || echo "Could not get instance status"
+        fi
+        # Test network connectivity
+        echo "Testing connectivity to ${{ secrets.FRONTEND_EC2_HOST }}..."
+        timeout 5 nc -zv ${{ secrets.FRONTEND_EC2_HOST }} 22 || echo "⚠️ Warning: Cannot connect to SSH port"
+      continue-on-error: true
         
     - name: Deploy Frontend to EC2
       uses: appleboy/ssh-action@v0.1.5
@@ -32,6 +44,8 @@ jobs:
         host: ${{ secrets.FRONTEND_EC2_HOST }}
         username: ec2-user
         key: ${{ secrets.FRONTEND_EC2_SSH_KEY }}
+        timeout: 60s
+        command_timeout: 30m
         script: |
           set -Eeuo pipefail
           trap 'echo "❌ Error on line $LINENO. Last command: $BASH_COMMAND"; exit 1' ERR
