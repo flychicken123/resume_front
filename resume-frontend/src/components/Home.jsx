@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import Login from './auth/Login';
 import IntegratedBuilderStart from './IntegratedBuilderStart';
 import ResumeHistory from './ResumeHistory';
+import JobSubmit from './JobSubmit';
 import About from './About';
 import Contact from './Contact';
 import SEO from './SEO';
@@ -16,6 +17,7 @@ const Home = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showIntegratedModal, setShowIntegratedModal] = useState(false);
   const [showResumeHistory, setShowResumeHistory] = useState(false);
+  const [showJobSubmit, setShowJobSubmit] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [usernameWidth, setUsernameWidth] = useState(100);
   const usernameRef = useRef(null);
@@ -221,20 +223,20 @@ const Home = () => {
       {/* Job Description Feature Section */}
       <div className="home-jobdesc-feature">
         <div className="home-jobdesc-feature-content">
-          <h2>🤖 AI-Powered Job Matching Technology</h2>
+          <h2>🎯 Smart Job Matching & Resume Optimization</h2>
           <p>
-            Our advanced AI analyzes any job posting in seconds and intelligently customizes your resume. The AI identifies critical keywords, matches your experience to job requirements, and restructures content for maximum impact. 
+            Paste any job posting and we'll instantly customize your resume to match what employers are looking for. Our system identifies critical keywords, highlights relevant experience, and formats everything professionally. 
             Beat automated screening systems and get noticed by hiring managers.
           </p>
           <div className="home-jobdesc-feature-benefits">
             <div className="benefit-item">
-              <span>🤖 AI keyword analysis & optimization</span>
+              <span>🔍 Keyword analysis & optimization</span>
             </div>
             <div className="benefit-item">
-              <span>📊 Machine learning skill prioritization</span>
+              <span>📊 Smart skill prioritization</span>
             </div>
             <div className="benefit-item">
-              <span>🎯 AI-engineered ATS compatibility</span>
+              <span>🎯 ATS-friendly formatting</span>
             </div>
           </div>
           <button 
@@ -247,7 +249,7 @@ const Home = () => {
               }
             }}
           >
-🤖 Start AI-Powered Resume Building
+📝 Start Building Your Resume
           </button>
         </div>
       </div>
@@ -255,25 +257,30 @@ const Home = () => {
       <div className="home-hero">
         <div className="home-hero-content">
           <div className="hero-main-content">
-            <h1 className="hero-title">🤖 AI-Powered Resume Builder That Gets You Hired</h1>
+            <h1 className="hero-title">📝 Build Professional Resumes & Land Your Dream Job</h1>
             <p className="hero-subtitle">
-              Experience the future of resume building with advanced AI technology. Our intelligent system analyzes job requirements, optimizes your content, and creates resumes that beat applicant tracking systems and impress recruiters.
+              Create stunning resumes that get noticed by employers and pass through applicant tracking systems. From building your resume to applying for jobs - we've got you covered.
             </p>
             <div className="hero-features">
               <div className="hero-feature">
-                <span>🤖 AI-powered content optimization</span>
+                <span>📝 Professional resume templates</span>
               </div>
               <div className="hero-feature">
-                <span>📊 Intelligent keyword matching</span>
+                <span>🎯 Optimized for job applications</span>
               </div>
               <div className="hero-feature">
-                <span>⚡ AI formatting in seconds</span>
+                <span>⚡ Apply to jobs instantly</span>
               </div>
             </div>
             <div className="home-cta-buttons">
               <button className="home-btn primary" onClick={handleStartBuilding}>
-                {user ? '🤖 Continue with AI Resume Builder' : '🚀 Start AI Resume Builder - Free!'}
+                {user ? '📝 Continue Building Resume' : '🚀 Start Building Your Resume - Free!'}
               </button>
+              {user && (
+                <button className="home-btn secondary" onClick={() => setShowJobSubmit(true)}>
+                  🎯 One-Click Apply
+                </button>
+              )}
             </div>
           </div>
           <div className="home-trusted">
@@ -289,7 +296,7 @@ const Home = () => {
         <div className="home-hero-image">
           <div className="ai-impact-preview">
             <div className="impact-header">
-              <div className="impact-title">🤖 AI Resume Builder</div>
+              <div className="impact-title">📝 Professional Resume Builder</div>
               <div className="impact-subtitle">Intelligent Technology That Delivers Results</div>
             </div>
             
@@ -364,10 +371,10 @@ const Home = () => {
       {/* AI Features Section */}
       <div className="what-makes-different">
         <div className="what-makes-different-content">
-          <h2>🤖 Advanced AI Technology That Sets Us Apart</h2>
+          <h2>🚀 Smart Features That Set Us Apart</h2>
           <p>
-            Experience cutting-edge artificial intelligence that revolutionizes resume building. 
-            Our machine learning algorithms analyze millions of successful resumes and job postings to give you the competitive edge.
+            Experience professional resume building that gets results. 
+            Our intelligent system analyzes successful resumes and job postings to give you the competitive edge.
           </p>
           
           <div className="features-grid">
@@ -523,6 +530,14 @@ const Home = () => {
       {/* Resume History Modal */}
       {showResumeHistory && (
         <ResumeHistory onClose={() => setShowResumeHistory(false)} />
+      )}
+
+      {showJobSubmit && (
+        <JobSubmit 
+          user={user}
+          resumeData={null} // TODO: Get actual resume data from context
+          onClose={() => setShowJobSubmit(false)} 
+        />
       )}
       
       {/* About Section */}
