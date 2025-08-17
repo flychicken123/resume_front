@@ -1,15 +1,17 @@
-# Use official Node.js image
+# Use official Node.js image with latest npm
 FROM node:18-alpine AS builder
+
+# Install build dependencies
+RUN apk add --no-cache git
 
 # Set working directory
 WORKDIR /app
 
 # Copy package files
 COPY resume-frontend/package.json ./
-COPY resume-frontend/package-lock.json ./
 
-# Install dependencies
-RUN npm install
+# Try without package-lock.json first to avoid conflicts
+RUN npm install --verbose
 
 # Copy source code
 COPY resume-frontend/ ./
