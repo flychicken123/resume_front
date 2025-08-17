@@ -1,17 +1,23 @@
-# Use official Node.js image with latest npm
+# Use official Node.js image
 FROM node:18-alpine AS builder
+
+# Install yarn
+RUN npm install -g yarn
 
 # Set working directory
 WORKDIR /app
 
-# Copy all frontend source code
+# Copy package files first
+COPY resume-frontend/package.json ./
+
+# Install dependencies with yarn
+RUN yarn install --frozen-lockfile --network-timeout 100000
+
+# Copy source code
 COPY resume-frontend/ ./
 
-# Install dependencies with simple approach
-RUN npm install
-
 # Build the React app
-RUN npm run build
+RUN yarn build
 
 # Production stage
 FROM node:18-alpine
