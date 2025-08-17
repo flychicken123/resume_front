@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import './Home.css';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useResume } from '../context/ResumeContext';
 import Login from './auth/Login';
 import IntegratedBuilderStart from './IntegratedBuilderStart';
 import ResumeHistory from './ResumeHistory';
@@ -14,6 +15,7 @@ import { trackReferrer, trackBuilderStart } from './Analytics';
 const Home = () => {
   const navigate = useNavigate();
   const { user, login } = useAuth();
+  const { resumeData } = useResume();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showIntegratedModal, setShowIntegratedModal] = useState(false);
   const [showResumeHistory, setShowResumeHistory] = useState(false);
@@ -535,7 +537,7 @@ const Home = () => {
       {showJobSubmit && (
         <JobSubmit 
           user={user}
-          resumeData={null} // TODO: Get actual resume data from context
+          resumeData={resumeData}
           onClose={() => setShowJobSubmit(false)} 
         />
       )}
