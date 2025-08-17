@@ -18,8 +18,10 @@ WORKDIR /app
 # Copy package files from resume-frontend directory
 COPY resume-frontend/package*.json ./
 
-# Install all dependencies
-RUN npm ci || npm install
+# Clear npm cache and install dependencies
+RUN npm cache clean --force \
+    && npm install --no-package-lock \
+    && npm install
 
 # Copy source code from resume-frontend directory
 COPY resume-frontend/ .
