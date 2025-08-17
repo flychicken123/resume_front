@@ -34,9 +34,11 @@ jobs:
         key: ${{ secrets.FRONTEND_EC2_SSH_KEY }}
         script: |
           set -Eeuo pipefail
-          trap 'echo "❌ Error on line $LINENO"; exit 1' ERR
+          trap 'echo "❌ Error on line $LINENO. Last command: $BASH_COMMAND"; exit 1' ERR
 
           echo "🚀 Starting frontend deployment..."
+          echo "📍 Current directory: $(pwd)"
+          echo "📍 Home directory: $HOME"
           
           # Ensure Docker is running
           if ! docker info >/dev/null 2>&1; then
@@ -46,12 +48,18 @@ jobs:
           fi
           
           # Remove existing directory completely and recreate
+          echo "🧹 Cleaning up existing directory..."
           rm -rf ~/ai-resume-frontend
           mkdir -p ~/ai-resume-frontend
           cd ~/ai-resume-frontend
+          echo "📍 Changed to directory: $(pwd)"
           
           # Clone the main branch of the repository using HTTPS (public repo)
+          echo "📥 Cloning repository..."
           git clone -b main https://github.com/flychicken123/resume_front.git .
+          echo "✅ Repository cloned successfully"
+          echo "📁 Directory contents:"
+          ls -la
           
           # Check if clone was successful
           if [ ! -f "docker-compose.frontend.yml" ]; then
@@ -70,7 +78,9 @@ jobs:
           NEW_TAG="ai-resume-frontend:${TIMESTAMP}"
           
           # Build new container with unique name
+          echo "🔨 Building Docker image..."
           docker-compose -f docker-compose.frontend.yml build --no-cache
+          echo "🏷️ Tagging image as ${NEW_TAG}..."
           docker tag ai-resume-frontend-frontend:latest ${NEW_TAG}
           
           # Start new container on different port temporarily
