@@ -93,6 +93,83 @@ export async function generateSummaryAI({ experience, education, skills }) {
   return data.summary;
 }
 
+// AI Grammar/Refactor functions - always available
+export async function improveExperienceGrammarAI(experience) {
+  const res = await fetch(`${API_BASE_URL}/api/experience/improve-grammar`, {
+    method: "POST",
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ 
+      userExperience: experience
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error || "AI grammar improvement failed.");
+  }
+  const data = await res.json();
+  return data.improvedExperience;
+}
+
+export async function improveSummaryGrammarAI(summary) {
+  const res = await fetch(`${API_BASE_URL}/api/summary/improve-grammar`, {
+    method: "POST",
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ 
+      summary: summary
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error || "AI grammar improvement failed.");
+  }
+  const data = await res.json();
+  return data.improvedSummary;
+}
+
+// Final step AI functions
+export async function generateResumeAdviceAI(resumeData, jobDescription = '') {
+  const res = await fetch(`${API_BASE_URL}/api/resume/analyze-advice`, {
+    method: "POST",
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ 
+      resumeData: resumeData,
+      jobDescription: jobDescription
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error || "AI resume analysis failed.");
+  }
+  const data = await res.json();
+  return data.advice;
+}
+
+export async function generateCoverLetterAI(resumeData, jobDescription = '', companyName = '') {
+  const res = await fetch(`${API_BASE_URL}/api/cover-letter/generate`, {
+    method: "POST",
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ 
+      resumeData: resumeData,
+      jobDescription: jobDescription,
+      companyName: companyName
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error || "AI cover letter generation failed.");
+  }
+  const data = await res.json();
+  return data.coverLetter;
+}
+
 export async function parseResumeFile(file) {
   const formData = new FormData();
   formData.append('resume', file);
