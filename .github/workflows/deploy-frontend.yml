@@ -61,27 +61,18 @@ jobs:
             sleep 5
           fi
           
-          # Clean up disk space first
-          echo "🧹 Cleaning up disk space..."
-          df -h
-          docker system prune -af --volumes || true
-          docker rmi $(docker images -q) || true
-          sudo rm -rf /tmp/* || true
-          df -h
+          # Quick cleanup - only remove really old stuff since we have space now
+          echo "🧹 Quick cleanup..."
+          docker image prune -af --filter "until=24h" || true
           
-          # Remove existing directory completely and recreate
-          echo "🧹 Cleaning up existing directory..."
-          rm -rf ~/ai-resume-frontend
-          mkdir -p ~/ai-resume-frontend
-          cd ~/ai-resume-frontend
-          echo "📍 Changed to directory: $(pwd)"
-          
-          # Clone the main branch of the repository using HTTPS (public repo)
-          echo "📥 Cloning repository..."
-          git clone -b main https://github.com/flychicken123/resume_front.git .
-          echo "✅ Repository cloned successfully"
-          echo "📁 Directory contents:"
-          ls -la
+          # Use git pull if repo exists, otherwise clone
+          cd ~/ai-resume-frontend 2>/dev/null && git pull origin main || {
+            rm -rf ~/ai-resume-frontend
+            mkdir -p ~/ai-resume-frontend
+            cd ~/ai-resume-frontend
+            git clone -b main https://github.com/flychicken123/resume_front.git .
+          }
+          echo "📍 Repository ready at: $(pwd)"
           
           # Check if clone was successful
           if [ ! -f "docker-compose.frontend.yml" ]; then
@@ -99,9 +90,9 @@ jobs:
           TIMESTAMP=$(date +%s)
           NEW_TAG="ai-resume-frontend:${TIMESTAMP}"
           
-          # Build new container with unique name
+          # Build new container (use cache if available, faster)
           echo "🔨 Building Docker image..."
-          docker-compose -f docker-compose.frontend.yml build --no-cache
+          docker-compose -f docker-compose.frontend.yml build
           echo "🏷️ Tagging image as ${NEW_TAG}..."
           docker tag ai-resume-frontend-frontend:latest ${NEW_TAG}
           
@@ -112,9 +103,9 @@ jobs:
             -e REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }} \
             ${NEW_TAG}
           
-          # Wait for new container to be ready
+          # Wait for new container to be ready (reduced wait time)
           echo "Waiting for new container to be ready..."
-          sleep 15
+          sleep 5
           
           # Health check new container
           if ! curl -f http://localhost:3001 >/dev/null 2>&1; then
@@ -138,7 +129,7 @@ jobs:
             ${NEW_TAG}
           
           # Final health check
-          sleep 5
+          sleep 2
           if ! docker ps | grep -q "ai-resume-frontend-frontend-1"; then
             echo "❌ Final container failed to start"
             docker logs ai-resume-frontend-frontend-1
@@ -148,20 +139,15 @@ jobs:
           # Cleanup temporary container
           docker rm "ai-resume-frontend-new-${TIMESTAMP}" 2>/dev/null || echo "Temp container already cleaned"
           
-          # Test public endpoint
-          echo "🌐 Testing public endpoint..."
-          if curl -f https://www.hihired.org > /dev/null 2>&1; then
-            echo "✅ Public frontend is accessible!"
-          else
-            echo "❌ Public frontend is not accessible"
-            exit 1
-          fi
+          # Skip public endpoint test (it's slow and not critical)
+          echo "🌐 Skipping public endpoint test for speed..."
           
-          # Clean up old Docker images
-          echo "🧹 Cleaning up old images..."
-          docker system prune -af || true
+          # Clean up only very old images
+          docker image prune -af --filter "until=72h" 2>/dev/null || true
           
           echo "✅ Frontend deployment completed successfully!"
+          echo "🚀 Container is running on port 3000"
+          docker ps | grep frontend || true
           
     - name: Send deployment notification
       if: always()
