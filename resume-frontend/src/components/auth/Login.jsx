@@ -156,32 +156,47 @@ const Login = ({ onLogin, onClose }) => {
 
 
     return (
-    <div className="login-container" style={{ maxWidth: 400, margin: '4rem auto', padding: '2rem', background: 'white', borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.08)', position: 'relative' }}>
+    <div className="login-container" style={{ 
+      maxWidth: 400, 
+      width: 'calc(100vw - 2rem)',
+      margin: '1rem auto', 
+      padding: '1.5rem', 
+      background: 'white', 
+      borderRadius: 12, 
+      boxShadow: '0 4px 12px rgba(0,0,0,0.08)', 
+      position: 'relative',
+      maxHeight: 'calc(100vh - 2rem)',
+      overflowY: 'auto'
+    }}>
       <button
         onClick={onClose}
         style={{
           position: 'absolute',
-          top: 16,
-          right: 16,
-          background: 'transparent',
+          top: 12,
+          right: 12,
+          background: '#f3f4f6',
           border: 'none',
-          fontSize: '24px',
+          fontSize: '20px',
           cursor: 'pointer',
-          color: '#999',
+          color: '#6b7280',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 1000,
-          fontWeight: 'normal',
-          padding: '0',
-          width: '24px',
-          height: '24px'
+          fontWeight: 'bold',
+          padding: '8px',
+          width: '36px',
+          height: '36px',
+          borderRadius: '50%',
+          transition: 'all 0.2s ease'
         }}
         onMouseEnter={(e) => {
-          e.target.style.color = '#333';
+          e.target.style.background = '#e5e7eb';
+          e.target.style.color = '#374151';
         }}
         onMouseLeave={(e) => {
-          e.target.style.color = '#999';
+          e.target.style.background = '#f3f4f6';
+          e.target.style.color = '#6b7280';
         }}
         aria-label="Close auth modal"
       >×</button>
