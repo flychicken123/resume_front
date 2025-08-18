@@ -279,10 +279,10 @@ function BuilderPage() {
           
           /* Ensure page break elements work correctly with multiple CSS approaches */
           div[style*="page-break-before: always"], div[style*="break-before: page"] {
-            page-break-before: always !important;
-            break-before: page !important;
+                page-break-before: always !important;
+                break-before: page !important;
             -webkit-break-before: page !important;
-            margin-top: 0 !important;
+                margin-top: 0 !important;
             padding-top: 0 !important;
             height: 0 !important;
             min-height: 0 !important;
@@ -442,7 +442,7 @@ function BuilderPage() {
   </style>
 </head>
 <body>
-            ${clonedElement.outerHTML}
+  ${clonedElement.outerHTML}
 </body>
 </html>`;
 
