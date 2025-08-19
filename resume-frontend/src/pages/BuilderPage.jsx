@@ -587,8 +587,16 @@ function BuilderPage() {
         const formData = new FormData();
         formData.append('html', htmlBlob, 'resume.html');
 
+        // Get auth token for the request
+        const token = localStorage.getItem('resumeToken');
+        const headers = {};
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+        
         fetch(`${getAPIBaseURL()}/api/resume/generate-pdf-file`, {
           method: 'POST',
+          headers: headers,
           body: formData
         })
         .then(async (response) => {
