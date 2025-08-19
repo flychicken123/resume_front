@@ -4,6 +4,7 @@ import { AuthProvider } from './context/AuthContext';
 import { ResumeProvider } from './context/ResumeContext';
 import Home from './components/Home';
 import { LoginPage, BuilderPage } from './pages';
+import JobApplicationPage from './pages/JobApplicationPage';
 import Analytics from './components/Analytics';
 import './App.css';
 
@@ -20,6 +21,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/builder" element={<BuilderPage />} />
+            <Route path="/apply" element={<JobApplicationPage />} />
           </Routes>
         </Router>
       </ResumeProvider>

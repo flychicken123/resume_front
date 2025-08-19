@@ -50,7 +50,7 @@ function BuilderPage() {
   }, []);
   
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const { user, login, logout, getAuthHeaders } = useAuth();
+  const { user, login, logout } = useAuth();
   const { data, saveToDatabaseNow, clearData } = useResume();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [startTime] = useState(Date.now());
@@ -387,25 +387,13 @@ function BuilderPage() {
         const htmlBlob = new Blob([minHtmlContent], { type: 'text/html' });
         const formData = new FormData();
         formData.append('html', htmlBlob, 'resume.html');
-        
-        // Debug: Check FormData contents
-        for (let [key, value] of formData.entries()) {
-          console.log('FormData entry:', key, value);
-        }
 
-        // Get token directly and only set Authorization header
-        const token = localStorage.getItem('resumeToken');
-        console.log('Token for PDF generation:', token); // Debug log
-        
-        const headers = {};
-        if (token) {
-          headers['Authorization'] = `Bearer ${token}`;
-        }
-        console.log('Headers being sent:', headers); // Debug log
-        
         fetch(`${getAPIBaseURL()}/api/resume/generate-pdf-file`, {
           method: 'POST',
-          headers: headers,
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')`
+          },
+          method: 'POST',
           body: formData
         })
         .then(async (response) => {
@@ -512,7 +500,7 @@ function BuilderPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('resumeToken')}`
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify(data)
       });

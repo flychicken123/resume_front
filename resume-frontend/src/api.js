@@ -191,3 +191,167 @@ export async function parseResumeFile(file) {
   }
   return await res.json();
 }
+
+// Job Application API functions
+export async function submitJobApplication(applicationData) {
+  const res = await fetch(`${API_BASE_URL}/api/job/apply`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(applicationData),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    // For missing profile info (412 status), throw with the full error object
+    if (res.status === 412 && err.error === 'missing_job_profile_info') {
+      const missingFieldsError = new Error('missing_job_profile_info');
+      missingFieldsError.missingFields = err.missing_fields;
+      missingFieldsError.status = 412;
+      throw missingFieldsError;
+    }
+    throw new Error(err.error || 'Failed to submit job application');
+  }
+  return await res.json();
+}
+
+export async function getUserRecentResumes() {
+  const res = await fetch(`${API_BASE_URL}/api/job/recent-resumes`, {
+    method: 'GET',
+    headers: getAuthHeaders(),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error || 'Failed to fetch recent resumes');
+  }
+  return await res.json();
+}
+
+export async function getUserJobApplications(limit = 20, offset = 0) {
+  const res = await fetch(`${API_BASE_URL}/api/job/applications?limit=${limit}&offset=${offset}`, {
+    method: 'GET',
+    headers: getAuthHeaders(),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error || 'Failed to fetch job applications');
+  }
+  return await res.json();
+}
+
+export async function getJobApplication(applicationId) {
+  const res = await fetch(`${API_BASE_URL}/api/job/applications/${applicationId}`, {
+    method: 'GET',
+    headers: getAuthHeaders(),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error || 'Failed to fetch job application');
+  }
+  return await res.json();
+}
+
+export async function updateJobApplicationStatus(applicationId, status) {
+  const res = await fetch(`${API_BASE_URL}/api/job/applications/${applicationId}/status`, {
+    method: 'PUT',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ status }),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error || 'Failed to update job application status');
+  }
+  return await res.json();
+}
+
+export async function deleteJobApplication(applicationId) {
+  const res = await fetch(`${API_BASE_URL}/api/job/applications/${applicationId}`, {
+    method: 'DELETE',
+    headers: getAuthHeaders(),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error || 'Failed to delete job application');
+  }
+  return await res.json();
+}
+
+// Job Automation API functions
+export async function saveUserPreferences(jobSiteDomain, preferences) {
+  const res = await fetch(`${API_BASE_URL}/api/job/preferences`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({
+      job_site_domain: jobSiteDomain,
+      preferences: preferences
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error || 'Failed to save preferences');
+  }
+  return await res.json();
+}
+
+export async function getUserPreferences(domain) {
+  const res = await fetch(`${API_BASE_URL}/api/job/preferences?domain=${encodeURIComponent(domain)}`, {
+    method: 'GET',
+    headers: getAuthHeaders(),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error || 'Failed to fetch preferences');
+  }
+  return await res.json();
+}
+
+export async function getAutomationStatus(applicationId) {
+  const res = await fetch(`${API_BASE_URL}/api/job/applications/${applicationId}/automation`, {
+    method: 'GET',
+    headers: getAuthHeaders(),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error || 'Failed to fetch automation status');
+  }
+  return await res.json();
+}
+
+export async function retryAutomation(applicationId, preferences = {}) {
+  const res = await fetch(`${API_BASE_URL}/api/job/applications/${applicationId}/retry`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({
+      preferences: preferences
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error || 'Failed to retry automation');
+  }
+  return await res.json();
+}
+
+// Job Profile API functions
+export async function getJobProfile() {
+  const res = await fetch(`${API_BASE_URL}/api/job/profile`, {
+    method: 'GET',
+    headers: getAuthHeaders(),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error || 'Failed to fetch job profile');
+  }
+  return await res.json();
+}
+
+export async function saveJobProfile(profileData) {
+  const res = await fetch(`${API_BASE_URL}/api/job/profile`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(profileData),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error || 'Failed to save job profile');
+  }
+  return await res.json();
+}
