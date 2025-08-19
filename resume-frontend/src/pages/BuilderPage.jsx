@@ -155,6 +155,15 @@ function BuilderPage() {
         const downloadBtns = clonedElement.querySelectorAll('button');
         downloadBtns.forEach(btn => btn.remove());
         
+        // IMPORTANT: Remove the outer live-preview-container wrapper's extra spacing/padding
+        // which might be causing phantom pages
+        if (clonedElement.className === 'live-preview-container') {
+          clonedElement.style.padding = '0';
+          clonedElement.style.margin = '0';
+          clonedElement.style.minHeight = 'auto';
+          clonedElement.style.height = 'auto';
+        }
+        
         // Remove any control panels or debug elements
         const controlPanels = clonedElement.querySelectorAll('.boundary-toggle, [style*="textAlign: center"], [style*="text-align: center"]');
         controlPanels.forEach(panel => {
@@ -218,6 +227,33 @@ function BuilderPage() {
           el.remove();
         });
         
+        // DIFFERENT APPROACH: Clean up the HTML to prevent phantom pages
+        // Remove any empty divs that might cause page breaks
+        const allDivs = clonedElement.querySelectorAll('div');
+        allDivs.forEach(div => {
+          // Remove divs that are empty or only contain whitespace
+          if (div && (!div.textContent || div.textContent.trim() === '')) {
+            // Check if it has no visible children
+            const hasVisibleChildren = Array.from(div.children).some(child => 
+              child.offsetWidth > 0 || child.offsetHeight > 0 || child.textContent.trim() !== ''
+            );
+            if (!hasVisibleChildren && !div.querySelector('img') && !div.querySelector('svg')) {
+              div.remove();
+            }
+          }
+        });
+        
+        // Remove any elements with excessive height that might push content to next page
+        const containerDivs = clonedElement.querySelectorAll('[style*="height"]');
+        containerDivs.forEach(div => {
+          if (div.style.height && div.style.height !== 'auto') {
+            div.style.height = 'auto';
+          }
+          if (div.style.minHeight) {
+            div.style.minHeight = 'auto';
+          }
+        });
+        
         // Collect essential CSS for PDF generation
         const stylesheets = Array.from(document.styleSheets);
         const cssRules = [];
@@ -253,6 +289,12 @@ function BuilderPage() {
         // Detect the current template class for targeted overrides
         const previewClasses = previewElement.className.split(' ');
         const templateClass = previewClasses.find(cls => cls !== 'live-preview-container') || '';
+        
+        
+        // Check if this is truly single-page content
+        const singlePageDiv = clonedElement.querySelector('.single-page-container');
+        const multiPageDiv = clonedElement.querySelector('.multi-page-container');
+        const isSinglePageContent = singlePageDiv && !multiPageDiv;
         
         // PDF-specific overrides to ensure consistent rendering (keep minimal)
         const pdfOverrides = `
