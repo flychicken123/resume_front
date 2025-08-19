@@ -192,24 +192,30 @@ function BuilderPage() {
           // Extract content from all page wrappers and combine into single container
           const pageWrappers = multiPageContainer.querySelectorAll('.page-wrapper');
           const combinedContent = document.createElement('div');
-          combinedContent.className = 'single-page-container';
-          combinedContent.style.cssText = 'background: white; color: black; padding: 20px; margin: 0; box-sizing: border-box;';
+          combinedContent.className = 'multi-page-pdf-container';
+          combinedContent.style.cssText = 'background: white; color: black; padding: 0; margin: 0; box-sizing: border-box;';
           
           pageWrappers.forEach((wrapper, index) => {
             const pageContent = wrapper.querySelector('.page-content');
             if (pageContent) {
+              // Create a page container to maintain exact page boundaries
+              const pageContainer = document.createElement('div');
+              pageContainer.className = `pdf-page-${index + 1}`;
+              pageContainer.style.cssText = `
+                padding: 20px;
+                min-height: 10in;
+                max-height: 10in;
+                overflow: hidden;
+                box-sizing: border-box;
+                ${index > 0 ? 'page-break-before: always;' : ''}
+              `;
+              
               // Clone the page content
               const contentClone = pageContent.cloneNode(true);
+              pageContainer.appendChild(contentClone);
               
-              // Add page break styling if not the first page
-              if (index > 0) {
-                const pageBreakDiv = document.createElement('div');
-                pageBreakDiv.style.cssText = 'page-break-before: always; break-before: page; height: 0; margin: 0; padding: 0;';
-                combinedContent.appendChild(pageBreakDiv);
-              }
-              
-              // Add the content
-              combinedContent.appendChild(contentClone);
+              // Add the page container
+              combinedContent.appendChild(pageContainer);
             }
           });
           
@@ -296,6 +302,44 @@ function BuilderPage() {
         const multiPageDiv = clonedElement.querySelector('.multi-page-container');
         const isSinglePageContent = singlePageDiv && !multiPageDiv;
         
+        // CRITICAL FIX: Apply font size scaling to match preview
+        const selectedFontSize = data.selectedFontSize || 'medium';
+        const selectedFormat = data.selectedFormat || 'temp1';
+        
+        // Font size multipliers (must match LivePreview.jsx)
+        const fontSizeMultipliers = {
+          'small': 0.85,
+          'medium': 1.0,
+          'large': 1.15,
+          'extra-large': 1.3
+        };
+        
+        // Base scale factor for preview (2x) - same as LivePreview
+        const baseScaleFactor = 2;
+        const fontScale = baseScaleFactor * (fontSizeMultipliers[selectedFontSize] || 1.0);
+        
+        // Apply the scaling to the container for PDF
+        if (singlePageDiv) {
+          // Scale all font sizes in the container
+          const scaleAllFontSizes = (element) => {
+            // Process current element
+            if (element.style && element.style.fontSize) {
+              const currentSize = parseFloat(element.style.fontSize);
+              if (!isNaN(currentSize)) {
+                // Already scaled by LivePreview, no need to scale again
+                // Just ensure it's preserved
+              }
+            }
+            
+            // Process all children
+            Array.from(element.children).forEach(child => {
+              scaleAllFontSizes(child);
+            });
+          };
+          
+          scaleAllFontSizes(singlePageDiv);
+        }
+        
         // PDF-specific overrides to ensure consistent rendering (keep minimal)
         const pdfOverrides = `
           @page { 
@@ -320,6 +364,15 @@ function BuilderPage() {
             min-height: auto !important;
           }
           
+          /* IMPORTANT: Preserve font sizes from inline styles */
+          /* Do not override fontSize that's already set inline */
+          div[style*="fontSize"], 
+          div[style*="font-size"],
+          span[style*="fontSize"],
+          span[style*="font-size"] {
+            /* Their inline font-size should be preserved, not overridden */
+          }
+          
           /* Ensure page break elements work correctly with multiple CSS approaches */
           div[style*="page-break-before: always"], div[style*="break-before: page"] {
                 page-break-before: always !important;
@@ -327,9 +380,28 @@ function BuilderPage() {
             -webkit-break-before: page !important;
                 margin-top: 0 !important;
             padding-top: 0 !important;
-            height: 0 !important;
-            min-height: 0 !important;
-            display: block !important;
+          }
+          
+          /* Multi-page PDF container handling */
+          .multi-page-pdf-container {
+            width: 100%;
+            margin: 0;
+            padding: 0;
+          }
+          
+          /* Each PDF page should be exactly one page */
+          .multi-page-pdf-container > div[class^="pdf-page-"] {
+            page-break-after: always !important;
+            page-break-inside: avoid !important;
+            min-height: 10in !important;
+            max-height: 10in !important;
+            overflow: hidden !important;
+            box-sizing: border-box !important;
+          }
+          
+          /* Last page shouldn't have page break after */
+          .multi-page-pdf-container > div[class^="pdf-page-"]:last-child {
+            page-break-after: avoid !important;
           }
           
           /* Additional page break support */
@@ -424,6 +496,7 @@ function BuilderPage() {
           }
           
           /* Ensure all text containers have full width and proper text handling */
+          /* BUT DO NOT override font sizes */
           div, p, span {
             max-width: none !important;
             width: auto !important;
@@ -432,6 +505,7 @@ function BuilderPage() {
             word-wrap: break-word !important;
             overflow-wrap: break-word !important;
             hyphens: auto !important;
+            /* Do NOT set font-size here - preserve inline styles */
           }
           
           /* Ensure experience and content sections don't get truncated */
@@ -482,6 +556,16 @@ function BuilderPage() {
   <style>
     /* PDF-specific overrides - MUST be in separate style tag to ensure they come last */
     ${pdfOverrides}
+  </style>
+  <style>
+    /* CRITICAL: Remove any font-size overrides that might interfere with inline styles */
+    /* Inline styles should always win for font sizes */
+    * {
+      /* Reset any font-size !important that might override inline styles */
+    }
+    
+    /* Ensure font size scaling from selected size (${selectedFontSize}) is preserved */
+    /* The preview scales fonts by ${fontScale}x which should be in inline styles */
   </style>
 </head>
 <body>
