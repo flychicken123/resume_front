@@ -10,48 +10,66 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
   // Page dimensions in pixels (8.5" x 11" at 96 DPI)
   const PAGE_HEIGHT = 1056;
   const PAGE_WIDTH = 816;
-  const CONTENT_MARGIN = 20; // Reduced from 40 - less margin means more space for content
+  const CONTENT_MARGIN = 10; // Further reduced margin for maximum content
   const AVAILABLE_HEIGHT = PAGE_HEIGHT - (CONTENT_MARGIN * 2);
+
+  // Font size scale factors that match the rendering scale
+  const getFontSizeScaleFactor = () => {
+    const fontSizeMultipliers = {
+      'small': 0.85,
+      'medium': 1.0,
+      'large': 1.15,
+      'extra-large': 1.3
+    };
+    return fontSizeMultipliers[data.selectedFontSize || 'medium'] || 1.0;
+  };
 
   // Estimate height for different content types (more realistic estimates)
   const estimateSectionHeight = (content, type) => {
     if (!content) return 0;
     
+    // Get font size scale factor to adjust heights
+    const fontScale = getFontSizeScaleFactor();
+    
     switch (type) {
       case 'header':
-        return 40; // More realistic header height
+        return Math.round(35 * fontScale); // Reduced from 40
         
       case 'summary':
-        // More realistic line estimation
-        const lines = Math.ceil(content.length / 100); // More realistic chars per line
-        const summaryHeight = Math.max(20, lines * 16); // More realistic line height
+        // Much more conservative estimation
+        const charsPerLine = Math.round(120 / fontScale); // Increased from 100
+        const lines = Math.ceil(content.length / charsPerLine);
+        const lineHeight = Math.round(14 * fontScale); // Reduced from 16
+        const summaryHeight = Math.max(18 * fontScale, lines * lineHeight);
         return summaryHeight;
         
       case 'experience':
         if (Array.isArray(content)) {
           const totalHeight = content.reduce((total, exp) => {
-            let height = 35; // Realistic job header height
+            let height = Math.round(28 * fontScale); // Reduced from 35
             if (exp.description) {
-              const descLines = Math.ceil(exp.description.length / 90); // Realistic chars per line
-              height += descLines * 16; // Realistic line height
+              const descCharsPerLine = Math.round(110 / fontScale); // Increased from 90
+              const descLines = Math.ceil(exp.description.length / descCharsPerLine);
+              height += descLines * Math.round(14 * fontScale); // Reduced from 16
             }
-            return total + height + 8; // Realistic spacing between jobs
+            return total + height + Math.round(6 * fontScale); // Reduced from 8
           }, 0);
           return totalHeight;
         }
-        return 40;
+        return Math.round(35 * fontScale);
         
       case 'education':
         if (Array.isArray(content)) {
-          const eduHeight = content.length * 30; // More realistic per education item
+          const eduHeight = content.length * Math.round(25 * fontScale); // Reduced from 30
           return eduHeight;
         }
-        return 30;
+        return Math.round(25 * fontScale);
         
       case 'skills':
-        // More realistic skills section estimation
-        const skillLines = Math.ceil(content.length / 120); // More realistic chars per line
-        const skillsHeight = Math.max(20, skillLines * 16); // More realistic
+        // More conservative skills section estimation
+        const skillCharsPerLine = Math.round(140 / fontScale); // Increased from 120
+        const skillLines = Math.ceil(content.length / skillCharsPerLine);
+        const skillsHeight = Math.max(18 * fontScale, skillLines * Math.round(14 * fontScale));
         return skillsHeight;
         
       default:
@@ -64,6 +82,17 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
     const newPages = [];
     let currentPage = [];
     let currentHeight = 0;
+    
+    // Get font scale factor to adjust page capacity
+    const fontScale = getFontSizeScaleFactor();
+    
+    // Adjust available height based on font size - much more aggressive packing
+    // We can safely use more of the page since we have conservative height estimates
+    const pageUtilization = fontScale <= 0.85 ? 1.05 :  // Allow slight overflow for small fonts
+                           fontScale <= 1.0 ? 1.02 :   // Still allow slight overflow for medium
+                           fontScale <= 1.15 ? 0.98 :  // Nearly full for large
+                           0.95;                        // Conservative for extra-large
+    const effectiveAvailableHeight = AVAILABLE_HEIGHT * pageUtilization;
     
     // Helper function to add section to current page
     const addToCurrentPage = (section) => {
@@ -82,11 +111,13 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
 
     // Helper function to check if content can fit on current page
     const canFitOnCurrentPage = (contentHeight) => {
-      return (currentHeight + contentHeight) <= AVAILABLE_HEIGHT;
+      return (currentHeight + contentHeight) <= effectiveAvailableHeight;
     };
 
     // Helper function to split long content across pages
     const splitLongContent = (content, type, maxHeight) => {
+      const fontScale = getFontSizeScaleFactor();
+      
       if (type === 'summary') {
         // Split summary more aggressively - try sentences first, then words if needed
         let sentences = content.split('. ');
@@ -115,8 +146,8 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
           const testPart = currentPart + connector + sentence;
           const testHeight = estimateSectionHeight(testPart, type);
           
-          // More aggressive - allow up to 80% of max height to ensure splitting
-          if (testHeight > maxHeight * 0.8 && currentPart) {
+          // Very aggressive - allow up to 95% of max height before splitting
+          if (testHeight > maxHeight * 0.95 && currentPart) {
             // Current part is full, start new part
             parts.push(currentPart);
             currentPart = sentence;
@@ -151,7 +182,9 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
           const expHeight = estimateSectionHeight([exp], 'experience');
           
           // Check if adding this experience would exceed max height
-          if (currentHeight + expHeight > maxHeight * 0.95 && currentPart.length > 0) {
+          // Use very high threshold to pack more content
+          const threshold = fontScale <= 0.85 ? 1.0 : 0.98;
+          if (currentHeight + expHeight > maxHeight * threshold && currentPart.length > 0) {
             // Current part is full, start new part
             parts.push([...currentPart]);
             currentPart = [exp];
@@ -190,7 +223,8 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
 
     // Summary section
     if (data.summary) {
-      const summaryHeight = estimateSectionHeight(data.summary, 'summary');
+      const sectionTitleHeight = Math.round(20 * fontScale); // Add height for section title
+      const summaryHeight = estimateSectionHeight(data.summary, 'summary') + sectionTitleHeight;
       allSections.push({
         type: 'summary',
         content: data.summary,
@@ -202,7 +236,8 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
 
     // Experience section
     if (data.experiences && data.experiences.length > 0) {
-      const totalExpHeight = estimateSectionHeight(data.experiences, 'experience');
+      const sectionTitleHeight = Math.round(20 * fontScale); // Add height for section title
+      const totalExpHeight = estimateSectionHeight(data.experiences, 'experience') + sectionTitleHeight;
       allSections.push({
         type: 'experience',
         content: data.experiences,
@@ -214,7 +249,8 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
 
     // Education section
     if (data.education) {
-      const eduHeight = estimateSectionHeight(data.education, 'education');
+      const sectionTitleHeight = Math.round(20 * fontScale); // Add height for section title
+      const eduHeight = estimateSectionHeight(data.education, 'education') + sectionTitleHeight;
       allSections.push({
         type: 'education',
         content: data.education,
@@ -225,7 +261,8 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
 
     // Skills section
     if (data.skills) {
-      const skillsHeight = estimateSectionHeight(data.skills, 'skills');
+      const sectionTitleHeight = Math.round(20 * fontScale); // Add height for section title
+      const skillsHeight = estimateSectionHeight(data.skills, 'skills') + sectionTitleHeight;
       allSections.push({
         type: 'skills',
         content: data.skills,
@@ -244,9 +281,9 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
         // Section fits completely on current page
         addToCurrentPage(section);
         sectionIndex++;
-      } else if (section.canSplit && currentHeight < AVAILABLE_HEIGHT * 0.9) {
-        // Try to split the section if there's reasonable space left
-        const remainingHeight = AVAILABLE_HEIGHT - currentHeight;
+      } else if (section.canSplit && currentHeight < effectiveAvailableHeight * 0.95) {
+        // Try to split the section even with little space left
+        const remainingHeight = effectiveAvailableHeight - currentHeight;
         const parts = splitLongContent(section.content, section.type, remainingHeight - 5);
         
         if (parts.length > 1) {
