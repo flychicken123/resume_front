@@ -388,6 +388,11 @@ function BuilderPage() {
         const formData = new FormData();
         formData.append('html', htmlBlob, 'resume.html');
         
+        // Add contact info to save in database
+        formData.append('name', data.name || '');
+        formData.append('email', data.email || '');
+        formData.append('phone', data.phone || '');
+        
         // Debug: Check FormData contents
         for (let [key, value] of formData.entries()) {
           console.log('FormData entry:', key, value);

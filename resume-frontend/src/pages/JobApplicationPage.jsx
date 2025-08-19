@@ -154,10 +154,10 @@ const JobApplicationPage = () => {
           
           setUnknownFields(unknownFieldsList);
           setShowUnknownFieldsModal(true);
-          // The application object is nested in the response
-          const appId = response.application?.id || response.application?.ID || response.id;
-          console.log('Setting application ID:', appId, 'from response:', response);
-          setCurrentApplicationId(appId);
+          // The application object is nested in the response - use application_code
+          const appCode = response.application?.application_code || response.application_code;
+          console.log('Setting application code:', appCode, 'from response:', response);
+          setCurrentApplicationId(appCode);
           
           if (unknownFieldsList.length > 0) {
             setError('The application requires additional information. Please provide answers for the unknown fields.');
@@ -203,7 +203,7 @@ const JobApplicationPage = () => {
   const handleSubmitUnknownFields = async () => {
     try {
       // Call API to save the unknown field answers and retry automation
-      const response = await fetch(`/api/job/applications/${currentApplicationId}/continue`, {
+      const response = await fetch(`/api/job/continue/${currentApplicationId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
