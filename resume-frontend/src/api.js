@@ -19,6 +19,9 @@ const getAPIBaseURL = () => {
 
 const API_BASE_URL = getAPIBaseURL();
 
+// Export the function so other files can use it
+export { getAPIBaseURL };
+
 const getAuthHeaders = () => {
   const token = localStorage.getItem('resumeToken');
   const baseHeaders = {

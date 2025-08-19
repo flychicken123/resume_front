@@ -100,7 +100,7 @@ const ImportResumeModal = ({ onClose }) => {
         
         // Save contact info to backend for future job applications
         if (structuredData.name || structuredData.email || structuredData.phone) {
-          const token = localStorage.getItem('token');
+          const token = localStorage.getItem('resumeToken');
           if (token) {
             console.log('Saving contact info to backend:', {
               name: structuredData.name,
@@ -117,11 +117,17 @@ const ImportResumeModal = ({ onClose }) => {
               body: JSON.stringify({
                 name: structuredData.name || '',
                 email: structuredData.email || '',
-                phone: structuredData.phone || ''
+                phone: structuredData.phone || '',
+                resume_name: `Imported Resume ${new Date().toLocaleDateString()}`
               })
-            }).then(resp => {
-              if (resp.ok) {
-                console.log('Contact info saved successfully');
+            }).then(resp => resp.json())
+            .then(data => {
+              if (data.success) {
+                console.log('Contact info saved successfully, resume ID:', data.resume_id);
+                // Store the resume ID for later use
+                if (data.resume_id) {
+                  localStorage.setItem('lastResumeId', data.resume_id);
+                }
               } else {
                 console.error('Failed to save contact info');
               }

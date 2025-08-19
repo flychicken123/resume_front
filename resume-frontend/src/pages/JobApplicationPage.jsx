@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { submitJobApplication, getUserJobApplications, getUserRecentResumes } from '../api';
+import { submitJobApplication, getUserJobApplications, getUserRecentResumes, getAPIBaseURL } from '../api';
 import { useAuth } from '../context/AuthContext';
 import AutomationModal from '../components/AutomationModal';
 import JobProfileSetup from '../components/JobProfileSetup';
@@ -83,9 +83,9 @@ const JobApplicationPage = () => {
       // Check automation result and show appropriate message
       if (response.automation_result) {
         setAutomationResult(response.automation_result);
-        if (response.automation_result.status === 'ready_for_automation') {
-          setShowAutomationModal(true);
-          setSuccess('🚀 Application submitted and ready for automatic job application! All your resume data has been extracted and the system is ready to apply.');
+        if (response.automation_result.status === 'success' || response.automation_result.status === 'submitted') {
+          // Successfully submitted - don't show modal, just success message
+          setSuccess('✅ Application submitted successfully!');
         } else if (response.automation_result.status === 'user_input_required') {
           // Extract unknown fields from the message
           const message = response.automation_result.message || '';
@@ -165,8 +165,8 @@ const JobApplicationPage = () => {
             setError('The application requires additional information but we could not parse the fields. Check the console for details.');
           }
         } else if (response.automation_result.status === 'failed') {
-          setShowAutomationModal(true);
-          setError('Application submitted but automation failed. Please check the logs in the modal.');
+          // Failed - just show error message, no modal
+          setError('Application could not be submitted automatically. Please try applying manually on the company website.');
         } else {
           setSuccess('Job application submitted successfully!');
         }
@@ -201,13 +201,20 @@ const JobApplicationPage = () => {
   };
 
   const handleSubmitUnknownFields = async () => {
+    // Close the modal immediately to show user action is being processed
+    setShowUnknownFieldsModal(false);
+    
+    // Show a loading message
+    setSuccess('⏳ Submitting your answers and completing the application...');
+    setError('');
+    
     try {
       // Call API to save the unknown field answers and retry automation
-      const response = await fetch(`/api/job/continue/${currentApplicationId}`, {
+      const response = await fetch(`${getAPIBaseURL()}/api/job/continue/${currentApplicationId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('resumeToken')}`
         },
         body: JSON.stringify({
           extra_qa: unknownFieldAnswers
@@ -220,33 +227,56 @@ const JobApplicationPage = () => {
       
       const result = await response.json();
       
-      // Close the modal and reset state
-      setShowUnknownFieldsModal(false);
+      // Reset state
       setUnknownFields([]);
       setUnknownFieldAnswers({});
       
       // Handle the result
-      if (result.automation_result) {
-        setAutomationResult(result.automation_result);
-        if (result.automation_result.status === 'success') {
-          setSuccess('Application completed successfully with your provided answers!');
-        } else if (result.automation_result.status === 'user_input_required') {
-          // More fields needed
-          const message = result.automation_result.message || '';
-          const fieldsMatch = message.match(/Please provide answers for: \[(.*?)\]/);
-          const newUnknownFields = fieldsMatch ? fieldsMatch[1].split(',').map(f => f.trim()) : [];
-          
-          setUnknownFields(newUnknownFields);
-          setShowUnknownFieldsModal(true);
-        } else {
-          setShowAutomationModal(true);
+      if (result.success) {
+        // Successfully submitted - just show success message
+        setSuccess('✅ Application completed successfully!');
+        setError('');
+        // Don't show automation modal for successful submissions
+      } else if (result.automation_result && result.automation_result.status === 'user_input_required') {
+        // More fields needed - reopen modal with new fields
+        const message = result.automation_result.message || '';
+        const fieldsMatch = message.match(/\[(.*?)\]/);
+        const fieldsString = fieldsMatch ? fieldsMatch[1] : '';
+        
+        let newUnknownFields = [];
+        if (fieldsString) {
+          if (fieldsString.includes(' | ')) {
+            newUnknownFields = fieldsString
+              .split(' | ')
+              .map(f => f.trim())
+              .filter(f => f && f.length > 2);
+          } else {
+            newUnknownFields = fieldsString.split(',').map(f => f.trim()).filter(f => f);
+          }
         }
+        
+        if (newUnknownFields.length > 0) {
+          // More fields needed - reopen modal with new fields
+          setUnknownFields(newUnknownFields);
+          setUnknownFieldAnswers({});
+          setShowUnknownFieldsModal(true);
+          setError('Additional information required - please provide answers for the new fields');
+        } else {
+          // Failed but no new fields
+          setError(result.message || 'Failed to complete application');
+          setSuccess('');
+        }
+      } else {
+        // Failed - show error message only, no automation modal
+        setError(result.message || 'Application could not be completed');
+        setSuccess('');
       }
       
       // Refresh applications list
       await fetchApplications();
     } catch (err) {
       setError('Failed to submit answers: ' + err.message);
+      setSuccess('');
     }
   };
 
@@ -274,12 +304,10 @@ const JobApplicationPage = () => {
         // Handle the response same as in normal submit
         if (response.automation_result) {
           setAutomationResult(response.automation_result);
-          if (response.automation_result.status === 'ready_for_automation') {
-            setShowAutomationModal(true);
-            setSuccess('🚀 Application submitted successfully with automation!');
+          if (response.automation_result.status === 'success' || response.automation_result.status === 'submitted') {
+            setSuccess('✅ Application submitted successfully!');
           } else if (response.automation_result.status === 'failed') {
-            setShowAutomationModal(true);
-            setError('Application submitted but automation failed.');
+            setError('Application could not be submitted automatically. Please try applying manually on the company website.');
           } else {
             setSuccess('Job application submitted successfully!');
           }
@@ -542,25 +570,36 @@ const JobApplicationPage = () => {
               
               <div className="unknown-fields-form">
                 {unknownFields.map((field, index) => {
-                  const fieldLower = field.toLowerCase();
+                  // Clean up the field text
+                  const cleanField = field.replace(/\s*\|\s*/g, '').trim();
+                  const fieldLower = cleanField.toLowerCase();
+                  
+                  // Skip if this is clearly not a real question
+                  if (fieldLower === 'enter manually' || 
+                      fieldLower === 'autofill with greenhouse' ||
+                      fieldLower === 'apply for this job' ||
+                      cleanField.length < 5) {
+                    return null;
+                  }
                   
                   // Determine if this is a field with predefined options
                   const isTransgender = fieldLower.includes('transgender');
                   const isSexualOrientation = fieldLower.includes('sexual orientation');
                   const isDisability = fieldLower.includes('disability') || fieldLower.includes('chronic');
                   const isVeteran = fieldLower.includes('veteran');
+                  const isDegree = fieldLower.includes('degree');
                   
                   return (
                     <div key={index} className="unknown-field-item">
-                      <label>{field || `Question ${index + 1}`}</label>
+                      <label>{cleanField || `Question ${index + 1}`}</label>
                       
                       {/* Transgender question */}
                       {isTransgender && (
                         <select
-                          value={unknownFieldAnswers[field] || ''}
+                          value={unknownFieldAnswers[cleanField] || ''}
                           onChange={(e) => setUnknownFieldAnswers({
                             ...unknownFieldAnswers,
-                            [field]: e.target.value
+                            [cleanField]: e.target.value
                           })}
                         >
                           <option value="">Select an answer...</option>
@@ -573,10 +612,10 @@ const JobApplicationPage = () => {
                       {/* Sexual orientation question */}
                       {isSexualOrientation && (
                         <select
-                          value={unknownFieldAnswers[field] || ''}
+                          value={unknownFieldAnswers[cleanField] || ''}
                           onChange={(e) => setUnknownFieldAnswers({
                             ...unknownFieldAnswers,
-                            [field]: e.target.value
+                            [cleanField]: e.target.value
                           })}
                         >
                           <option value="">Select an answer...</option>
@@ -590,10 +629,10 @@ const JobApplicationPage = () => {
                       {/* Disability question */}
                       {isDisability && (
                         <select
-                          value={unknownFieldAnswers[field] || ''}
+                          value={unknownFieldAnswers[cleanField] || ''}
                           onChange={(e) => setUnknownFieldAnswers({
                             ...unknownFieldAnswers,
-                            [field]: e.target.value
+                            [cleanField]: e.target.value
                           })}
                         >
                           <option value="">Select an answer...</option>
@@ -606,10 +645,10 @@ const JobApplicationPage = () => {
                       {/* Veteran question */}
                       {isVeteran && (
                         <select
-                          value={unknownFieldAnswers[field] || ''}
+                          value={unknownFieldAnswers[cleanField] || ''}
                           onChange={(e) => setUnknownFieldAnswers({
                             ...unknownFieldAnswers,
-                            [field]: e.target.value
+                            [cleanField]: e.target.value
                           })}
                         >
                           <option value="">Select an answer...</option>
@@ -619,14 +658,33 @@ const JobApplicationPage = () => {
                         </select>
                       )}
                       
-                      {/* Default text input for other questions */}
-                      {!isTransgender && !isSexualOrientation && !isDisability && !isVeteran && (
-                        <input
-                          type="text"
-                          value={unknownFieldAnswers[field] || ''}
+                      {/* Degree question */}
+                      {isDegree && !isTransgender && !isSexualOrientation && !isDisability && !isVeteran && (
+                        <select
+                          value={unknownFieldAnswers[cleanField] || ''}
                           onChange={(e) => setUnknownFieldAnswers({
                             ...unknownFieldAnswers,
-                            [field]: e.target.value
+                            [cleanField]: e.target.value
+                          })}
+                        >
+                          <option value="">Select a degree...</option>
+                          <option value="High School">High School</option>
+                          <option value="Associate">Associate</option>
+                          <option value="Bachelor's">Bachelor's</option>
+                          <option value="Master's">Master's</option>
+                          <option value="PhD">PhD</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      )}
+                      
+                      {/* Default text input for other questions */}
+                      {!isTransgender && !isSexualOrientation && !isDisability && !isVeteran && !isDegree && (
+                        <input
+                          type="text"
+                          value={unknownFieldAnswers[cleanField] || ''}
+                          onChange={(e) => setUnknownFieldAnswers({
+                            ...unknownFieldAnswers,
+                            [cleanField]: e.target.value
                           })}
                           placeholder="Enter your answer"
                         />
