@@ -329,8 +329,20 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
   }
 
   // Format styles copied exactly from StepFormat.jsx templates - scaled up for live preview
-  const getFormatStyles = (format) => {
-    const scaleFactor = 2; // Scale up from StepFormat's 6-10px to 12-20px for readability
+  const getFormatStyles = (format, fontSize = 'medium') => {
+    // Base scale factor for preview (2x for readability)
+    const baseScaleFactor = 2;
+    
+    // Font size multipliers
+    const fontSizeMultipliers = {
+      'small': 0.85,
+      'medium': 1.0,
+      'large': 1.15,
+      'extra-large': 1.3
+    };
+    
+    // Combined scale factor
+    const scaleFactor = baseScaleFactor * (fontSizeMultipliers[fontSize] || 1.0)
     
     switch (format) {
       case 'temp1':
@@ -519,7 +531,7 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
       
              default:
          // Default to Classic Professional
-         return getFormatStyles('temp1');
+         return getFormatStyles('temp1', fontSize);
     }
   };
 
@@ -699,7 +711,7 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
     });
   };
 
-  const styles = getFormatStyles(data.selectedFormat || 'temp1');
+  const styles = getFormatStyles(data.selectedFormat || 'temp1', data.selectedFontSize || 'medium');
 
   // Determine if we should show multiple pages
   const shouldShowMultiPage = pages.length > 1;
