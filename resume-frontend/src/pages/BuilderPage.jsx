@@ -15,6 +15,7 @@ import JobDescModal from '../components/JobDescModal';
 import ImportResumeModal from '../components/ImportResumeModal';
 import SEO from '../components/SEO';
 import { trackResumeGeneration } from '../components/Analytics';
+import './BuilderPage.css';
 
 const steps = [
   "Personal Details",
@@ -640,10 +641,10 @@ function BuilderPage() {
           
           {/* Stepper and Content */}
           <div style={{ display: 'flex', width: '100%', flex: 1 }}>
-            <div style={{ minWidth: 140, background: '#d1d5fa', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 0, paddingBottom: 0, position: 'sticky', left: 0, top: 0, height: '100vh', zIndex: 10 }}>
+            <div className="stepper-container">
               <Stepper steps={steps} currentStep={step} setStep={setStep} />
             </div>
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '2rem' }}>
+            <div className="builder-content">
               {step === 1 && <StepPersonal />}
               {step === 2 && <StepExperience />}
               {step === 3 && <StepEducation />}
