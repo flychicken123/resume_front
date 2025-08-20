@@ -7,15 +7,14 @@ import StepPersonal from '../components/StepPersonal';
 import StepExperience from '../components/StepExperience';
 import StepEducation from '../components/StepEducation';
 import StepSkills from '../components/StepSkills';
-import StepSummary from '../components/StepSummary';
 import StepFormat from '../components/StepFormat';
-import StepPreview from '../components/StepPreview';
+import StepSummary from '../components/StepSummary';
+import LivePreview from '../components/LivePreview';
 import AuthModal from '../components/auth/AuthModal';
 import JobDescModal from '../components/JobDescModal';
 import ImportResumeModal from '../components/ImportResumeModal';
 import SEO from '../components/SEO';
-import { trackResumeGeneration, trackReferrer, trackBuilderStart, trackStepCompletion } from '../components/Analytics';
-import { generateResumeAdviceAI, generateCoverLetterAI } from '../api';
+import { trackResumeGeneration } from '../components/Analytics';
 import './BuilderPage.css';
 
 const steps = [
@@ -23,8 +22,8 @@ const steps = [
   "Experience",
   "Education", 
   "Skills",
-  "Summary",
-  "Format"
+  "Format",
+  "Summary"
 ];
 
 function BuilderPage() {
@@ -33,13 +32,6 @@ function BuilderPage() {
   const [showJobDescModal, setShowJobDescModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [jobDescription, setJobDescription] = useState('');
-  const [showAdvice, setShowAdvice] = useState(false);
-  const [showCoverLetter, setShowCoverLetter] = useState(false);
-  const [resumeAdvice, setResumeAdvice] = useState('');
-  const [coverLetter, setCoverLetter] = useState('');
-  const [adviceLoading, setAdviceLoading] = useState(false);
-  const [coverLetterLoading, setCoverLetterLoading] = useState(false);
-  const [companyName, setCompanyName] = useState('');
   
   // Load job description from localStorage on component mount
   useEffect(() => {
@@ -53,13 +45,6 @@ function BuilderPage() {
   const { user, login, logout, getAuthHeaders } = useAuth();
   const { data, saveToDatabaseNow, clearData } = useResume();
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [startTime] = useState(Date.now());
-
-  // Track referrer and builder start when component loads
-  useEffect(() => {
-    trackReferrer();
-    trackBuilderStart('builder_page');
-  }, []);
 
   const toggleFullscreen = () => {
     const previewElement = document.getElementById('resume-preview-container');
@@ -158,105 +143,148 @@ function BuilderPage() {
       }
 
       // Capture the HTML content from the live preview
-      const previewElement = document.querySelector('.preview');
+      const previewElement = document.querySelector('.live-preview-container');
       
       if (previewElement) {
         // Clone the preview element (no inline style expansion to keep HTML small)
         const clonedElement = previewElement.cloneNode(true);
         
-        // Remove the view button from the cloned element
-        const viewBtn = clonedElement.querySelector('button');
-        if (viewBtn) {
-          viewBtn.remove();
-        }
-        
-        // Font size scaling for PDF - MUST be defined before any functions that use it
-        // Match StepPreview scaling factors exactly
-        const fontSizeScaling = {
-          'small': 0.9,   // Increased from 0.8
-          'medium': 1.1,  // Increased from 1.0
-          'large': 1.2,
-          'extra-large': 1.4
-        };
-        const scale = fontSizeScaling[data.selectedFontSize || 'medium'] || 1.0;
-        
-        // Define scaleFont function immediately after scale is defined
-        // This should match exactly with StepPreview.jsx scaleFont function
-        const scaleFont = (baseSize) => {
-          const size = parseInt(baseSize);
-          return `${Math.round(size * scale)}pt`; // Use pt to match CSS custom properties
-        };
-        
 
         
-        // Directly modify the cloned element's inline styles to match the selected font size
-        const applyScaledFontSizes = (element, depth = 0) => {
+        // Remove the download button from the cloned element
+        const downloadBtns = clonedElement.querySelectorAll('button');
+        downloadBtns.forEach(btn => btn.remove());
+        
+        // IMPORTANT: Remove the outer live-preview-container wrapper's extra spacing/padding
+        // which might be causing phantom pages
+        if (clonedElement.className === 'live-preview-container') {
+          clonedElement.style.padding = '0';
+          clonedElement.style.margin = '0';
+          clonedElement.style.minHeight = 'auto';
+          clonedElement.style.height = 'auto';
+        }
+        
+        // Remove any control panels or debug elements
+        const controlPanels = clonedElement.querySelectorAll('.boundary-toggle, [style*="textAlign: center"], [style*="text-align: center"]');
+        controlPanels.forEach(panel => {
+          // Check if this panel contains a download button
+          const hasButton = panel.querySelector('button') || panel.innerHTML.includes('Download PDF');
+          if (hasButton) {
+            panel.remove();
+          }
+        });
+        
+        // Remove the download button container specifically
+        const downloadContainer = clonedElement.querySelector('div[style*="textAlign: center"]');
+        if (downloadContainer && downloadContainer.innerHTML.includes('Download PDF')) {
+          downloadContainer.remove();
+        }
+        
+        // Debug: Log structure to identify empty page cause
+
+        
+        // Handle both single-page and multi-page content
+        const singlePageContainer = clonedElement.querySelector('.single-page-container');
+        const multiPageContainer = clonedElement.querySelector('.multi-page-container');
+        
+        if (multiPageContainer && !singlePageContainer) {
           
-          // Get the current font size or determine what it should be based on element properties
-          let currentFontSize = element.style.fontSize;
-          let newFontSize = scaleFont('9pt'); // default base size (match CSS --font-size-base)
+          // Extract content from all page wrappers and combine into single container
+          const pageWrappers = multiPageContainer.querySelectorAll('.page-wrapper');
+          const combinedContent = document.createElement('div');
+          combinedContent.className = 'multi-page-pdf-container';
+          combinedContent.style.cssText = 'background: white; color: black; padding: 0; margin: 0; box-sizing: border-box;';
           
-          // Determine appropriate font size based on element characteristics
-          if (element.style.fontSize) {
-            // If element already has a font size, scale it (convert px to pt if needed)
-            const currentSize = parseInt(element.style.fontSize);
-            if (currentSize === 18 || currentSize === 22) newFontSize = scaleFont('18pt'); // Header
-            else if (currentSize === 12 || currentSize === 14) newFontSize = scaleFont('12pt'); // Section titles
-            else if (currentSize === 10 || currentSize === 12) newFontSize = scaleFont('10pt'); // Company/job titles
-            else if (currentSize === 9 || currentSize === 11) newFontSize = scaleFont('9pt'); // Base/contact/details
-            else newFontSize = scaleFont('9pt'); // Default fallback
-          } else {
-            // No font size set, determine based on other styles
-            if (element.style.fontWeight === 'bold' && element.style.textTransform === 'uppercase') {
-              newFontSize = scaleFont('12pt'); // Section titles (match --font-size-section)
-            } else if (element.style.fontWeight === 'bold' || element.style.fontWeight === '600') {
-              newFontSize = scaleFont('10pt'); // Company/job titles (match --font-size-content)
-            } else if (element.style.color === '#7f8c8d' || element.style.color === 'rgb(127, 140, 141)') {
-              newFontSize = scaleFont('9pt'); // Dates and details (match --font-size-details)
-            } else if (element.style.marginLeft === '15px') {
-              newFontSize = scaleFont('9pt'); // Bullet points (match --font-size-list)
-            } else {
-              newFontSize = scaleFont('9pt'); // Default base (match --font-size-base)
+          pageWrappers.forEach((wrapper, index) => {
+            const pageContent = wrapper.querySelector('.page-content');
+            if (pageContent) {
+              // Create a page container to maintain exact page boundaries
+              const pageContainer = document.createElement('div');
+              pageContainer.className = `pdf-page-${index + 1}`;
+              pageContainer.style.cssText = `
+                padding: 20px;
+                min-height: 10in;
+                max-height: 10in;
+                overflow: hidden;
+                box-sizing: border-box;
+                ${index > 0 ? 'page-break-before: always;' : ''}
+              `;
+              
+              // Clone the page content
+              const contentClone = pageContent.cloneNode(true);
+              pageContainer.appendChild(contentClone);
+              
+              // Add the page container
+              combinedContent.appendChild(pageContainer);
+            }
+          });
+          
+          // Replace the multi-page container with our combined single-page container
+          multiPageContainer.parentNode.replaceChild(combinedContent, multiPageContainer);
+        } else if (!singlePageContainer && !multiPageContainer) {
+          // No content containers found
+        } else {
+          // Using existing single-page container
+        }
+        
+        // Remove any remaining multi-page elements
+        const remainingMultiPageElements = clonedElement.querySelectorAll('.multi-page-container, .page-wrapper');
+        remainingMultiPageElements.forEach(el => {
+          el.remove();
+        });
+        
+        // DIFFERENT APPROACH: Clean up the HTML to prevent phantom pages
+        // Remove any empty divs that might cause page breaks
+        const allDivs = clonedElement.querySelectorAll('div');
+        allDivs.forEach(div => {
+          // Remove divs that are empty or only contain whitespace
+          if (div && (!div.textContent || div.textContent.trim() === '')) {
+            // Check if it has no visible children
+            const hasVisibleChildren = Array.from(div.children).some(child => 
+              child.offsetWidth > 0 || child.offsetHeight > 0 || child.textContent.trim() !== ''
+            );
+            if (!hasVisibleChildren && !div.querySelector('img') && !div.querySelector('svg')) {
+              div.remove();
             }
           }
-          
-          // Apply the new font size
-          element.style.fontSize = newFontSize;
-          
-          // Recursively process child elements
-          Array.from(element.children).forEach(child => applyScaledFontSizes(child, depth + 1));
-        };
+        });
         
-        // Check if it's the first child (header/name)
-        if (clonedElement.children.length > 0) {
-          clonedElement.children[0].style.fontSize = scaleFont('18pt');
-        }
+        // Remove any elements with excessive height that might push content to next page
+        const containerDivs = clonedElement.querySelectorAll('[style*="height"]');
+        containerDivs.forEach(div => {
+          if (div.style.height && div.style.height !== 'auto') {
+            div.style.height = 'auto';
+          }
+          if (div.style.minHeight) {
+            div.style.minHeight = 'auto';
+          }
+        });
         
-
+        // Collect essential CSS for PDF generation
+        const stylesheets = Array.from(document.styleSheets);
+        const cssRules = [];
         
-        // Apply scaled font sizes to all elements
-        applyScaledFontSizes(clonedElement);
-        
-
-        
-
-        
-        // Capture CSS rules for the PDF
-        const filteredCssText = Array.from(document.styleSheets).map((sheet) => {
+        stylesheets.forEach(sheet => {
           try {
             const rules = Array.from(sheet.cssRules);
-            const previewRules = rules.filter(rule => {
+            const relevantRules = rules.filter(rule => {
               if (rule.type === CSSRule.STYLE_RULE) {
-                const sel = rule.selectorText || '';
-                return sel.includes('.preview');
+                const selector = rule.selectorText || '';
+                return selector.includes('.live-preview-container') || 
+                       selector.includes('.page-wrapper') || 
+                       selector.includes('.single-page-container') ||
+                       selector.includes('.page-content');
               }
               return false;
             });
-            return previewRules.map(rule => rule.cssText).join('\n');
+            
+            cssRules.push(...relevantRules.map(rule => rule.cssText));
           } catch (e) {
-            return '';
+            // Skip inaccessible stylesheets
           }
-        }).filter(Boolean).join('\n');
+        });
+        
+        const filteredCssText = cssRules.join('\n');
 
         // Remove screen-only visual effects that cause a visible edge in PDFs
         const cleanedCssText = filteredCssText
@@ -266,71 +294,244 @@ function BuilderPage() {
 
         // Detect the current template class for targeted overrides
         const previewClasses = previewElement.className.split(' ');
-        const templateClass = previewClasses.find(cls => cls !== 'preview') || '';
-
+        const templateClass = previewClasses.find(cls => cls !== 'live-preview-container') || '';
+        
+        
+        // Check if this is truly single-page content
+        const singlePageDiv = clonedElement.querySelector('.single-page-container');
+        const multiPageDiv = clonedElement.querySelector('.multi-page-container');
+        const isSinglePageContent = singlePageDiv && !multiPageDiv;
+        
+        // CRITICAL FIX: Apply font size scaling to match preview
+        const selectedFontSize = data.selectedFontSize || 'medium';
+        const selectedFormat = data.selectedFormat || 'temp1';
+        
+        // Font size multipliers (must match LivePreview.jsx)
+        const fontSizeMultipliers = {
+          'small': 0.85,
+          'medium': 1.0,
+          'large': 1.15,
+          'extra-large': 1.3
+        };
+        
+        // Base scale factor for preview (2x) - same as LivePreview
+        const baseScaleFactor = 2;
+        const fontScale = baseScaleFactor * (fontSizeMultipliers[selectedFontSize] || 1.0);
+        
+        // Apply the scaling to the container for PDF
+        if (singlePageDiv) {
+          // Scale all font sizes in the container
+          const scaleAllFontSizes = (element) => {
+            // Process current element
+            if (element.style && element.style.fontSize) {
+              const currentSize = parseFloat(element.style.fontSize);
+              if (!isNaN(currentSize)) {
+                // Already scaled by LivePreview, no need to scale again
+                // Just ensure it's preserved
+              }
+            }
+            
+            // Process all children
+            Array.from(element.children).forEach(child => {
+              scaleAllFontSizes(child);
+            });
+          };
+          
+          scaleAllFontSizes(singlePageDiv);
+        }
         
         // PDF-specific overrides to ensure consistent rendering (keep minimal)
         const pdfOverrides = `
-          @page { size: Letter; margin: 0; }
-          html, body { background: #ffffff !important; margin: 0 !important; padding: 0 !important; }
-          /* Keep the preview's own width/padding/margins exactly as in the live DOM */
-          .preview { box-shadow: none !important; border: 0 !important; outline: none !important; }
-          .preview::before, .preview::after { display: none !important; content: none !important; }
-          
-          /* CSS Custom Properties for font size scaling (matching StepPreview exactly) */
-          :root {
-            --font-size-base: ${scaleFont('9pt')} !important;
-            --font-size-header: ${scaleFont('18pt')} !important;
-            --font-size-section: ${scaleFont('12pt')} !important;
-            --font-size-content: ${scaleFont('10pt')} !important;
-            --font-size-details: ${scaleFont('9pt')} !important;
-            --font-size-list: ${scaleFont('9pt')} !important;
-            --font-size-contact: ${scaleFont('9pt')} !important;
+          @page { 
+            size: Letter; 
+            margin: 0.5in;
           }
           
-          /* Root level font size override */
-          html { font-size: var(--font-size-base) !important; }
-          body { font-size: var(--font-size-base) !important; }
+          /* Allow natural page breaks for long content */
+          body {
+            orphans: 2;
+            widows: 2;
+            page-break-inside: auto;
+            height: auto !important;
+          }
           
-          /* Font size overrides using exact LivePreview styling */
-          .preview { font-size: var(--font-size-base) !important; }
-          .preview > div:first-child { font-size: var(--font-size-header) !important; } /* Header/Name */
-          .preview > div:nth-child(2) { font-size: var(--font-size-contact) !important; } /* Contact info */
+          /* Ensure sections can break naturally if needed */
+          .single-page-container {
+            page-break-inside: auto;
+            break-inside: auto;
+            height: auto !important;
+            max-height: none !important;
+            min-height: auto !important;
+          }
           
-          /* Section titles - multiple ways to target them */
-          .preview div[style*="text-transform: uppercase"] { font-size: var(--font-size-section) !important; }
-          .preview div[style*="TEXT-TRANSFORM: UPPERCASE"] { font-size: var(--font-size-section) !important; }
-          .preview div[style*="letter-spacing"] { font-size: var(--font-size-section) !important; }
+          /* IMPORTANT: Preserve font sizes from inline styles */
+          /* Do not override fontSize that's already set inline */
+          div[style*="fontSize"], 
+          div[style*="font-size"],
+          span[style*="fontSize"],
+          span[style*="font-size"] {
+            /* Their inline font-size should be preserved, not overridden */
+          }
           
-          /* Company/job titles - multiple ways to target them */
-          .preview div[style*="font-weight: bold"] { font-size: var(--font-size-content) !important; }
-          .preview div[style*="font-weight:bold"] { font-size: var(--font-size-content) !important; }
-          .preview div[style*="fontWeight: bold"] { font-size: var(--font-size-content) !important; }
-          .preview div[style*="font-weight: 600"] { font-size: var(--font-size-content) !important; }
+          /* Ensure page break elements work correctly with multiple CSS approaches */
+          div[style*="page-break-before: always"], div[style*="break-before: page"] {
+                page-break-before: always !important;
+                break-before: page !important;
+            -webkit-break-before: page !important;
+                margin-top: 0 !important;
+            padding-top: 0 !important;
+          }
           
-          /* Dates and details - multiple ways to target them */
-          .preview div[style*="color: #7f8c8d"] { font-size: var(--font-size-details) !important; }
-          .preview div[style*="color:#7f8c8d"] { font-size: var(--font-size-details) !important; }
-          .preview div[style*="color: rgb(127, 140, 141)"] { font-size: var(--font-size-details) !important; }
+          /* Multi-page PDF container handling */
+          .multi-page-pdf-container {
+            width: 100%;
+            margin: 0;
+            padding: 0;
+          }
           
-          /* Bullet points - multiple ways to target them */
-          .preview div[style*="margin-left: 15px"] { font-size: var(--font-size-list) !important; }
-          .preview div[style*="marginLeft: 15px"] { font-size: var(--font-size-list) !important; }
-          .preview div[style*="margin-left:15px"] { font-size: var(--font-size-list) !important; }
+          /* Each PDF page should be exactly one page */
+          .multi-page-pdf-container > div[class^="pdf-page-"] {
+            page-break-after: always !important;
+            page-break-inside: avoid !important;
+            min-height: 10in !important;
+            max-height: 10in !important;
+            overflow: hidden !important;
+            box-sizing: border-box !important;
+          }
           
-          /* Force font size on all elements as backup */
-          .preview * { font-size: var(--font-size-base) !important; }
-          .preview div { font-size: var(--font-size-base) !important; }
-          .preview span { font-size: var(--font-size-base) !important; }
+          /* Last page shouldn't have page break after */
+          .multi-page-pdf-container > div[class^="pdf-page-"]:last-child {
+            page-break-after: avoid !important;
+          }
           
-          /* Override any inline styles with maximum specificity */
-          .preview [style*="font-size"] { font-size: var(--font-size-base) !important; }
-          .preview [style*="fontSize"] { font-size: var(--font-size-base) !important; }
+          /* Additional page break support */
+          .page-content {
+            display: block !important;
+            visibility: visible !important;
+            height: auto !important;
+            overflow: visible !important;
+          }
           
-          /* Completely natural page flow - no page break rules */
-          @page {
-            size: Letter;
-            margin: 0.5in;
+          html, body { 
+            background: #ffffff !important; 
+            margin: 0 !important; 
+            padding: 0 !important; 
+            color: #000000 !important;
+            width: 100% !important;
+            max-width: none !important;
+            min-width: 100% !important;
+          }
+          
+          /* Ensure all containers are visible and match preview layout */
+          .live-preview-container { 
+            background: #ffffff !important; 
+            color: #000000 !important;
+            display: block !important;
+            visibility: visible !important;
+            height: auto !important;
+            max-height: none !important;
+            overflow: visible !important;
+            width: 100% !important;
+            max-width: none !important;
+            min-width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+          }
+          
+          .single-page-container { 
+            background: #ffffff !important; 
+            color: #000000 !important;
+            display: block !important;
+            visibility: visible !important;
+            height: auto !important;
+            max-height: none !important;
+            overflow: visible !important;
+            width: 100% !important;
+            max-width: none !important;
+            min-width: 100% !important;
+            padding: 20px !important;
+            margin: 0 !important;
+            box-sizing: border-box !important;
+          }
+          
+          /* Hide multi-page containers since we convert to single-page */
+          .multi-page-container, .page-wrapper {
+            display: none !important;
+          }
+          
+          /* Remove borders from containers only */
+          .live-preview-container, .single-page-container {
+            border: none !important;
+            box-shadow: none !important;
+            outline: none !important;
+          }
+          
+          /* Remove 3D transform effects for straight PDF boundaries */
+          .single-page-container {
+            transform: none !important;
+            -webkit-transform: none !important;
+            -moz-transform: none !important;
+            -ms-transform: none !important;
+          }
+          
+          .single-page-container:hover {
+            transform: none !important;
+            -webkit-transform: none !important;
+            -moz-transform: none !important;
+            -ms-transform: none !important;
+          }
+          
+          /* Force all elements to use available width and prevent cutoff */
+          * {
+            word-wrap: break-word !important;
+            word-break: normal !important;
+            max-width: none !important;
+            overflow: visible !important;
+            box-sizing: border-box !important;
+          }
+          
+          /* Only force black color on main containers, preserve template colors */
+          body, .live-preview-container, .single-page-container {
+            color: #000000 !important;
+          }
+          
+          /* Ensure all text containers have full width and proper text handling */
+          /* BUT DO NOT override font sizes */
+          div, p, span {
+            max-width: none !important;
+            width: auto !important;
+            overflow: visible !important;
+            white-space: normal !important;
+            word-wrap: break-word !important;
+            overflow-wrap: break-word !important;
+            hyphens: auto !important;
+            /* Do NOT set font-size here - preserve inline styles */
+          }
+          
+          /* Ensure experience and content sections don't get truncated */
+          div[style*="marginBottom: 6px"], 
+          div[style*="margin-bottom: 6px"],
+          div[style*="lineHeight"],
+          div[style*="line-height"] {
+            width: 100% !important;
+            max-width: none !important;
+            overflow: visible !important;
+            word-wrap: break-word !important;
+            white-space: normal !important;
+          }
+          
+          /* Add section title borders for separators */
+          div[style*="fontSize: 11px"][style*="fontWeight: bold"][style*="textTransform: uppercase"],
+          div[style*="font-size: 11px"][style*="font-weight: bold"][style*="text-transform: uppercase"] {
+            border-bottom: 1px solid #000000 !important;
+            padding-bottom: 4px !important;
+            margin-bottom: 8px !important;
+            width: 100% !important;
+          }
+          
+          /* Hide buttons only */
+          button {
+            display: none !important;
           }
         `;
         
@@ -357,15 +558,14 @@ function BuilderPage() {
     ${pdfOverrides}
   </style>
   <style>
-              /* Direct inline style overrides - highest specificity */
-          .preview [style*="font-size"] { font-size: var(--font-size-base) !important; }
-          .preview [style*="font-size:"] { font-size: var(--font-size-base) !important; }
-          
-          /* Override specific inline styles with matching selectors */
-          .preview div[style*="font-size: 18px"] { font-size: var(--font-size-header) !important; }
-          .preview div[style*="font-size: 12px"] { font-size: var(--font-size-section) !important; }
-          .preview div[style*="font-size: 10px"] { font-size: var(--font-size-content) !important; }
-          .preview div[style*="font-size: 9px"] { font-size: var(--font-size-details) !important; }
+    /* CRITICAL: Remove any font-size overrides that might interfere with inline styles */
+    /* Inline styles should always win for font sizes */
+    * {
+      /* Reset any font-size !important that might override inline styles */
+    }
+    
+    /* Ensure font size scaling from selected size (${selectedFontSize}) is preserved */
+    /* The preview scales fonts by ${fontScale}x which should be in inline styles */
   </style>
 </head>
 <body>
@@ -380,7 +580,6 @@ function BuilderPage() {
           .replace(/\s{2,}/g, ' ');
         const minHtmlContent = minifyHtml(htmlContent);
 
-        // Debug: Log the HTML content length and preview
 
 
         // Call the backend to generate PDF using multipart upload (smaller, proxy-friendly)
@@ -432,10 +631,43 @@ function BuilderPage() {
              // Use our download endpoint to record the history
              const downloadEndpoint = `${getAPIBaseURL()}/api/resume/download/${filename}`;
              
-             // Use the direct S3 URL since CORS prevents us from using fetch()
-             // The backend has already generated the PDF and returned a signed URL
-
-             window.open(result.data.downloadURL, '_blank');
+             // For protected routes, we need to include auth headers
+             // Since we can't add headers to window.open, we'll use fetch first
+             if (user) {
+               fetch(downloadEndpoint, {
+                 method: 'GET',
+                 headers: {
+                   'Authorization': `Bearer ${localStorage.getItem('resumeToken')}`
+                 },
+                 redirect: 'follow', // Explicitly follow redirects
+               }).then(response => {
+                 if (response.ok || response.status === 307) {
+                   // For 307 redirects, get the Location header
+                   if (response.status === 307) {
+                     const redirectUrl = response.headers.get('Location');
+                     if (redirectUrl) {
+                       window.open(redirectUrl, '_blank');
+                       return;
+                     }
+                   }
+                   // For successful responses, try to get the URL from response
+                   return response.url;
+                 } else {
+                   throw new Error('Download failed');
+                 }
+               }).then(url => {
+                 if (url) {
+                   window.open(url, '_blank');
+                 }
+               }).catch(error => {
+                 console.error('Download error:', error);
+                 // Fallback to direct URL
+                 window.open(result.data.downloadURL, '_blank');
+               });
+             } else {
+               // If not logged in, use direct URL
+               window.open(result.data.downloadURL, '_blank');
+             }
              alert('PDF resume generated successfully!');
            } else {
              console.error('PDF generation failed response:', result);
@@ -466,16 +698,13 @@ function BuilderPage() {
 
   // Handler for auth button
   const handleAuthButton = () => {
-
     if (user) {
-
       // Immediately clear everything and redirect to home
       localStorage.removeItem('resumeUser');
       logout();
       // Navigate to home page to avoid any modal issues
       window.location.href = '/';
     } else {
-
       setShowAuthModal(true);
     }
   };
@@ -592,16 +821,28 @@ function BuilderPage() {
         keywords="build resume, create resume, resume builder, AI resume builder, professional resume, resume maker, write resume, resume template"
         canonical="https://hihired.org/builder"
       />
-      <div className="builder-layout">
+      <div style={{ display: 'flex', minHeight: '100vh', width: '100%' }}>
         {/* Left Side - Resume Builder */}
-        <div className="builder-left">
-          <div className="site-header">
-            <h1>
-              HiHired - AI Resume Builder
-            </h1>
-            <div className="header-controls">
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#f8fafc' }}>
+          <div className="site-header" style={{ width: '100%', paddingTop: '2.5rem', paddingBottom: '1.5rem', textAlign: 'center', background: 'transparent', position: 'relative' }}>
+                         <div style={{ position: 'absolute', right: '2rem', top: '50%', transform: 'translateY(-50%)', display: 'flex', gap: '1rem', zIndex: 20 }}>
               <button
                 onClick={() => window.location.href = '/'}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  border: '2px solid #d1d5db',
+                  borderRadius: '8px',
+                  background: 'white',
+                  color: '#374151',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  fontSize: '0.95rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                  transition: 'all 0.2s ease'
+                }}
                 onMouseEnter={(e) => {
                   e.target.style.background = '#f3f4f6';
                   e.target.style.transform = 'translateY(-2px)';
@@ -616,11 +857,20 @@ function BuilderPage() {
                 ← Back to Home
               </button>
             </div>
+            <h1 style={{
+              fontSize: '2.5rem',
+              fontWeight: 700,
+              color: '#3b82f6',
+              margin: 0,
+              letterSpacing: '-1px'
+            }}>
+              HiHired - AI Resume Builder
+            </h1>
           </div>
 
           
           {/* Stepper and Content */}
-          <div className="builder-main-section">
+          <div style={{ display: 'flex', width: '100%', flex: 1 }}>
             <div className="stepper-container">
               <Stepper steps={steps} currentStep={step} setStep={setStep} />
             </div>
@@ -629,173 +879,194 @@ function BuilderPage() {
               {step === 2 && <StepExperience />}
               {step === 3 && <StepEducation />}
               {step === 4 && <StepSkills />}
-              {step === 5 && <StepSummary />}
-              {step === 6 && <StepFormat onNext={handleNext} />}
+              {step === 5 && <StepFormat />}
+              {step === 6 && <StepSummary />}
               
-              {/* Navigation Buttons */}
-              <div className="navigation-buttons">
-                {step < steps.length && (
-                  <button
-                    className="btn-next"
-                    onClick={() => setStep(step + 1)}
-                    onMouseEnter={(e) => {
-                      e.target.style.background = '#2563eb';
-                      e.target.style.transform = 'translateY(-1px)';
-                      e.target.style.boxShadow = '0 6px 12px rgba(59, 130, 246, 0.3)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.background = '#3b82f6';
-                      e.target.style.transform = 'translateY(0)';
-                      e.target.style.boxShadow = '0 4px 6px rgba(59, 130, 246, 0.25)';
-                    }}
-                  >
-                    Next →
-                  </button>
-                )}
-                {step === steps.length && (
-                  <>
-                    {/* All Buttons Section */}
-                    <div style={{ 
-                      display: 'grid',
-                      gridTemplateColumns: '1fr 1fr',
-                      gap: '0.5rem',
-                      justifyContent: 'center',
-                      margin: '0 auto',
-                      maxWidth: '500px'
-                    }}>
-                      {/* Row 1: Navigation Buttons */}
-                      <button
-                        onClick={() => setStep(step - 1)}
-                        style={{
-                          background: 'white',
-                          color: '#374151',
-                          border: '2px solid #d1d5db',
-                          borderRadius: '6px',
-                          padding: '0.6rem 1rem',
-                          fontSize: '0.875rem',
-                          cursor: 'pointer',
-                          fontWeight: 600,
-                          transition: 'all 0.2s ease',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '0.4rem',
-                          height: '42px',
-                          width: '100%'
-                        }}
-                      >
-                        ← Previous
-                      </button>
-                      
-                      <button
-                        className="btn-view-resume"
-                        onClick={handleViewResume}
-                        style={{
-                          background: '#10b981',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '6px',
-                          padding: '0.6rem 1rem',
-                          fontSize: '0.875rem',
-                          cursor: 'pointer',
-                          fontWeight: 600,
-                          transition: 'all 0.2s ease',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '0.4rem',
-                          height: '42px',
-                          width: '100%'
-                        }}
-                      >
-                        📄 View Resume
-                      </button>
-                      
-                      {/* Row 2: AI Buttons */}
-                      <button
-                        onClick={handleGetResumeAdvice}
-                        disabled={adviceLoading}
-                        style={{
-                          background: '#8b5cf6',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '6px',
-                          padding: '0.6rem 1rem',
-                          fontSize: '0.875rem',
-                          cursor: adviceLoading ? 'not-allowed' : 'pointer',
-                          opacity: adviceLoading ? 0.7 : 1,
-                          fontWeight: 600,
-                          transition: 'all 0.2s ease',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '0.4rem',
-                          height: '42px',
-                          width: '100%'
-                        }}
-                      >
-                        {adviceLoading ? '🔍 Analyzing...' : '🔍 AI Resume Advice'}
-                      </button>
-                      
-                      <button
-                        onClick={handleGenerateCoverLetter}
-                        disabled={coverLetterLoading}
-                        style={{
-                          background: '#ec4899',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '6px',
-                          padding: '0.6rem 1rem',
-                          fontSize: '0.875rem',
-                          cursor: coverLetterLoading ? 'not-allowed' : 'pointer',
-                          opacity: coverLetterLoading ? 0.7 : 1,
-                          fontWeight: 600,
-                          transition: 'all 0.2s ease',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '0.4rem',
-                          height: '42px',
-                          width: '100%'
-                        }}
-                      >
-                        {coverLetterLoading ? '📝 Generating...' : '📝 AI Cover Letter'}
-                      </button>
-                    </div>
-                    
-                    {(!jobDescription || !jobDescription.trim()) && (
-                      <div style={{ 
-                        background: '#fef3c7', 
-                        border: '1px solid #f59e0b', 
-                        borderRadius: '4px', 
-                        padding: '0.5rem',
-                        fontSize: '0.8rem',
-                        color: '#92400e',
-                        textAlign: 'center',
-                        marginTop: '0.75rem',
-                        maxWidth: '500px',
-                        margin: '0.75rem auto 0'
-                      }}>
-                        💡 <strong>Tip:</strong> For personalized AI features, start with a job description!
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
+                             {/* Navigation Buttons */}
+               <div style={{ 
+                 display: 'flex', 
+                 gap: '1rem', 
+                 marginTop: '2rem',
+                 alignItems: 'center',
+                 justifyContent: 'center',
+                 width: '100%'
+               }}>
+                 {step > 1 && (
+                   <button
+                     onClick={() => setStep(step - 1)}
+                     style={{
+                       padding: '1rem 2.5rem',
+                       border: '2px solid #d1d5db',
+                       borderRadius: '8px',
+                       background: 'white',
+                       color: '#374151',
+                       cursor: 'pointer',
+                       fontWeight: 600,
+                       fontSize: '1rem',
+                       transition: 'all 0.2s ease',
+                       minWidth: '200px',
+                       height: '48px',
+                       display: 'flex',
+                       alignItems: 'center',
+                       justifyContent: 'center'
+                     }}
+                     onMouseEnter={(e) => {
+                       e.target.style.background = '#f3f4f6';
+                       e.target.style.transform = 'translateY(-2px)';
+                       e.target.style.boxShadow = '0 6px 12px rgba(0, 0, 0, 0.1)';
+                     }}
+                     onMouseLeave={(e) => {
+                       e.target.style.background = 'white';
+                       e.target.style.transform = 'translateY(0)';
+                       e.target.style.boxShadow = 'none';
+                     }}
+                   >
+                     ← Previous
+                   </button>
+                 )}
+                 {step < steps.length && (
+                   <button
+                     onClick={() => setStep(step + 1)}
+                     style={{
+                       padding: '1rem 2.5rem',
+                       border: 'none',
+                       borderRadius: '8px',
+                       background: '#3b82f6',
+                       color: 'white',
+                       cursor: 'pointer',
+                       fontWeight: 600,
+                       fontSize: '1rem',
+                       transition: 'all 0.2s ease',
+                       minWidth: '200px',
+                       height: '48px',
+                       display: 'flex',
+                       alignItems: 'center',
+                       justifyContent: 'center',
+                       boxShadow: '0 4px 6px rgba(59, 130, 246, 0.25)'
+                     }}
+                     onMouseEnter={(e) => {
+                       e.target.style.background = '#2563eb';
+                       e.target.style.transform = 'translateY(-2px)';
+                       e.target.style.boxShadow = '0 6px 12px rgba(59, 130, 246, 0.3)';
+                     }}
+                     onMouseLeave={(e) => {
+                       e.target.style.background = '#3b82f6';
+                       e.target.style.transform = 'translateY(0)';
+                       e.target.style.boxShadow = '0 4px 6px rgba(59, 130, 246, 0.25)';
+                     }}
+                   >
+                     Next →
+                   </button>
+                 )}
+                 {step === steps.length && (
+                   <>
+                     <button
+                       onClick={handleViewResume}
+                       style={{
+                         padding: '1rem 2.5rem',
+                         border: 'none',
+                         borderRadius: '8px',
+                         background: '#10b981',
+                         color: 'white',
+                         cursor: 'pointer',
+                         fontWeight: 600,
+                         fontSize: '1rem',
+                         boxShadow: '0 4px 6px rgba(16, 185, 129, 0.25)',
+                         transition: 'all 0.2s ease',
+                         minWidth: '200px',
+                         height: '48px',
+                         display: 'flex',
+                         alignItems: 'center',
+                         justifyContent: 'center'
+                       }}
+                       onMouseEnter={(e) => {
+                         e.target.style.background = '#059669';
+                         e.target.style.transform = 'translateY(-2px)';
+                         e.target.style.boxShadow = '0 6px 12px rgba(16, 185, 129, 0.3)';
+                       }}
+                       onMouseLeave={(e) => {
+                         e.target.style.background = '#10b981';
+                         e.target.style.transform = 'translateY(0)';
+                         e.target.style.boxShadow = '0 4px 6px rgba(16, 185, 129, 0.25)';
+                       }}
+                     >
+                       📄 View Resume
+                     </button>
+                     <button
+                       onClick={() => window.location.href = '/'}
+                       style={{
+                         padding: '1rem 2.5rem',
+                         border: '2px solid #3b82f6',
+                         borderRadius: '8px',
+                         background: 'white',
+                         color: '#3b82f6',
+                         cursor: 'pointer',
+                         fontWeight: 600,
+                         fontSize: '1rem',
+                         transition: 'all 0.2s ease',
+                         minWidth: '200px',
+                         height: '48px',
+                         display: 'flex',
+                         alignItems: 'center',
+                         justifyContent: 'center'
+                       }}
+                       onMouseEnter={(e) => {
+                         e.target.style.background = '#3b82f6';
+                         e.target.style.color = 'white';
+                         e.target.style.transform = 'translateY(-2px)';
+                         e.target.style.boxShadow = '0 6px 12px rgba(59, 130, 246, 0.3)';
+                       }}
+                       onMouseLeave={(e) => {
+                         e.target.style.background = 'white';
+                         e.target.style.color = '#3b82f6';
+                         e.target.style.transform = 'translateY(0)';
+                         e.target.style.boxShadow = 'none';
+                       }}
+                     >
+                       ✅ Complete & Return Home
+                     </button>
+                   </>
+                 )}
+               </div>
             </div>
           </div>
         </div>
 
         {/* Right Side - Live Resume Preview */}
-        <div className="builder-right">
-          <div className="preview-header">
-            <h2>Live Resume Preview</h2>
-            <div className="preview-controls">
+        <div style={{ 
+          flex: 1, 
+          background: 'white', 
+          borderLeft: '1px solid #e5e7eb',
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: '100vh',
+          overflow: 'auto'
+        }}>
+          <div style={{
+            padding: '1rem',
+            borderBottom: '1px solid #e5e7eb',
+            background: '#f9fafb',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#374151' }}>Live Resume Preview</h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
               {user ? (
-                <span>{user}</span>
+                <span style={{ color: '#3b82f6', fontWeight: 500, fontSize: '0.9rem' }}>{user}</span>
               ) : null}
               <button
                 onClick={handleAuthButton}
+                style={{
+                  padding: '0.5rem 1rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '4px',
+                  background: 'white',
+                  color: '#3b82f6',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem',
+                  fontWeight: 500
+                }}
               >
                 {user ? 'Logout' : 'Login / Signup'}
               </button>
@@ -803,6 +1074,15 @@ function BuilderPage() {
                 onClick={toggleFullscreen}
                 className="fullscreen-button"
                 title={`${isFullscreen ? 'Exit' : 'Enter'} fullscreen mode (F11)`}
+                style={{
+                  padding: '0.5rem 1rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '4px',
+                  background: 'white',
+                  color: '#374151',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem'
+                }}
               >
                 {isFullscreen ? 'Exit Full Screen' : 'Open Full Screen'}
               </button>
@@ -810,9 +1090,16 @@ function BuilderPage() {
           </div>
           <div 
             id="resume-preview-container"
-            className="preview-content"
+            style={{ 
+              flex: 1, 
+              overflow: 'visible', 
+              padding: '1rem',
+              background: 'white',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
           >
-            <StepPreview onDownload={handleViewResume} />
+                            <LivePreview onDownload={handleViewResume} />
           </div>
         </div>
       </div>
@@ -821,94 +1108,6 @@ function BuilderPage() {
        {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
        {showJobDescModal && <JobDescModal onClose={() => setShowJobDescModal(false)} onJobDescriptionSubmit={handleJobDescSubmit} onProceed={handleProceedAfterChoice} />}
        {showImportModal && <ImportResumeModal onClose={() => setShowImportModal(false)} />}
-       
-       {/* AI Advice Modal */}
-       {showAdvice && (
-         <div style={{
-           position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-           background: 'rgba(0,0,0,0.25)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center'
-         }}>
-           <div style={{
-             background: 'white', borderRadius: '12px', maxWidth: '600px', width: '90%', maxHeight: '80%',
-             overflow: 'auto', padding: '2rem', position: 'relative'
-           }}>
-             <button
-               onClick={() => setShowAdvice(false)}
-               style={{
-                 position: 'absolute', top: '16px', right: '16px', background: 'transparent',
-                 border: 'none', fontSize: '24px', cursor: 'pointer', color: '#999'
-               }}
-             >×</button>
-             <h2 style={{ marginBottom: '1rem', color: '#374151' }}>🔍 AI Resume Advice</h2>
-             <div style={{
-               background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px',
-               padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: '1.6', fontSize: '0.95rem'
-             }}>
-               {resumeAdvice}
-             </div>
-           </div>
-         </div>
-       )}
-       
-       {/* AI Cover Letter Modal */}
-       {showCoverLetter && (
-         <div style={{
-           position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-           background: 'rgba(0,0,0,0.25)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center'
-         }}>
-           <div style={{
-             background: 'white', borderRadius: '12px', maxWidth: '700px', width: '90%', maxHeight: '80%',
-             overflow: 'auto', padding: '2rem', position: 'relative'
-           }}>
-             <button
-               onClick={() => setShowCoverLetter(false)}
-               style={{
-                 position: 'absolute', top: '16px', right: '16px', background: 'transparent',
-                 border: 'none', fontSize: '24px', cursor: 'pointer', color: '#999'
-               }}
-             >×</button>
-             <h2 style={{ marginBottom: '1rem', color: '#374151' }}>📝 AI Generated Cover Letter</h2>
-             {jobDescription && jobDescription.trim() && (
-               <div style={{ marginBottom: '1rem' }}>
-                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#374151' }}>
-                   Company Name (Optional):
-                 </label>
-                 <input
-                   type="text"
-                   value={companyName}
-                   onChange={(e) => setCompanyName(e.target.value)}
-                   placeholder="Enter company name for personalized cover letter"
-                   style={{
-                     width: '100%', padding: '0.5rem', border: '1px solid #d1d5db',
-                     borderRadius: '4px', fontSize: '0.95rem'
-                   }}
-                 />
-               </div>
-             )}
-             <div style={{
-               background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px',
-               padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: '1.6', fontSize: '0.95rem',
-               minHeight: '200px'
-             }}>
-               {coverLetter}
-             </div>
-             <div style={{ marginTop: '1rem', textAlign: 'right' }}>
-               <button
-                 onClick={() => {
-                   navigator.clipboard.writeText(coverLetter);
-                   alert('Cover letter copied to clipboard!');
-                 }}
-                 style={{
-                   background: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px',
-                   padding: '0.5rem 1rem', fontSize: '0.875rem', cursor: 'pointer'
-                 }}
-               >
-                 📋 Copy to Clipboard
-               </button>
-             </div>
-           </div>
-         </div>
-       )}
     </>
   );
 }
