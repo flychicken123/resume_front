@@ -64,9 +64,9 @@ const Home = () => {
   return (
     <div>
       <SEO 
-        title="Free AI Resume Builder - Create Professional Resumes Online | HiHired"
-        description="100% free AI resume builder. Create professional resumes in minutes with AI-powered writing assistance. No signup required. ATS-optimized templates. Download PDF instantly. Build your resume for free today!"
-        keywords="free resume builder, free ai resume builder, resume builder, free resume, ai resume builder, resume builder free, online resume builder, free resume templates, professional resume builder, resume maker free, build resume online free, free cv builder, resume generator, ats resume builder, free resume creator, make resume online free"
+        title="HiHired - AI-Powered Resume Builder | Advanced Machine Learning Technology"
+        description="Experience the future of resume building with our AI-powered platform. Advanced machine learning algorithms optimize your resume, analyze job descriptions, and increase interview rates by 3x. Free AI resume builder."
+        keywords="AI resume builder, artificial intelligence resume, machine learning resume builder, AI-powered resume, smart resume AI, neural network resume optimization, AI job matching, intelligent resume builder"
         canonical="https://hihired.org/"
       />
       <nav className="home-navbar">
@@ -204,7 +204,6 @@ const Home = () => {
               >
                 Resume History
               </button>
-            )}
             {user && (
               <Link 
                 to="/apply" 
@@ -213,6 +212,7 @@ const Home = () => {
               >
                 Apply to Jobs
               </Link>
+            )}
             )}
             <a 
               href="#about" 
@@ -259,6 +259,149 @@ const Home = () => {
           }
         }}
       />
+
+      {/* Job Description Feature Section */}
+      <div className="home-jobdesc-feature">
+        <div className="home-jobdesc-feature-content">
+          <h2>🎯 Smart Job Matching & Resume Optimization</h2>
+          <p>
+            Paste any job posting and we'll instantly customize your resume to match what employers are looking for. Our system identifies critical keywords, highlights relevant experience, and formats everything professionally. 
+            Beat automated screening systems and get noticed by hiring managers.
+          </p>
+          <div className="home-jobdesc-feature-benefits">
+            <div className="benefit-item">
+              <span>🔍 Keyword analysis & optimization</span>
+            </div>
+            <div className="benefit-item">
+              <span>📊 Smart skill prioritization</span>
+            </div>
+            <div className="benefit-item">
+              <span>🎯 ATS-friendly formatting</span>
+            </div>
+          </div>
+          <button 
+            className="home-btn primary home-jobdesc-cta" 
+            onClick={() => {
+              if (!user) {
+                setShowAuthModal(true);
+              } else {
+                setShowIntegratedModal(true);
+              }
+            }}
+          >
+📝 Start Building Your Resume
+          </button>
+        </div>
+      </div>
+      
+      <div className="home-hero">
+        <div className="home-hero-content">
+          <div className="hero-main-content">
+            <h1 className="hero-title">📝 Build Professional Resumes & Land Your Dream Job</h1>
+            <p className="hero-subtitle">
+              Create stunning resumes that get noticed by employers and pass through applicant tracking systems. From building your resume to applying for jobs - we've got you covered.
+            </p>
+            <div className="hero-features">
+              <div className="hero-feature">
+                <span>📝 Professional resume templates</span>
+              </div>
+              <div className="hero-feature">
+                <span>🎯 Optimized for job applications</span>
+              </div>
+              <div className="hero-feature">
+                <span>⚡ Apply to jobs instantly</span>
+              </div>
+            </div>
+            <div className="home-cta-buttons">
+              <button className="home-btn primary" onClick={handleStartBuilding}>
+                {user ? '📝 Continue Building Resume' : '🚀 Start Building Your Resume - Free!'}
+              </button>
+            </div>
+          </div>
+          <div className="home-trusted">
+            <span>🌟 Trusted by job seekers worldwide</span>
+            <div className="home-logos">
+              <span>🎓 Students</span>
+              <span>💼 Professionals</span>
+              <span>🔄 Career Changers</span>
+              <span>🌟 Recent Grads</span>
+            </div>
+          </div>
+        </div>
+        <div className="home-hero-image">
+          <div className="ai-impact-preview">
+            <div className="impact-header">
+              <div className="impact-title">📝 Professional Resume Builder</div>
+              <div className="impact-subtitle">Intelligent Technology That Delivers Results</div>
+            </div>
+            
+            <div className="impact-stats">
+              <div className="stat-item">
+                <div className="stat-number">🤖 AI</div>
+                <div className="stat-label">Powered Tech</div>
+              </div>
+              <div className="stat-item">
+                <div className="stat-number">⚡ Smart</div>
+                <div className="stat-label">Auto-Optimize</div>
+              </div>
+              <div className="stat-item">
+                <div className="stat-number">📊 ML</div>
+                <div className="stat-label">Algorithms</div>
+              </div>
+            </div>
+            
+            <div className="comparison-section">
+              <div className="comparison-item before">
+                <div className="comparison-label">Before</div>
+                <div className="comparison-content">
+                  <div className="keyword-match">❌ Manual keywords</div>
+                  <div className="skill-alignment">❌ Generic content</div>
+                  <div className="ats-score">❌ Hours of work</div>
+                </div>
+              </div>
+              
+              <div className="comparison-item after">
+                <div className="comparison-label">After</div>
+                <div className="comparison-content">
+                  <div className="keyword-match">✅ AI powered</div>
+                  <div className="skill-alignment">✅ Smart tools</div>
+                  <div className="ats-score">✅ Fast AI</div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="ai-features">
+              <div className="feature-item">
+                <span>🤖 AI content generation</span>
+              </div>
+              <div className="feature-item">
+                <span>📊 Smart skill analysis</span>
+              </div>
+              <div className="feature-item">
+                <span>🎯 AI job matching</span>
+              </div>
+              <div className="feature-item">
+                <span>⚡ Real-time AI optimize</span>
+              </div>
+              <div className="feature-item">
+                <span>📄 AI-formatted PDF</span>
+              </div>
+              <div className="feature-item">
+                <span>📱 Works on mobile</span>
+              </div>
+            </div>
+            
+            <div className="ai-benefits">
+              <div className="benefit-highlight">
+                <span>🤖 AI analyzes instantly</span>
+              </div>
+              <div className="benefit-highlight">
+                <span>📊 ML improves results</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       
       {/* AI Features Section */}
       <div className="what-makes-different">
@@ -423,14 +566,6 @@ const Home = () => {
       {showResumeHistory && (
         <ResumeHistory onClose={() => setShowResumeHistory(false)} />
       )}
-
-      {showJobSubmit && (
-        <JobSubmit 
-          user={user}
-          resumeData={resumeData}
-          onClose={() => setShowJobSubmit(false)} 
-        />
-      )}
       
       {/* About Section */}
       <About />
@@ -439,6 +574,13 @@ const Home = () => {
       <Contact />
     </div>
   );
+n      {showJobSubmit && (
+        <JobSubmit 
+          user={user}
+          resumeData={resumeData}
+          onClose={() => setShowJobSubmit(false)} 
+        />
+      )}
 };
 
 export default Home; 
