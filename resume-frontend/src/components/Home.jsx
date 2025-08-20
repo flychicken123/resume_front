@@ -105,6 +105,7 @@ const Home = () => {
               Resume History
             </button>
           )}
+          {/* Hidden - Apply to Jobs feature
           {user && (
             <Link 
               to="/apply" 
@@ -113,6 +114,7 @@ const Home = () => {
               Apply to Jobs
             </Link>
           )}
+          */}
           <a href="#about" className="home-nav-link" onClick={(e) => {
             e.preventDefault();
             document.getElementById('about').scrollIntoView({ behavior: 'smooth' });
@@ -204,6 +206,8 @@ const Home = () => {
               >
                 Resume History
               </button>
+                        )}
+            {/* Hidden - Apply to Jobs feature
             {user && (
               <Link 
                 to="/apply" 
@@ -213,7 +217,7 @@ const Home = () => {
                 Apply to Jobs
               </Link>
             )}
-            )}
+            */}
             <a 
               href="#about" 
               className="mobile-nav-link" 
@@ -570,17 +574,20 @@ const Home = () => {
       {/* About Section */}
       <About />
       
-      {/* Contact Section */}
-      <Contact />
-    </div>
-  );
-n      {showJobSubmit && (
+      
+      {/* Hidden - Apply to Jobs feature
+      {showJobSubmit && (
         <JobSubmit 
           user={user}
           resumeData={resumeData}
           onClose={() => setShowJobSubmit(false)} 
         />
       )}
+      */}
+      {/* Contact Section */}
+      <Contact />
+    </div>
+  );
 };
 
 export default Home; 

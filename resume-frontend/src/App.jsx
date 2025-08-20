@@ -21,7 +21,9 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/builder" element={<BuilderPage />} />
+            {/* Hidden - Apply to Jobs feature
             <Route path="/apply" element={<JobApplicationPage />} />
+            */}
           </Routes>
         </Router>
       </ResumeProvider>

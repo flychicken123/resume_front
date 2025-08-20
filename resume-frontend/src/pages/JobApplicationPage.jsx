@@ -80,8 +80,28 @@ const JobApplicationPage = () => {
         resume_id: parseInt(formData.resume_id)
       });
       
-      // Check automation result and show appropriate message
-      if (response.automation_result) {
+      // Check for missing fields first
+      if (response.status === 'missing_fields' && response.missing_fields) {
+        console.log('Missing fields detected:', response.missing_fields);
+        
+        // Extract field names and options
+        const fieldsList = response.missing_fields.map(field => field.question || field.fieldName);
+        
+        // Store the full field info with options
+        const fieldsWithOptions = {};
+        response.missing_fields.forEach(field => {
+          fieldsWithOptions[field.question || field.fieldName] = field.options || [];
+        });
+        
+        setUnknownFields(fieldsList);
+        setShowUnknownFieldsModal(true);
+        setCurrentApplicationId(response.application?.application_code || response.application_code);
+        setError('The application requires additional information. Please provide answers for the fields.');
+        
+        // Store the options for use in the modal
+        window.missingFieldOptions = fieldsWithOptions;
+        
+      } else if (response.automation_result) {
         setAutomationResult(response.automation_result);
         if (response.automation_result.status === 'success' || response.automation_result.status === 'submitted') {
           // Successfully submitted - don't show modal, just success message
@@ -582,7 +602,12 @@ const JobApplicationPage = () => {
                     return null;
                   }
                   
-                  // Determine if this is a field with predefined options
+                  // Get options from backend if available
+                  const fieldOptions = window.missingFieldOptions && window.missingFieldOptions[cleanField] 
+                    ? window.missingFieldOptions[cleanField] 
+                    : [];
+                  
+                  // Determine if this is a field with predefined options (fallback for when no options from backend)
                   const isTransgender = fieldLower.includes('transgender');
                   const isSexualOrientation = fieldLower.includes('sexual orientation');
                   const isDisability = fieldLower.includes('disability') || fieldLower.includes('chronic');
@@ -593,6 +618,23 @@ const JobApplicationPage = () => {
                     <div key={index} className="unknown-field-item">
                       <label>{cleanField || `Question ${index + 1}`}</label>
                       
+                      {/* Use options from backend if available */}
+                      {fieldOptions.length > 0 ? (
+                        <select
+                          value={unknownFieldAnswers[cleanField] || ''}
+                          onChange={(e) => setUnknownFieldAnswers({
+                            ...unknownFieldAnswers,
+                            [cleanField]: e.target.value
+                          })}
+                        >
+                          <option value="">Select an option...</option>
+                          {fieldOptions.map((option, optIndex) => (
+                            <option key={optIndex} value={option}>{option}</option>
+                          ))}
+                        </select>
+                      ) : (
+                      /* Fallback to hardcoded options or text input */
+                      <>
                       {/* Transgender question */}
                       {isTransgender && (
                         <select
@@ -688,6 +730,8 @@ const JobApplicationPage = () => {
                           })}
                           placeholder="Enter your answer"
                         />
+                      )}
+                      </>
                       )}
                       
                       <small className="field-hint">
