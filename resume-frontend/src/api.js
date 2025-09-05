@@ -170,6 +170,22 @@ export async function generateCoverLetterAI(resumeData, jobDescription = '', com
   return data.coverLetter;
 }
 
+// LinkedIn endpoints
+export async function fetchLinkedInResume(linkedinToken) {
+  const res = await fetch(`${API_BASE_URL}/api/linkedin/resume`, {
+    method: "GET",
+    headers: {
+      ...getAuthHeaders(),
+      'X-LinkedIn-Token': linkedinToken
+    },
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error || "Failed to fetch LinkedIn resume data.");
+  }
+  return await res.json();
+}
+
 export async function parseResumeFile(file) {
   const formData = new FormData();
   formData.append('resume', file);
