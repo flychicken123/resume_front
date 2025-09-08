@@ -35,6 +35,19 @@ const getAuthHeaders = () => {
   };
 };
 
+// Helper function to handle 401 errors globally
+const handleAuthError = (response) => {
+  if (response.status === 401) {
+    // Clear expired token and user data
+    localStorage.removeItem('resumeToken');
+    localStorage.removeItem('userEmail');
+    // Redirect to login
+    window.location.href = '/login';
+    throw new Error('Session expired. Please log in again.');
+  }
+  return response;
+};
+
 export async function generateResume(data) {
   const res = await fetch(`${API_BASE_URL}/api/resume/generate`, {
     method: "POST",
@@ -197,11 +210,25 @@ export async function parseResumeFile(file) {
 
 // Job Application API functions
 export async function submitJobApplication(applicationData) {
+  const token = localStorage.getItem('resumeToken');
+  if (!token) {
+    throw new Error('Authentication required. Please log in.');
+  }
+  
   const res = await fetch(`${API_BASE_URL}/api/job/apply`, {
     method: 'POST',
-    headers: getAuthHeaders(),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
     body: JSON.stringify(applicationData),
   });
+  
+  // Handle 401 Unauthorized - token expired
+  if (res.status === 401) {
+    handleAuthError(res);
+  }
+  
   if (!res.ok) {
     const err = await res.json();
     // For missing profile info (412 status), throw with the full error object
