@@ -35,8 +35,29 @@ const getAuthHeaders = () => {
   };
 };
 
+// Helper function to handle 401 responses
+const handleUnauthorized = () => {
+  console.log('Session expired - logging out user');
+  localStorage.removeItem('resumeUser');
+  localStorage.removeItem('resumeToken');
+  window.location.href = '/login';
+};
+
+// Helper function to make fetch requests with automatic 401 handling
+const fetchWithAuth = async (url, options = {}) => {
+  const response = await fetch(url, options);
+  
+  // Check for 401 Unauthorized
+  if (response.status === 401) {
+    handleUnauthorized();
+    throw new Error('Session expired. Please log in again.');
+  }
+  
+  return response;
+};
+
 export async function generateResume(data) {
-  const res = await fetch(`${API_BASE_URL}/api/resume/generate`, {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/resume/generate`, {
     method: "POST",
     headers: getAuthHeaders(),
     body: JSON.stringify(data),
@@ -50,7 +71,7 @@ export async function generateResume(data) {
 
 // AI assistant endpoints
 export async function generateExperienceAI(experience, jobDescription = '') {
-  const res = await fetch(`${API_BASE_URL}/api/experience/optimize`, {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/experience/optimize`, {
     method: "POST",
     headers: {
       'Content-Type': 'application/json'
@@ -69,7 +90,7 @@ export async function generateExperienceAI(experience, jobDescription = '') {
 }
 
 export async function generateEducationAI(education) {
-  const res = await fetch(`${API_BASE_URL}/api/ai/education`, {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/ai/education`, {
     method: "POST",
     headers: getAuthHeaders(),
     body: JSON.stringify({ education }),
@@ -83,7 +104,7 @@ export async function generateEducationAI(education) {
 }
 
 export async function generateSummaryAI({ experience, education, skills }) {
-  const res = await fetch(`${API_BASE_URL}/api/ai/summary`, {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/ai/summary`, {
     method: "POST",
     headers: getAuthHeaders(),
     body: JSON.stringify({ experience, education, skills }),
@@ -98,7 +119,7 @@ export async function generateSummaryAI({ experience, education, skills }) {
 
 // AI Grammar/Refactor functions - always available
 export async function improveExperienceGrammarAI(experience) {
-  const res = await fetch(`${API_BASE_URL}/api/experience/improve-grammar`, {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/experience/improve-grammar`, {
     method: "POST",
     headers: {
       'Content-Type': 'application/json'
@@ -116,7 +137,7 @@ export async function improveExperienceGrammarAI(experience) {
 }
 
 export async function improveSummaryGrammarAI(summary) {
-  const res = await fetch(`${API_BASE_URL}/api/summary/improve-grammar`, {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/summary/improve-grammar`, {
     method: "POST",
     headers: {
       'Content-Type': 'application/json'
@@ -135,7 +156,7 @@ export async function improveSummaryGrammarAI(summary) {
 
 // Final step AI functions
 export async function generateResumeAdviceAI(resumeData, jobDescription = '') {
-  const res = await fetch(`${API_BASE_URL}/api/resume/analyze-advice`, {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/resume/analyze-advice`, {
     method: "POST",
     headers: {
       'Content-Type': 'application/json'
@@ -154,7 +175,7 @@ export async function generateResumeAdviceAI(resumeData, jobDescription = '') {
 }
 
 export async function generateCoverLetterAI(resumeData, jobDescription = '', companyName = '') {
-  const res = await fetch(`${API_BASE_URL}/api/cover-letter/generate`, {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/cover-letter/generate`, {
     method: "POST",
     headers: {
       'Content-Type': 'application/json'
@@ -184,7 +205,7 @@ export async function parseResumeFile(file) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const res = await fetch(`${API_BASE_URL}/api/resume/parse`, {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/resume/parse`, {
     method: 'POST',
     headers,
     body: formData,
@@ -197,7 +218,7 @@ export async function parseResumeFile(file) {
 
 // Job Application API functions
 export async function submitJobApplication(applicationData) {
-  const res = await fetch(`${API_BASE_URL}/api/job/apply`, {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/job/apply`, {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify(applicationData),
@@ -217,7 +238,7 @@ export async function submitJobApplication(applicationData) {
 }
 
 export async function getUserRecentResumes() {
-  const res = await fetch(`${API_BASE_URL}/api/job/recent-resumes`, {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/job/recent-resumes`, {
     method: 'GET',
     headers: getAuthHeaders(),
   });
@@ -229,7 +250,7 @@ export async function getUserRecentResumes() {
 }
 
 export async function getUserJobApplications(limit = 20, offset = 0) {
-  const res = await fetch(`${API_BASE_URL}/api/job/applications?limit=${limit}&offset=${offset}`, {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/job/applications?limit=${limit}&offset=${offset}`, {
     method: 'GET',
     headers: getAuthHeaders(),
   });
@@ -241,7 +262,7 @@ export async function getUserJobApplications(limit = 20, offset = 0) {
 }
 
 export async function getJobApplication(applicationId) {
-  const res = await fetch(`${API_BASE_URL}/api/job/applications/${applicationId}`, {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/job/applications/${applicationId}`, {
     method: 'GET',
     headers: getAuthHeaders(),
   });
@@ -253,7 +274,7 @@ export async function getJobApplication(applicationId) {
 }
 
 export async function updateJobApplicationStatus(applicationId, status) {
-  const res = await fetch(`${API_BASE_URL}/api/job/applications/${applicationId}/status`, {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/job/applications/${applicationId}/status`, {
     method: 'PUT',
     headers: getAuthHeaders(),
     body: JSON.stringify({ status }),
@@ -266,7 +287,7 @@ export async function updateJobApplicationStatus(applicationId, status) {
 }
 
 export async function deleteJobApplication(applicationId) {
-  const res = await fetch(`${API_BASE_URL}/api/job/applications/${applicationId}`, {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/job/applications/${applicationId}`, {
     method: 'DELETE',
     headers: getAuthHeaders(),
   });
@@ -279,7 +300,7 @@ export async function deleteJobApplication(applicationId) {
 
 // Job Automation API functions
 export async function saveUserPreferences(jobSiteDomain, preferences) {
-  const res = await fetch(`${API_BASE_URL}/api/job/preferences`, {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/job/preferences`, {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify({
@@ -295,7 +316,7 @@ export async function saveUserPreferences(jobSiteDomain, preferences) {
 }
 
 export async function getUserPreferences(domain) {
-  const res = await fetch(`${API_BASE_URL}/api/job/preferences?domain=${encodeURIComponent(domain)}`, {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/job/preferences?domain=${encodeURIComponent(domain)}`, {
     method: 'GET',
     headers: getAuthHeaders(),
   });
@@ -307,7 +328,7 @@ export async function getUserPreferences(domain) {
 }
 
 export async function getAutomationStatus(applicationId) {
-  const res = await fetch(`${API_BASE_URL}/api/job/applications/${applicationId}/automation`, {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/job/applications/${applicationId}/automation`, {
     method: 'GET',
     headers: getAuthHeaders(),
   });
@@ -319,7 +340,7 @@ export async function getAutomationStatus(applicationId) {
 }
 
 export async function retryAutomation(applicationId, preferences = {}) {
-  const res = await fetch(`${API_BASE_URL}/api/job/applications/${applicationId}/retry`, {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/job/applications/${applicationId}/retry`, {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify({
@@ -335,7 +356,7 @@ export async function retryAutomation(applicationId, preferences = {}) {
 
 // Job Profile API functions
 export async function getJobProfile() {
-  const res = await fetch(`${API_BASE_URL}/api/job/profile`, {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/job/profile`, {
     method: 'GET',
     headers: getAuthHeaders(),
   });
@@ -347,7 +368,7 @@ export async function getJobProfile() {
 }
 
 export async function saveJobProfile(profileData) {
-  const res = await fetch(`${API_BASE_URL}/api/job/profile`, {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/job/profile`, {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify(profileData),

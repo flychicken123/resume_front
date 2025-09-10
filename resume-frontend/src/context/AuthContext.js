@@ -42,13 +42,18 @@ export const AuthProvider = ({ children }) => {
     console.log('AuthContext login completed, token saved to localStorage');
   };
 
-  const logout = () => {
+  const logout = (redirect = true) => {
     console.log('AuthContext logout called');
     setUser(null);
     setToken(null);
     localStorage.removeItem('resumeUser');
     localStorage.removeItem('resumeToken');
     console.log('AuthContext logout completed');
+    
+    // Redirect to login page if specified
+    if (redirect) {
+      window.location.href = '/login';
+    }
   };
 
   const getAuthHeaders = () => {
