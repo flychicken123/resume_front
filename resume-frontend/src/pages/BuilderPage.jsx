@@ -6,6 +6,7 @@ import Stepper from '../components/Stepper';
 import StepPersonal from '../components/StepPersonal';
 import StepExperience from '../components/StepExperience';
 import StepEducation from '../components/StepEducation';
+import StepProjects from '../components/StepProjects';
 import StepSkills from '../components/StepSkills';
 import StepFormat from '../components/StepFormat';
 import StepSummary from '../components/StepSummary';
@@ -20,7 +21,8 @@ import './BuilderPage.css';
 const steps = [
   "Personal Details",
   "Experience",
-  "Education", 
+  "Projects",
+  "Education",
   "Skills",
   "Format",
   "Summary"
@@ -904,10 +906,11 @@ function BuilderPage() {
             <div className="builder-content">
               {step === 1 && <StepPersonal />}
               {step === 2 && <StepExperience />}
-              {step === 3 && <StepEducation />}
-              {step === 4 && <StepSkills />}
-              {step === 5 && <StepFormat />}
-              {step === 6 && <StepSummary />}
+              {step === 3 && <StepProjects />}
+              {step === 4 && <StepEducation />}
+              {step === 5 && <StepSkills />}
+              {step === 6 && <StepFormat />}
+              {step === 7 && <StepSummary />}
               
                              {/* Navigation Buttons */}
                <div style={{ 

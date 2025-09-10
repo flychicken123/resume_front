@@ -19,20 +19,10 @@ const StepExperience = () => {
     }
   }, []);
 
-  // Initialize experiences as structured objects if not already
+  // Initialize experiences array if not already set
   React.useEffect(() => {
-    if (!data.experiences || data.experiences.length === 0) {
-      setData({ ...data, experiences: [{
-        jobTitle: '',
-        company: '',
-        city: '',
-        state: '',
-        remote: false,
-        startDate: '',
-        endDate: '',
-        currentlyWorking: false,
-        description: ''
-      }] });
+    if (!data.experiences) {
+      setData({ ...data, experiences: [] });
     }
   }, []);
 
@@ -54,6 +44,10 @@ const StepExperience = () => {
   const removeExperience = (idx) => {
     const newList = data.experiences.filter((_, i) => i !== idx);
     setData({ ...data, experiences: newList });
+  };
+
+  const skipExperience = () => {
+    setData({ ...data, experiences: [] });
   };
 
   const handleChange = (idx, field, value) => {
@@ -171,11 +165,27 @@ const StepExperience = () => {
         </div>
       )}
       
-      {data.experiences.map((exp, idx) => (
+      {data.experiences.length === 0 ? (
+        <div style={{ 
+          background: '#f0f9ff', 
+          border: '1px solid #0ea5e9', 
+          borderRadius: '8px', 
+          padding: '2rem', 
+          marginBottom: '1.5rem',
+          textAlign: 'center'
+        }}>
+          <p style={{ margin: 0, color: '#0c4a6e', fontSize: '1rem', marginBottom: '1rem' }}>
+            <strong>No work experience added yet.</strong>
+          </p>
+          <p style={{ margin: 0, color: '#0c4a6e', fontSize: '0.9rem', marginBottom: '1rem' }}>
+            If you're a student or new graduate without work experience, you can skip this section and highlight your projects instead.
+          </p>
+        </div>
+      ) : data.experiences.map((exp, idx) => (
         <div key={idx} style={{ marginBottom: '2rem', border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <h3 style={{ margin: 0, color: '#374151' }}>Experience {idx + 1}</h3>
-            {data.experiences.length > 1 && (
+            {(
               <button
                 onClick={() => removeExperience(idx)}
                 style={{
@@ -544,7 +554,7 @@ const StepExperience = () => {
           marginTop: '1rem'
         }}
       >
-        + Add Another Experience
+        + {data.experiences.length === 0 ? 'Add Work Experience' : 'Add Another Experience'}
       </button>
     </div>
   );
