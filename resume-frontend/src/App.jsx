@@ -6,6 +6,7 @@ import Home from './components/Home';
 import { LoginPage, BuilderPage } from './pages';
 import JobApplicationPage from './pages/JobApplicationPage';
 import Analytics from './components/Analytics';
+import SessionMonitor from './components/SessionMonitor';
 import './App.css';
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
           v7_relativeSplatPath: true 
         }}>
           <Analytics />
+          <SessionMonitor />
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<LoginPage />} />
