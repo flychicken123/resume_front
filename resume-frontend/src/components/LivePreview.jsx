@@ -441,7 +441,7 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
           sectionTitle: { 
             color: '#1f2937', 
             fontWeight: 'bold', 
-            fontSize: `${6 * scaleFactor}px`, 
+            fontSize: `${7 * scaleFactor}px`,  // Slightly larger than body text
             marginBottom: `${2 * scaleFactor}px`, 
             borderBottom: '1px solid #000', 
             paddingBottom: `${1 * scaleFactor}px`, 
@@ -499,7 +499,7 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
           sectionTitle: { 
             color: '#2c3e50', 
             fontWeight: 'bold', 
-            fontSize: `${6 * scaleFactor}px`, 
+            fontSize: `${7 * scaleFactor}px`,  // Slightly larger than body text
             marginBottom: `${2 * scaleFactor}px`, 
             borderBottom: '1px solid #000', 
             paddingBottom: `${1 * scaleFactor}px`, 
@@ -565,7 +565,7 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
           sectionTitle: { 
             color: '#3498db', 
             fontWeight: '600', 
-            fontSize: `${6 * scaleFactor}px`, 
+            fontSize: `${7 * scaleFactor}px`,  // Slightly larger than body text
             marginBottom: `${2 * scaleFactor}px`, 
             textTransform: 'uppercase', 
             letterSpacing: '1px', 
@@ -674,23 +674,58 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
     });
   };
 
-  // Render education items
+  // Render education items - format like original PDF with school and location on same line
   const renderEducation = (education, styles) => {
     if (!education) return null;
 
     if (Array.isArray(education)) {
-      return education.map((edu, idx) => (
-        <div key={idx} style={styles.item}>
-          <div style={styles.company}>
-            {edu.degree} {edu.field && `in ${edu.field}`} | {edu.school} | {edu.graduationYear}
-          </div>
-          {edu.gpa && (
-            <div style={styles.date}>
-              GPA: {edu.gpa}
+      return education.map((edu, idx) => {
+        // Format year range - handle both formats (startYear/graduationYear and startDate/endDate)
+        let yearRange = '';
+        
+        // Check for year format first (from form)
+        if (edu.startYear && edu.graduationYear) {
+          yearRange = `${edu.startYear} - ${edu.graduationYear}`;
+        } else if (edu.graduationYear) {
+          // If only graduation year, assume 4-year degree
+          const gradYear = parseInt(edu.graduationYear);
+          if (!isNaN(gradYear)) {
+            yearRange = `${gradYear - 4} - ${gradYear}`;
+          } else {
+            yearRange = edu.graduationYear;
+          }
+        } 
+        // Check for date format (from parsed resume)
+        else if (edu.startDate && edu.endDate) {
+          yearRange = `${edu.startDate} - ${edu.endDate}`;
+        } else if (edu.endDate) {
+          yearRange = edu.endDate;
+        } else if (edu.startDate) {
+          yearRange = `${edu.startDate} - Present`;
+        } else {
+          // Only show 'Year' if there's truly no date information
+          yearRange = '';
+        }
+
+        return (
+          <div key={idx} style={styles.item}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+              <div style={styles.company}>
+                {edu.school || 'University'}
+              </div>
+              {yearRange && (
+                <div style={{ ...styles.date, fontWeight: 'normal' }}>
+                  {yearRange}
+                </div>
+              )}
             </div>
-          )}
-        </div>
-      ));
+            <div style={{ marginTop: '2px' }}>
+              {edu.degree} {edu.field && `in ${edu.field}`}
+              {edu.gpa && ` • GPA: ${edu.gpa}`}
+            </div>
+          </div>
+        );
+      });
     } else {
       return (
         <div style={styles.item}>
@@ -808,15 +843,15 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
             summaryTitle = 'SUMMARY';
           }
           
-          return renderSection(summaryTitle, <div style={styles.summary}>{section.content}</div>, styles);
+          return <div key={idx}>{renderSection(summaryTitle, <div style={styles.summary}>{section.content}</div>, styles)}</div>;
         case 'experience':
-          return renderSection('EXPERIENCE', renderExperiences(section.content, styles), styles);
+          return <div key={idx}>{renderSection('EXPERIENCE', renderExperiences(section.content, styles), styles)}</div>;
         case 'education':
-          return renderSection('EDUCATION', renderEducation(section.content, styles), styles);
+          return <div key={idx}>{renderSection('EDUCATION', renderEducation(section.content, styles), styles)}</div>;
         case 'projects':
-          return renderSection('PROJECTS', renderProjects(section.content, styles), styles);
+          return <div key={idx}>{renderSection('PROJECTS', renderProjects(section.content, styles), styles)}</div>;
         case 'skills':
-          return renderSection('SKILLS', <div style={styles.skills}>{section.content}</div>, styles);
+          return <div key={idx}>{renderSection('SKILLS', <div style={styles.skills}>{section.content}</div>, styles)}</div>;
         default:
           return null;
       }

@@ -606,11 +606,12 @@ function BuilderPage() {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    /* Use a consistent font for PDF generation */
-    body, * {
-      font-family: 'Arial', 'Helvetica', sans-serif !important;
-      line-height: 1.2 !important;
+    /* Fallback font for PDF generation - only apply if no font is specified */
+    body {
+      font-family: 'Inter', 'Segoe UI', 'Arial', 'Helvetica', sans-serif;
+      line-height: 1.4;
     }
+    /* Let template-specific fonts take precedence */
   </style>
   <style>
     body { margin: 0; padding: 0; background-color: white; }
