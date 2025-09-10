@@ -65,6 +65,23 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
         }
         return Math.round(25 * fontScale);
         
+      case 'projects':
+        if (Array.isArray(content)) {
+          // Projects usually take more space due to descriptions
+          const projectHeight = content.reduce((total, project) => {
+            let height = Math.round(30 * fontScale); // Base height for title
+            if (project.description) {
+              const lines = project.description.split('\n').length;
+              height += lines * Math.round(15 * fontScale);
+            }
+            if (project.technologies) height += Math.round(15 * fontScale);
+            if (project.projectUrl) height += Math.round(15 * fontScale);
+            return total + height;
+          }, 0);
+          return projectHeight;
+        }
+        return Math.round(60 * fontScale);
+        
       case 'skills':
         // More conservative skills section estimation
         const skillCharsPerLine = Math.round(140 / fontScale); // Increased from 120
@@ -247,6 +264,19 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
       });
     }
 
+    // Projects section (comes before education for students)
+    if (data.projects && data.projects.length > 0) {
+      const sectionTitleHeight = Math.round(20 * fontScale); // Add height for section title
+      const projectsHeight = estimateSectionHeight(data.projects, 'projects') + sectionTitleHeight;
+      allSections.push({
+        type: 'projects',
+        content: data.projects,
+        estimatedHeight: projectsHeight,
+        priority: 4,
+        canSplit: true  // Allow projects section to be split across pages
+      });
+    }
+
     // Education section
     if (data.education) {
       const sectionTitleHeight = Math.round(20 * fontScale); // Add height for section title
@@ -255,7 +285,7 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
         type: 'education',
         content: data.education,
         estimatedHeight: eduHeight,
-        priority: 4
+        priority: 5
       });
     }
 
@@ -267,7 +297,7 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
         type: 'skills',
         content: data.skills,
         estimatedHeight: skillsHeight,
-        priority: 5
+        priority: 6
       });
     }
 
@@ -671,6 +701,49 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
     }
   };
 
+  const renderProjects = (projects, styles) => {
+    if (!projects || projects.length === 0) return null;
+
+    return projects.map((project, idx) => {
+      // Skip empty projects
+      if (!project.projectName && !project.description) return null;
+      
+      return (
+        <div key={idx} style={styles.item}>
+          <div style={styles.company}>
+            {project.projectName}
+          </div>
+          
+          {project.technologies && (
+            <div style={{ fontStyle: 'italic', fontSize: '0.9em', marginTop: '2px', marginBottom: '4px' }}>
+              Technologies: {project.technologies}
+            </div>
+          )}
+          
+          {project.projectUrl && (
+            <div style={{ fontSize: '0.9em', marginTop: '2px', marginBottom: '4px' }}>
+              <a href={project.projectUrl} style={{ color: '#0066cc', textDecoration: 'none' }}>
+                {project.projectUrl}
+              </a>
+            </div>
+          )}
+          
+          {project.description && (
+            <div style={{ marginTop: '2px' }}>
+              {project.description.split('\n').map((line, lineIdx) => (
+                line.trim() && (
+                  <div key={lineIdx} style={styles.bullet}>
+                    • {line.trim().replace(/^[•\-]\s*/, '')}
+                  </div>
+                )
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }).filter(Boolean);
+  };
+
   // Render a single section
   const renderSection = (title, content, styles) => {
     if (!content || (Array.isArray(content) && content.length === 0)) {
@@ -740,6 +813,8 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
           return renderSection('EXPERIENCE', renderExperiences(section.content, styles), styles);
         case 'education':
           return renderSection('EDUCATION', renderEducation(section.content, styles), styles);
+        case 'projects':
+          return renderSection('PROJECTS', renderProjects(section.content, styles), styles);
         case 'skills':
           return renderSection('SKILLS', <div style={styles.skills}>{section.content}</div>, styles);
         default:
@@ -827,6 +902,10 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
 
             {data.experiences && data.experiences.length > 0 && (
               renderSection('EXPERIENCE', renderExperiences(data.experiences, styles), styles)
+            )}
+
+            {data.projects && data.projects.length > 0 && (
+              renderSection('PROJECTS', renderProjects(data.projects, styles), styles)
             )}
 
             {data.education && (

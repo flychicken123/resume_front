@@ -109,16 +109,7 @@ export const ResumeProvider = ({ children }) => {
       name: "",
       email: "",
       phone: "",
-      experiences: [{
-        jobTitle: '',
-        company: '',
-        city: '',
-        state: '',
-        startDate: '',
-        endDate: '',
-        currentlyWorking: false,
-        description: ''
-      }],
+      experiences: [],
       education: [{
         degree: '',
         school: '',
@@ -127,6 +118,12 @@ export const ResumeProvider = ({ children }) => {
         gpa: '',
         honors: '',
         location: ''
+      }],
+      projects: [{
+        projectName: '',
+        description: '',
+        technologies: '',
+        projectUrl: ''
       }],
       skills: "",
       summary: "",
@@ -163,16 +160,7 @@ export const ResumeProvider = ({ children }) => {
       name: "",
       email: "",
       phone: "",
-      experiences: [{
-        jobTitle: '',
-        company: '',
-        city: '',
-        state: '',
-        startDate: '',
-        endDate: '',
-        currentlyWorking: false,
-        description: ''
-      }],
+      experiences: [],
       education: [{
         degree: '',
         school: '',
@@ -181,6 +169,12 @@ export const ResumeProvider = ({ children }) => {
         gpa: '',
         honors: '',
         location: ''
+      }],
+      projects: [{
+        projectName: '',
+        description: '',
+        technologies: '',
+        projectUrl: ''
       }],
       skills: "",
       summary: "",
@@ -258,6 +252,14 @@ export const ResumeProvider = ({ children }) => {
           gpa: '',
           honors: '',
           location: ''
+        }));
+      }
+      if (Array.isArray(structured.projects) && structured.projects.length > 0) {
+        mapped.projects = structured.projects.map((proj) => ({
+          projectName: proj.name || '',
+          description: Array.isArray(proj.bullets) ? proj.bullets.join('\n') : (proj.description || ''),
+          technologies: Array.isArray(proj.technologies) ? proj.technologies.join(', ') : '',
+          projectUrl: proj.url || ''
         }));
       }
       console.log('Mapped data:', mapped);

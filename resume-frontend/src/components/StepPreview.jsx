@@ -100,6 +100,42 @@ const StepPreview = ({ onDownload }) => {
       );
     }).filter(Boolean);
   };
+
+  // Format projects data
+  const formatProjects = () => {
+    if (!data.projects || data.projects.length === 0) return null;
+    
+    return data.projects.map((project, idx) => {
+      if (!project.projectName) return null;
+      
+      return (
+        <div key={idx} className="experience-item">
+          <div className="institution-header">
+            {project.projectName}
+          </div>
+          {project.technologies && (
+            <div className="education-details">
+              {project.technologies}
+            </div>
+          )}
+          {project.projectUrl && (
+            <div className="education-details">
+              {project.projectUrl}
+            </div>
+          )}
+          {project.description && (
+            <ul className="bullet-points">
+              {project.description.split('\n').filter(point => point.trim()).map((point, pointIdx) => (
+                <li key={pointIdx}>
+                  {point.trim().replace(/^[•\-]\s*/, '')}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      );
+    }).filter(Boolean);
+  };
   
   return (
     <div className="preview-container" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
@@ -123,6 +159,13 @@ const StepPreview = ({ onDownload }) => {
           <>
             <div className="section-header">Experience</div>
             {formatExperiences()}
+          </>
+        )}
+        
+        {formatProjects() && (
+          <>
+            <div className="section-header">Projects</div>
+            {formatProjects()}
           </>
         )}
         
