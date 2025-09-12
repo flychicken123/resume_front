@@ -8,7 +8,7 @@ const StepImport = ({ onSkip, jobDescription }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [localJobDesc, setLocalJobDesc] = useState(jobDescription || '');
-  const { setData } = useResume();
+  const { applyImportedData } = useResume();
 
   const handleNext = async () => {
     if (tab === 'file' && selectedFile) {
@@ -16,7 +16,10 @@ const StepImport = ({ onSkip, jobDescription }) => {
       setError('');
       try {
         const parsed = await parseResumeFile(selectedFile);
-        setData(parsed); // update context with parsed data
+        // Extract the structured data from the response
+        if (parsed && parsed.structured) {
+          applyImportedData(parsed.structured);
+        }
         onSkip();
       } catch (err) {
         setError('Failed to parse resume. Please try again.');

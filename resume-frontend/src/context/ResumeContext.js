@@ -256,10 +256,10 @@ export const ResumeProvider = ({ children }) => {
       }
       if (Array.isArray(structured.projects) && structured.projects.length > 0) {
         mapped.projects = structured.projects.map((proj) => ({
-          projectName: proj.name || '',
+          projectName: proj.projectName || '',
           description: Array.isArray(proj.bullets) ? proj.bullets.join('\n') : (proj.description || ''),
-          technologies: Array.isArray(proj.technologies) ? proj.technologies.join(', ') : '',
-          projectUrl: proj.url || ''
+          technologies: Array.isArray(proj.technologies) ? proj.technologies.join(', ') : (proj.technologies || ''),
+          projectUrl: proj.projectUrl || ''
         }));
       }
       console.log('Mapped data:', mapped);
