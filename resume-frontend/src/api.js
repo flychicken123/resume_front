@@ -136,6 +136,43 @@ export async function improveExperienceGrammarAI(experience) {
   return data.improvedExperience;
 }
 
+export async function optimizeProjectAI(projectData, jobDescription = '') {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/project/optimize`, {
+    method: "POST",
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ 
+      projectData: projectData,
+      jobDescription: jobDescription
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error || "AI project optimization failed.");
+  }
+  const data = await res.json();
+  return data.optimizedProject;
+}
+
+export async function improveProjectGrammarAI(projectData) {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/project/improve-grammar`, {
+    method: "POST",
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ 
+      projectData: projectData
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error || "AI project grammar improvement failed.");
+  }
+  const data = await res.json();
+  return data.improvedProject;
+}
+
 export async function improveSummaryGrammarAI(summary) {
   const res = await fetchWithAuth(`${API_BASE_URL}/api/summary/improve-grammar`, {
     method: "POST",

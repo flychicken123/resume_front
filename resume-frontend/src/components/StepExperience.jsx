@@ -2,22 +2,23 @@
 import React, { useState, useEffect } from 'react';
 import { useResume } from '../context/ResumeContext';
 import { generateExperienceAI, improveExperienceGrammarAI } from '../api';
+import { useLocation } from 'react-router-dom';
 
 const StepExperience = () => {
   const { data, setData } = useResume();
   const [loadingIndex, setLoadingIndex] = useState(null);
-  const [grammarLoadingIndex, setGrammarLoadingIndex] = useState(null);
-  const [aiExperiences, setAiExperiences] = useState({});
-  const [grammarImprovedExperiences, setGrammarImprovedExperiences] = useState({});
-  const [jobDescription, setJobDescription] = useState('');
-
-  // Load job description from localStorage
-  useEffect(() => {
-    const savedJobDesc = localStorage.getItem('jobDescription');
-    if (savedJobDesc) {
-      setJobDescription(savedJobDesc);
+  const [aiMode, setAiMode] = useState({});
+  const location = useLocation();
+  
+  // Extract job description from URL if present
+  const getJobDescription = () => {
+    const pathParts = location.pathname.split('/');
+    if (pathParts[1] === 'build' && pathParts[2]) {
+      return decodeURIComponent(pathParts[2]);
     }
-  }, []);
+    // Fallback to localStorage
+    return localStorage.getItem('jobDescription') || '';
+  };
 
   // Initialize experiences array if not already set
   React.useEffect(() => {
@@ -56,36 +57,9 @@ const StepExperience = () => {
     setData({ ...data, experiences: newList });
   };
 
-  const handleAIGenerate = async (idx) => {
+  const checkWithAI = async (idx) => {
     try {
       setLoadingIndex(idx);
-      const experience = data.experiences[idx];
-      
-      if (!experience.description.trim()) {
-        alert('Please enter your job description first before converting.');
-        return;
-      }
-      
-      if (!jobDescription.trim()) {
-        alert('AI conversion requires a job description. You can still build your resume without AI optimization, or go back to the home page to start with a job description.');
-        return;
-      }
-      
-      // Send only the description to AI for optimization
-      const experienceText = experience.description;
-      
-      const suggestion = await generateExperienceAI(experienceText, jobDescription);
-      setAiExperiences(prev => ({ ...prev, [idx]: suggestion }));
-    } catch (err) {
-      alert(err.message);
-    } finally {
-      setLoadingIndex(null);
-    }
-  };
-
-  const handleGrammarImprove = async (idx) => {
-    try {
-      setGrammarLoadingIndex(idx);
       const experience = data.experiences[idx];
       
       if (!experience.description.trim()) {
@@ -94,24 +68,25 @@ const StepExperience = () => {
       }
       
       const experienceText = experience.description;
-      const improvedText = await improveExperienceGrammarAI(experienceText);
-      setGrammarImprovedExperiences(prev => ({ ...prev, [idx]: improvedText }));
+      const jobDesc = getJobDescription();
+      
+      let improvedText;
+      if (jobDesc) {
+        // Optimize for job description
+        improvedText = await generateExperienceAI(experienceText, jobDesc);
+      } else {
+        // Just improve grammar and professionalism
+        improvedText = await improveExperienceGrammarAI(experienceText);
+      }
+      
+      handleChange(idx, 'description', improvedText);
+      
+      // Set AI mode for this experience
+      setAiMode(prev => ({ ...prev, [idx]: true }));
     } catch (err) {
-      alert(err.message);
+      alert('Failed to check with AI. Please try again.');
     } finally {
-      setGrammarLoadingIndex(null);
-    }
-  };
-
-  const useAIExperience = (idx) => {
-    if (aiExperiences[idx]) {
-      handleChange(idx, 'description', aiExperiences[idx]);
-    }
-  };
-
-  const useGrammarImprovedExperience = (idx) => {
-    if (grammarImprovedExperiences[idx]) {
-      handleChange(idx, 'description', grammarImprovedExperiences[idx]);
+      setLoadingIndex(null);
     }
   };
 
@@ -137,7 +112,7 @@ const StepExperience = () => {
       <p style={{ color: '#6b7280', marginBottom: '1rem', fontSize: '0.875rem' }}>
         * Required fields. Experience will only appear in your resume when both Job Title and Employer are filled.
       </p>
-      {jobDescription && jobDescription.trim() && (
+      {getJobDescription() && (
         <div style={{ 
           background: '#f0f9ff', 
           border: '1px solid #0ea5e9', 
@@ -146,21 +121,7 @@ const StepExperience = () => {
           marginBottom: '1.5rem' 
         }}>
           <p style={{ margin: 0, color: '#0369a1', fontSize: '0.9rem' }}>
-            🎯 <strong>AI Optimization Available:</strong> Use the "AI Convert" button below each experience to optimize it based on your job description.
-          </p>
-        </div>
-      )}
-      
-      {(!jobDescription || !jobDescription.trim()) && (
-        <div style={{ 
-          background: '#fef3c7', 
-          border: '1px solid #f59e0b', 
-          borderRadius: '8px', 
-          padding: '1rem', 
-          marginBottom: '1.5rem' 
-        }}>
-          <p style={{ margin: 0, color: '#92400e', fontSize: '0.9rem' }}>
-            💡 <strong>Builder Mode:</strong> You're building your resume without a job description. For AI-powered optimization, go back to the home page and choose "Start Building with Job Description".
+            🎯 <strong>AI Optimization Available:</strong> Use the "Check with AI" button to optimize your experiences based on the job description.
           </p>
         </div>
       )}
@@ -405,137 +366,25 @@ const StepExperience = () => {
             />
           </div>
 
-          {/* AI Helper Section - Always available */}
-          <div style={{ 
-            background: '#f8fafc', 
-            border: '1px solid #e2e8f0', 
-            borderRadius: '6px', 
-            padding: '1rem',
-            marginBottom: '1rem'
-          }}>
-            <h4 style={{ margin: '0 0 1rem 0', color: '#374151', fontSize: '0.95rem' }}>🤖 AI Assistance</h4>
-            
-            {/* Grammar/Refactor Button - Always Available */}
-            <div style={{ marginBottom: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
-                <button
-                  onClick={() => handleGrammarImprove(idx)}
-                  disabled={grammarLoadingIndex === idx || !exp.description.trim()}
-                  style={{
-                    background: '#059669',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '6px',
-                    padding: '0.5rem 1rem',
-                    fontSize: '0.875rem',
-                    cursor: grammarLoadingIndex === idx ? 'not-allowed' : 'pointer',
-                    opacity: grammarLoadingIndex === idx || !exp.description.trim() ? 0.5 : 1
-                  }}
-                >
-                  {grammarLoadingIndex === idx ? '✨ Improving...' : '✨ AI Improve Grammar & Style'}
-                </button>
-                
-                {grammarImprovedExperiences[idx] && (
-                  <button
-                    onClick={() => useGrammarImprovedExperience(idx)}
-                    style={{
-                      background: '#10b981',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '6px',
-                      padding: '0.5rem 1rem',
-                      fontSize: '0.875rem',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    ✅ Use Improved Version
-                  </button>
-                )}
-              </div>
-              
-              {grammarImprovedExperiences[idx] && (
-                <div style={{ 
-                  background: 'white', 
-                  border: '1px solid #d1d5db', 
-                  borderRadius: '4px', 
-                  padding: '0.75rem',
-                  fontSize: '0.875rem',
-                  color: '#374151',
-                  marginBottom: '1rem'
-                }}>
-                  <strong>AI-Improved Description:</strong>
-                  <div style={{ marginTop: '0.5rem' }}>{grammarImprovedExperiences[idx]}</div>
-                </div>
-              )}
-            </div>
-
-            {/* Job Matching Button - Only with job description */}
-            {jobDescription && jobDescription.trim() && (
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
-                  <button
-                    onClick={() => handleAIGenerate(idx)}
-                    disabled={loadingIndex === idx || !exp.description.trim()}
-                    style={{
-                      background: '#3b82f6',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '6px',
-                      padding: '0.5rem 1rem',
-                      fontSize: '0.875rem',
-                      cursor: loadingIndex === idx ? 'not-allowed' : 'pointer',
-                      opacity: loadingIndex === idx || !exp.description.trim() ? 0.5 : 1
-                    }}
-                  >
-                    {loadingIndex === idx ? '🎯 Optimizing...' : '🎯 AI Optimize for Job Description'}
-                  </button>
-                  
-                  {aiExperiences[idx] && (
-                    <button
-                      onClick={() => useAIExperience(idx)}
-                      style={{
-                        background: '#10b981',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '6px',
-                        padding: '0.5rem 1rem',
-                        fontSize: '0.875rem',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      ✅ Use Optimized Version
-                    </button>
-                  )}
-                </div>
-                
-                {aiExperiences[idx] && (
-                  <div style={{ 
-                    background: 'white', 
-                    border: '1px solid #d1d5db', 
-                    borderRadius: '4px', 
-                    padding: '0.75rem',
-                    fontSize: '0.875rem',
-                    color: '#374151'
-                  }}>
-                    <strong>Job-Optimized Description:</strong>
-                    <div style={{ marginTop: '0.5rem' }}>{aiExperiences[idx]}</div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {(!jobDescription || !jobDescription.trim()) && (
-              <div style={{ 
-                background: '#fef3c7', 
-                border: '1px solid #f59e0b', 
-                borderRadius: '4px', 
-                padding: '0.75rem',
-                fontSize: '0.85rem',
-                color: '#92400e'
-              }}>
-                💡 <strong>Job Optimization Unavailable:</strong> To get AI optimization based on job requirements, go back to the home page and start with a job description.
-              </div>
-            )}
+          {/* AI Check Button */}
+          <div style={{ marginTop: '1rem' }}>
+            <button
+              onClick={() => checkWithAI(idx)}
+              disabled={loadingIndex === idx || !exp.description.trim()}
+              style={{
+                background: aiMode[idx] ? '#10b981' : '#3b82f6',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                padding: '0.5rem 1rem',
+                fontSize: '0.875rem',
+                cursor: loadingIndex === idx || !exp.description.trim() ? 'not-allowed' : 'pointer',
+                opacity: loadingIndex === idx || !exp.description.trim() ? 0.5 : 1
+              }}
+              title={getJobDescription() ? "Optimize experience for the job posting" : "Improve grammar and professionalism"}
+            >
+              {loadingIndex === idx ? 'Checking...' : aiMode[idx] ? '✓ AI Enhanced' : '✨ Check with AI'}
+            </button>
           </div>
         </div>
       ))}
