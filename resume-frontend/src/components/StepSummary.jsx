@@ -1,77 +1,57 @@
 import React, { useState, useEffect } from 'react';
 import { useResume } from '../context/ResumeContext';
 import { generateSummaryAI, improveSummaryGrammarAI } from '../api';
+import { useLocation } from 'react-router-dom';
 
 const StepSummary = () => {
   const { data, setData } = useResume();
   const [loading, setLoading] = useState(false);
-  const [grammarLoading, setGrammarLoading] = useState(false);
-  const [aiSummary, setAiSummary] = useState('');
-  const [grammarImprovedSummary, setGrammarImprovedSummary] = useState('');
-  const [jobDescription, setJobDescription] = useState('');
-
-  // Load job description from localStorage
-  useEffect(() => {
-    const savedJobDesc = localStorage.getItem('jobDescription');
-    if (savedJobDesc) {
-      setJobDescription(savedJobDesc);
+  const [aiMode, setAiMode] = useState(false);
+  const location = useLocation();
+  
+  // Extract job description from URL if present
+  const getJobDescription = () => {
+    const pathParts = location.pathname.split('/');
+    if (pathParts[1] === 'build' && pathParts[2]) {
+      return decodeURIComponent(pathParts[2]);
     }
-  }, []);
+    // Fallback to localStorage
+    return localStorage.getItem('jobDescription') || '';
+  };
 
-  const handleAIGenerate = async () => {
+  const checkWithAI = async () => {
     try {
-      if (!jobDescription.trim()) {
-        alert('AI summary generation requires a job description. You can still write your summary manually, or go back to the home page to start with a job description.');
+      setLoading(true);
+      const jobDesc = getJobDescription();
+      
+      if (jobDesc && (!data.summary || data.summary.trim() === '')) {
+        // Generate new summary based on job description
+        const educationText = Array.isArray(data.education) 
+          ? data.education.map(edu => 
+              `${edu.degree}${edu.field ? ` in ${edu.field}` : ''} from ${edu.school}${edu.graduationYear ? ` (${edu.graduationYear})` : ''}`
+            ).join(', ')
+          : data.education;
+        
+        const suggestion = await generateSummaryAI({ 
+          experience: data.experience, 
+          education: educationText, 
+          skills: data.skills.split(',').map(s => s.trim()) 
+        });
+        setData({ ...data, summary: suggestion });
+      } else if (data.summary && data.summary.trim()) {
+        // Improve existing summary
+        const improvedText = await improveSummaryGrammarAI(data.summary);
+        setData({ ...data, summary: improvedText });
+      } else {
+        alert('Please enter a summary first or add experience/education to generate one.');
         return;
       }
       
-      setLoading(true);
-      // Convert education array to string format for AI
-      const educationText = Array.isArray(data.education) 
-        ? data.education.map(edu => 
-            `${edu.degree}${edu.field ? ` in ${edu.field}` : ''} from ${edu.school}${edu.graduationYear ? ` (${edu.graduationYear})` : ''}`
-          ).join(', ')
-        : data.education;
-      
-      const suggestion = await generateSummaryAI({ 
-        experience: data.experience, 
-        education: educationText, 
-        skills: data.skills.split(',').map(s => s.trim()) 
-      });
-      setAiSummary(suggestion);
+      setAiMode(true);
     } catch (err) {
-      alert(err.message);
+      alert('Failed to check with AI. Please try again.');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleGrammarImprove = async () => {
-    try {
-      if (!data.summary.trim()) {
-        alert('Please enter your summary first.');
-        return;
-      }
-      
-      setGrammarLoading(true);
-      const improvedText = await improveSummaryGrammarAI(data.summary);
-      setGrammarImprovedSummary(improvedText);
-    } catch (err) {
-      alert(err.message);
-    } finally {
-      setGrammarLoading(false);
-    }
-  };
-
-  const useAISummary = () => {
-    if (aiSummary) {
-      setData({ ...data, summary: aiSummary });
-    }
-  };
-
-  const useGrammarImprovedSummary = () => {
-    if (grammarImprovedSummary) {
-      setData({ ...data, summary: grammarImprovedSummary });
     }
   };
 
@@ -97,136 +77,35 @@ const StepSummary = () => {
         }}
       />
       
-      {/* AI Helper Section - Always available */}
-      <div style={{ 
-        background: '#f8fafc', 
-        border: '1px solid #e2e8f0', 
-        borderRadius: '6px', 
-        padding: '1rem',
-        marginBottom: '1rem'
-      }}>
-        <h4 style={{ margin: '0 0 1rem 0', color: '#374151', fontSize: '0.95rem' }}>🤖 AI Assistance</h4>
-        
-        {/* Grammar/Refactor Button - Always Available */}
-        <div style={{ marginBottom: '1rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
-            <button
-              onClick={handleGrammarImprove}
-              disabled={grammarLoading || !data.summary.trim()}
-              style={{
-                background: '#059669',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                padding: '0.5rem 1rem',
-                fontSize: '0.875rem',
-                cursor: grammarLoading ? 'not-allowed' : 'pointer',
-                opacity: grammarLoading || !data.summary.trim() ? 0.5 : 1
-              }}
-            >
-              {grammarLoading ? '✨ Improving...' : '✨ AI Improve Grammar & Style'}
-            </button>
-            
-            {grammarImprovedSummary && (
-              <button
-                onClick={useGrammarImprovedSummary}
-                style={{
-                  background: '#10b981',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  padding: '0.5rem 1rem',
-                  fontSize: '0.875rem',
-                  cursor: 'pointer'
-                }}
-              >
-                ✅ Use Improved Version
-              </button>
-            )}
-          </div>
-          
-          {grammarImprovedSummary && (
-            <div style={{ 
-              background: 'white', 
-              border: '1px solid #d1d5db', 
-              borderRadius: '4px', 
-              padding: '0.75rem',
-              fontSize: '0.875rem',
-              color: '#374151',
-              marginBottom: '1rem'
-            }}>
-              <strong>AI-Improved Summary:</strong>
-              <div style={{ marginTop: '0.5rem' }}>{grammarImprovedSummary}</div>
-            </div>
-          )}
-        </div>
-
-        {/* Job-Based Generation - Only with job description */}
-        {jobDescription && jobDescription.trim() && (
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
-              <button
-                onClick={handleAIGenerate}
-                disabled={loading}
-                style={{
-                  background: '#3b82f6',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  padding: '0.5rem 1rem',
-                  fontSize: '0.875rem',
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                  opacity: loading ? 0.5 : 1
-                }}
-              >
-                {loading ? '🎯 Generating...' : '🎯 AI Generate Summary for Job Description'}
-              </button>
-              
-              {aiSummary && (
-                <button
-                  onClick={useAISummary}
-                  style={{
-                    background: '#10b981',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '6px',
-                    padding: '0.5rem 1rem',
-                    fontSize: '0.875rem',
-                    cursor: 'pointer'
-                  }}
-                >
-                  ✅ Use Generated Summary
-                </button>
-              )}
-            </div>
-            
-            {aiSummary && (
-              <div style={{ 
-                background: 'white', 
-                border: '1px solid #d1d5db', 
-                borderRadius: '4px', 
-                padding: '0.75rem',
-                fontSize: '0.875rem',
-                color: '#374151'
-              }}>
-                <strong>Job-Optimized Summary:</strong>
-                <div style={{ marginTop: '0.5rem' }}>{aiSummary}</div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {(!jobDescription || !jobDescription.trim()) && (
-          <div style={{ 
-            background: '#fef3c7', 
-            border: '1px solid #f59e0b', 
-            borderRadius: '4px', 
-            padding: '0.75rem',
-            fontSize: '0.85rem',
-            color: '#92400e'
-          }}>
-            💡 <strong>Job-Based Generation Unavailable:</strong> To get AI summary generation based on job requirements, go back to the home page and start with a job description.
-          </div>
+      {/* AI Check Button */}
+      <div style={{ marginTop: '1rem' }}>
+        <button
+          onClick={checkWithAI}
+          disabled={loading}
+          style={{
+            background: aiMode ? '#10b981' : '#3b82f6',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            padding: '0.5rem 1rem',
+            fontSize: '0.875rem',
+            cursor: loading ? 'not-allowed' : 'pointer',
+            opacity: loading ? 0.5 : 1
+          }}
+          title={
+            getJobDescription() && !data.summary 
+              ? "Generate summary based on job description" 
+              : data.summary 
+              ? "Improve grammar and professionalism" 
+              : "Add content to generate summary"
+          }
+        >
+          {loading ? 'Checking...' : aiMode ? '✓ AI Enhanced' : '✨ Check with AI'}
+        </button>
+        {getJobDescription() && !data.summary && (
+          <p style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: '#6b7280' }}>
+            💡 Tip: Click "Check with AI" to generate a summary based on your experience and the job description.
+          </p>
         )}
       </div>
     </div>

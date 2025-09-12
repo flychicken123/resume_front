@@ -1,10 +1,23 @@
 // src/components/StepProjects.jsx
 import React, { useState } from 'react';
 import { useResume } from '../context/ResumeContext';
+import { optimizeProjectAI, improveProjectGrammarAI } from '../api';
+import { useLocation } from 'react-router-dom';
 
 const StepProjects = () => {
   const { data, setData } = useResume();
   const [loadingIndex, setLoadingIndex] = useState(null);
+  const [aiMode, setAiMode] = useState({});
+  const location = useLocation();
+  
+  // Extract job description from URL if present
+  const getJobDescription = () => {
+    const pathParts = location.pathname.split('/');
+    if (pathParts[1] === 'build' && pathParts[2]) {
+      return decodeURIComponent(pathParts[2]);
+    }
+    return '';
+  };
 
   // Initialize projects if not already
   React.useEffect(() => {
@@ -39,27 +52,36 @@ const StepProjects = () => {
     setData({ ...data, projects: updatedProjects });
   };
 
-  const moveProject = (index, direction) => {
-    const updatedProjects = [...data.projects];
-    if (direction === 'up' && index > 0) {
-      [updatedProjects[index], updatedProjects[index - 1]] = 
-      [updatedProjects[index - 1], updatedProjects[index]];
-    } else if (direction === 'down' && index < updatedProjects.length - 1) {
-      [updatedProjects[index], updatedProjects[index + 1]] = 
-      [updatedProjects[index + 1], updatedProjects[index]];
-    }
-    setData({ ...data, projects: updatedProjects });
-  };
-
-  // Generate project description using AI (placeholder for future implementation)
-  const improveProjectDescription = async (index) => {
+  // Optimize project with AI based on job description or improve grammar
+  const optimizeProjectWithAI = async (index) => {
     setLoadingIndex(index);
     try {
-      // TODO: Implement AI assistance for project descriptions
-      // For now, just show a message
-      alert('AI assistance for project descriptions coming soon!');
+      const project = data.projects[index];
+      const projectData = project.description || '';
+      
+      if (!projectData.trim()) {
+        alert('Please add some project description first');
+        return;
+      }
+      
+      const jobDesc = getJobDescription();
+      
+      let optimizedDescription;
+      if (jobDesc) {
+        // Optimize for job description
+        optimizedDescription = await optimizeProjectAI(projectData, jobDesc);
+      } else {
+        // Just improve grammar and professionalism
+        optimizedDescription = await improveProjectGrammarAI(projectData);
+      }
+      
+      updateProject(index, 'description', optimizedDescription);
+      
+      // Set AI mode for this project
+      setAiMode(prev => ({ ...prev, [index]: true }));
     } catch (error) {
-      console.error('Error improving project description:', error);
+      console.error('Error optimizing project:', error);
+      alert('Failed to check project with AI. Please try again.');
     } finally {
       setLoadingIndex(null);
     }
@@ -71,40 +93,26 @@ const StepProjects = () => {
       <p>Showcase your academic, personal, or professional projects. This is especially important if you have limited work experience.</p>
       
       {data.projects && data.projects.map((project, index) => (
-        <div key={index} className="experience-card" style={{ marginBottom: '1.5rem' }}>
-          <div className="card-header">
-            <h3>Project {index + 1}</h3>
-            <div className="card-actions">
-              {index > 0 && (
-                <button 
-                  type="button" 
-                  onClick={() => moveProject(index, 'up')}
-                  className="move-btn"
-                  title="Move up"
-                >
-                  ↑
-                </button>
-              )}
-              {index < data.projects.length - 1 && (
-                <button 
-                  type="button" 
-                  onClick={() => moveProject(index, 'down')}
-                  className="move-btn"
-                  title="Move down"
-                >
-                  ↓
-                </button>
-              )}
-              {data.projects.length > 1 && (
-                <button 
-                  type="button" 
-                  onClick={() => removeProject(index)}
-                  className="remove-btn"
-                >
-                  Remove
-                </button>
-              )}
-            </div>
+        <div key={index} style={{ marginBottom: '2rem', border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h3 style={{ margin: 0, color: '#374151' }}>Project {index + 1}</h3>
+            {data.projects.length > 1 && (
+              <button 
+                type="button" 
+                onClick={() => removeProject(index)}
+                style={{
+                  background: '#fee2e2',
+                  color: '#dc2626',
+                  border: '1px solid #fecaca',
+                  borderRadius: '4px',
+                  padding: '0.25rem 0.5rem',
+                  fontSize: '0.75rem',
+                  cursor: 'pointer'
+                }}
+              >
+                Remove
+              </button>
+            )}
           </div>
           
           <div className="form-row">
@@ -153,12 +161,12 @@ const StepProjects = () => {
               <div className="textarea-actions" style={{ marginTop: '0.5rem' }}>
                 <button 
                   type="button" 
-                  onClick={() => improveProjectDescription(index)}
+                  onClick={() => optimizeProjectWithAI(index)}
                   disabled={loadingIndex === index || !project.description}
                   className="ai-btn"
                   style={{
                     padding: '0.5rem 1rem',
-                    backgroundColor: '#3b82f6',
+                    backgroundColor: aiMode[index] ? '#10b981' : '#3b82f6',
                     color: 'white',
                     border: 'none',
                     borderRadius: '4px',
@@ -167,8 +175,9 @@ const StepProjects = () => {
                     fontSize: '0.875rem',
                     fontWeight: '500'
                   }}
+                  title={getJobDescription() ? "Optimize project for the job posting" : "Improve grammar and professionalism"}
                 >
-                  {loadingIndex === index ? 'Improving...' : '✨ Improve with AI'}
+                  {loadingIndex === index ? 'Checking...' : aiMode[index] ? '✓ AI Enhanced' : '✨ Check with AI'}
                 </button>
               </div>
             </div>
