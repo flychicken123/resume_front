@@ -1,19 +1,18 @@
 // src/api.js
 
-// Get API URL - use same logic as App.jsx to prevent double /api
+// Get API base URL
+// - In local dev, call backend directly on :8081
+// - In production, use same-origin to avoid CORS
 const getAPIBaseURL = () => {
   if (typeof window !== 'undefined') {
-    // Use the backend domain (non-www) for API calls
-    if (window.location.hostname === 'www.hihired.org') {
-      return 'https://hihired.org';
-    } else if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      // For local development, use backend port 8081
+    const host = window.location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1') {
       return 'http://localhost:8081';
-    } else {
-      return window.location.origin;
     }
+    // Same-origin for all deployed hosts (www and apex)
+    return window.location.origin;
   }
-  // Fallback for server-side rendering
+  // Fallback for SSR/build-time
   return process.env.REACT_APP_API_URL || 'http://localhost:8081';
 };
 

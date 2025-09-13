@@ -3,9 +3,11 @@
 
 const getAPIBaseURL = () => {
   if (typeof window !== 'undefined') {
-    return window.location.hostname === 'www.hihired.org' 
-      ? 'https://hihired.org' 
-      : window.location.origin;
+    const host = window.location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1') {
+      return 'http://localhost:8081';
+    }
+    return window.location.origin;
   }
   return process.env.REACT_APP_API_URL || 'http://localhost:8081';
 };

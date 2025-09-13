@@ -1,16 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useResume } from '../context/ResumeContext';
-
-const getAPIBaseURL = () => {
-  if (typeof window !== 'undefined') {
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      return 'http://localhost:8081';
-    }
-    return window.location.hostname === 'www.hihired.org' ? 'https://hihired.org' : window.location.origin;
-  }
-  return process.env.REACT_APP_API_URL || 'http://localhost:8081';
-};
+import { getAPIBaseURL } from '../api';
 
 const IntegratedBuilderStart = ({ onClose }) => {
   const navigate = useNavigate();
@@ -18,12 +9,74 @@ const IntegratedBuilderStart = ({ onClose }) => {
   
   const [step, setStep] = useState(1); // 1: job description (optional), 2: resume import choice
   const [jobDescription, setJobDescription] = useState('');
+  const [jobUrl, setJobUrl] = useState('');
   const [file, setFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingJob, setIsFetchingJob] = useState(false);
   const [error, setError] = useState('');
 
+  // Fetch job description from URL. Returns the description string if found.
+  const fetchJobFromUrl = async () => {
+    if (!jobUrl.trim()) {
+      setError('Please enter a job posting URL');
+      return '';
+    }
+    
+    setError('');
+    setIsFetchingJob(true);
+    
+    try {
+      const response = await fetch(`${getAPIBaseURL()}/api/job/extract`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url: jobUrl.trim() }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch job description');
+      }
+      
+      const data = await response.json();
+      if (data.description) {
+        // Format the description with title and company if available
+        let formattedDescription = '';
+        if (data.title) {
+          formattedDescription += `Position: ${data.title}\n`;
+        }
+        if (data.company) {
+          formattedDescription += `Company: ${data.company}\n\n`;
+        }
+        formattedDescription += data.description;
+        
+        setJobDescription(formattedDescription);
+        return formattedDescription;
+      } else {
+        throw new Error('No job description found at this URL');
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to fetch job description from URL');
+      return '';
+    } finally {
+      setIsFetchingJob(false);
+    }
+  };
+  
   // Step 1: Continue to step 2 (save job description if provided)
-  const handleJobDescriptionNext = () => {
+  const handleJobDescriptionNext = async () => {
+    // If URL is provided but no description yet, fetch it first
+    if (jobUrl.trim() && !jobDescription.trim()) {
+      const desc = await fetchJobFromUrl();
+      if (desc && desc.trim()) {
+        localStorage.setItem('jobDescription', desc.trim());
+      }
+      setStep(2);
+      return;
+    }
+
+    // Regular flow - save description if exists and continue
     if (jobDescription.trim()) {
       localStorage.setItem('jobDescription', jobDescription.trim());
     }
@@ -149,9 +202,88 @@ const IntegratedBuilderStart = ({ onClose }) => {
               🚀 Let's Build Your Resume
             </h2>
             <p style={{ color: '#6b7280', marginBottom: '2rem' }}>
-              Start by adding a job description if you have one. This is optional but helps our AI optimize your resume!
+              Add a job posting to get AI-powered optimization. Provide a URL or paste the description directly.
             </p>
 
+            {/* Job URL Input */}
+            <div style={{ marginBottom: '1.5rem' }}>
+              <label style={{ 
+                display: 'block', 
+                marginBottom: '0.5rem', 
+                fontWeight: 500, 
+                color: '#374151' 
+              }}>
+                Job Posting URL (Optional)
+              </label>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <input
+                  type="url"
+                  value={jobUrl}
+                  onChange={(e) => setJobUrl(e.target.value)}
+                  placeholder="https://example.com/job-posting"
+                  style={{
+                    flex: 1,
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: 8,
+                    fontSize: '0.9rem',
+                    fontFamily: 'inherit'
+                  }}
+                />
+                <button
+                  onClick={fetchJobFromUrl}
+                  disabled={!jobUrl.trim() || isFetchingJob}
+                  style={{
+                    padding: '0.75rem 1.5rem',
+                    border: 'none',
+                    borderRadius: 8,
+                    background: !jobUrl.trim() || isFetchingJob ? '#e5e7eb' : '#10b981',
+                    color: !jobUrl.trim() || isFetchingJob ? '#9ca3af' : 'white',
+                    cursor: !jobUrl.trim() || isFetchingJob ? 'not-allowed' : 'pointer',
+                    fontWeight: 500,
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  {isFetchingJob ? 'Fetching...' : 'Fetch'}
+                </button>
+              </div>
+              <p style={{ 
+                fontSize: '0.8rem', 
+                color: '#6b7280', 
+                marginTop: '0.5rem', 
+                marginBottom: 0 
+              }}>
+                💡 Paste a job posting URL and click Fetch to automatically extract the description
+              </p>
+            </div>
+
+            {/* OR Divider */}
+            <div style={{ 
+              position: 'relative', 
+              textAlign: 'center', 
+              margin: '1.5rem 0' 
+            }}>
+              <div style={{ 
+                position: 'absolute', 
+                top: '50%', 
+                left: 0, 
+                right: 0, 
+                height: '1px', 
+                background: '#e5e7eb' 
+              }} />
+              <span style={{ 
+                position: 'relative', 
+                background: 'white', 
+                padding: '0 1rem', 
+                color: '#9ca3af', 
+                fontSize: '0.875rem', 
+                fontWeight: 500 
+              }}>
+                OR
+              </span>
+            </div>
+
+            {/* Job Description Textarea */}
             <div style={{ marginBottom: '1.5rem' }}>
               <label style={{ 
                 display: 'block', 
@@ -167,17 +299,28 @@ const IntegratedBuilderStart = ({ onClose }) => {
                 placeholder="Paste the job description here to get AI-powered resume optimization... or leave empty to continue without it."
                 style={{
                   width: '100%',
-                  minHeight: '120px',
-                  maxHeight: '200px',
+                  minHeight: '150px',
+                  maxHeight: '250px',
                   padding: '0.75rem',
                   border: '1px solid #d1d5db',
                   borderRadius: 8,
                   fontSize: '0.9rem',
                   resize: 'vertical',
                   fontFamily: 'inherit',
-                  lineHeight: 1.5
+                  lineHeight: 1.5,
+                  background: jobDescription && jobUrl ? '#f0f9ff' : 'white'
                 }}
               />
+              {jobDescription && jobUrl && (
+                <p style={{ 
+                  fontSize: '0.8rem', 
+                  color: '#0369a1', 
+                  marginTop: '0.5rem', 
+                  marginBottom: 0 
+                }}>
+                  ✅ Job description fetched from URL
+                </p>
+              )}
               <p style={{ 
                 fontSize: '0.8rem', 
                 color: '#6b7280', 
@@ -187,6 +330,20 @@ const IntegratedBuilderStart = ({ onClose }) => {
                 💡 Our AI will analyze the job requirements and optimize your resume accordingly
               </p>
             </div>
+            
+            {error && (
+              <div style={{
+                padding: '0.75rem',
+                background: '#fee2e2',
+                border: '1px solid #fecaca',
+                borderRadius: 8,
+                color: '#dc2626',
+                fontSize: '0.875rem',
+                marginBottom: '1rem'
+              }}>
+                {error}
+              </div>
+            )}
 
             <div style={{ display: 'flex', justifyContent: 'center' }}>
               <button 
