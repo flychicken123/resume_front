@@ -12,7 +12,18 @@ const SEO = ({
   const defaultTitle = "HiHired - Free AI Resume Builder | Build Professional Resumes Online";
   const defaultDescription = "Create professional resumes in minutes with our free AI resume builder. Build ATS-friendly resumes, optimize for job descriptions, and land your dream job. No registration required.";
   const defaultKeywords = "resume builder, AI resume builder, free resume builder, professional resume, resume maker, build resume, write resume, create resume, resume template, ATS resume, job resume, career resume, online resume builder";
-  const defaultCanonical = "https://hihired.org";
+  const defaultCanonical = typeof window !== 'undefined' 
+    ? `${window.location.origin}${window.location.pathname}` 
+    : "https://hihired.org";
+
+  // Use noindex on localhost to keep dev builds out of search
+  const isLocalhost = typeof window !== 'undefined' && (
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1' ||
+    window.location.hostname === '0.0.0.0' ||
+    window.location.hostname.includes('localhost')
+  );
+  const robotsContent = isLocalhost ? 'noindex, nofollow' : 'index, follow';
 
   return (
     <Helmet>
@@ -24,6 +35,7 @@ const SEO = ({
       
       {/* Canonical URL */}
       <link rel="canonical" href={canonical || defaultCanonical} />
+      <meta property="og:locale" content="en_US" />
       
       {/* Open Graph / Facebook */}
       <meta property="og:type" content={ogType} />
@@ -41,7 +53,7 @@ const SEO = ({
       <meta property="twitter:image" content={ogImage} />
       
       {/* Additional SEO Meta Tags */}
-      <meta name="robots" content="index, follow" />
+      <meta name="robots" content={robotsContent} />
       <meta name="author" content="HiHired" />
       <meta name="application-name" content="HiHired" />
       <meta name="apple-mobile-web-app-title" content="HiHired" />

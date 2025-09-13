@@ -1,4 +1,5 @@
 import React from 'react';
+import SEO from './components/SEO';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ResumeProvider } from './context/ResumeContext';
@@ -17,6 +18,11 @@ function App() {
           v7_startTransition: true,
           v7_relativeSplatPath: true 
         }}>
+          <SEO 
+            title="Free AI Resume Builder — Create Professional Resumes | HiHired"
+            description="Build a professional, ATS-friendly resume in minutes with our free AI resume builder. No signup required. Choose templates, tailor to job descriptions, and download as PDF."
+            ogImage="https://hihired.org/og-image.jpg"
+          />
           <Analytics />
           <SessionMonitor />
           <Routes>
