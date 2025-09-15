@@ -221,9 +221,22 @@ export const ResumeProvider = ({ children }) => {
         console.log('Invalid structured data, returning early');
         return;
       }
-      const mapped = { ...data };
-      console.log('Current data before mapping:', data);
-      
+      // Start with a clean slate - only keep format and font size settings
+      const mapped = {
+        name: "",
+        email: "",
+        phone: "",
+        experiences: [],
+        education: [],
+        projects: [],
+        skills: "",
+        summary: "",
+        selectedFormat: data.selectedFormat || "temp1",
+        selectedFontSize: data.selectedFontSize || "medium"
+      };
+      console.log('Starting with clean data, preserving format settings');
+
+      // Now apply the imported data
       if (structured.name) mapped.name = structured.name;
       if (structured.email) mapped.email = structured.email;
       if (structured.phone) mapped.phone = structured.phone;
@@ -231,6 +244,8 @@ export const ResumeProvider = ({ children }) => {
       if (Array.isArray(structured.skills)) {
         mapped.skills = structured.skills.join(', ');
       }
+
+      // Only add experiences if they exist in the imported data
       if (Array.isArray(structured.experience) && structured.experience.length > 0) {
         mapped.experiences = structured.experience.map((e) => ({
           jobTitle: e.role || '',
@@ -243,6 +258,8 @@ export const ResumeProvider = ({ children }) => {
           description: Array.isArray(e.bullets) ? e.bullets.join('\n') : (e.description || '')
         }));
       }
+
+      // Only add education if it exists in the imported data
       if (Array.isArray(structured.education) && structured.education.length > 0) {
         mapped.education = structured.education.map((ed) => ({
           degree: ed.degree || '',
@@ -253,7 +270,20 @@ export const ResumeProvider = ({ children }) => {
           honors: '',
           location: ''
         }));
+      } else {
+        // If no education in import, add one empty education entry (common requirement)
+        mapped.education = [{
+          degree: '',
+          school: '',
+          field: '',
+          graduationYear: '',
+          gpa: '',
+          honors: '',
+          location: ''
+        }];
       }
+
+      // Only add projects if they exist in the imported data
       if (Array.isArray(structured.projects) && structured.projects.length > 0) {
         mapped.projects = structured.projects.map((proj) => ({
           projectName: proj.projectName || '',
@@ -262,9 +292,10 @@ export const ResumeProvider = ({ children }) => {
           projectUrl: proj.projectUrl || ''
         }));
       }
+
       console.log('Mapped data:', mapped);
       setData(mapped);
-      console.log('Data set successfully');
+      console.log('Data set successfully - old data cleared, new data applied');
     } catch (e) {
       console.error('Failed to apply imported data:', e);
     }
