@@ -72,43 +72,90 @@ export const useResumeHistory = () => {
   }, [getAuthHeaders, fetchResumeHistory]);
 
   const downloadResume = useCallback((s3Path, resumeName) => {
+    console.log('Download requested for:', { s3Path, resumeName });
+
     // Extract filename from S3 path
-    const url = new URL(s3Path);
-    const pathParts = url.pathname.split('/');
-    const filename = pathParts[pathParts.length - 1];
-    
+    let filename;
+
+    // Check if s3Path is a full URL or just a key path
+    if (s3Path.startsWith('http://') || s3Path.startsWith('https://')) {
+      // It's a full URL, parse it
+      try {
+        const url = new URL(s3Path);
+        const pathParts = url.pathname.split('/');
+        filename = pathParts[pathParts.length - 1];
+      } catch (error) {
+        console.error('Invalid URL:', s3Path);
+        alert('Unable to download resume. Invalid file path.');
+        return;
+      }
+    } else {
+      // It's just a key like "resumes/filename.pdf"
+      const pathParts = s3Path.split('/');
+      filename = pathParts[pathParts.length - 1];
+    }
+
+    console.log('Extracted filename:', filename);
+
     // Use our download endpoint to record the history
     const downloadEndpoint = `${API_BASE_URL}/api/resume/download/${filename}`;
-    
+    console.log('Download endpoint:', downloadEndpoint);
+
     fetch(downloadEndpoint, {
       method: 'GET',
       headers: getAuthHeaders(),
-      redirect: 'follow', // Explicitly follow redirects
     }).then(response => {
-      if (response.ok || response.status === 307) {
-        // For 307 redirects, get the Location header
-        if (response.status === 307) {
-          const redirectUrl = response.headers.get('Location');
-          if (redirectUrl) {
-            window.open(redirectUrl, '_blank');
-            return;
-          }
-        }
-        // For successful responses, try to get the URL from response
-        return response.url;
+      console.log('Download response:', response.status, response);
+
+      if (response.ok) {
+        // Parse JSON response
+        return response.json();
       } else {
-        throw new Error('Download failed');
+        return response.text().then(text => {
+          console.error('Download failed with response:', text);
+          throw new Error('Download failed: ' + response.status);
+        });
       }
-    }).then(url => {
-      if (url) {
-        window.open(url, '_blank');
+    }).then(data => {
+      if (data && data.downloadUrl) {
+        console.log('Opening download URL:', data.downloadUrl);
+        // Open the S3 presigned URL directly in a new tab
+        window.open(data.downloadUrl, '_blank');
+      } else {
+        throw new Error('No download URL received from server');
       }
     }).catch(error => {
       console.error('Download error:', error);
-      // Fallback to direct URL
-      window.open(s3Path, '_blank');
+      alert('Failed to download resume. Please try again.');
     });
   }, [getAuthHeaders]);
+
+  const renameResume = useCallback(async (historyId, newName) => {
+    try {
+      setError(null);
+
+      const res = await fetch(`${API_BASE_URL}/api/resume/history/${historyId}/rename`, {
+        method: "PUT",
+        headers: {
+          ...getAuthHeaders(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ resume_name: newName }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Failed to rename resume.");
+      }
+
+      // Refresh the history after successful rename
+      await fetchResumeHistory();
+    } catch (err) {
+      setError(err.message);
+      console.error('Error renaming resume:', err);
+      throw err; // Re-throw so the component can handle it
+    }
+  }, [getAuthHeaders, fetchResumeHistory]);
 
   const formatDate = useCallback((dateString) => {
     const date = new Date(dateString);
@@ -128,6 +175,7 @@ export const useResumeHistory = () => {
     fetchResumeHistory,
     deleteResumeFromHistory,
     downloadResume,
+    renameResume,
     formatDate,
   };
 };
