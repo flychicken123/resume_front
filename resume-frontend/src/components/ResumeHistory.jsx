@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useResumeHistory } from '../hooks/useResumeHistory';
 import './ResumeHistory.css';
@@ -12,8 +12,11 @@ const ResumeHistory = ({ onClose }) => {
     fetchResumeHistory,
     deleteResumeFromHistory,
     downloadResume,
+    renameResume,
     formatDate,
   } = useResumeHistory();
+  const [editingId, setEditingId] = useState(null);
+  const [newName, setNewName] = useState('');
 
   useEffect(() => {
     if (user) {
@@ -32,6 +35,32 @@ const ResumeHistory = ({ onClose }) => {
       // Error is already handled in the hook
       console.error('Delete failed:', err);
     }
+  };
+
+  const handleRename = (item) => {
+    setEditingId(item.id);
+    setNewName(item.resume_name);
+  };
+
+  const handleSaveRename = async (historyId) => {
+    if (!newName.trim()) {
+      alert('Resume name cannot be empty');
+      return;
+    }
+
+    try {
+      await renameResume(historyId, newName.trim());
+      setEditingId(null);
+      setNewName('');
+    } catch (err) {
+      console.error('Rename failed:', err);
+      alert('Failed to rename resume. Please try again.');
+    }
+  };
+
+  const handleCancelRename = () => {
+    setEditingId(null);
+    setNewName('');
   };
 
   if (!user) {
@@ -87,22 +116,65 @@ const ResumeHistory = ({ onClose }) => {
               {history.map((item) => (
                 <div key={item.id} className="history-item">
                   <div className="history-item-info">
-                    <h3>{item.resume_name}</h3>
-                    <p className="history-date">Generated: {formatDate(item.generated_at)}</p>
+                    {editingId === item.id ? (
+                      <div className="rename-input-container">
+                        <input
+                          type="text"
+                          value={newName}
+                          onChange={(e) => setNewName(e.target.value)}
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              handleSaveRename(item.id);
+                            } else if (e.key === 'Escape') {
+                              handleCancelRename();
+                            }
+                          }}
+                          className="rename-input"
+                          autoFocus
+                        />
+                        <button
+                          className="save-rename-button"
+                          onClick={() => handleSaveRename(item.id)}
+                        >
+                          Save
+                        </button>
+                        <button
+                          className="cancel-rename-button"
+                          onClick={handleCancelRename}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <h3>{item.resume_name}</h3>
+                        <p className="history-date">Generated: {formatDate(item.generated_at)}</p>
+                      </>
+                    )}
                   </div>
                   <div className="history-item-actions">
-                                         <button
-                       className="download-button"
-                       onClick={() => downloadResume(item.s3_path, item.resume_name)}
-                     >
-                       Download
-                     </button>
-                    <button
-                      className="delete-button"
-                      onClick={() => handleDelete(item.id)}
-                    >
-                      Delete
-                    </button>
+                    {editingId !== item.id && (
+                      <>
+                        <button
+                          className="rename-button"
+                          onClick={() => handleRename(item)}
+                        >
+                          Rename
+                        </button>
+                        <button
+                          className="download-button"
+                          onClick={() => downloadResume(item.s3_path, item.resume_name)}
+                        >
+                          Download
+                        </button>
+                        <button
+                          className="delete-button"
+                          onClick={() => handleDelete(item.id)}
+                        >
+                          Delete
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               ))}
