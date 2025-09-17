@@ -12,16 +12,18 @@ import About from './About';
 import Contact from './Contact';
 import SEO from './SEO';
 import { trackReferrer, trackBuilderStart } from './Analytics';
+import LinkedInLogin from './auth/LinkedInLogin';
 
 const Home = () => {
   const navigate = useNavigate();
-  const { user, login } = useAuth();
+  const { user, login, linkedInToken, linkLinkedIn } = useAuth();
   const { resumeData } = useResume();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showIntegratedModal, setShowIntegratedModal] = useState(false);
   const [showResumeHistory, setShowResumeHistory] = useState(false);
   const [showJobSubmit, setShowJobSubmit] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showLinkedInModal, setShowLinkedInModal] = useState(false);
   const [usernameWidth, setUsernameWidth] = useState(100);
   const usernameRef = useRef(null);
   const buttonRef = useRef(null);
@@ -127,17 +129,30 @@ const Home = () => {
         
         <div className="home-navbar-right">
           {user ? (
-            <span 
-              ref={usernameRef}
-              className="desktop-username"
-              style={{ 
-                color: '#3b82f6', 
-                fontWeight: 500,
-                marginRight: `${usernameWidth}px`
-              }}
-            >
-              {user}
-            </span>
+            <>
+              <span 
+                ref={usernameRef}
+                className="desktop-username"
+                style={{ 
+                  color: '#3b82f6', 
+                  fontWeight: 500,
+                  marginRight: '20px'
+                }}
+              >
+                {user}
+              </span>
+              {/* Temporarily commented out Link LinkedIn button - will resume work in the future
+              {!linkedInToken && (
+                <button
+                  className="home-auth-btn"
+                  onClick={() => setShowLinkedInModal(true)}
+                  style={{ marginRight: '10px', backgroundColor: '##FFFFFF' }}
+                >
+                  Link LinkedIn
+                </button>
+              )}
+              */}
+            </>
           ) : null}
           <button 
             ref={buttonRef}
@@ -145,6 +160,7 @@ const Home = () => {
             onClick={() => {
               if (user) {
                 localStorage.removeItem('resumeUser');
+                localStorage.removeItem('linkedInToken');
                 window.location.reload();
               } else {
                 setShowAuthModal(true);
@@ -569,6 +585,57 @@ const Home = () => {
       {/* Resume History Modal */}
       {showResumeHistory && (
         <ResumeHistory onClose={() => setShowResumeHistory(false)} />
+      )}
+
+      {/* LinkedIn Link Modal */}
+      {showLinkedInModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+          background: 'rgba(0,0,0,0.25)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}>
+          <div style={{ 
+            background: 'white', 
+            padding: '2rem', 
+            borderRadius: '8px', 
+            maxWidth: '400px', 
+            width: '90%',
+            position: 'relative'
+          }}>
+            <button
+              onClick={() => setShowLinkedInModal(false)}
+              style={{
+                position: 'absolute',
+                top: '10px',
+                right: '10px',
+                background: 'transparent',
+                border: 'none',
+                fontSize: '24px',
+                cursor: 'pointer',
+                color: '#666'
+              }}
+            >×</button>
+            <h2 style={{ marginBottom: '1rem', textAlign: 'center' }}>Link Your LinkedIn Account</h2>
+            <p style={{ marginBottom: '1.5rem', textAlign: 'center', color: '#666' }}>
+              Connect your LinkedIn to import your professional experience and enhance your resume
+            </p>
+            {/* Temporarily commented out LinkedInLogin component - will resume work in the future
+            <LinkedInLogin 
+              isLinking={true}
+              onSuccess={(data) => {
+                console.log('LinkedIn linking successful');
+                linkLinkedIn(data.linkedin_token);
+                setShowLinkedInModal(false);
+              }}
+              onError={(error) => {
+                console.error(`LinkedIn linking failed: ${error}`);
+              }}
+            />
+            */}
+            <p style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+              LinkedIn integration is temporarily disabled. We'll resume this feature in the future.
+            </p>
+          </div>
+        </div>
       )}
       
       {/* About Section */}

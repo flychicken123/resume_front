@@ -14,11 +14,13 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [linkedInToken, setLinkedInToken] = useState(null);
 
   // Check for existing user session on app load
   useEffect(() => {
     const savedUser = localStorage.getItem('resumeUser');
     const savedToken = localStorage.getItem('resumeToken');
+    const savedLinkedInToken = localStorage.getItem('linkedInToken');
     console.log('AuthContext useEffect - savedUser:', savedUser);
     console.log('AuthContext useEffect - savedToken:', savedToken);
     
@@ -26,6 +28,9 @@ export const AuthProvider = ({ children }) => {
       console.log('AuthContext useEffect - setting user and token from localStorage');
       setUser(JSON.parse(savedUser));
       setToken(savedToken);
+      if (savedLinkedInToken) {
+        setLinkedInToken(savedLinkedInToken);
+      }
     } else {
       console.log('AuthContext useEffect - no valid saved user/token found, but not auto-logging out');
       // Don't auto-logout, just set loading to false
@@ -42,12 +47,21 @@ export const AuthProvider = ({ children }) => {
     console.log('AuthContext login completed, token saved to localStorage');
   };
 
+  const linkLinkedIn = (linkedInAuthToken) => {
+    console.log('AuthContext linkLinkedIn called with token');
+    setLinkedInToken(linkedInAuthToken);
+    localStorage.setItem('linkedInToken', linkedInAuthToken);
+  };
+
   const logout = (redirect = true) => {
+
     console.log('AuthContext logout called');
     setUser(null);
     setToken(null);
+    setLinkedInToken(null);
     localStorage.removeItem('resumeUser');
     localStorage.removeItem('resumeToken');
+    localStorage.removeItem('linkedInToken');
     console.log('AuthContext logout completed');
     
     // Redirect to login page if specified
@@ -75,7 +89,9 @@ export const AuthProvider = ({ children }) => {
   const value = {
     user,
     token,
+    linkedInToken,
     login,
+    linkLinkedIn,
     logout,
     loading,
     getAuthHeaders
