@@ -2,9 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import './Home.css';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useResume } from '../context/ResumeContext';
 import Login from './auth/Login';
 import IntegratedBuilderStart from './IntegratedBuilderStart';
 import ResumeHistory from './ResumeHistory';
+import JobSubmit from './JobSubmit';
+import SimpleHero from './SimpleHero';
 import About from './About';
 import Contact from './Contact';
 import SEO from './SEO';
@@ -14,9 +17,11 @@ import LinkedInLogin from './auth/LinkedInLogin';
 const Home = () => {
   const navigate = useNavigate();
   const { user, login, linkedInToken, linkLinkedIn } = useAuth();
+  const { resumeData } = useResume();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showIntegratedModal, setShowIntegratedModal] = useState(false);
   const [showResumeHistory, setShowResumeHistory] = useState(false);
+  const [showJobSubmit, setShowJobSubmit] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showLinkedInModal, setShowLinkedInModal] = useState(false);
   const [usernameWidth, setUsernameWidth] = useState(100);
@@ -102,6 +107,16 @@ const Home = () => {
               Resume History
             </button>
           )}
+          {/* Hidden - Apply to Jobs feature
+          {user && (
+            <Link 
+              to="/apply" 
+              className="home-nav-link"
+            >
+              Apply to Jobs
+            </Link>
+          )}
+          */}
           <a href="#about" className="home-nav-link" onClick={(e) => {
             e.preventDefault();
             document.getElementById('about').scrollIntoView({ behavior: 'smooth' });
@@ -198,32 +213,27 @@ const Home = () => {
               Builder
             </button>
             {user && (
-              <>
-                <button 
-                  className="mobile-nav-link" 
-                  onClick={() => {
-                    setShowResumeHistory(true);
-                    setShowMobileMenu(false);
-                  }}
-                >
-                  Resume History
-                </button>
-                {/* Temporarily commented out Link LinkedIn button - will resume work in the future
-                {!linkedInToken && (
-                  <button 
-                    className="mobile-nav-link" 
-                    onClick={() => {
-                      setShowLinkedInModal(true);
-                      setShowMobileMenu(false);
-                    }}
-                    style={{ backgroundColor: '#0077B5', color: 'white' }}
-                  >
-                    Link LinkedIn
-                  </button>
-                )}
-                */}
-              </>
+              <button 
+                className="mobile-nav-link" 
+                onClick={() => {
+                  setShowResumeHistory(true);
+                  setShowMobileMenu(false);
+                }}
+              >
+                Resume History
+              </button>
+                        )}
+            {/* Hidden - Apply to Jobs feature
+            {user && (
+              <Link 
+                to="/apply" 
+                className="mobile-nav-link"
+                onClick={() => setShowMobileMenu(false)}
+              >
+                Apply to Jobs
+              </Link>
             )}
+            */}
             <a 
               href="#about" 
               className="mobile-nav-link" 
@@ -250,6 +260,26 @@ const Home = () => {
         </div>
       )}
       
+      {/* Simple Hero Section with Resume */}
+      <SimpleHero 
+        onImportClick={() => {
+          trackBuilderStart('import_resume');
+          if (!user) {
+            setShowAuthModal(true);
+          } else {
+            setShowIntegratedModal(true);
+          }
+        }}
+        onCreateClick={() => {
+          trackBuilderStart('create_resume');
+          if (!user) {
+            setShowAuthModal(true);
+          } else {
+            setShowIntegratedModal(true);
+          }
+        }}
+      />
+
       {/* Job Description Feature Section */}
       <div className="home-jobdesc-feature">
         <div className="home-jobdesc-feature-content">
@@ -611,6 +641,16 @@ const Home = () => {
       {/* About Section */}
       <About />
       
+      
+      {/* Hidden - Apply to Jobs feature
+      {showJobSubmit && (
+        <JobSubmit 
+          user={user}
+          resumeData={resumeData}
+          onClose={() => setShowJobSubmit(false)} 
+        />
+      )}
+      */}
       {/* Contact Section */}
       <Contact />
     </div>

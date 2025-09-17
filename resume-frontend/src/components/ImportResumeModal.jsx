@@ -97,6 +97,46 @@ const ImportResumeModal = ({ onClose }) => {
       if (structuredData) {
         console.log('Applying imported data:', structuredData);
         applyImportedData(structuredData);
+        
+        // Save contact info to backend for future job applications
+        if (structuredData.name || structuredData.email || structuredData.phone) {
+          const token = localStorage.getItem('resumeToken');
+          if (token) {
+            console.log('Saving contact info to backend:', {
+              name: structuredData.name,
+              email: structuredData.email,
+              phone: structuredData.phone
+            });
+            
+            fetch(`${getAPIBaseURL()}/api/user/save-contact-info`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({
+                name: structuredData.name || '',
+                email: structuredData.email || '',
+                phone: structuredData.phone || '',
+                resume_name: `Imported Resume ${new Date().toLocaleDateString()}`
+              })
+            }).then(resp => resp.json())
+            .then(data => {
+              if (data.success) {
+                console.log('Contact info saved successfully, resume ID:', data.resume_id);
+                // Store the resume ID for later use
+                if (data.resume_id) {
+                  localStorage.setItem('lastResumeId', data.resume_id);
+                }
+              } else {
+                console.error('Failed to save contact info');
+              }
+            }).catch(err => {
+              console.error('Error saving contact info:', err);
+            });
+          }
+        }
+        
         // Add a small delay to ensure state update completes
         setTimeout(() => {
           onClose();

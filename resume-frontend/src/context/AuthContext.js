@@ -53,7 +53,8 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('linkedInToken', linkedInAuthToken);
   };
 
-  const logout = () => {
+  const logout = (redirect = true) => {
+
     console.log('AuthContext logout called');
     setUser(null);
     setToken(null);
@@ -62,6 +63,11 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('resumeToken');
     localStorage.removeItem('linkedInToken');
     console.log('AuthContext logout completed');
+    
+    // Redirect to login page if specified
+    if (redirect) {
+      window.location.href = '/login';
+    }
   };
 
   const getAuthHeaders = () => {

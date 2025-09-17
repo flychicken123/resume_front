@@ -6,6 +6,7 @@ import Stepper from '../components/Stepper';
 import StepPersonal from '../components/StepPersonal';
 import StepExperience from '../components/StepExperience';
 import StepEducation from '../components/StepEducation';
+import StepProjects from '../components/StepProjects';
 import StepSkills from '../components/StepSkills';
 import StepFormat from '../components/StepFormat';
 import StepSummary from '../components/StepSummary';
@@ -20,7 +21,8 @@ import './BuilderPage.css';
 const steps = [
   "Personal Details",
   "Experience",
-  "Education", 
+  "Projects",
+  "Education",
   "Skills",
   "Format",
   "Summary"
@@ -42,8 +44,8 @@ function BuilderPage() {
   }, []);
   
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const { user, login, logout } = useAuth();
-  const { data, saveToDatabaseNow } = useResume();
+  const { user, login, logout, getAuthHeaders } = useAuth();
+  const { data, saveToDatabaseNow, clearData } = useResume();
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const toggleFullscreen = () => {
@@ -143,6 +145,17 @@ function BuilderPage() {
       }
 
       // Capture the HTML content from the live preview
+      // Force all pages to be visible for PDF generation
+      // Remove height constraints for PDF generation
+      const styleOverride = document.createElement("style");
+      styleOverride.innerHTML = ".page-wrapper { height: auto !important; max-height: none !important; overflow: visible !important; } .page-content { height: auto !important; max-height: none !important; overflow: visible !important; }";
+      document.head.appendChild(styleOverride);
+      const allPageWrappers = document.querySelectorAll(".page-wrapper");
+      allPageWrappers.forEach(wrapper => {
+        wrapper.style.display = "block";
+        wrapper.style.visibility = "visible";
+        wrapper.style.opacity = "1";
+      });
       const previewElement = document.querySelector('.live-preview-container');
       
       if (previewElement) {
@@ -191,27 +204,37 @@ function BuilderPage() {
           
           // Extract content from all page wrappers and combine into single container
           const pageWrappers = multiPageContainer.querySelectorAll('.page-wrapper');
+          console.log("HTML before processing:", clonedElement.innerHTML.includes("EDUCATION") ? "Contains EDUCATION" : "Missing EDUCATION");
+          console.log("Found", pageWrappers.length, "pages in multi-page container");
           const combinedContent = document.createElement('div');
           combinedContent.className = 'multi-page-pdf-container';
           combinedContent.style.cssText = 'background: white; color: black; padding: 0; margin: 0; box-sizing: border-box;';
           
           pageWrappers.forEach((wrapper, index) => {
             const pageContent = wrapper.querySelector('.page-content');
+              if (pageContent) { console.log("Processing page", index + 1, "- Full content includes EDUCATION:", pageContent.innerHTML.includes("EDUCATION")); }
             if (pageContent) {
               // Create a page container to maintain exact page boundaries
               const pageContainer = document.createElement('div');
               pageContainer.className = `pdf-page-${index + 1}`;
               pageContainer.style.cssText = `
                 padding: 20px;
-                min-height: 10in;
-                max-height: 10in;
-                overflow: hidden;
+                min-height: auto;
+                
+                overflow: visible;
                 box-sizing: border-box;
                 ${index > 0 ? 'page-break-before: always;' : ''}
               `;
               
               // Clone the page content
               const contentClone = pageContent.cloneNode(true);
+              // Debug: Check what sections are in this page
+              const sections = contentClone.querySelectorAll("[style*=fontWeight], div");
+              const educationDiv = contentClone.innerHTML.includes("EDUCATION") ? "Has EDUCATION text" : "No EDUCATION text";
+              console.log("Page", index + 1, "- Education check:", educationDiv);
+              contentClone.style.height = "auto";
+              contentClone.style.maxHeight = "none";
+              contentClone.style.overflow = "visible";
               pageContainer.appendChild(contentClone);
               
               // Add the page container
@@ -393,9 +416,9 @@ function BuilderPage() {
           .multi-page-pdf-container > div[class^="pdf-page-"] {
             page-break-after: always !important;
             page-break-inside: avoid !important;
-            min-height: 10in !important;
-            max-height: 10in !important;
-            overflow: hidden !important;
+            min-height: auto !important;
+            /* max-height: 10in !important; */
+            overflow: visible !important;
             box-sizing: border-box !important;
           }
           
@@ -410,6 +433,8 @@ function BuilderPage() {
             visibility: visible !important;
             height: auto !important;
             overflow: visible !important;
+            max-height: none !important;
+            height: auto !important;
           }
           
           html, body { 
@@ -431,6 +456,8 @@ function BuilderPage() {
             height: auto !important;
             max-height: none !important;
             overflow: visible !important;
+            max-height: none !important;
+            height: auto !important;
             width: 100% !important;
             max-width: none !important;
             min-width: 100% !important;
@@ -446,6 +473,8 @@ function BuilderPage() {
             height: auto !important;
             max-height: none !important;
             overflow: visible !important;
+            max-height: none !important;
+            height: auto !important;
             width: 100% !important;
             max-width: none !important;
             min-width: 100% !important;
@@ -487,6 +516,8 @@ function BuilderPage() {
             word-break: normal !important;
             max-width: none !important;
             overflow: visible !important;
+            max-height: none !important;
+            height: auto !important;
             box-sizing: border-box !important;
           }
           
@@ -501,6 +532,8 @@ function BuilderPage() {
             max-width: none !important;
             width: auto !important;
             overflow: visible !important;
+            max-height: none !important;
+            height: auto !important;
             white-space: normal !important;
             word-wrap: break-word !important;
             overflow-wrap: break-word !important;
@@ -516,6 +549,8 @@ function BuilderPage() {
             width: 100% !important;
             max-width: none !important;
             overflow: visible !important;
+            max-height: none !important;
+            height: auto !important;
             word-wrap: break-word !important;
             white-space: normal !important;
           }
@@ -537,17 +572,46 @@ function BuilderPage() {
         
 
  
+        // Get the font based on template
+        console.log("Current data.selectedFormat:", data.selectedFormat);
+        console.log("Current data.template:", data.template);
+        const getTemplateFont = () => {
+          switch(data.selectedFormat || 'temp1') {
+            case 'temp1':
+              return "'Calibri', 'Arial', sans-serif";
+            case 'industry-manager':
+              return "'Georgia', serif";
+            case 'modern':
+              return "'Segoe UI', 'Tahoma', 'Geneva', 'Verdana', sans-serif";
+            default:
+              return "'Calibri', 'Arial', sans-serif";
+          }
+        };
+        const templateFont = getTemplateFont();
+        console.log("Using font for template", data.selectedFormat, ":", templateFont);
+        
         // Create complete HTML document with CSS overrides LAST
+        // Comprehensive font debugging
+        console.log("Template (selectedFormat):", data.selectedFormat);
+        console.log("Font selected:", templateFont);
+        console.log("All data keys:", Object.keys(data));
+        
         const htmlContent = `
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
   <title>${data.name || 'Resume'}</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    /* Ensure same font in wkhtmltopdf */
-    .preview, .preview * { font-family: 'Noto Sans', sans-serif !important; }
+    /* Fallback font for PDF generation - only apply if no font is specified */
+    body {
+      font-family: 'Inter', 'Segoe UI', 'Arial', 'Helvetica', sans-serif;
+      line-height: 1.4;
+    }
+    /* Let template-specific fonts take precedence */
   </style>
   <style>
     body { margin: 0; padding: 0; background-color: white; }
@@ -586,9 +650,30 @@ function BuilderPage() {
         const htmlBlob = new Blob([minHtmlContent], { type: 'text/html' });
         const formData = new FormData();
         formData.append('html', htmlBlob, 'resume.html');
+        
+        // Add contact info to save in database
+        formData.append('name', data.name || '');
+        formData.append('email', data.email || '');
+        formData.append('phone', data.phone || '');
+        
+        // Debug: Check FormData contents
+        for (let [key, value] of formData.entries()) {
+          console.log('FormData entry:', key, value);
+        }
 
+        // Get token directly and only set Authorization header
+        const token = localStorage.getItem('resumeToken');
+        console.log('Token for PDF generation:', token); // Debug log
+        
+        const headers = {};
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+        console.log('Headers being sent:', headers); // Debug log
+        
         fetch(`${getAPIBaseURL()}/api/resume/generate-pdf-file`, {
           method: 'POST',
+          headers: headers,
           body: formData
         })
         .then(async (response) => {
@@ -610,43 +695,9 @@ function BuilderPage() {
              // Use our download endpoint to record the history
              const downloadEndpoint = `${getAPIBaseURL()}/api/resume/download/${filename}`;
              
-             // For protected routes, we need to include auth headers
-             // Since we can't add headers to window.open, we'll use fetch first
-             if (user) {
-               fetch(downloadEndpoint, {
-                 method: 'GET',
-                 headers: {
-                   'Authorization': `Bearer ${localStorage.getItem('resumeToken')}`
-                 },
-                 redirect: 'follow', // Explicitly follow redirects
-               }).then(response => {
-                 if (response.ok || response.status === 307) {
-                   // For 307 redirects, get the Location header
-                   if (response.status === 307) {
-                     const redirectUrl = response.headers.get('Location');
-                     if (redirectUrl) {
-                       window.open(redirectUrl, '_blank');
-                       return;
-                     }
-                   }
-                   // For successful responses, try to get the URL from response
-                   return response.url;
-                 } else {
-                   throw new Error('Download failed');
-                 }
-               }).then(url => {
-                 if (url) {
-                   window.open(url, '_blank');
-                 }
-               }).catch(error => {
-                 console.error('Download error:', error);
-                 // Fallback to direct URL
-                 window.open(result.data.downloadURL, '_blank');
-               });
-             } else {
-               // If not logged in, use direct URL
-               window.open(result.data.downloadURL, '_blank');
-             }
+             // Just open the S3 URL directly - it's pre-signed
+             window.open(result.data.downloadURL, '_blank');
+             
              alert('PDF resume generated successfully!');
            } else {
              console.error('PDF generation failed response:', result);
@@ -700,6 +751,89 @@ function BuilderPage() {
     setShowImportModal(true);
   };
 
+  const handleNext = () => {
+    if (step < steps.length) {
+      trackStepCompletion(steps[step - 1], step);
+      setStep(step + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (step > 1) {
+      setStep(step - 1);
+    }
+  };
+
+  const handleStepClick = (stepId) => {
+    if (stepId <= step) {
+      setStep(stepId);
+    }
+  };
+
+  const handleDownload = async () => {
+    try {
+      const response = await fetch('/api/resume/download', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('resumeToken')}`
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${data.name || 'resume'}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        console.error('Download failed');
+      }
+    } catch (error) {
+      console.error('Download error:', error);
+    }
+  };
+
+  const handleStartOver = () => {
+    clearData();
+    setStep(1);
+  };
+
+  // AI Resume Advice Handler
+  const handleGetResumeAdvice = async () => {
+    try {
+      setAdviceLoading(true);
+      const advice = await generateResumeAdviceAI(data, jobDescription);
+      setResumeAdvice(advice);
+      setShowAdvice(true);
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setAdviceLoading(false);
+    }
+  };
+
+  // AI Cover Letter Handler
+  const handleGenerateCoverLetter = async () => {
+    try {
+      setCoverLetterLoading(true);
+      const letter = await generateCoverLetterAI(data, jobDescription, companyName);
+      setCoverLetter(letter);
+      setShowCoverLetter(true);
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setCoverLetterLoading(false);
+    }
+  };
+
+  const CurrentStepComponent = steps[step - 1];
+
   return (
     <>
       <Helmet>
@@ -707,8 +841,8 @@ function BuilderPage() {
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
         <style>{`
-          .preview { font-family: 'Noto Sans', sans-serif; }
-          .preview * { font-family: 'Noto Sans', sans-serif; }
+          .preview { font-family: 'Segoe UI', 'Tahoma', sans-serif; }
+          .preview * { font-family: 'Segoe UI', 'Tahoma', sans-serif; }
         `}</style>
       </Helmet>
       <SEO 
@@ -773,10 +907,11 @@ function BuilderPage() {
             <div className="builder-content">
               {step === 1 && <StepPersonal />}
               {step === 2 && <StepExperience />}
-              {step === 3 && <StepEducation />}
-              {step === 4 && <StepSkills />}
-              {step === 5 && <StepFormat />}
-              {step === 6 && <StepSummary />}
+              {step === 3 && <StepProjects />}
+              {step === 4 && <StepEducation />}
+              {step === 5 && <StepSkills />}
+              {step === 6 && <StepFormat />}
+              {step === 7 && <StepSummary />}
               
                              {/* Navigation Buttons */}
                <div style={{ 

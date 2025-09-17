@@ -11,6 +11,7 @@ const StepEducation = () => {
         degree: '',
         school: '',
         field: '',
+        startYear: '',
         graduationYear: '',
         gpa: '',
         honors: '',
@@ -26,6 +27,7 @@ const StepEducation = () => {
       degree: '',
       school: '',
       field: '',
+      startYear: '',
       graduationYear: '',
       gpa: '',
       honors: '',
@@ -155,6 +157,28 @@ const StepEducation = () => {
                 value={edu.field || ''}
                 onChange={(e) => updateEducation(idx, 'field', e.target.value)}
                 placeholder="e.g., Computer Science"
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  fontSize: '0.95rem'
+                }}
+              />
+            </div>
+
+            {/* Start Year */}
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#374151' }}>
+                Start Year
+              </label>
+              <input
+                type="number"
+                value={edu.startYear || ''}
+                onChange={(e) => updateEducation(idx, 'startYear', e.target.value)}
+                placeholder="e.g., 2019"
+                min="1900"
+                max="2030"
                 style={{
                   width: '100%',
                   padding: '0.75rem',

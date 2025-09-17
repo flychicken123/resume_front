@@ -1,0 +1,130 @@
+.resume-showcase {
+  padding: 60px 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.showcase-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.showcase-title {
+  font-size: 36px;
+  font-weight: 700;
+  color: #1a202c;
+  margin-bottom: 15px;
+}
+
+.showcase-subtitle {
+  font-size: 18px;
+  color: #64748b;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.resume-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  margin-bottom: 50px;
+}
+
+.resume-example {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: default;
+}
+
+.resume-example:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+}
+
+.resume-image {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  object-position: top;
+  display: block;
+}
+
+.showcase-benefits {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap;
+  padding: 30px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-radius: 16px;
+}
+
+.benefit {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.benefit-icon {
+  font-size: 24px;
+}
+
+.benefit-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: #334155;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .resume-showcase {
+    padding: 40px 15px;
+  }
+
+  .showcase-title {
+    font-size: 28px;
+  }
+
+  .showcase-subtitle {
+    font-size: 16px;
+  }
+
+  .resume-grid {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+  }
+
+  .resume-image {
+    height: 350px;
+  }
+
+  .showcase-benefits {
+    gap: 20px;
+    padding: 20px;
+  }
+
+  .benefit {
+    flex-basis: calc(50% - 10px);
+  }
+}
+
+@media (max-width: 480px) {
+  .showcase-title {
+    font-size: 24px;
+  }
+
+  .resume-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .resume-image {
+    height: 300px;
+  }
+
+  .benefit {
+    flex-basis: 100%;
+  }
+}

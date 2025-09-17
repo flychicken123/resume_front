@@ -75,6 +75,18 @@
   box-shadow: 0 4px 16px rgba(37,99,235,0.2);
 }
 
+.home-btn.tertiary {
+  background: #fff;
+  color: #2563eb;
+  border: 2px solid #2563eb;
+  box-shadow: 0 2px 8px rgba(37,99,235,0.08);
+}
+.home-btn.tertiary:hover {
+  background: #f0f7ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(37,99,235,0.15);
+}
+
 .home-trusted {
   display: flex;
   flex-direction: column;
@@ -567,6 +579,17 @@
   
   .home-navbar-right {
     gap: 24px;
+  }
+  
+  .home-cta-buttons {
+    flex-direction: column;
+    width: 100%;
+    gap: 12px;
+  }
+  
+  .home-btn {
+    width: 100%;
+    text-align: center;
   }
 }
 

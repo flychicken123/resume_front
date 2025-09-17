@@ -65,6 +65,40 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
         }
         return Math.round(25 * fontScale);
         
+      case 'projects':
+        if (Array.isArray(content)) {
+          // Projects usually take more space due to descriptions
+          const projectHeight = content.reduce((total, project) => {
+            let height = Math.round(18 * fontScale); // Base height for title (reduced)
+            if (project.description) {
+              // Count actual lines including bullet points
+              const lines = project.description.split('\n').filter(l => l.trim());
+              // Most bullet points fit on one line at preview scale
+              let totalLines = lines.length;
+              
+              const descCharsPerLine = Math.round(140 / fontScale); // Increased - more chars fit per line
+              
+              // Only count extra lines for very long bullet points
+              for (const line of lines) {
+                const cleanLine = line.replace('•', '').trim();
+                if (cleanLine.length > descCharsPerLine) {
+                  totalLines += Math.floor(cleanLine.length / descCharsPerLine);
+                }
+              }
+              
+              height += totalLines * Math.round(12 * fontScale); // Reduced line height
+            }
+            if (project.technologies) {
+              // Technologies usually fit on one line
+              height += Math.round(12 * fontScale);
+            }
+            if (project.projectUrl) height += Math.round(12 * fontScale);
+            return total + height + Math.round(5 * fontScale); // Reduced spacing
+          }, 0);
+          return projectHeight;
+        }
+        return Math.round(60 * fontScale);
+        
       case 'skills':
         // More conservative skills section estimation
         const skillCharsPerLine = Math.round(140 / fontScale); // Increased from 120
@@ -86,12 +120,12 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
     // Get font scale factor to adjust page capacity
     const fontScale = getFontSizeScaleFactor();
     
-    // Adjust available height based on font size - much more aggressive packing
-    // We can safely use more of the page since we have conservative height estimates
-    const pageUtilization = fontScale <= 0.85 ? 1.05 :  // Allow slight overflow for small fonts
-                           fontScale <= 1.0 ? 1.02 :   // Still allow slight overflow for medium
-                           fontScale <= 1.15 ? 0.98 :  // Nearly full for large
-                           0.95;                        // Conservative for extra-large
+    // Adjust available height based on font size - balanced for better space usage
+    // Slightly higher percentages since our estimates are now more accurate
+    const pageUtilization = fontScale <= 0.85 ? 0.94 :  // Small fonts - use 94%
+                           fontScale <= 1.0 ? 0.93 :   // Medium fonts - use 93%
+                           fontScale <= 1.15 ? 0.92 :  // Large fonts - use 92%
+                           0.90;                        // Extra-large - use 90%
     const effectiveAvailableHeight = AVAILABLE_HEIGHT * pageUtilization;
     
     // Helper function to add section to current page
@@ -182,8 +216,8 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
           const expHeight = estimateSectionHeight([exp], 'experience');
           
           // Check if adding this experience would exceed max height
-          // Use very high threshold to pack more content
-          const threshold = fontScale <= 0.85 ? 1.0 : 0.98;
+          // Use higher threshold to maximize space usage
+          const threshold = 0.95; // Use 95% for better space utilization
           if (currentHeight + expHeight > maxHeight * threshold && currentPart.length > 0) {
             // Current part is full, start new part
             parts.push([...currentPart]);
@@ -201,6 +235,141 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
         }
         
         return parts.length > 1 ? parts : [content];
+      }
+      
+      if (type === 'projects' && Array.isArray(content)) {
+        // If we have very little space, don't try to split
+        if (maxHeight < 100) {
+          return [content];
+        }
+        
+        // For a single large project with many bullet points, try to split the description
+        if (content.length === 1 && content[0].description) {
+          const project = content[0];
+          const lines = project.description.split('\n').filter(l => l.trim());
+          
+          // If we have many bullet points, try to split them
+          if (lines.length > 4) {
+            // Calculate how many bullet points might fit
+            const lineHeight = Math.round(13 * fontScale); // Slightly more conservative
+            const titleHeight = Math.round(16 * fontScale);
+            const sectionTitleHeight = Math.round(20 * fontScale); // "PROJECTS" title
+            const techHeight = project.technologies ? Math.round(12 * fontScale) : 0;
+            const urlHeight = project.projectUrl ? Math.round(12 * fontScale) : 0;
+            const baseHeight = titleHeight + sectionTitleHeight + techHeight + urlHeight + 30; // More padding for safety
+            
+            const availableForBullets = maxHeight - baseHeight;
+            // Be more conservative - leave some buffer
+            const bulletsPerPage = Math.max(2, Math.floor(availableForBullets / lineHeight) - 2);
+            
+            if (bulletsPerPage >= 2 && bulletsPerPage < lines.length) {
+              // Split the bullet points
+              const firstPart = lines.slice(0, bulletsPerPage).join('\n');
+              const secondPart = lines.slice(bulletsPerPage).join('\n');
+              
+              return [
+                [{
+                  ...project,
+                  description: firstPart,
+                  // Keep tech and URL on first page
+                  _isSplit: true,
+                  _isFirstPart: true
+                }],
+                [{
+                  ...project,
+                  description: secondPart,
+                  projectName: null, // Don't show title on continuation
+                  // Don't repeat tech and URL on second page
+                  technologies: null,
+                  projectUrl: null,
+                  _isContinuation: true
+                }]
+              ];
+            }
+          }
+        }
+        
+        // Original splitting logic for multiple projects
+        const parts = [];
+        let currentPart = [];
+        let currentHeight = 0;
+        
+        // First check if even one project can fit
+        const firstProject = content[0];
+        let firstProjectHeight = Math.round(16 * fontScale);
+        
+        if (firstProject.description) {
+          const lines = firstProject.description.split('\n').filter(l => l.trim());
+          let totalLines = 0;
+          const descCharsPerLine = Math.round(150 / fontScale);
+          
+          for (const line of lines) {
+            const cleanLine = line.replace('•', '').trim();
+            const lineCount = Math.max(1, Math.ceil(cleanLine.length / descCharsPerLine));
+            totalLines += lineCount;
+          }
+          
+          firstProjectHeight += totalLines * Math.round(11 * fontScale);
+        }
+        if (firstProject.technologies) {
+          firstProjectHeight += Math.round(11 * fontScale);
+        }
+        if (firstProject.projectUrl) {
+          firstProjectHeight += Math.round(11 * fontScale);
+        }
+        
+        if (firstProjectHeight > maxHeight) {
+          // No projects can fit, don't split
+          return [content];
+        }
+        
+        for (const project of content) {
+          // Calculate individual project height
+          let projectHeight = Math.round(16 * fontScale); // Title (reduced)
+          if (project.description) {
+            const lines = project.description.split('\n').filter(l => l.trim());
+            let totalLines = lines.length;
+            const descCharsPerLine = Math.round(150 / fontScale); // More chars per line
+            for (const line of lines) {
+              const cleanLine = line.replace('•', '').trim();
+              if (cleanLine.length > descCharsPerLine) {
+                totalLines += Math.floor(cleanLine.length / descCharsPerLine);
+              }
+            }
+            projectHeight += totalLines * Math.round(11 * fontScale); // Reduced line height
+          }
+          if (project.technologies) {
+            projectHeight += Math.round(11 * fontScale);
+          }
+          if (project.projectUrl) {
+            projectHeight += Math.round(11 * fontScale);
+          }
+          
+          
+          // Check if adding this project would exceed max height
+          // Don't use threshold here - use actual maxHeight
+          if (currentHeight + projectHeight > maxHeight && currentPart.length > 0) {
+            // Current part is full, start new part
+            parts.push([...currentPart]);
+            currentPart = [project];
+            currentHeight = projectHeight;
+          } else if (currentHeight + projectHeight <= maxHeight) {
+            // Add to current part only if it actually fits
+            currentPart.push(project);
+            currentHeight += projectHeight;
+          } else if (currentPart.length === 0) {
+            // This project is too big to fit even alone, skip splitting
+            console.log(`Project too large to fit (${projectHeight}px > ${maxHeight}px)`);
+            return [content];
+          }
+        }
+        
+        if (currentPart.length > 0) {
+          parts.push(currentPart);
+        }
+        
+        // Only return parts if we actually managed to split something
+        return parts.length > 0 ? parts : [content];
       }
       
       // For other types, return as is
@@ -247,6 +416,19 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
       });
     }
 
+    // Projects section (comes before education for students)
+    if (data.projects && data.projects.length > 0) {
+      const sectionTitleHeight = Math.round(20 * fontScale); // Add height for section title
+      const projectsHeight = estimateSectionHeight(data.projects, 'projects') + sectionTitleHeight;
+      allSections.push({
+        type: 'projects',
+        content: data.projects,
+        estimatedHeight: projectsHeight,
+        priority: 4,
+        canSplit: true  // Allow projects section to be split across pages
+      });
+    }
+
     // Education section
     if (data.education) {
       const sectionTitleHeight = Math.round(20 * fontScale); // Add height for section title
@@ -255,7 +437,7 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
         type: 'education',
         content: data.education,
         estimatedHeight: eduHeight,
-        priority: 4
+        priority: 5
       });
     }
 
@@ -267,12 +449,13 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
         type: 'skills',
         content: data.skills,
         estimatedHeight: skillsHeight,
-        priority: 5
+        priority: 6
       });
     }
 
     // Now pack sections into pages aggressively
     let sectionIndex = 0;
+    
     
     while (sectionIndex < allSections.length) {
       const section = allSections[sectionIndex];
@@ -281,52 +464,75 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
         // Section fits completely on current page
         addToCurrentPage(section);
         sectionIndex++;
-      } else if (section.canSplit && currentHeight < effectiveAvailableHeight * 0.95) {
-        // Try to split the section even with little space left
+      } else if (section.canSplit && currentHeight > 0) {
+        // Section doesn't fit completely, but we have content on the page
+        // Try to split if there's meaningful space left
         const remainingHeight = effectiveAvailableHeight - currentHeight;
-        const parts = splitLongContent(section.content, section.type, remainingHeight - 5);
         
-        if (parts.length > 1) {
-          // Add first part to current page
-          const firstPartHeight = estimateSectionHeight(parts[0], section.type);
-          addToCurrentPage({
-            ...section,
-            content: parts[0],
-            estimatedHeight: firstPartHeight,
-            isContinued: true
-          });
+        
+        // Require at least 100px for any meaningful content
+        const minSpaceToSplit = 100;
+        
+        if (remainingHeight > minSpaceToSplit) {
+          const parts = splitLongContent(section.content, section.type, remainingHeight);
           
-          // Start new page for remaining parts
-          startNewPage();
+          // Check if we actually got a meaningful split
+          // For projects, parts[0] should be an array of projects, not the full content
+          const gotMeaningfulSplit = parts.length > 1 || 
+            (section.type === 'projects' && Array.isArray(parts[0]) && parts[0].length < section.content.length);
           
-          // Add remaining parts
-          for (let i = 1; i < parts.length; i++) {
-            const partHeight = estimateSectionHeight(parts[i], section.type);
-            const isLast = i === parts.length - 1;
+          if (gotMeaningfulSplit) {
+            // We got split parts - add them even if just one part fits
             
-            if (canFitOnCurrentPage(partHeight)) {
-              addToCurrentPage({
-                ...section,
-                content: parts[i],
-                estimatedHeight: partHeight,
-                isContinuation: true,
-                isContinued: !isLast
-              });
-            } else {
+            // Add first part to current page
+            const firstPartHeight = estimateSectionHeight(parts[0], section.type);
+            addToCurrentPage({
+              ...section,
+              content: parts[0],
+              estimatedHeight: firstPartHeight,
+              isContinued: parts.length > 1
+            });
+            
+            // If there are more parts, add them to new pages
+            if (parts.length > 1) {
+              // Start new page for remaining parts
               startNewPage();
-              addToCurrentPage({
-                ...section,
-                content: parts[i],
-                estimatedHeight: partHeight,
-                isContinuation: true,
-                isContinued: !isLast
-              });
+              
+              // Add remaining parts
+              for (let i = 1; i < parts.length; i++) {
+                const partHeight = estimateSectionHeight(parts[i], section.type);
+                const isLast = i === parts.length - 1;
+                
+                if (canFitOnCurrentPage(partHeight)) {
+                  addToCurrentPage({
+                    ...section,
+                    content: parts[i],
+                    estimatedHeight: partHeight,
+                    isContinuation: true,
+                    isContinued: !isLast
+                  });
+                } else {
+                  startNewPage();
+                  addToCurrentPage({
+                    ...section,
+                    content: parts[i],
+                    estimatedHeight: partHeight,
+                    isContinuation: true,
+                    isContinued: !isLast
+                  });
+                }
+              }
             }
+            
+            sectionIndex++;
+          } else {
+            // Can't split effectively, move to new page
+            startNewPage();
+            addToCurrentPage(section);
+            sectionIndex++;
           }
-          
-          sectionIndex++;
         } else {
-          // Can't split effectively, move to new page
+          // Not enough space to split meaningfully, move to new page
           startNewPage();
           addToCurrentPage(section);
           sectionIndex++;
@@ -411,7 +617,7 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
           sectionTitle: { 
             color: '#1f2937', 
             fontWeight: 'bold', 
-            fontSize: `${6 * scaleFactor}px`, 
+            fontSize: `${7 * scaleFactor}px`,  // Slightly larger than body text
             marginBottom: `${2 * scaleFactor}px`, 
             borderBottom: '1px solid #000', 
             paddingBottom: `${1 * scaleFactor}px`, 
@@ -469,7 +675,7 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
           sectionTitle: { 
             color: '#2c3e50', 
             fontWeight: 'bold', 
-            fontSize: `${6 * scaleFactor}px`, 
+            fontSize: `${7 * scaleFactor}px`,  // Slightly larger than body text
             marginBottom: `${2 * scaleFactor}px`, 
             borderBottom: '1px solid #000', 
             paddingBottom: `${1 * scaleFactor}px`, 
@@ -535,7 +741,7 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
           sectionTitle: { 
             color: '#3498db', 
             fontWeight: '600', 
-            fontSize: `${6 * scaleFactor}px`, 
+            fontSize: `${7 * scaleFactor}px`,  // Slightly larger than body text
             marginBottom: `${2 * scaleFactor}px`, 
             textTransform: 'uppercase', 
             letterSpacing: '1px', 
@@ -644,23 +850,58 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
     });
   };
 
-  // Render education items
+  // Render education items - format like original PDF with school and location on same line
   const renderEducation = (education, styles) => {
     if (!education) return null;
 
     if (Array.isArray(education)) {
-      return education.map((edu, idx) => (
-        <div key={idx} style={styles.item}>
-          <div style={styles.company}>
-            {edu.degree} {edu.field && `in ${edu.field}`} | {edu.school} | {edu.graduationYear}
-          </div>
-          {edu.gpa && (
-            <div style={styles.date}>
-              GPA: {edu.gpa}
+      return education.map((edu, idx) => {
+        // Format year range - handle both formats (startYear/graduationYear and startDate/endDate)
+        let yearRange = '';
+        
+        // Check for year format first (from form)
+        if (edu.startYear && edu.graduationYear) {
+          yearRange = `${edu.startYear} - ${edu.graduationYear}`;
+        } else if (edu.graduationYear) {
+          // If only graduation year, assume 4-year degree
+          const gradYear = parseInt(edu.graduationYear);
+          if (!isNaN(gradYear)) {
+            yearRange = `${gradYear - 4} - ${gradYear}`;
+          } else {
+            yearRange = edu.graduationYear;
+          }
+        } 
+        // Check for date format (from parsed resume)
+        else if (edu.startDate && edu.endDate) {
+          yearRange = `${edu.startDate} - ${edu.endDate}`;
+        } else if (edu.endDate) {
+          yearRange = edu.endDate;
+        } else if (edu.startDate) {
+          yearRange = `${edu.startDate} - Present`;
+        } else {
+          // Only show 'Year' if there's truly no date information
+          yearRange = '';
+        }
+
+        return (
+          <div key={idx} style={styles.item}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+              <div style={styles.company}>
+                {edu.school || 'University'}
+              </div>
+              {yearRange && (
+                <div style={{ ...styles.date, fontWeight: 'normal' }}>
+                  {yearRange}
+                </div>
+              )}
             </div>
-          )}
-        </div>
-      ));
+            <div style={{ marginTop: '2px' }}>
+              {edu.degree} {edu.field && `in ${edu.field}`}
+              {edu.gpa && ` • GPA: ${edu.gpa}`}
+            </div>
+          </div>
+        );
+      });
     } else {
       return (
         <div style={styles.item}>
@@ -669,6 +910,49 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
         </div>
       );
     }
+  };
+
+  const renderProjects = (projects, styles) => {
+    if (!projects || projects.length === 0) return null;
+
+    return projects.map((project, idx) => {
+      // Skip empty projects
+      if (!project.projectName && !project.description) return null;
+      
+      return (
+        <div key={idx} style={styles.item}>
+          <div style={styles.company}>
+            {project.projectName}
+          </div>
+          
+          {project.technologies && (
+            <div style={{ fontStyle: 'italic', fontSize: '0.9em', marginTop: '2px', marginBottom: '4px' }}>
+              Technologies: {project.technologies}
+            </div>
+          )}
+          
+          {project.projectUrl && (
+            <div style={{ fontSize: '0.9em', marginTop: '2px', marginBottom: '4px' }}>
+              <a href={project.projectUrl} style={{ color: '#0066cc', textDecoration: 'none' }}>
+                {project.projectUrl}
+              </a>
+            </div>
+          )}
+          
+          {project.description && (
+            <div style={{ marginTop: '2px' }}>
+              {project.description.split('\n').map((line, lineIdx) => (
+                line.trim() && (
+                  <div key={lineIdx} style={styles.bullet}>
+                    • {line.trim().replace(/^[•\-]\s*/, '')}
+                  </div>
+                )
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }).filter(Boolean);
   };
 
   // Render a single section
@@ -735,13 +1019,15 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
             summaryTitle = 'SUMMARY';
           }
           
-          return renderSection(summaryTitle, <div style={styles.summary}>{section.content}</div>, styles);
+          return <div key={idx}>{renderSection(summaryTitle, <div style={styles.summary}>{section.content}</div>, styles)}</div>;
         case 'experience':
-          return renderSection('EXPERIENCE', renderExperiences(section.content, styles), styles);
+          return <div key={idx}>{renderSection('EXPERIENCE', renderExperiences(section.content, styles), styles)}</div>;
         case 'education':
-          return renderSection('EDUCATION', renderEducation(section.content, styles), styles);
+          return <div key={idx}>{renderSection('EDUCATION', renderEducation(section.content, styles), styles)}</div>;
+        case 'projects':
+          return <div key={idx}>{renderSection('PROJECTS', renderProjects(section.content, styles), styles)}</div>;
         case 'skills':
-          return renderSection('SKILLS', <div style={styles.skills}>{section.content}</div>, styles);
+          return <div key={idx}>{renderSection('SKILLS', <div style={styles.skills}>{section.content}</div>, styles)}</div>;
         default:
           return null;
       }
@@ -827,6 +1113,10 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
 
             {data.experiences && data.experiences.length > 0 && (
               renderSection('EXPERIENCE', renderExperiences(data.experiences, styles), styles)
+            )}
+
+            {data.projects && data.projects.length > 0 && (
+              renderSection('PROJECTS', renderProjects(data.projects, styles), styles)
             )}
 
             {data.education && (
