@@ -2,6 +2,34 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext();
 
+const normalizeUser = (rawUser) => {
+  if (!rawUser) {
+    return null;
+  }
+
+  if (typeof rawUser === 'string') {
+    return {
+      email: rawUser,
+      name: rawUser,
+      isAdmin: false,
+    };
+  }
+
+  if (typeof rawUser === 'object') {
+    const normalized = {
+      id: rawUser.id ?? rawUser.user_id ?? null,
+      email: rawUser.email ?? rawUser.user ?? '',
+      name: rawUser.name ?? rawUser.email ?? rawUser.user ?? '',
+      isAdmin: rawUser.isAdmin ?? rawUser.is_admin ?? false,
+    };
+
+    return normalized.email ? normalized : null;
+  }
+
+  return null;
+};
+
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -21,23 +49,40 @@ export const AuthProvider = ({ children }) => {
     const savedToken = localStorage.getItem('resumeToken');
     console.log('AuthContext useEffect - savedUser:', savedUser);
     console.log('AuthContext useEffect - savedToken:', savedToken);
-    
-    if (savedUser && savedToken && savedToken !== 'undefined' && savedToken !== 'null') {
+
+    let parsedUser = null;
+    if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
+      try {
+        parsedUser = JSON.parse(savedUser);
+      } catch (error) {
+        parsedUser = savedUser;
+      }
+    }
+
+    const normalizedUser = normalizeUser(parsedUser);
+
+    if (normalizedUser && savedToken && savedToken !== 'undefined' && savedToken !== 'null') {
       console.log('AuthContext useEffect - setting user and token from localStorage');
-      setUser(JSON.parse(savedUser));
+      setUser(normalizedUser);
       setToken(savedToken);
     } else {
       console.log('AuthContext useEffect - no valid saved user/token found, but not auto-logging out');
-      // Don't auto-logout, just set loading to false
     }
     setLoading(false);
   }, []);
 
   const login = (userData, authToken) => {
     console.log('AuthContext login called with:', { userData, authToken });
-    setUser(userData);
+    const normalized = normalizeUser(userData);
+    setUser(normalized);
     setToken(authToken);
-    localStorage.setItem('resumeUser', JSON.stringify(userData));
+
+    if (normalized) {
+      localStorage.setItem('resumeUser', JSON.stringify(normalized));
+    } else {
+      localStorage.removeItem('resumeUser');
+    }
+
     localStorage.setItem('resumeToken', authToken);
     console.log('AuthContext login completed, token saved to localStorage');
   };
@@ -78,7 +123,9 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     loading,
-    getAuthHeaders
+    getAuthHeaders,
+    isAdmin: user?.isAdmin ?? false,
+    userEmail: user?.email ?? null,
   };
 
   return (
@@ -87,3 +134,7 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 }; 
+
+
+
+
