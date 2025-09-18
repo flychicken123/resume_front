@@ -121,24 +121,6 @@ const SimpleHero = ({ onImportClick, onCreateClick }) => {
         </div>
       </div>
       
-      <div className="features-section">
-        <div className="feature">
-          <span className="feature-icon">✅</span>
-          <span className="feature-text">ATS-Optimized Templates</span>
-        </div>
-        <div className="feature">
-          <span className="feature-icon">🎯</span>
-          <span className="feature-text">Job-Specific Customization</span>
-        </div>
-        <div className="feature">
-          <span className="feature-icon">📄</span>
-          <span className="feature-text">Professional PDF Export</span>
-        </div>
-        <div className="feature">
-          <span className="feature-icon">🚀</span>
-          <span className="feature-text">One-Click Job Applications</span>
-        </div>
-      </div>
     </div>
   );
 };
