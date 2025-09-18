@@ -2,7 +2,7 @@ import React from 'react';
 import Login from './Login';
 import { useAuth } from '../../context/AuthContext';
 
-const AuthModal = ({ onClose }) => {
+const AuthModal = ({ onClose, contextMessage }) => {
   const { login } = useAuth();
 
   const handleClose = () => {
@@ -30,7 +30,7 @@ const AuthModal = ({ onClose }) => {
       justifyContent: 'center'
     }}>
       <div style={{ position: 'relative' }}>
-        <Login onLogin={handleLogin} onClose={handleClose} />
+        <Login onLogin={handleLogin} onClose={handleClose} contextMessage={contextMessage} />
       </div>
     </div>
   );

@@ -4,8 +4,11 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ResumeProvider } from './context/ResumeContext';
 import Home from './components/Home';
-import { LoginPage, BuilderPage } from './pages';
+import { LoginPage, BuilderPage, AdminMembershipPage } from './pages';
 import JobApplicationPage from './pages/JobApplicationPage';
+import PricingPage from './components/PricingPage';
+import SubscriptionSuccess from './components/SubscriptionSuccess';
+import SubscriptionCancel from './components/SubscriptionCancel';
 import Analytics from './components/Analytics';
 import SessionMonitor from './components/SessionMonitor';
 import './App.css';
@@ -29,6 +32,10 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/builder" element={<BuilderPage />} />
+            <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/admin/memberships" element={<AdminMembershipPage />} />
+            <Route path="/subscription/success" element={<SubscriptionSuccess />} />
+            <Route path="/subscription/cancel" element={<SubscriptionCancel />} />
             {/* Hidden - Apply to Jobs feature
             <Route path="/apply" element={<JobApplicationPage />} />
             */}

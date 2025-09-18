@@ -10,13 +10,26 @@ import StepProjects from '../components/StepProjects';
 import StepSkills from '../components/StepSkills';
 import StepFormat from '../components/StepFormat';
 import StepSummary from '../components/StepSummary';
+import StepCoverLetter from '../components/StepCoverLetter';
 import LivePreview from '../components/LivePreview';
 import AuthModal from '../components/auth/AuthModal';
 import JobDescModal from '../components/JobDescModal';
 import ImportResumeModal from '../components/ImportResumeModal';
+import UpgradeModal from '../components/UpgradeModal';
+import SubscriptionStatus from '../components/SubscriptionStatus';
 import SEO from '../components/SEO';
 import { trackResumeGeneration } from '../components/Analytics';
 import './BuilderPage.css';
+
+const getAPIBaseURL = () => {
+  if (typeof window !== 'undefined') {
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return 'http://localhost:8081';
+    }
+    return window.location.hostname === 'www.hihired.org' ? 'https://hihired.org' : window.location.origin;
+  }
+  return process.env.REACT_APP_API_URL || 'http://localhost:8081';
+};
 
 const steps = [
   "Personal Details",
@@ -25,7 +38,8 @@ const steps = [
   "Education",
   "Skills",
   "Format",
-  "Summary"
+  "Summary",
+  "Cover Letter"
 ];
 
 function BuilderPage() {
@@ -33,7 +47,9 @@ function BuilderPage() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showJobDescModal, setShowJobDescModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [jobDescription, setJobDescription] = useState('');
+  const [subscriptionData, setSubscriptionData] = useState(null);
   
   // Load job description from localStorage on component mount
   useEffect(() => {
@@ -45,6 +61,7 @@ function BuilderPage() {
   
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { user, login, logout, getAuthHeaders } = useAuth();
+  const displayName = typeof user === 'string' ? user : (user?.name || user?.email || '');
   const { data, saveToDatabaseNow, clearData } = useResume();
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -686,6 +703,61 @@ function BuilderPage() {
           }
         })
                  .then(result => {
+           // Check if limit was reached (403 status)
+           if (result.status === 403) {
+             console.log('403 detected - setting up modal');
+             console.log('Result data:', result.data);
+
+             // Get current user's plan from token or default to free
+             const token = localStorage.getItem('resumeToken');
+             let currentPlan = 'free';
+             if (token) {
+               try {
+                 const payload = JSON.parse(atob(token.split('.')[1]));
+                 currentPlan = payload.plan || 'free';
+               } catch (e) {
+                 console.log('Could not parse token for plan');
+               }
+             }
+
+             // Parse the error data if available
+             const subscriptionInfo = {
+               usage: {
+                 can_generate: false,
+                 remaining: 0,
+                 reset_date: result.data?.resetDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+                 limitReached: true
+               },
+               subscription: {
+                 plan_name: result.data?.plan?.toLowerCase() || currentPlan,
+                 display_name: result.data?.plan || currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1),
+                 resume_limit: result.data?.limit || (currentPlan === 'premium' ? 30 : currentPlan === 'ultimate' ? 200 : 1),
+                 resume_period: result.data?.period || (currentPlan === 'free' ? 'week' : 'month')
+               }
+             };
+
+             setSubscriptionData(subscriptionInfo);
+             console.log('Subscription data set:', subscriptionInfo);
+
+             // Show modal immediately - force a state update
+             console.log('Current modal state before:', showUpgradeModal);
+             setShowUpgradeModal(false); // Reset first
+             setTimeout(() => {
+               console.log('Setting modal to true');
+               setShowUpgradeModal(true); // Then set to true
+             }, 10);
+
+             // Reset button state - find the actual button
+             const buttons = document.querySelectorAll('button');
+             buttons.forEach(btn => {
+               if (btn.textContent.includes('Generating PDF')) {
+                 btn.textContent = '📄 Generate Resume';
+                 btn.disabled = false;
+               }
+             });
+             return;
+           }
+
            if (result.ok && result.data && result.data.downloadURL) {
              // Extract filename from the downloadURL
              const url = new URL(result.data.downloadURL);
@@ -701,12 +773,18 @@ function BuilderPage() {
              alert('PDF resume generated successfully!');
            } else {
              console.error('PDF generation failed response:', result);
-             throw new Error((result.data && (result.data.error || result.data.message)) || `Failed to generate PDF (status ${result.status})`);
+             // Don't throw error for 403 as it's already handled above
+             if (result.status !== 403) {
+               alert((result.data && (result.data.error || result.data.message)) || `Failed to generate PDF (status ${result.status})`);
+             }
            }
          })
         .catch(error => {
           console.error('PDF generation error:', error);
-          alert('Failed to generate PDF. Please try again.');
+          // Don't show generic error for limit reached
+          if (!error.message?.includes('limit')) {
+            alert('Failed to generate PDF. Please try again.');
+          }
         });
 
       } else {
@@ -770,8 +848,97 @@ function BuilderPage() {
     }
   };
 
+  const fetchCurrentSubscriptionSafe = async () => {
+    try {
+      const token = localStorage.getItem('resumeToken');
+      if (!token) return null;
+      const resp = await fetch(`${getAPIBaseURL()}/api/subscription/current`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!resp.ok) return null;
+      const data = await resp.json();
+      return data && data.subscription ? data.subscription : null;
+    } catch (_) { return null; }
+  };
+
+  const checkSubscriptionLimit = async () => {
+    try {
+      const token = localStorage.getItem('resumeToken');
+      if (!token) return true; // Allow non-authenticated users (server will handle limits)
+
+      const response = await fetch(`${getAPIBaseURL()}/api/subscription/check-limit`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      // Legacy: some versions might use 429 to indicate limit reached
+      if (response.status === 429) {
+        const data = await response.json().catch(() => ({}));
+        const sub = await fetchCurrentSubscriptionSafe();
+        const planKey = (sub?.plan_name || 'free').toLowerCase();
+        const mapped = {
+          usage: {
+            can_generate: false,
+            remaining: 0,
+            reset_date: data.reset_date || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+            limitReached: true
+          },
+          subscription: sub || {
+            plan_name: planKey,
+            display_name: planKey.charAt(0).toUpperCase() + planKey.slice(1),
+            resume_limit: planKey === 'premium' ? 30 : planKey === 'ultimate' ? 200 : 1,
+            resume_period: planKey === 'free' ? 'week' : 'month'
+          }
+        };
+        setSubscriptionData(mapped);
+        setShowUpgradeModal(true);
+        return false;
+      }
+
+      // New behavior: API returns 200 with can_generate flag
+      if (response.ok) {
+        const data = await response.json().catch(() => null);
+        if (data && data.can_generate === false) {
+          const sub = await fetchCurrentSubscriptionSafe();
+          const planKey = (sub?.plan_name || 'free').toLowerCase();
+          const mapped = {
+            usage: {
+              can_generate: false,
+              remaining: data.remaining ?? 0,
+              reset_date: data.reset_date || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+              limitReached: true
+            },
+            subscription: sub || {
+              plan_name: planKey,
+              display_name: planKey.charAt(0).toUpperCase() + planKey.slice(1),
+              resume_limit: planKey === 'premium' ? 30 : planKey === 'ultimate' ? 200 : 1,
+              resume_period: planKey === 'free' ? 'week' : 'month'
+            }
+          };
+          setSubscriptionData(mapped);
+          setShowUpgradeModal(true);
+          return false;
+        }
+        return true;
+      }
+
+      // On other non-OK statuses, allow and let server enforce at generation
+      return true;
+    } catch (error) {
+      console.error('Error checking subscription limit:', error);
+      return true; // Allow on error
+    }
+  };
+
   const handleDownload = async () => {
     try {
+      // Check subscription limit first
+      const canProceed = await checkSubscriptionLimit();
+      if (!canProceed) {
+        return; // Stop if limit reached
+      }
+
       const response = await fetch('/api/resume/download', {
         method: 'POST',
         headers: {
@@ -780,6 +947,14 @@ function BuilderPage() {
         },
         body: JSON.stringify(data)
       });
+
+      if (response.status === 429) {
+        // Handle rate limit from server
+        const limitData = await response.json();
+        setSubscriptionData(limitData);
+        setShowUpgradeModal(true);
+        return;
+      }
 
       if (response.ok) {
         const blob = await response.blob();
@@ -896,6 +1071,17 @@ function BuilderPage() {
             }}>
               HiHired - AI Resume Builder
             </h1>
+            {user && (
+              <div style={{ position: 'absolute', right: '20px', top: '80px' }}>
+                <SubscriptionStatus
+                  minimal={true}
+                  onLimitReached={(usage, subscription) => {
+                    setSubscriptionData({ usage, subscription });
+                    setShowUpgradeModal(true);
+                  }}
+                />
+              </div>
+            )}
           </div>
 
           
@@ -912,6 +1098,11 @@ function BuilderPage() {
               {step === 5 && <StepSkills />}
               {step === 6 && <StepFormat />}
               {step === 7 && <StepSummary />}
+              {step === 8 && (
+                <StepCoverLetter
+                  onGeneratePremiumFeature={() => setShowUpgradeModal(true)}
+                />
+              )}
               
                              {/* Navigation Buttons */}
                <div style={{ 
@@ -1084,7 +1275,7 @@ function BuilderPage() {
             <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#374151' }}>Live Resume Preview</h2>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
               {user ? (
-                <span style={{ color: '#3b82f6', fontWeight: 500, fontSize: '0.9rem' }}>{user}</span>
+                <span style={{ color: '#3b82f6', fontWeight: 500, fontSize: '0.9rem' }}>{displayName}</span>
               ) : null}
               <button
                 onClick={handleAuthButton}
@@ -1130,7 +1321,19 @@ function BuilderPage() {
               flexDirection: 'column'
             }}
           >
-                            <LivePreview onDownload={handleViewResume} />
+                            {step !== 8 && <LivePreview onDownload={handleViewResume} />}
+                            {step === 8 && (
+                              <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                height: '100%',
+                                color: '#6b7280',
+                                fontSize: '1.1rem'
+                              }}>
+                                Resume preview not available for Cover Letter
+                              </div>
+                            )}
           </div>
         </div>
       </div>
@@ -1139,6 +1342,17 @@ function BuilderPage() {
        {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
        {showJobDescModal && <JobDescModal onClose={() => setShowJobDescModal(false)} onJobDescriptionSubmit={handleJobDescSubmit} onProceed={handleProceedAfterChoice} />}
        {showImportModal && <ImportResumeModal onClose={() => setShowImportModal(false)} />}
+       {showUpgradeModal && (() => {
+         console.log('Rendering UpgradeModal, showUpgradeModal=', showUpgradeModal, 'data=', subscriptionData);
+         return (
+           <UpgradeModal
+             isOpen={true}
+             onClose={() => setShowUpgradeModal(false)}
+             currentPlan={(subscriptionData?.subscription?.plan_name || 'free').toLowerCase()}
+             usage={subscriptionData?.usage || {}}
+           />
+         );
+       })()}
     </>
   );
 }

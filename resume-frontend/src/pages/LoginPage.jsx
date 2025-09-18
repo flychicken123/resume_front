@@ -5,8 +5,8 @@ import Login from '../components/auth/Login';
 const LoginPage = () => {
   const { login } = useAuth();
   
-  const handleLogin = (email, token) => {
-    login(email, token);
+  const handleLogin = (userData, token) => {
+    login(userData, token);
     // Redirect to home page after successful login
     window.location.href = '/';
   };
@@ -31,3 +31,4 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
+

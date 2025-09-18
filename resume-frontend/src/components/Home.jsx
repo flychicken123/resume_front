@@ -15,8 +15,9 @@ import { trackReferrer, trackBuilderStart } from './Analytics';
 
 const Home = () => {
   const navigate = useNavigate();
-  const { user, login } = useAuth();
+  const { user, login, isAdmin } = useAuth();
   const { resumeData } = useResume();
+  const displayName = typeof user === 'string' ? user : (user?.name || user?.email || '');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showIntegratedModal, setShowIntegratedModal] = useState(false);
   const [showResumeHistory, setShowResumeHistory] = useState(false);
@@ -97,18 +98,30 @@ const Home = () => {
             Builder
           </button>
           {user && (
-            <button 
-              className="home-nav-link" 
+            <button
+              className="home-nav-link"
               onClick={() => setShowResumeHistory(true)}
               style={{ background: 'none', border: 'none', cursor: 'pointer', font: 'inherit' }}
             >
               Resume History
             </button>
           )}
+          <Link
+            to="/pricing"
+            className="home-nav-link"
+            style={{ textDecoration: 'none' }}
+          >
+            Pricing
+          </Link>
+          {isAdmin && (
+            <Link to="/admin/memberships" className="home-nav-link">
+              Admin
+            </Link>
+          )}
           {/* Hidden - Apply to Jobs feature
           {user && (
-            <Link 
-              to="/apply" 
+            <Link
+              to="/apply"
               className="home-nav-link"
             >
               Apply to Jobs
@@ -136,7 +149,7 @@ const Home = () => {
                 marginRight: `${usernameWidth}px`
               }}
             >
-              {user}
+              {displayName}
             </span>
           ) : null}
           <button 
@@ -197,8 +210,8 @@ const Home = () => {
               Builder
             </button>
             {user && (
-              <button 
-                className="mobile-nav-link" 
+              <button
+                className="mobile-nav-link"
                 onClick={() => {
                   setShowResumeHistory(true);
                   setShowMobileMenu(false);
@@ -206,11 +219,28 @@ const Home = () => {
               >
                 Resume History
               </button>
-                        )}
+            )}
+            <Link
+              to="/pricing"
+              className="mobile-nav-link"
+              onClick={() => setShowMobileMenu(false)}
+              style={{ textDecoration: 'none' }}
+            >
+              Pricing
+            </Link>
+            {isAdmin && (
+              <Link
+                to="/admin/memberships"
+                className="mobile-nav-link"
+                onClick={() => setShowMobileMenu(false)}
+              >
+                Admin
+              </Link>
+            )}
             {/* Hidden - Apply to Jobs feature
             {user && (
-              <Link 
-                to="/apply" 
+              <Link
+                to="/apply"
                 className="mobile-nav-link"
                 onClick={() => setShowMobileMenu(false)}
               >
@@ -218,7 +248,7 @@ const Home = () => {
               </Link>
             )}
             */}
-            <a 
+            <a
               href="#about" 
               className="mobile-nav-link" 
               onClick={(e) => {
@@ -591,3 +621,4 @@ const Home = () => {
 };
 
 export default Home; 
+

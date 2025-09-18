@@ -888,7 +888,7 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
               fontSize: '16px'
             }}
           >
-            📄 Download PDF
+            📄 Generate Resume
           </button>
         </div>
       )}

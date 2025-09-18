@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
 import { trackUserLogin, trackGoogleUserRegistration } from '../Analytics';
 
-const Login = ({ onLogin, onClose }) => {
+const Login = ({ onLogin, onClose, contextMessage }) => {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
@@ -57,8 +57,12 @@ const Login = ({ onLogin, onClose }) => {
         if (result.message && result.message.includes('created')) {
           trackGoogleUserRegistration();
         }
-        
-        onLogin(email, result.token);
+        const userPayload = result.user || {
+          email,
+          name: decodedToken?.name || email,
+          is_admin: result.user?.is_admin ?? false,
+        };
+        onLogin(userPayload, result.token);
       } else {
         console.log('Google login failed:', result.message);
         setError(result.message || 'Google authentication failed');
@@ -132,7 +136,12 @@ const Login = ({ onLogin, onClose }) => {
         trackUserLogin(mode === 'signup' ? 'email_registration' : 'email_login');
         
         // Pass both user data and token to the login function
-        onLogin(email, result.token);
+        const userPayload = result.user || {
+          email,
+          name: result.user?.name || email,
+          is_admin: result.user?.is_admin ?? false,
+        };
+        onLogin(userPayload, result.token);
       } else {
         console.log('Login failed:', result.message);
         setError(result.message || 'Authentication failed');
@@ -264,6 +273,22 @@ const Login = ({ onLogin, onClose }) => {
         aria-label="Close auth modal"
       >×</button>
       <h2 style={{ textAlign: 'center', marginBottom: '1rem', fontSize: '1.3rem' }}>{mode === 'login' ? 'Login' : 'Sign Up'}</h2>
+      {contextMessage && (
+        <div
+          style={{
+            background: '#fef3c7',
+            border: '1px solid #fcd34d',
+            borderRadius: '6px',
+            color: '#92400e',
+            fontSize: '0.9rem',
+            lineHeight: 1.4,
+            marginBottom: '1rem',
+            padding: '0.75rem'
+          }}
+        >
+          {contextMessage}
+        </div>
+      )}
       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
         <GoogleLogin
           onSuccess={credentialResponse => {
@@ -337,3 +362,10 @@ const Login = ({ onLogin, onClose }) => {
 };
 
 export default Login; 
+
+
+
+
+
+
+

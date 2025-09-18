@@ -1,8 +1,10 @@
-import { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import AuthModal from './auth/AuthModal';
 
 const SessionMonitor = () => {
   const { logout } = useAuth();
+  const [showSessionModal, setShowSessionModal] = useState(false);
 
   useEffect(() => {
     // Function to check if session is expired
@@ -27,9 +29,8 @@ const SessionMonitor = () => {
             
             if (currentTime >= expiryTime) {
               console.log('Session expired - logging out user');
-              // Show alert to user
-              alert('Your session has expired. Please log in again.');
-              logout(true); // Logout and redirect to login page
+              logout(false); // Clear session without navigation
+              setShowSessionModal(true);
             }
           }
         }
@@ -61,7 +62,14 @@ const SessionMonitor = () => {
     };
   }, [logout]);
 
-  return null; // This component doesn't render anything
+  const handleCloseModal = () => setShowSessionModal(false);
+
+  return showSessionModal ? (
+    <AuthModal
+      onClose={handleCloseModal}
+      contextMessage="Your session has expired. Please log in again to continue."
+    />
+  ) : null;
 };
 
 export default SessionMonitor;
