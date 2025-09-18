@@ -187,7 +187,6 @@
 .plan-button.free {
   background: #e5e7eb;
   color: #6b7280;
-  cursor: not-allowed;
 }
 
 .plan-button.premium {
