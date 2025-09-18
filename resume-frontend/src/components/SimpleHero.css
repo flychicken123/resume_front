@@ -329,7 +329,7 @@
 }
 
 .badge-lightning {
-  font-size: 24px;
+  font-size: 28px;
 }
 
 .badge-text {
@@ -370,7 +370,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 40px;
+  gap: 20px;
   flex-wrap: wrap;
   padding: 40px 20px;
   margin-top: 40px;
@@ -385,7 +385,7 @@
 }
 
 .feature-icon {
-  font-size: 24px;
+  font-size: 28px;
 }
 
 .feature-text {
@@ -398,7 +398,7 @@
 @media (max-width: 968px) {
   .hero-container {
     flex-direction: column;
-    gap: 40px;
+    gap: 20px;
   }
 
   .hero-right {
@@ -446,3 +446,4 @@
     font-size: 16px;
   }
 }
+
