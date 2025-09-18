@@ -1,9 +1,47 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckIcon } from '@heroicons/react/24/solid';
 import { useAuth } from '../context/AuthContext';
 import Navigation from './Navigation';
 import './PricingPage.css';
+
+const DEFAULT_PLAN_DETAILS = {
+  free: {
+    name: 'Free',
+    price: '$0',
+    period: '/forever',
+    color: 'gray',
+    features: [
+      '1 resume per week'
+    ],
+    buttonText: 'Select Free',
+    popular: false
+  },
+  premium: {
+    name: 'Premium',
+    price: '$0.01',
+    period: '/month',
+    color: 'blue',
+    features: [
+      '30 resumes per month'
+    ],
+    buttonText: 'Get Premium',
+    popular: true
+  },
+  ultimate: {
+    name: 'Ultimate',
+    price: '$0.02',
+    period: '/month',
+    color: 'purple',
+    features: [
+      '200 resumes per month'
+    ],
+    buttonText: 'Get Ultimate',
+    popular: false
+  }
+};
+
+const PLAN_KEYS = ['free', 'premium', 'ultimate'];
 
 const getAPIBaseURL = () => {
   if (typeof window !== 'undefined') {
@@ -166,41 +204,75 @@ const PricingPage = () => {
     }
   };
 
-  const planDetails = {
-    free: {
-      name: 'Free',
-      price: '$0',
-      period: '/forever',
-      color: 'gray',
-      features: [
-        '1 resume per week'
-      ],
-      buttonText: 'Select Free',
-      popular: false
-    },
-    premium: {
-      name: 'Premium',
-      price: '$0.01',
-      period: '/month',
-      color: 'blue',
-      features: [
-        '30 resumes per month'
-      ],
-      buttonText: 'Get Premium',
-      popular: true
-    },
-    ultimate: {
-      name: 'Ultimate',
-      price: '$0.02',
-      period: '/month',
-      color: 'purple',
-      features: [
-        '200 resumes per month'
-      ],
-      buttonText: 'Get Ultimate',
-      popular: false
-    }
-  };
+    const planDataMap = useMemo(() => {
+    const map = {};
+    (plans || []).forEach((plan) => {
+      if (!plan || !plan.name) {
+        return;
+      }
+      map[String(plan.name).toLowerCase()] = plan;
+    });
+    return map;
+  }, [plans]);
+
+  const planDetails = useMemo(() => {
+    const details = {};
+    PLAN_KEYS.forEach((key) => {
+      const base = DEFAULT_PLAN_DETAILS[key];
+      const planData = planDataMap[key];
+      const price = planData && typeof planData.price === 'number' && !Number.isNaN(planData.price)
+        ? `$${planData.price.toFixed(2)}`
+        : base.price;
+
+      const period = (() => {
+        if (!planData || !planData.resume_period) {
+          return base.period;
+        }
+        const normalized = String(planData.resume_period).toLowerCase();
+        switch (normalized) {
+          case 'monthly':
+            return '/month';
+          case 'weekly':
+            return '/week';
+          case 'yearly':
+            return '/year';
+          default:
+            return `/${normalized}`;
+        }
+      })();
+
+      const extractFeatures = () => {
+        if (!planData || !planData.features) {
+          return [...base.features];
+        }
+        const raw = planData.features;
+        if (Array.isArray(raw)) {
+          return [...raw];
+        }
+        if (raw && Array.isArray(raw.features)) {
+          return [...raw.features];
+        }
+        return [...base.features];
+      };
+
+      let features = extractFeatures();
+      if (planData && planData.resume_limit && planData.resume_period) {
+        const limitLabel = `${planData.resume_limit} resumes per ${String(planData.resume_period).toLowerCase()}`;
+        const lowerFeatures = features.map((item) => String(item).toLowerCase());
+        if (!lowerFeatures.includes(limitLabel.toLowerCase())) {
+          features = [limitLabel, ...features];
+        }
+      }
+
+      details[key] = {
+        ...base,
+        price,
+        period,
+        features,
+      };
+    });
+    return details;
+  }, [planDataMap]);
 
   if (loading) {
     return (
@@ -238,7 +310,7 @@ const PricingPage = () => {
 
         {/* Pricing Cards */}
         <div className="pricing-cards">
-          {['free', 'premium', 'ultimate'].map((planKey) => {
+          {PLAN_KEYS.map((planKey) => {
             const plan = planDetails[planKey];
             const isCurrentPlan = currentPlan && currentPlan.toLowerCase() === planKey.toLowerCase();
             const isDowngrade = (currentPlan === 'premium' || currentPlan === 'ultimate') && planKey === 'free';
