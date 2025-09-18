@@ -220,26 +220,36 @@ const PricingPage = () => {
     PLAN_KEYS.forEach((key) => {
       const base = DEFAULT_PLAN_DETAILS[key];
       const planData = planDataMap[key];
-      const price = planData && typeof planData.price === 'number' && !Number.isNaN(planData.price)
-        ? `$${planData.price.toFixed(2)}`
-        : base.price;
 
-      const period = (() => {
+      const price =
+        planData && typeof planData.price === 'number' && !Number.isNaN(planData.price)
+          ? `$${planData.price.toFixed(2)}`
+          : base.price;
+
+      const derivePeriod = () => {
         if (!planData || !planData.resume_period) {
-          return base.period;
+          if (base.period && base.period.startsWith('/')) {
+            return { periodText: base.period, limitUnit: base.period.slice(1) };
+          }
+          return { periodText: base.period || '', limitUnit: '' };
         }
+
         const normalized = String(planData.resume_period).toLowerCase();
         switch (normalized) {
           case 'monthly':
-            return '/month';
+            return { periodText: '/month', limitUnit: 'month' };
           case 'weekly':
-            return '/week';
+            return { periodText: '/week', limitUnit: 'week' };
           case 'yearly':
-            return '/year';
+            return { periodText: '/year', limitUnit: 'year' };
+          case 'daily':
+            return { periodText: '/day', limitUnit: 'day' };
           default:
-            return `/${normalized}`;
+            return { periodText: `/${normalized}`, limitUnit: normalized };
         }
-      })();
+      };
+
+      const { periodText, limitUnit } = derivePeriod();
 
       const extractFeatures = () => {
         if (!planData || !planData.features) {
@@ -256,8 +266,12 @@ const PricingPage = () => {
       };
 
       let features = extractFeatures();
-      if (planData && planData.resume_limit && planData.resume_period) {
-        const limitLabel = `${planData.resume_limit} resumes per ${String(planData.resume_period).toLowerCase()}`;
+
+      const limitValue =
+        planData && planData.resume_limit !== undefined ? Number(planData.resume_limit) : Number.NaN;
+      if (!Number.isNaN(limitValue) && limitValue > 0 && limitUnit) {
+        const noun = limitValue === 1 ? 'resume' : 'resumes';
+        const limitLabel = `${limitValue} ${noun} per ${limitUnit}`;
         const lowerFeatures = features.map((item) => String(item).toLowerCase());
         if (!lowerFeatures.includes(limitLabel.toLowerCase())) {
           features = [limitLabel, ...features];
@@ -267,7 +281,7 @@ const PricingPage = () => {
       details[key] = {
         ...base,
         price,
-        period,
+        period: periodText || base.period,
         features,
       };
     });
