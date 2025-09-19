@@ -1,7 +1,7 @@
 .simple-hero {
-  padding: 40px 20px 120px;
+  padding: 60px 24px 180px;
   max-width: 1200px;
-  margin: 0 auto 80px;
+  margin: 0 auto 120px;
   position: relative;
 }
 
@@ -368,7 +368,8 @@
 /* Responsive Design */
 @media (max-width: 968px) {
   .simple-hero {
-    padding: 30px 16px 100px;
+    padding: 40px 16px 140px;
+    margin: 0 auto 100px;
   }
   .hero-container {
     flex-direction: column;
@@ -388,7 +389,8 @@
 
 @media (max-width: 640px) {
   .simple-hero {
-    padding: 24px 16px 80px;
+    padding: 32px 16px 120px;
+    margin: 0 auto 80px;
   }
   .hero-headline {
     font-size: 28px;
@@ -423,4 +425,3 @@
     font-size: 16px;
   }
 }
-

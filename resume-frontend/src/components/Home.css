@@ -126,11 +126,11 @@
   box-shadow: 0 25px 80px rgba(102, 126, 234, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.1);
   padding: 28px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: white;
+  color: #1f2937;
   overflow: visible;
   position: relative;
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(148, 163, 184, 0.3);
 }
 
 .impact-header {
@@ -142,13 +142,13 @@
   font-size: 24px;
   font-weight: 700;
   margin-bottom: 8px;
-  color: white;
+  color: #1f2937;
 }
 
 .impact-subtitle {
   font-size: 16px;
-  opacity: 0.9;
-  color: #e0e7ff;
+  
+  color: #4b5563;
 }
 
 .impact-stats {
@@ -165,7 +165,7 @@
   border-radius: 16px;
   padding: 14px 8px;
   backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(148, 163, 184, 0.3);
   transition: all 0.3s ease;
   min-height: 70px;
   display: flex;
@@ -190,7 +190,7 @@
 
 .stat-label {
   font-size: 10px;
-  opacity: 0.9;
+  
   line-height: 1.2;
   font-weight: 500;
   word-wrap: break-word;
@@ -608,7 +608,7 @@
 /* Job Description Feature Section */
 .home-jobdesc-feature {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-  color: white;
+  color: #1f2937;
   padding: 3rem 2rem;
   text-align: center;
   margin-bottom: 2rem;
@@ -637,7 +637,7 @@
   font-size: 2.2rem;
   font-weight: 700;
   margin-bottom: 1rem;
-  color: white;
+  color: #1f2937;
 }
 
 .home-jobdesc-feature p {
@@ -650,7 +650,7 @@
 .home-jobdesc-feature-benefits {
   display: flex;
   justify-content: center;
-  gap: 2rem;
+  gap: 2.5rem;
   margin-bottom: 2rem;
   flex-wrap: wrap;
 }
@@ -758,7 +758,7 @@
   
   .home-hero-image {
     min-width: 260px;
-    min-height: 280px;
+    min-height: 0;
   }
   
   .ai-impact-preview {
@@ -852,7 +852,7 @@
   
   .ai-impact-preview {
     width: 240px;
-    min-height: 280px;
+    min-height: 0;
     padding: 12px;
   }
   
@@ -916,8 +916,8 @@
     padding: 10px 20px !important;
     max-width: 260px !important;
   }
-} 
 
+}
 /* Success Stories Section */
 .success-stories-section {
   background: #f8fafc;
@@ -950,14 +950,14 @@
 .success-stories-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 2rem;
+  gap: 2.5rem;
   margin-bottom: 4rem;
 }
 
 .success-story-card {
   background: white;
   border-radius: 16px;
-  padding: 2rem;
+  padding: 1.75rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   border: 1px solid #e5e7eb;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -984,7 +984,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: #1f2937;
   font-weight: bold;
   box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
   border: 2px solid rgba(255, 255, 255, 0.2);
@@ -1033,7 +1033,7 @@
 .success-metrics {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 2rem;
+  gap: 2.5rem;
   margin-top: 3rem;
 }
 
@@ -1135,8 +1135,8 @@
   .metric-number {
     font-size: 1.75rem;
   }
-} 
 
+}
 .hero-features {
   display: flex;
   gap: 24px;
@@ -1159,7 +1159,7 @@
 
 .hero-feature-icon {
   font-size: 1.1rem;
-} 
+}
 
 /* What Makes Us Different Section */
 .what-makes-different {
@@ -1186,7 +1186,7 @@
   font-size: 1.1rem;
   line-height: 1.6;
   margin-bottom: 3rem;
-  opacity: 0.95;
+  color: rgba(255, 255, 255, 0.92);
   max-width: 600px;
   margin-left: auto;
   margin-right: auto;
@@ -1194,8 +1194,8 @@
 
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2.5rem;
   margin-top: 2rem;
   max-width: 1200px;
   margin-left: auto;
@@ -1203,111 +1203,105 @@
 }
 
 .feature-card {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 16px;
-  padding: 2rem;
+  padding: 1.75rem;
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(148, 163, 184, 0.3);
   text-align: left;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  min-height: 280px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
   display: flex;
   flex-direction: column;
-  word-wrap: break-word;
-  overflow: visible;
+  gap: 0.75rem;
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.1);
 }
 
 .feature-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  transform: translateY(-6px);
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.15);
 }
 
 .feature-icon {
   font-size: 2.5rem;
-  margin-bottom: 1rem;
-  display: block;
-  flex-shrink: 0;
+  line-height: 1;
 }
 
 .feature-title {
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   font-weight: 600;
-  margin-bottom: 0.75rem;
-  color: white;
-  line-height: 1.3;
-  flex-shrink: 0;
+  color: #0f172a;
+  margin: 0;
 }
 
 .feature-description {
   font-size: 1rem;
-  line-height: 1.5;
-  opacity: 0.9;
-  color: #e0e7ff;
+  line-height: 1.6;
+  color: #374151;
+  margin: 0;
   flex-grow: 1;
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
 
-/* Enhanced responsive adjustments */
 @media (max-width: 768px) {
   .what-makes-different {
-    padding: 3rem 1rem;
+    padding: 3rem 1.25rem;
   }
-  
+
   .what-makes-different h2 {
     font-size: 2rem;
   }
-  
-  .features-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
+
+  .what-makes-different p {
+    font-size: 1rem;
+    margin-bottom: 2rem;
   }
-  
+
+  .features-grid {
+    gap: 1.75rem;
+  }
+
   .feature-card {
     padding: 1.5rem;
-    min-height: 220px;
+    gap: 0.65rem;
   }
-  
-  .feature-icon {
-    font-size: 2rem;
-  }
-  
+
   .feature-title {
-    font-size: 1.1rem;
+    font-size: 1.15rem;
   }
-  
+
+  .feature-icon {
+    font-size: 2.2rem;
+  }
+
   .feature-description {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
   }
 }
 
 @media (max-width: 480px) {
   .what-makes-different {
-    padding: 2rem 0.75rem;
+    padding: 2.5rem 1rem;
   }
-  
+
   .what-makes-different h2 {
-    font-size: 1.5rem;
+    font-size: 1.6rem;
   }
-  
+
   .what-makes-different p {
-    font-size: 1rem;
+    font-size: 0.95rem;
   }
-  
+
   .feature-card {
-    padding: 1.25rem;
-    min-height: 200px;
+    padding: 1.35rem;
+    gap: 0.6rem;
   }
-  
-  .feature-icon {
-    font-size: 1.75rem;
-  }
-  
+
   .feature-title {
-    font-size: 1rem;
+    font-size: 1.05rem;
   }
-  
+
   .feature-description {
-    font-size: 0.85rem;
+    font-size: 0.92rem;
   }
-} 
+}
