@@ -1,14 +1,59 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Contact.css';
+import { getAPIBaseURL } from '../api';
+import { setLastStep } from '../utils/exitTracking';
 
 const Contact = () => {
   const navigate = useNavigate();
-  
+  const apiBaseUrl = useMemo(() => getAPIBaseURL(), []);
+  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+  const [status, setStatus] = useState('idle');
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    setLastStep('view_contact');
+  }, []);
+
   const handleEmailClick = () => {
-    window.location.href = 'mailto:flychicken1991@gmail.com';
+    window.location.href = 'mailto:hihired_support@tactechs.net';
   };
-  
+
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (status === 'loading') {
+      return;
+    }
+    setStatus('loading');
+    setError('');
+    setLastStep('contact_submit_attempt');
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Request failed');
+      }
+
+      setStatus('success');
+      setFormData({ name: '', email: '', message: '' });
+      setLastStep('contact_submit_success');
+    } catch (err) {
+      console.error('Contact form submission failed', err);
+      setStatus('error');
+      setError('We could not send your message. Please email hihired_support@tactechs.net.');
+      setLastStep('contact_submit_error');
+    }
+  };
+
   const handleStartBuilding = () => {
     navigate('/builder');
   };

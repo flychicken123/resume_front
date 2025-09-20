@@ -1,7 +1,18 @@
 import React from 'react';
 import './SimpleHero.css';
+import { setLastStep } from '../utils/exitTracking';
 
 const SimpleHero = ({ onImportClick, onCreateClick }) => {
+  const handleImport = () => {
+    setLastStep('clicked_import_from_hero');
+    onImportClick?.();
+  };
+
+  const handleCreate = () => {
+    setLastStep('clicked_create_from_hero');
+    onCreateClick?.();
+  };
+
   return (
     <div className="simple-hero">
       <div className="hero-container">
@@ -17,10 +28,10 @@ const SimpleHero = ({ onImportClick, onCreateClick }) => {
           </p>
           
           <div className="hero-buttons">
-            <button className="btn-import" onClick={onImportClick}>
+            <button className="btn-import" onClick={handleImport}>
               Import your resume
             </button>
-            <button className="btn-create" onClick={onCreateClick}>
+            <button className="btn-create" onClick={handleCreate}>
               Create my resume
             </button>
           </div>
@@ -33,7 +44,7 @@ const SimpleHero = ({ onImportClick, onCreateClick }) => {
                 Describe your role in a few words, and we'll generate tailored 
                 content for your work experience section.
               </p>
-              <button className="btn-try-ai" onClick={onCreateClick}>
+              <button className="btn-try-ai" onClick={handleCreate}>
                 Get Started →
               </button>
             </div>
