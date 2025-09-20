@@ -55,9 +55,10 @@ export const setLastStep = (step) => {
 };
 
 export const setCurrentPage = (path, title = '') => {
+  const previousPage = lastPagePath;
   lastPagePath = path || '/';
   lastPageTitle = title;
-  if (!lastStep) {
+  if (!lastStep || lastStep.startsWith('page:') || lastStep === `page:${previousPage}`) {
     lastStep = `page:${lastPagePath}`;
   }
 };
@@ -66,11 +67,20 @@ export const initExitTracking = () => {
   if (trackingInitialized || typeof window === 'undefined') return;
   trackingInitialized = true;
 
-  window.addEventListener('beforeunload', () => sendExitEvent('beforeunload'));
+  window.addEventListener('pageshow', () => {
+    eventSent = false;
+  });
+
+  window.addEventListener('beforeunload', () => {
+    eventSent = false;
+    sendExitEvent('beforeunload');
+  });
 
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') {
       sendExitEvent('visibilitychange');
+    } else if (document.visibilityState === 'visible') {
+      eventSent = false;
     }
   });
 };
