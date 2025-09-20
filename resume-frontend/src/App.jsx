@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import SEO from './components/SEO';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ResumeProvider } from './context/ResumeContext';
 import Home from './components/Home';
@@ -11,7 +11,23 @@ import SubscriptionSuccess from './components/SubscriptionSuccess';
 import SubscriptionCancel from './components/SubscriptionCancel';
 import Analytics from './components/Analytics';
 import SessionMonitor from './components/SessionMonitor';
+import ChatWidget from './components/ChatWidget';
+import { initExitTracking, setCurrentPage } from './utils/exitTracking';
 import './App.css';
+
+function ExitTrackingBridge() {
+  const location = useLocation();
+
+  useEffect(() => {
+    initExitTracking();
+  }, []);
+
+  useEffect(() => {
+    setCurrentPage(location.pathname, document.title || '');
+  }, [location.pathname]);
+
+  return null;
+}
 
 function App() {
   return (
@@ -28,6 +44,7 @@ function App() {
           />
           <Analytics />
           <SessionMonitor />
+          <ExitTrackingBridge />
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<LoginPage />} />
@@ -39,11 +56,11 @@ function App() {
             {/* Hidden - Apply to Jobs feature
             <Route path="/apply" element={<JobApplicationPage />} />
             */}
-          </Routes>
-        </Router>
+          </Routes>\r\n          <ChatWidget />\r\n        </Router>
       </ResumeProvider>
     </AuthProvider>
   );
 }
 
 export default App;
+

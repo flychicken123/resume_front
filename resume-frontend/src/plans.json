@@ -1,0 +1,46 @@
+{
+  "plans": [
+    {
+      "id": "free",
+      "name": "Free Plan",
+      "price": 0.0,
+      "currency": "USD",
+      "resume_limit": 1,
+      "resume_period": "weekly",
+      "features": [
+        "1 resume per week",
+        "Basic templates",
+        "PDF export",
+        "Email support"
+      ]
+    },
+    {
+      "id": "premium",
+      "name": "Premium Plan",
+      "price": 9.99,
+      "currency": "USD",
+      "resume_limit": 30,
+      "resume_period": "monthly",
+      "features": [
+        "30 resumes per month",
+        "Advanced templates",
+        "Keyword optimization",
+        "Priority support"
+      ]
+    },
+    {
+      "id": "ultimate",
+      "name": "Ultimate Plan",
+      "price": 29.99,
+      "currency": "USD",
+      "resume_limit": 200,
+      "resume_period": "monthly",
+      "features": [
+        "200 resumes per month",
+        "All templates",
+        "Bulk downloads",
+        "Agency tools"
+      ]
+    }
+  ]
+}
