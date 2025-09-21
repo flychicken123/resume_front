@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useResume } from '../context/ResumeContext';
 import { generateSummaryAI, improveSummaryGrammarAI } from '../api';
 import { useLocation } from 'react-router-dom';
@@ -8,14 +8,82 @@ const StepSummary = () => {
   const [loading, setLoading] = useState(false);
   const [aiMode, setAiMode] = useState(false);
   const location = useLocation();
-  
-  // Extract job description from URL if present
+
+  const normalizeSkills = () => {
+    if (Array.isArray(data.skills)) {
+      return data.skills.map((skill) => (skill || '').trim()).filter(Boolean);
+    }
+    if (typeof data.skills === 'string') {
+      return data.skills
+        .split(',')
+        .map((skill) => skill.trim())
+        .filter(Boolean);
+    }
+    return [];
+  };
+
+  const buildExperienceText = () => {
+    if (!Array.isArray(data.experiences) || data.experiences.length === 0) {
+      return '';
+    }
+
+    const entries = data.experiences
+      .map((exp) => {
+        if (!exp) return '';
+
+        const headerParts = [];
+        if (exp.jobTitle) headerParts.push(exp.jobTitle);
+        if (exp.company) headerParts.push(`at ${exp.company}`);
+        const location = [exp.city, exp.state].filter(Boolean).join(', ');
+        if (location) headerParts.push(location);
+
+        let dates = '';
+        if (exp.startDate || exp.endDate || exp.currentlyWorking) {
+          const start = exp.startDate ? exp.startDate : '';
+          const end = exp.currentlyWorking ? 'Present' : exp.endDate || '';
+          if (start || end) {
+            dates = start && end ? `${start} - ${end}` : (start || end);
+          }
+        }
+        if (dates) headerParts.push(`(${dates})`);
+
+        const header = headerParts.join(' ');
+        const description = (exp.description || '').trim();
+
+        return [header, description].filter(Boolean).join('\n');
+      })
+      .filter(Boolean);
+
+    return entries.join('\n\n');
+  };
+
+  const buildEducationText = () => {
+    if (Array.isArray(data.education) && data.education.length > 0) {
+      return data.education
+        .map((edu) => {
+          if (!edu) return '';
+          const degree = edu.degree || '';
+          const field = edu.field ? ` in ${edu.field}` : '';
+          const school = edu.school ? ` at ${edu.school}` : '';
+          const years = edu.graduationYear || edu.startYear
+            ? ` (${[edu.startYear, edu.graduationYear].filter(Boolean).join(' - ')})`
+            : '';
+          return `${degree}${field}${school}${years}`.trim();
+        })
+        .filter(Boolean)
+        .join(', ');
+    }
+    if (typeof data.education === 'string') {
+      return data.education;
+    }
+    return '';
+  };
+
   const getJobDescription = () => {
     const pathParts = location.pathname.split('/');
     if (pathParts[1] === 'build' && pathParts[2]) {
       return decodeURIComponent(pathParts[2]);
     }
-    // Fallback to localStorage
     return localStorage.getItem('jobDescription') || '';
   };
 
@@ -23,30 +91,36 @@ const StepSummary = () => {
     try {
       setLoading(true);
       const jobDesc = getJobDescription();
-      
-      if (jobDesc && (!data.summary || data.summary.trim() === '')) {
-        // Generate new summary based on job description
-        const educationText = Array.isArray(data.education) 
-          ? data.education.map(edu => 
-              `${edu.degree}${edu.field ? ` in ${edu.field}` : ''} from ${edu.school}${edu.graduationYear ? ` (${edu.graduationYear})` : ''}`
-            ).join(', ')
-          : data.education;
-        
-        const suggestion = await generateSummaryAI({ 
-          experience: data.experience, 
-          education: educationText, 
-          skills: data.skills.split(',').map(s => s.trim()) 
+      const experienceText = buildExperienceText();
+      const educationText = buildEducationText();
+      const skillsList = normalizeSkills();
+      const hasSummary = Boolean(data.summary && data.summary.trim());
+      const hasContext = Boolean(experienceText || educationText || skillsList.length || jobDesc);
+
+      if (!hasSummary) {
+        if (!hasContext) {
+          alert('Please enter a summary first or add experience/education to generate one.');
+          return;
+        }
+
+        const experiencePayload = [
+          experienceText,
+          jobDesc ? `Job Description:\n${jobDesc}` : ''
+        ]
+          .filter(Boolean)
+          .join('\n\n');
+
+        const suggestion = await generateSummaryAI({
+          experience: experiencePayload,
+          education: educationText,
+          skills: skillsList,
         });
         setData({ ...data, summary: suggestion });
-      } else if (data.summary && data.summary.trim()) {
-        // Improve existing summary
+      } else {
         const improvedText = await improveSummaryGrammarAI(data.summary);
         setData({ ...data, summary: improvedText });
-      } else {
-        alert('Please enter a summary first or add experience/education to generate one.');
-        return;
       }
-      
+
       setAiMode(true);
     } catch (err) {
       alert('Failed to check with AI. Please try again.');
@@ -58,16 +132,18 @@ const StepSummary = () => {
   return (
     <div>
       <h2>Professional Summary</h2>
-      <p style={{ color: '#6b7280', marginBottom: '1rem', fontSize: '0.875rem' }}>Optional: A brief overview of your professional background and key qualifications.</p>
-      
+      <p style={{ color: '#6b7280', marginBottom: '1rem', fontSize: '0.875rem' }}>
+        Optional: A brief overview of your professional background and key qualifications.
+      </p>
+
       <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#374151' }}>Professional Summary</label>
       <textarea
         rows="4"
         value={data.summary}
         onChange={(e) => setData({ ...data, summary: e.target.value })}
         placeholder="Write a brief overview of your professional background, key skills, and career objectives..."
-        style={{ 
-          width: '100%', 
+        style={{
+          width: '100%',
           padding: '0.75rem',
           border: '1px solid #d1d5db',
           borderRadius: '6px',
@@ -76,8 +152,7 @@ const StepSummary = () => {
           marginBottom: '1rem'
         }}
       />
-      
-      {/* AI Check Button */}
+
       <div style={{ marginTop: '1rem' }}>
         <button
           onClick={checkWithAI}
@@ -93,11 +168,11 @@ const StepSummary = () => {
             opacity: loading ? 0.5 : 1
           }}
           title={
-            getJobDescription() && !data.summary 
-              ? "Generate summary based on job description" 
-              : data.summary 
-              ? "Improve grammar and professionalism" 
-              : "Add content to generate summary"
+            getJobDescription() && !data.summary
+              ? 'Generate summary based on job description'
+              : data.summary
+              ? 'Improve grammar and professionalism'
+              : 'Add content to generate summary'
           }
         >
           {loading ? 'Checking...' : aiMode ? '✓ AI Enhanced' : '✨ Check with AI'}
@@ -110,5 +185,6 @@ const StepSummary = () => {
       </div>
     </div>
   );
-}
+};
+
 export default StepSummary;
