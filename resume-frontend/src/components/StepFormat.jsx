@@ -45,11 +45,11 @@ const StepFormat = ({ onNext }) => {
       padding: '1rem',
       maxWidth: '100%'
     }}>
-      <h2 style={{ marginBottom: '0.25rem' }}>Choose Your Resume Format</h2>
-      <p style={{ marginBottom: '1rem' }}>Select a template style and font size that best represents your professional image.</p>
+      <h2 style={{ marginBottom: '0.25rem' }}>Choose Your Template and Format</h2>
+      <p style={{ marginBottom: '1rem' }}>Pick a template style and font size. You can change these anytime.</p>
 
       <div style={{ marginBottom: '1rem' }}>
-        <h3 style={{ marginBottom: '0.75rem' }}>Template Style</h3>
+        <h3 style={{ marginBottom: '0.75rem' }}>Templates</h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '0.75rem' }}>
           {formats.map((format) => (
             <div
