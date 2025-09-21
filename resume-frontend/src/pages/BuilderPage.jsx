@@ -247,24 +247,34 @@ function BuilderPage() {
           const combinedContent = document.createElement('div');
           combinedContent.className = 'multi-page-pdf-container';
           combinedContent.style.cssText = 'background: white; color: black; padding: 0; margin: 0; box-sizing: border-box;';
-          const PAGE_MAX_HEIGHT = 1900; // account for 2x preview scale when measuring height
-          const measuredPages = Array.from(pageWrappers).map(wrapper => {
-            const pageContent = wrapper.querySelector('.page-content');
-            const rawHeight = pageContent
-              ? Math.max(pageContent.scrollHeight, pageContent.getBoundingClientRect().height)
-              : Math.max(wrapper.scrollHeight, wrapper.getBoundingClientRect().height);
-            return { wrapper, pageContent, height: rawHeight };
-          }).filter(item => !!item.pageContent);
 
-          let pageIndex = 0;
-          let pdfPageCounter = 1;
-          while (pageIndex < measuredPages.length) {
+          const measuredPages = Array.from(pageWrappers)
+            .map(wrapper => ({
+              wrapper,
+              pageContent: wrapper.querySelector('.page-content') || wrapper
+            }))
+            .filter(item => !!item.pageContent);
+
+          measuredPages.forEach((page, index) => {
             const pageContainer = document.createElement('div');
-            pageContainer.className = `pdf-page-${pdfPageCounter}`;
-            const topPadding = pdfPageCounter === 1 ? '8px' : '20px';
+            pageContainer.className = `pdf-page-${index + 1}`;
+
+            let paddingTop = '20px';
+            let paddingRight = '20px';
+            let paddingBottom = '20px';
+            let paddingLeft = '20px';
+
+            if (page.wrapper && window.getComputedStyle) {
+              const computedPadding = window.getComputedStyle(page.wrapper);
+              paddingTop = computedPadding.getPropertyValue('padding-top') || paddingTop;
+              paddingRight = computedPadding.getPropertyValue('padding-right') || paddingRight;
+              paddingBottom = computedPadding.getPropertyValue('padding-bottom') || paddingBottom;
+              paddingLeft = computedPadding.getPropertyValue('padding-left') || paddingLeft;
+            }
+
             pageContainer.style.cssText = `
               width: 100%;
-              padding: ${topPadding} 20px 20px;
+              padding: ${paddingTop} ${paddingRight} ${paddingBottom} ${paddingLeft};
               margin: 0;
               box-sizing: border-box;
               background: white;
@@ -272,40 +282,18 @@ function BuilderPage() {
               page-break-inside: avoid;
             `;
 
-            let usedHeight = 0;
-            let isFirstClone = true;
+            const contentClone = page.pageContent.cloneNode(true);
+            normalizeElementSizing(contentClone);
+            contentClone.style.background = 'white';
+            contentClone.style.color = 'black';
+            pageContainer.appendChild(contentClone);
 
-            while (pageIndex < measuredPages.length) {
-              const { pageContent, height } = measuredPages[pageIndex];
-              if (!isFirstClone && usedHeight + height > PAGE_MAX_HEIGHT) {
-                break;
-              }
-
-              const contentClone = pageContent.cloneNode(true);
-              normalizeElementSizing(contentClone);
-              contentClone.style.background = 'white';
-              contentClone.style.color = 'black';
-
-              if (!isFirstClone) {
-                const spacer = document.createElement('div');
-                spacer.style.height = '8px';
-                spacer.style.width = '100%';
-                pageContainer.appendChild(spacer);
-              }
-
-              pageContainer.appendChild(contentClone);
-              usedHeight += height;
-              pageIndex += 1;
-              isFirstClone = false;
-            }
-
-            if (pageIndex < measuredPages.length) {
+            if (index < measuredPages.length - 1) {
               pageContainer.style.pageBreakAfter = 'always';
             }
 
             combinedContent.appendChild(pageContainer);
-            pdfPageCounter += 1;
-          }
+          });
 
           multiPageContainer.parentNode.replaceChild(combinedContent, multiPageContainer);
         } else if (!singlePageContainer && !multiPageContainer) {
@@ -442,7 +430,7 @@ function BuilderPage() {
         const pdfOverrides = `
           @page { 
             size: Letter; 
-            margin: 0.5in;
+            margin: 0;
           }
           
           /* Allow natural page breaks for long content */
