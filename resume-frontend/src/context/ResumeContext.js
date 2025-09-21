@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { useAuth } from './AuthContext';
 
 // Get API URL - use same logic as other files
@@ -16,6 +16,32 @@ const getAPIBaseURL = () => {
 const API_BASE_URL = getAPIBaseURL();
 
 const ResumeContext = createContext();
+
+const createDefaultResumeData = () => ({
+  name: "",
+  email: "",
+  phone: "",
+  experiences: [],
+  education: [{
+    degree: '',
+    school: '',
+    field: '',
+    graduationYear: '',
+    gpa: '',
+    honors: '',
+    location: ''
+  }],
+  projects: [{
+    projectName: '',
+    description: '',
+    technologies: '',
+    projectUrl: ''
+  }],
+  skills: "",
+  summary: "",
+  selectedFormat: "temp1",
+  selectedFontSize: "medium"
+});
 
 // Helper function to get data from localStorage with user-specific key
 const getStoredData = (userId) => {
@@ -37,6 +63,33 @@ const saveToStorage = (data, userId) => {
   } catch (error) {
     console.error('Error saving to localStorage:', error);
   }
+};
+
+// Retrieve the last known user email from storage to hydrate before AuthContext loads
+const getStoredUserEmail = () => {
+  if (typeof window === 'undefined') return null;
+
+  const rawUser = localStorage.getItem('resumeUser');
+  if (!rawUser || rawUser === 'undefined' || rawUser === 'null') {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(rawUser);
+    if (typeof parsed === 'string') {
+      return parsed;
+    }
+    if (parsed && typeof parsed === 'object') {
+      return parsed.email || parsed.user || null;
+    }
+  } catch (error) {
+    if (!(error instanceof SyntaxError)) {
+      console.error('Error parsing stored user from localStorage:', error);
+    }
+  }
+
+  // Fallback: raw value may already be an email string
+  return rawUser;
 };
 
 // Helper function to clear stored data
@@ -100,42 +153,38 @@ const loadFromDatabase = async (userEmail) => {
 
 export const ResumeProvider = ({ children }) => {
   const { user } = useAuth();
+  const initialUserEmailRef = useRef(getStoredUserEmail());
+  const hasHydratedRef = useRef(false);
+  const hydratedUserRef = useRef(initialUserEmailRef.current || null);
   
   const [data, setData] = useState(() => {
     // Initialize with stored data or default values
-    const userId = user ? user.email : null;
+    const userId = (user && user.email) || initialUserEmailRef.current;
     const storedData = getStoredData(userId);
-    return storedData || {
-      name: "",
-      email: "",
-      phone: "",
-      experiences: [],
-      education: [{
-        degree: '',
-        school: '',
-        field: '',
-        graduationYear: '',
-        gpa: '',
-        honors: '',
-        location: ''
-      }],
-      projects: [{
-        projectName: '',
-        description: '',
-        technologies: '',
-        projectUrl: ''
-      }],
-      skills: "",
-      summary: "",
-      selectedFormat: "temp1",  // Default format
-      selectedFontSize: "medium"  // Default font size
-    };
+    return storedData || createDefaultResumeData();
   });
 
   // Save data to localStorage whenever it changes (but not to database)
   useEffect(() => {
-    const userId = user ? user.email : null;
-    saveToStorage(data, userId);
+    const currentUserId = user ? user.email : null;
+
+    if (hydratedUserRef.current !== currentUserId) {
+      hydratedUserRef.current = currentUserId;
+      hasHydratedRef.current = false;
+    }
+
+    if (!hasHydratedRef.current) {
+      hasHydratedRef.current = true;
+      if (currentUserId) {
+        initialUserEmailRef.current = currentUserId;
+      }
+      return;
+    }
+
+    if (currentUserId) {
+      initialUserEmailRef.current = currentUserId;
+    }
+    saveToStorage(data, currentUserId);
     // Note: Database saving is now only done when user clicks "Download Resume"
   }, [data, user]);
 
@@ -156,31 +205,7 @@ export const ResumeProvider = ({ children }) => {
   const clearData = () => {
     const userId = user ? user.email : null;
     clearStoredData(userId);
-    setData({
-      name: "",
-      email: "",
-      phone: "",
-      experiences: [],
-      education: [{
-        degree: '',
-        school: '',
-        field: '',
-        graduationYear: '',
-        gpa: '',
-        honors: '',
-        location: ''
-      }],
-      projects: [{
-        projectName: '',
-        description: '',
-        technologies: '',
-        projectUrl: ''
-      }],
-      skills: "",
-      summary: "",
-      selectedFormat: "temp1",
-      selectedFontSize: "medium"
-    });
+    setData(createDefaultResumeData());
   };
 
   // Function to load user data when they log in
