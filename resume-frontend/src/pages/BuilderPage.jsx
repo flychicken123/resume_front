@@ -33,11 +33,11 @@ const getAPIBaseURL = () => {
 
 const steps = [
   "Personal Details",
+    "Job Description (Optional)",
   "Experience",
   "Projects",
   "Education",
   "Skills",
-  "Job Description",
   "Template & Format",
   "Summary",
   "Cover Letter"
@@ -1123,11 +1123,11 @@ function BuilderPage() {
             </div>
             <div className="builder-content">
               {step === 1 && <StepPersonal />}
-              {step === 2 && <StepExperience />}
-              {step === 3 && <StepProjects />}
-              {step === 4 && <StepEducation />}
-              {step === 5 && <StepSkills />}
-              {step === 6 && (
+              {step === 3 && <StepExperience />}
+              {step === 4 && <StepProjects />}
+              {step === 5 && <StepEducation />}
+              {step === 6 && <StepSkills />}
+              {step === 2 && (
                 <StepJobDescription
                   jobDescription={jobDescription}
                   onJobDescriptionChange={handleJobDescriptionChange}
