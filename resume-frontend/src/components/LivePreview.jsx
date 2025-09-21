@@ -907,17 +907,32 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
 
         return (
           <div key={idx} style={styles.item}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-              <div style={styles.company}>
+            <div style={{ width: '100%', overflow: 'hidden' }}>
+              <div style={{ ...styles.company, float: 'left' }}>
                 {edu.school || 'University'}
               </div>
               {yearRange && (
-                <div style={{ ...styles.date, fontWeight: 'normal' }}>
+                <div
+                  style={{
+                    ...styles.date,
+                    fontWeight: 'normal',
+                    float: 'right',
+                    textAlign: 'right',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
                   {yearRange}
                 </div>
               )}
             </div>
-            <div style={{ marginTop: '2px' }}>
+            <div
+              style={{
+                ...styles.company,
+                fontWeight: 'normal',
+                marginTop: '2px',
+                clear: 'both',
+              }}
+            >
               {edu.degree} {edu.field && `in ${edu.field}`}
               {edu.gpa && ` • GPA: ${edu.gpa}`}
             </div>
@@ -927,8 +942,30 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
     } else {
       return (
         <div style={styles.item}>
-          <div style={styles.company}>Degree</div>
-          <div style={styles.date}>University • Year</div>
+          <div style={{ width: '100%', overflow: 'hidden' }}>
+            <div style={{ ...styles.company, float: 'left' }}>Degree</div>
+            <div
+              style={{
+                ...styles.date,
+                fontWeight: 'normal',
+                float: 'right',
+                textAlign: 'right',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              University • Year
+            </div>
+          </div>
+          <div
+            style={{
+              ...styles.company,
+              fontWeight: 'normal',
+              marginTop: '2px',
+              clear: 'both',
+            }}
+          >
+            Degree • Field
+          </div>
         </div>
       );
     }
