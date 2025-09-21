@@ -8,12 +8,12 @@ import StepExperience from '../components/StepExperience';
 import StepEducation from '../components/StepEducation';
 import StepProjects from '../components/StepProjects';
 import StepSkills from '../components/StepSkills';
+import StepJobDescription from '../components/StepJobDescription';
 import StepFormat from '../components/StepFormat';
 import StepSummary from '../components/StepSummary';
 import StepCoverLetter from '../components/StepCoverLetter';
 import LivePreview from '../components/LivePreview';
 import AuthModal from '../components/auth/AuthModal';
-import JobDescModal from '../components/JobDescModal';
 import ImportResumeModal from '../components/ImportResumeModal';
 import UpgradeModal from '../components/UpgradeModal';
 import SubscriptionStatus from '../components/SubscriptionStatus';
@@ -37,6 +37,7 @@ const steps = [
   "Projects",
   "Education",
   "Skills",
+  "Job Description",
   "Template & Format",
   "Summary",
   "Cover Letter"
@@ -45,7 +46,6 @@ const steps = [
 function BuilderPage() {
   const [step, setStep] = useState(1); // Start with Personal Details step
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [showJobDescModal, setShowJobDescModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [jobDescription, setJobDescription] = useState('');
@@ -851,15 +851,14 @@ function BuilderPage() {
   };
 
   // Handler for job description submission
-  const handleJobDescSubmit = (description) => {
+  const handleJobDescriptionChange = (description) => {
     setJobDescription(description);
-    localStorage.setItem('jobDescription', description);
-    setShowJobDescModal(false);
-  };
-
-  const handleProceedAfterChoice = () => {
-    setShowJobDescModal(false);
-    setShowImportModal(true);
+    const trimmed = description.trim();
+    if (trimmed) {
+      localStorage.setItem('jobDescription', trimmed);
+    } else {
+      localStorage.removeItem('jobDescription');
+    }
   };
 
   const handleNext = () => {
@@ -1040,8 +1039,6 @@ function BuilderPage() {
     }
   };
 
-  const CurrentStepComponent = steps[step - 1];
-
   return (
     <>
       <Helmet>
@@ -1064,6 +1061,36 @@ function BuilderPage() {
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#f8fafc' }}>
           <div className="site-header" style={{ width: '100%', paddingTop: '2.5rem', paddingBottom: '1.5rem', textAlign: 'center', background: 'transparent', position: 'relative' }}>
                          <div style={{ position: 'absolute', right: '2rem', top: '50%', transform: 'translateY(-50%)', display: 'flex', gap: '1rem', zIndex: 20 }}>
+              <button
+                onClick={() => setShowImportModal(true)}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: '#3b82f6',
+                  color: 'white',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  fontSize: '0.95rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  boxShadow: '0 2px 6px rgba(59, 130, 246, 0.3)',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.background = '#2563eb';
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = '0 4px 10px rgba(37, 99, 235, 0.3)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = '#3b82f6';
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = '0 2px 6px rgba(59, 130, 246, 0.3)';
+                }}
+              >
+                📄 Import Resume
+              </button>
               <button
                 onClick={() => window.location.href = '/'}
                 style={{
@@ -1129,9 +1156,15 @@ function BuilderPage() {
               {step === 3 && <StepProjects />}
               {step === 4 && <StepEducation />}
               {step === 5 && <StepSkills />}
-              {step === 6 && <StepFormat />}
-              {step === 7 && <StepSummary />}
-              {step === 8 && (
+              {step === 6 && (
+                <StepJobDescription
+                  jobDescription={jobDescription}
+                  onJobDescriptionChange={handleJobDescriptionChange}
+                />
+              )}
+              {step === 7 && <StepFormat />}
+              {step === 8 && <StepSummary />}
+              {step === 9 && (
                 <StepCoverLetter
                   onGeneratePremiumFeature={() => setShowUpgradeModal(true)}
                 />
@@ -1354,8 +1387,8 @@ function BuilderPage() {
               flexDirection: 'column'
             }}
           >
-                            {step !== 8 && <LivePreview onDownload={handleViewResume} />}
-                            {step === 8 && (
+                            {step !== 9 && <LivePreview onDownload={handleViewResume} />}
+                            {step === 9 && (
                               <div style={{
                                 display: 'flex',
                                 alignItems: 'center',
@@ -1373,7 +1406,6 @@ function BuilderPage() {
 
              {/* Modals */}
        {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
-       {showJobDescModal && <JobDescModal onClose={() => setShowJobDescModal(false)} onJobDescriptionSubmit={handleJobDescSubmit} onProceed={handleProceedAfterChoice} />}
        {showImportModal && <ImportResumeModal onClose={() => setShowImportModal(false)} />}
        {showUpgradeModal && (() => {
          console.log('Rendering UpgradeModal, showUpgradeModal=', showUpgradeModal, 'data=', subscriptionData);
