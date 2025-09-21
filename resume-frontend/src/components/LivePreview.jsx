@@ -140,10 +140,10 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
     
     // Adjust available height based on font size - balanced for better space usage
     // Slightly higher percentages since our estimates are now more accurate
-    const pageUtilization = fontScale <= 0.85 ? 0.94 :  // Small fonts - use 94%
-                           fontScale <= 1.0 ? 0.93 :   // Medium fonts - use 93%
-                           fontScale <= 1.15 ? 0.92 :  // Large fonts - use 92%
-                           0.90;                        // Extra-large - use 90%
+    const pageUtilization = fontScale <= 0.85 ? 0.97 :  // Small fonts - use more of the page
+                           fontScale <= 1.0 ? 0.965 :  // Medium fonts
+                           fontScale <= 1.15 ? 0.95 :  // Large fonts
+                           0.93;                        // Extra-large
     const effectiveAvailableHeight = AVAILABLE_HEIGHT * pageUtilization;
     
     // Helper function to add section to current page
