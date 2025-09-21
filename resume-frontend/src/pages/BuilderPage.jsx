@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { useAuth } from '../context/AuthContext';
 import { useResume } from '../context/ResumeContext';
@@ -143,6 +143,7 @@ function BuilderPage() {
 
   // Handler for view resume action
   const handleViewResume = async () => {
+    let styleOverride = null;
     try {
       // Check if user is authenticated
       if (!user) {
@@ -164,8 +165,19 @@ function BuilderPage() {
       // Capture the HTML content from the live preview
       // Force all pages to be visible for PDF generation
       // Remove height constraints for PDF generation
-      const styleOverride = document.createElement("style");
-      styleOverride.innerHTML = ".page-wrapper { height: auto !important; max-height: none !important; overflow: visible !important; } .page-content { height: auto !important; max-height: none !important; overflow: visible !important; }";
+      styleOverride = document.createElement("style");
+      styleOverride.innerHTML = `
+        .page-wrapper {
+          height: auto !important;
+          max-height: none !important;
+          overflow: visible !important;
+        }
+        .page-content {
+          height: auto !important;
+          max-height: none !important;
+          overflow: visible !important;
+        }
+      `;
       document.head.appendChild(styleOverride);
       const allPageWrappers = document.querySelectorAll(".page-wrapper");
       allPageWrappers.forEach(wrapper => {
@@ -216,67 +228,101 @@ function BuilderPage() {
         // Handle both single-page and multi-page content
         const singlePageContainer = clonedElement.querySelector('.single-page-container');
         const multiPageContainer = clonedElement.querySelector('.multi-page-container');
-        
+
+        const normalizeElementSizing = (element) => {
+          if (!element || !element.style) return;
+          element.style.setProperty('height', 'auto', 'important');
+          element.style.setProperty('max-height', 'none', 'important');
+          element.style.setProperty('min-height', '0', 'important');
+          element.style.removeProperty('transform');
+          element.style.removeProperty('-webkit-transform');
+          Array.from(element.children || []).forEach(child => normalizeElementSizing(child));
+        };
+
         if (multiPageContainer && !singlePageContainer) {
-          
-          // Extract content from all page wrappers and combine into single container
           const pageWrappers = multiPageContainer.querySelectorAll('.page-wrapper');
           console.log("HTML before processing:", clonedElement.innerHTML.includes("EDUCATION") ? "Contains EDUCATION" : "Missing EDUCATION");
           console.log("Found", pageWrappers.length, "pages in multi-page container");
+
           const combinedContent = document.createElement('div');
           combinedContent.className = 'multi-page-pdf-container';
           combinedContent.style.cssText = 'background: white; color: black; padding: 0; margin: 0; box-sizing: border-box;';
-          
-          pageWrappers.forEach((wrapper, index) => {
+          const PAGE_MAX_HEIGHT = 1900; // account for 2x preview scale when measuring height
+          const measuredPages = Array.from(pageWrappers).map(wrapper => {
             const pageContent = wrapper.querySelector('.page-content');
-              if (pageContent) { console.log("Processing page", index + 1, "- Full content includes EDUCATION:", pageContent.innerHTML.includes("EDUCATION")); }
-            if (pageContent) {
-              // Create a page container to maintain exact page boundaries
-              const pageContainer = document.createElement('div');
-              pageContainer.className = `pdf-page-${index + 1}`;
-              pageContainer.style.cssText = `
-                padding: 20px;
-                min-height: auto;
-                
-                overflow: visible;
-                box-sizing: border-box;
-                ${index > 0 ? 'page-break-before: always;' : ''}
-              `;
-              
-              // Clone the page content
+            const rawHeight = pageContent
+              ? Math.max(pageContent.scrollHeight, pageContent.getBoundingClientRect().height)
+              : Math.max(wrapper.scrollHeight, wrapper.getBoundingClientRect().height);
+            return { wrapper, pageContent, height: rawHeight };
+          }).filter(item => !!item.pageContent);
+
+          let pageIndex = 0;
+          let pdfPageCounter = 1;
+          while (pageIndex < measuredPages.length) {
+            const pageContainer = document.createElement('div');
+            pageContainer.className = `pdf-page-${pdfPageCounter}`;
+            const topPadding = pdfPageCounter === 1 ? '8px' : '20px';
+            pageContainer.style.cssText = `
+              width: 100%;
+              padding: ${topPadding} 20px 20px;
+              margin: 0;
+              box-sizing: border-box;
+              background: white;
+              color: black;
+              page-break-inside: avoid;
+            `;
+
+            let usedHeight = 0;
+            let isFirstClone = true;
+
+            while (pageIndex < measuredPages.length) {
+              const { pageContent, height } = measuredPages[pageIndex];
+              if (!isFirstClone && usedHeight + height > PAGE_MAX_HEIGHT) {
+                break;
+              }
+
               const contentClone = pageContent.cloneNode(true);
-              // Debug: Check what sections are in this page
-              const sections = contentClone.querySelectorAll("[style*=fontWeight], div");
-              const educationDiv = contentClone.innerHTML.includes("EDUCATION") ? "Has EDUCATION text" : "No EDUCATION text";
-              console.log("Page", index + 1, "- Education check:", educationDiv);
-              contentClone.style.height = "auto";
-              contentClone.style.maxHeight = "none";
-              contentClone.style.overflow = "visible";
+              normalizeElementSizing(contentClone);
+              contentClone.style.background = 'white';
+              contentClone.style.color = 'black';
+
+              if (!isFirstClone) {
+                const spacer = document.createElement('div');
+                spacer.style.height = '8px';
+                spacer.style.width = '100%';
+                pageContainer.appendChild(spacer);
+              }
+
               pageContainer.appendChild(contentClone);
-              
-              // Add the page container
-              combinedContent.appendChild(pageContainer);
+              usedHeight += height;
+              pageIndex += 1;
+              isFirstClone = false;
             }
-          });
-          
-          // Replace the multi-page container with our combined single-page container
+
+            if (pageIndex < measuredPages.length) {
+              pageContainer.style.pageBreakAfter = 'always';
+            }
+
+            combinedContent.appendChild(pageContainer);
+            pdfPageCounter += 1;
+          }
+
           multiPageContainer.parentNode.replaceChild(combinedContent, multiPageContainer);
         } else if (!singlePageContainer && !multiPageContainer) {
           // No content containers found
         } else {
           // Using existing single-page container
         }
-        
-        // Remove any remaining multi-page elements
-        const remainingMultiPageElements = clonedElement.querySelectorAll('.multi-page-container, .page-wrapper');
-        remainingMultiPageElements.forEach(el => {
-          el.remove();
-        });
-        
+
         // DIFFERENT APPROACH: Clean up the HTML to prevent phantom pages
         // Remove any empty divs that might cause page breaks
         const allDivs = clonedElement.querySelectorAll('div');
         allDivs.forEach(div => {
+          if (!div) return;
+          const className = div.className || '';
+          if (className.includes('page-wrapper') || className.includes('page-content') || className.includes('pdf-page')) {
+            return;
+          }
           // Remove divs that are empty or only contain whitespace
           if (div && (!div.textContent || div.textContent.trim() === '')) {
             // Check if it has no visible children
@@ -292,6 +338,11 @@ function BuilderPage() {
         // Remove any elements with excessive height that might push content to next page
         const containerDivs = clonedElement.querySelectorAll('[style*="height"]');
         containerDivs.forEach(div => {
+          if (!div) return;
+          const className = div.className || '';
+          if (className.includes('page-wrapper') || className.includes('page-content') || className.includes('pdf-page')) {
+            return;
+          }
           if (div.style.height && div.style.height !== 'auto') {
             div.style.height = 'auto';
           }
@@ -357,29 +408,36 @@ function BuilderPage() {
         // Base scale factor for preview (2x) - same as LivePreview
         const baseScaleFactor = 2;
         const fontScale = baseScaleFactor * (fontSizeMultipliers[selectedFontSize] || 1.0);
-        
-        // Apply the scaling to the container for PDF
-        if (singlePageDiv) {
-          // Scale all font sizes in the container
-          const scaleAllFontSizes = (element) => {
-            // Process current element
-            if (element.style && element.style.fontSize) {
-              const currentSize = parseFloat(element.style.fontSize);
-              if (!isNaN(currentSize)) {
-                // Already scaled by LivePreview, no need to scale again
-                // Just ensure it's preserved
-              }
-            }
-            
-            // Process all children
-            Array.from(element.children).forEach(child => {
-              scaleAllFontSizes(child);
-            });
-          };
-          
-          scaleAllFontSizes(singlePageDiv);
-        }
-        
+
+        const getTemplateFont = () => {
+          switch(data.selectedFormat || 'temp1') {
+            case 'temp1':
+              return "'Calibri', 'Arial', sans-serif";
+            case 'industry-manager':
+              return "'Georgia', serif";
+            case 'modern':
+              return "'Segoe UI', 'Tahoma', 'Geneva', 'Verdana', sans-serif";
+            default:
+              return "'Calibri', 'Arial', sans-serif";
+          }
+        };
+        const getTemplateLineHeight = () => {
+          switch (data.selectedFormat || 'temp1') {
+            case 'temp1':
+              return 1.15; // Match preview default for classic template
+            case 'modern':
+              return 1.2;
+            case 'industry-manager':
+              return 1.25;
+            default:
+              return 1.2;
+          }
+        };
+        const templateFont = getTemplateFont();
+        const templateLineHeight = getTemplateLineHeight();
+
+        normalizeElementSizing(clonedElement);
+
         // PDF-specific overrides to ensure consistent rendering (keep minimal)
         const pdfOverrides = `
           @page { 
@@ -438,7 +496,13 @@ function BuilderPage() {
             overflow: visible !important;
             box-sizing: border-box !important;
           }
-          
+
+          .multi-page-pdf-container,
+          .multi-page-pdf-container * {
+            font-family: ${templateFont} !important;
+          }
+
+
           /* Last page shouldn't have page break after */
           .multi-page-pdf-container > div[class^="pdf-page-"]:last-child {
             page-break-after: avoid !important;
@@ -589,26 +653,9 @@ function BuilderPage() {
         
 
  
-        // Get the font based on template
         console.log("Current data.selectedFormat:", data.selectedFormat);
         console.log("Current data.template:", data.template);
-        const getTemplateFont = () => {
-          switch(data.selectedFormat || 'temp1') {
-            case 'temp1':
-              return "'Calibri', 'Arial', sans-serif";
-            case 'industry-manager':
-              return "'Georgia', serif";
-            case 'modern':
-              return "'Segoe UI', 'Tahoma', 'Geneva', 'Verdana', sans-serif";
-            default:
-              return "'Calibri', 'Arial', sans-serif";
-          }
-        };
-        const templateFont = getTemplateFont();
         console.log("Using font for template", data.selectedFormat, ":", templateFont);
-        
-        // Create complete HTML document with CSS overrides LAST
-        // Comprehensive font debugging
         console.log("Template (selectedFormat):", data.selectedFormat);
         console.log("Font selected:", templateFont);
         console.log("All data keys:", Object.keys(data));
@@ -625,8 +672,8 @@ function BuilderPage() {
   <style>
     /* Fallback font for PDF generation - only apply if no font is specified */
     body {
-      font-family: 'Inter', 'Segoe UI', 'Arial', 'Helvetica', sans-serif;
-      line-height: 1.4;
+      font-family: ${templateFont};
+      line-height: ${templateLineHeight};
     }
     /* Let template-specific fonts take precedence */
   </style>
@@ -758,20 +805,15 @@ function BuilderPage() {
              return;
            }
 
-           if (result.ok && result.data && result.data.downloadURL) {
-             // Extract filename from the downloadURL
-             const url = new URL(result.data.downloadURL);
-             const pathParts = url.pathname.split('/');
-             const filename = pathParts[pathParts.length - 1];
-             
-             // Use our download endpoint to record the history
-             const downloadEndpoint = `${getAPIBaseURL()}/api/resume/download/${filename}`;
-             
-             // Just open the S3 URL directly - it's pre-signed
-             window.open(result.data.downloadURL, '_blank');
-             
-             alert('PDF resume generated successfully!');
-           } else {
+            if (result.ok && result.data && result.data.downloadURL) {
+              // Extract filename from the downloadURL
+              const url = new URL(result.data.downloadURL);
+              const pathParts = url.pathname.split('/');
+              const filename = pathParts[pathParts.length - 1];
+              
+              // Just open the S3 URL directly - it's pre-signed
+              window.open(result.data.downloadURL, '_blank');
+            } else {
              console.error('PDF generation failed response:', result);
              // Don't throw error for 403 as it's already handled above
              if (result.status !== 403) {
@@ -798,8 +840,11 @@ function BuilderPage() {
       // Reset button state
       const viewButton = document.querySelector('button[onClick]');
       if (viewButton) {
-        viewButton.textContent = 'View Resume';
+        viewButton.textContent = '📄 View Resume';
         viewButton.disabled = false;
+      }
+      if (styleOverride && styleOverride.parentNode) {
+        styleOverride.parentNode.removeChild(styleOverride);
       }
     }
   };
