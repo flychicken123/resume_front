@@ -37,7 +37,7 @@ const steps = [
   "Projects",
   "Education",
   "Skills",
-  "Format",
+  "Template & Format",
   "Summary",
   "Cover Letter"
 ];
@@ -387,10 +387,10 @@ function BuilderPage() {
         
         // Font size multipliers (must match LivePreview.jsx)
         const fontSizeMultipliers = {
-          'small': 0.85,
-          'medium': 1.0,
-          'large': 1.15,
-          'extra-large': 1.3
+          'small': 1.0,
+          'medium': 1.2,
+          'large': 1.5,
+          'extra-large': 1.8
         };
         
         // Base scale factor for preview (2x) - same as LivePreview

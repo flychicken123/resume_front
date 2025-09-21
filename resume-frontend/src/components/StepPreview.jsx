@@ -21,13 +21,13 @@ const StepPreview = ({ onDownload }) => {
   
   // Font size scaling factors - increased small and medium for better readability
   const fontSizeScaling = {
-    'small': 0.9,   // Increased from 0.8
-    'medium': 1.1,  // Increased from 1.0  
-    'large': 1.2,
-    'extra-large': 1.4
+    'small': 1.0,
+    'medium': 1.2,
+    'large': 1.5,
+    'extra-large': 1.8
   };
   
-  const scale = fontSizeScaling[data.selectedFontSize || 'medium'] || 1.0;
+  const scale = fontSizeScaling[data.selectedFontSize || 'medium'] || 1.2;
   
   // Helper function to scale font sizes (match LivePreview exactly)
   const scaleFont = (baseSize) => {

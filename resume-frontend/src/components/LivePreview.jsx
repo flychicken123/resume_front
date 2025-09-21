@@ -32,12 +32,12 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
   // Font size scale factors that match the rendering scale
   const getFontSizeScaleFactor = () => {
     const fontSizeMultipliers = {
-      'small': 0.85,
-      'medium': 1.0,
-      'large': 1.15,
-      'extra-large': 1.3
+      'small': 1.0,
+      'medium': 1.2,
+      'large': 1.5,
+      'extra-large': 1.8
     };
-    return fontSizeMultipliers[data.selectedFontSize || 'medium'] || 1.0;
+    return fontSizeMultipliers[data.selectedFontSize || 'medium'] || 1.2;
   };
 
   // Estimate height for different content types (more realistic estimates)
@@ -598,16 +598,16 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
     // Base scale factor for preview (2x for readability)
     const baseScaleFactor = 2;
     
-    // Font size multipliers
+    // Font size multipliers (visible size increase)
     const fontSizeMultipliers = {
-      'small': 0.85,
-      'medium': 1.0,
-      'large': 1.15,
-      'extra-large': 1.3
+      'small': 1.0,
+      'medium': 1.2,
+      'large': 1.5,
+      'extra-large': 1.8
     };
     
     // Combined scale factor
-    const scaleFactor = baseScaleFactor * (fontSizeMultipliers[fontSize] || 1.0)
+    const scaleFactor = baseScaleFactor * (fontSizeMultipliers[fontSize] || fontSizeMultipliers['large'])
     
     switch (format) {
       case 'temp1':
@@ -617,7 +617,7 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
             fontFamily: 'Calibri, Arial, sans-serif', 
             fontSize: `${7 * scaleFactor}px`, 
             lineHeight: '1.2',
-            padding: `${8 * scaleFactor}px`,
+            padding: '16px 16px 0 16px',
             background: 'white',
             border: '1px solid #e5e7eb',
             borderRadius: '4px',
@@ -675,7 +675,7 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
             fontFamily: 'Georgia, serif', 
             fontSize: `${7 * scaleFactor}px`, 
             lineHeight: '1.2',
-            padding: `${8 * scaleFactor}px`,
+            padding: '16px 16px 0 16px',
             background: 'white',
             border: '1px solid #e5e7eb',
             borderRadius: '4px',
@@ -737,7 +737,7 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
             fontFamily: 'Segoe UI, sans-serif', 
             fontSize: `${7 * scaleFactor}px`, 
             lineHeight: '1.2',
-            padding: `${8 * scaleFactor}px`,
+            padding: '16px 16px 0 16px',
             background: 'white',
             border: '1px solid #e5e7eb',
             borderRadius: '4px',
@@ -853,7 +853,12 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
         return (
           <div key={idx} style={styles.item}>
             <div style={styles.company}>
-              {toText(exp.jobTitle) || 'Job Title'} | {toText(exp.company) || 'Company'} {location && `• ${location}`} {dates && `• ${dates}`}
+              {[
+                toText(exp.jobTitle) || 'Job Title',
+                toText(exp.company) || 'Company',
+                location,
+                dates
+              ].filter(Boolean).join(' • ')}
             </div>
             {exp.description && (
               <div style={{ marginTop: '2px' }}>
