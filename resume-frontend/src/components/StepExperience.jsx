@@ -10,6 +10,9 @@ const StepExperience = () => {
   const [aiMode, setAiMode] = useState({});
   const location = useLocation();
   
+  // Safely handle missing experiences on initial render
+  const experiences = Array.isArray(data?.experiences) ? data.experiences : [];
+  
   // Extract job description from URL if present
   const getJobDescription = () => {
     const pathParts = location.pathname.split('/');
@@ -39,11 +42,11 @@ const StepExperience = () => {
       currentlyWorking: false,
       description: ''
     };
-    setData({ ...data, experiences: [...data.experiences, newExperience] });
+    setData({ ...data, experiences: [...experiences, newExperience] });
   };
 
   const removeExperience = (idx) => {
-    const newList = data.experiences.filter((_, i) => i !== idx);
+    const newList = experiences.filter((_, i) => i !== idx);
     setData({ ...data, experiences: newList });
   };
 
@@ -52,7 +55,7 @@ const StepExperience = () => {
   };
 
   const handleChange = (idx, field, value) => {
-    const newList = [...data.experiences];
+    const newList = [...experiences];
     newList[idx] = { ...newList[idx], [field]: value };
     setData({ ...data, experiences: newList });
   };
@@ -60,14 +63,15 @@ const StepExperience = () => {
   const checkWithAI = async (idx) => {
     try {
       setLoadingIndex(idx);
-      const experience = data.experiences[idx];
+      const experience = experiences[idx];
       
-      if (!experience.description.trim()) {
+      const desc = (experience?.description || '').trim();
+      if (!desc) {
         alert('Please enter your experience description first.');
         return;
       }
       
-      const experienceText = experience.description;
+      const experienceText = desc;
       const jobDesc = getJobDescription();
       
       let improvedText;
@@ -126,7 +130,7 @@ const StepExperience = () => {
         </div>
       )}
       
-      {data.experiences.length === 0 ? (
+      {(experiences.length === 0) ? (
         <div style={{ 
           background: '#f0f9ff', 
           border: '1px solid #0ea5e9', 
@@ -142,7 +146,7 @@ const StepExperience = () => {
             If you're a student or new graduate without work experience, you can skip this section and highlight your projects instead.
           </p>
         </div>
-      ) : data.experiences.map((exp, idx) => (
+      ) : experiences.map((exp, idx) => (
         <div key={idx} style={{ marginBottom: '2rem', border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <h3 style={{ margin: 0, color: '#374151' }}>Experience {idx + 1}</h3>
@@ -370,7 +374,7 @@ const StepExperience = () => {
           <div style={{ marginTop: '1rem' }}>
             <button
               onClick={() => checkWithAI(idx)}
-              disabled={loadingIndex === idx || !exp.description.trim()}
+              disabled={loadingIndex === idx || !(exp.description || '').trim()}
               style={{
                 background: aiMode[idx] ? '#10b981' : '#3b82f6',
                 color: 'white',
@@ -378,8 +382,8 @@ const StepExperience = () => {
                 borderRadius: '6px',
                 padding: '0.5rem 1rem',
                 fontSize: '0.875rem',
-                cursor: loadingIndex === idx || !exp.description.trim() ? 'not-allowed' : 'pointer',
-                opacity: loadingIndex === idx || !exp.description.trim() ? 0.5 : 1
+                cursor: loadingIndex === idx || !(exp.description || '').trim() ? 'not-allowed' : 'pointer',
+                opacity: loadingIndex === idx || !(exp.description || '').trim() ? 0.5 : 1
               }}
               title={getJobDescription() ? "Optimize experience for the job posting" : "Improve grammar and professionalism"}
             >
@@ -403,7 +407,7 @@ const StepExperience = () => {
           marginTop: '1rem'
         }}
       >
-        + {data.experiences.length === 0 ? 'Add Work Experience' : 'Add Another Experience'}
+        + {experiences.length === 0 ? 'Add Work Experience' : 'Add Another Experience'}
       </button>
     </div>
   );

@@ -5,6 +5,22 @@ import './LivePreview.css';
 const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
   const { data } = useResume();
   const [pages, setPages] = useState([]);
+  // Normalize any value into safe display text
+  const toText = (val) => {
+    if (val == null) return '';
+    if (typeof val === 'string') return val;
+    if (Array.isArray(val)) return val.filter(Boolean).join(', ');
+    if (typeof val === 'object') {
+      try {
+        const values = Object.values(val);
+        const flattened = values.every((v) => Array.isArray(v)) ? values.flat() : values;
+        return flattened.filter(Boolean).join(', ');
+      } catch (e) {
+        return '';
+      }
+    }
+    return String(val);
+  };
   const contentRef = useRef(null);
 
   // Page dimensions in pixels (8.5" x 11" at 96 DPI)
@@ -37,8 +53,9 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
         
       case 'summary':
         // Much more conservative estimation
+        const contentText = toText(content);
         const charsPerLine = Math.round(120 / fontScale); // Increased from 100
-        const lines = Math.ceil(content.length / charsPerLine);
+        const lines = Math.ceil(contentText.length / charsPerLine);
         const lineHeight = Math.round(14 * fontScale); // Reduced from 16
         const summaryHeight = Math.max(18 * fontScale, lines * lineHeight);
         return summaryHeight;
@@ -101,8 +118,9 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
         
       case 'skills':
         // More conservative skills section estimation
+        const skillsText = toText(content);
         const skillCharsPerLine = Math.round(140 / fontScale); // Increased from 120
-        const skillLines = Math.ceil(content.length / skillCharsPerLine);
+        const skillLines = Math.ceil(skillsText.length / skillCharsPerLine);
         const skillsHeight = Math.max(18 * fontScale, skillLines * Math.round(14 * fontScale));
         return skillsHeight;
         
@@ -392,11 +410,12 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
 
     // Summary section
     if (data.summary) {
-      const sectionTitleHeight = Math.round(20 * fontScale); // Add height for section title
-      const summaryHeight = estimateSectionHeight(data.summary, 'summary') + sectionTitleHeight;
+      const summaryText = toText(data.summary);
+      const sectionTitleHeight = Math.round(20 * fontScale);
+      const summaryHeight = estimateSectionHeight(summaryText, 'summary') + sectionTitleHeight;
       allSections.push({
         type: 'summary',
-        content: data.summary,
+        content: summaryText,
         estimatedHeight: summaryHeight,
         priority: 2,
         canSplit: true
@@ -443,14 +462,17 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
 
     // Skills section
     if (data.skills) {
-      const sectionTitleHeight = Math.round(20 * fontScale); // Add height for section title
-      const skillsHeight = estimateSectionHeight(data.skills, 'skills') + sectionTitleHeight;
-      allSections.push({
-        type: 'skills',
-        content: data.skills,
-        estimatedHeight: skillsHeight,
-        priority: 6
-      });
+      const skillsText = toText(data.skills);
+      if (skillsText) {
+        const sectionTitleHeight = Math.round(20 * fontScale); // Add height for section title
+        const skillsHeight = estimateSectionHeight(skillsText, 'skills') + sectionTitleHeight;
+        allSections.push({
+          type: 'skills',
+          content: skillsText,
+          estimatedHeight: skillsHeight,
+          priority: 6
+        });
+      }
     }
 
     // Now pack sections into pages aggressively
@@ -812,7 +834,7 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
           </div>
         );
       } else {
-        const location = exp.city && exp.state ? `${exp.city}, ${exp.state}` : exp.city || exp.state || '';
+        const location = exp.city && exp.state ? `${toText(exp.city)}, ${toText(exp.state)}` : toText(exp.city) || toText(exp.state) || '';
         
         let startDate = '';
         let endDate = '';
@@ -831,7 +853,7 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
         return (
           <div key={idx} style={styles.item}>
             <div style={styles.company}>
-              {exp.jobTitle || 'Job Title'} | {exp.company || 'Company'} {location && `• ${location}`} {dates && `• ${dates}`}
+              {toText(exp.jobTitle) || 'Job Title'} | {toText(exp.company) || 'Company'} {location && `• ${location}`} {dates && `• ${dates}`}
             </div>
             {exp.description && (
               <div style={{ marginTop: '2px' }}>
@@ -918,23 +940,25 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
     return projects.map((project, idx) => {
       // Skip empty projects
       if (!project.projectName && !project.description) return null;
-      
+      const nameText = toText(project.projectName);
+      const techText = toText(project.technologies);
+      const urlText = toText(project.projectUrl);
       return (
         <div key={idx} style={styles.item}>
           <div style={styles.company}>
-            {project.projectName}
+            {nameText}
           </div>
           
-          {project.technologies && (
+          {techText && (
             <div style={{ fontStyle: 'italic', fontSize: '0.9em', marginTop: '2px', marginBottom: '4px' }}>
-              Technologies: {project.technologies}
+              Technologies: {techText}
             </div>
           )}
           
-          {project.projectUrl && (
+          {urlText && (
             <div style={{ fontSize: '0.9em', marginTop: '2px', marginBottom: '4px' }}>
-              <a href={project.projectUrl} style={{ color: '#0066cc', textDecoration: 'none' }}>
-                {project.projectUrl}
+              <a href={urlText} style={{ color: '#0066cc', textDecoration: 'none' }}>
+                {urlText}
               </a>
             </div>
           )}
@@ -984,12 +1008,12 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
                 <div style={styles.headerContainer}>
                   {section.content.name && (
                     <div style={styles.header}>
-                      {section.content.name}
+                      {toText(section.content.name)}
                     </div>
                   )}
                   {(section.content.email || section.content.phone) && (
                     <div style={styles.contact}>
-                      {[section.content.email, section.content.phone].filter(Boolean).join(' • ')}
+                      {[section.content.email, section.content.phone].map(toText).filter(Boolean).join(' • ')}
                     </div>
                   )}
                 </div>
@@ -997,12 +1021,12 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
                 <>
                   {section.content.name && (
                     <div style={styles.header}>
-                      {section.content.name}
+                      {toText(section.content.name)}
                     </div>
                   )}
                   {(section.content.email || section.content.phone) && (
                     <div style={styles.contact}>
-                      {[section.content.email, section.content.phone].filter(Boolean).join(' • ')}
+                      {[section.content.email, section.content.phone].map(toText).filter(Boolean).join(' • ')}
                     </div>
                   )}
                 </>
@@ -1027,7 +1051,7 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
         case 'projects':
           return <div key={idx}>{renderSection('PROJECTS', renderProjects(section.content, styles), styles)}</div>;
         case 'skills':
-          return <div key={idx}>{renderSection('SKILLS', <div style={styles.skills}>{section.content}</div>, styles)}</div>;
+          return <div key={idx}>{renderSection('SKILLS', <div style={styles.skills}>{toText(section.content)}</div>, styles)}</div>;
         default:
           return null;
       }
@@ -1083,12 +1107,12 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
               <div style={styles.headerContainer}>
                 {data.name && (
                   <div style={styles.header}>
-                    {data.name}
+                    {toText(data.name)}
                   </div>
                 )}
                 {(data.email || data.phone) && (
                   <div style={styles.contact}>
-                    {[data.email, data.phone].filter(Boolean).join(' • ')}
+                    {[data.email, data.phone].map(toText).filter(Boolean).join(' • ')}
                   </div>
                 )}
               </div>
@@ -1096,19 +1120,19 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
               <>
                 {data.name && (
                   <div style={styles.header}>
-                    {data.name}
+                    {toText(data.name)}
                   </div>
                 )}
                 {(data.email || data.phone) && (
                   <div style={styles.contact}>
-                    {[data.email, data.phone].filter(Boolean).join(' • ')}
+                    {[data.email, data.phone].map(toText).filter(Boolean).join(' • ')}
                   </div>
                 )}
               </>
             )}
 
             {data.summary && (
-              renderSection('SUMMARY', <div style={styles.summary}>{data.summary}</div>, styles)
+              renderSection('SUMMARY', <div style={styles.summary}>{toText(data.summary)}</div>, styles)
             )}
 
             {data.experiences && data.experiences.length > 0 && (
@@ -1123,8 +1147,8 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
               renderSection('EDUCATION', renderEducation(data.education, styles), styles)
             )}
 
-            {data.skills && (
-              renderSection('SKILLS', <div style={styles.skills}>{data.skills}</div>, styles)
+            {data.skills && toText(data.skills) && (
+              renderSection('SKILLS', <div style={styles.skills}>{toText(data.skills)}</div>, styles)
             )}
           </div>
         </div>

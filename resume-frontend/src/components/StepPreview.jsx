@@ -3,6 +3,19 @@ import { useResume } from '../context/ResumeContext';
 
 const StepPreview = ({ onDownload }) => {
   const { data, setData } = useResume();
+  const toText = (val) => {
+    if (val == null) return '';
+    if (typeof val === 'string') return val;
+    if (Array.isArray(val)) return val.filter(Boolean).join(', ');
+    if (typeof val === 'object') {
+      try {
+        const values = Object.values(val);
+        const flattened = values.every((v) => Array.isArray(v)) ? values.flat() : values;
+        return flattened.filter(Boolean).join(', ');
+      } catch (e) { return ''; }
+    }
+    return String(val);
+  };
   
 
   
@@ -62,12 +75,12 @@ const StepPreview = ({ onDownload }) => {
       return (
         <div key={idx} className="experience-item">
           <div className="institution-header">
-            {exp.jobTitle} at {exp.company}
+            {toText(exp.jobTitle)} at {toText(exp.company)}
           </div>
           <div className="education-details">
             {exp.remote ? 'Remote' : 
-             exp.city && exp.state ? `${exp.city}, ${exp.state}` : 
-             exp.city || exp.state || ''} • {startDate} - {endDate}
+             (exp.city && exp.state ? `${toText(exp.city)}, ${toText(exp.state)}` : 
+             toText(exp.city) || toText(exp.state) || '')} • {startDate} - {endDate}
           </div>
           {exp.description && (
             <ul className="bullet-points">
@@ -91,10 +104,10 @@ const StepPreview = ({ onDownload }) => {
       return (
         <div key={idx} className="education-item">
           <div className="institution-header">
-            {edu.degree} {edu.field && `in ${edu.field}`}
+            {toText(edu.degree)} {edu.field && `in ${toText(edu.field)}`}
           </div>
           <div className="education-details">
-            {edu.school} • {edu.graduationYear} {edu.gpa && `• GPA: ${edu.gpa}`} {edu.honors && `• ${edu.honors}`}
+            {toText(edu.school)} • {toText(edu.graduationYear)} {edu.gpa && `• GPA: ${toText(edu.gpa)}`} {edu.honors && `• ${toText(edu.honors)}`}
           </div>
         </div>
       );
@@ -111,16 +124,16 @@ const StepPreview = ({ onDownload }) => {
       return (
         <div key={idx} className="experience-item">
           <div className="institution-header">
-            {project.projectName}
+            {toText(project.projectName)}
           </div>
           {project.technologies && (
             <div className="education-details">
-              {project.technologies}
+              {toText(project.technologies)}
             </div>
           )}
           {project.projectUrl && (
             <div className="education-details">
-              {project.projectUrl}
+              {toText(project.projectUrl)}
             </div>
           )}
           {project.description && (
@@ -142,7 +155,7 @@ const StepPreview = ({ onDownload }) => {
 
       <div className={getTemplateClass()} style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <div className="header">
-          <div className="name">{data.name || 'Your Name'}</div>
+          <div className="name">{toText(data.name) || 'Your Name'}</div>
           <div className="contact-info">
             {data.email && data.phone ? `${data.email} • ${data.phone}` : (data.email || data.phone || 'your.email@example.com • (555) 123-4567')}
           </div>
@@ -151,7 +164,7 @@ const StepPreview = ({ onDownload }) => {
         {data.summary && (
           <>
             <div className="section-header">Summary</div>
-            <p>{data.summary}</p>
+            <p>{toText(data.summary)}</p>
           </>
         )}
         
@@ -179,7 +192,7 @@ const StepPreview = ({ onDownload }) => {
         {data.skills && (
           <>
             <div className="section-header">Skills</div>
-            <p>{data.skills}</p>
+            <p>{toText(data.skills)}</p>
           </>
         )}
         
