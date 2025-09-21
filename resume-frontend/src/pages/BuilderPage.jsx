@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { useAuth } from '../context/AuthContext';
 import { useResume } from '../context/ResumeContext';
@@ -1061,36 +1061,7 @@ function BuilderPage() {
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#f8fafc' }}>
           <div className="site-header" style={{ width: '100%', paddingTop: '2.5rem', paddingBottom: '1.5rem', textAlign: 'center', background: 'transparent', position: 'relative' }}>
                          <div style={{ position: 'absolute', right: '2rem', top: '50%', transform: 'translateY(-50%)', display: 'flex', gap: '1rem', zIndex: 20 }}>
-              <button
-                onClick={() => setShowImportModal(true)}
-                style={{
-                  padding: '0.75rem 1.5rem',
-                  borderRadius: '8px',
-                  border: 'none',
-                  background: '#3b82f6',
-                  color: 'white',
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                  fontSize: '0.95rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  boxShadow: '0 2px 6px rgba(59, 130, 246, 0.3)',
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.background = '#2563eb';
-                  e.target.style.transform = 'translateY(-2px)';
-                  e.target.style.boxShadow = '0 4px 10px rgba(37, 99, 235, 0.3)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.background = '#3b82f6';
-                  e.target.style.transform = 'translateY(0)';
-                  e.target.style.boxShadow = '0 2px 6px rgba(59, 130, 246, 0.3)';
-                }}
-              >
-                📄 Import Resume
-              </button>
+
               <button
                 onClick={() => window.location.href = '/'}
                 style={{
@@ -1423,3 +1394,4 @@ function BuilderPage() {
 }
 
 export default BuilderPage;
+
