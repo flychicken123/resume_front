@@ -305,6 +305,37 @@ function BuilderPage() {
         // DIFFERENT APPROACH: Clean up the HTML to prevent phantom pages
         // Remove any empty divs that might cause page breaks
         const allDivs = clonedElement.querySelectorAll('div');
+        const hasStructuralStyles = (element) => {
+          if (!element) {
+            return false;
+          }
+          const inlineStyle = (element.getAttribute('style') || '').toLowerCase();
+          const inlineBorder = ['border-bottom', 'border-top', 'border-left', 'border-right', 'border-width'].some(prop => inlineStyle.includes(prop)) && !inlineStyle.includes('border: none');
+          const inlineBackground = inlineStyle.includes('background') && !inlineStyle.includes('background: none') && !inlineStyle.includes('background: transparent');
+          const inlineShadow = inlineStyle.includes('box-shadow') && !inlineStyle.includes('box-shadow: none');
+          if (inlineBorder || inlineBackground || inlineShadow) {
+            return true;
+          }
+          if (window.getComputedStyle) {
+            try {
+              const computed = window.getComputedStyle(element);
+              const borderProps = ['borderTopWidth', 'borderRightWidth', 'borderBottomWidth', 'borderLeftWidth'];
+              const hasBorder = borderProps.some(prop => {
+                const value = parseFloat(computed[prop]);
+                return !Number.isNaN(value) && value > 0;
+              });
+              const background = computed.backgroundColor;
+              const hasBackground = background && background !== 'rgba(0, 0, 0, 0)' && background !== 'transparent';
+              const hasBoxShadow = computed.boxShadow && computed.boxShadow !== 'none';
+              if (hasBorder || hasBackground || hasBoxShadow) {
+                return true;
+              }
+            } catch (err) {
+              // Ignore errors from detached nodes
+            }
+          }
+          return false;
+        };
         allDivs.forEach(div => {
           if (!div) return;
           const className = div.className || '';
@@ -312,12 +343,17 @@ function BuilderPage() {
             return;
           }
           // Remove divs that are empty or only contain whitespace
-          if (div && (!div.textContent || div.textContent.trim() === '')) {
+          if (!div.textContent || div.textContent.trim() === '') {
             // Check if it has no visible children
-            const hasVisibleChildren = Array.from(div.children).some(child => 
+            const hasVisibleChildren = Array.from(div.children).some(child =>
               child.offsetWidth > 0 || child.offsetHeight > 0 || child.textContent.trim() !== ''
             );
-            if (!hasVisibleChildren && !div.querySelector('img') && !div.querySelector('svg')) {
+            if (
+              !hasVisibleChildren &&
+              !hasStructuralStyles(div) &&
+              !div.querySelector('img') &&
+              !div.querySelector('svg')
+            ) {
               div.remove();
             }
           }
