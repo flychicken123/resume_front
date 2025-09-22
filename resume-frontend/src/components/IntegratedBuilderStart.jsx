@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useResume } from '../context/ResumeContext';
 import { getAPIBaseURL } from '../api';
@@ -10,6 +10,107 @@ const IntegratedBuilderStart = ({ onClose }) => {
   const [file, setFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isDragOver, setIsDragOver] = useState(false);
+  const dropZoneRef = useRef(null);
+  const dragDepthRef = useRef(0);
+
+  const acceptExts = ['.pdf', '.doc', '.docx', '.txt'];
+  const isAcceptedFile = (resumeFile) => {
+    if (!resumeFile?.name) return false;
+    const lower = resumeFile.name.toLowerCase();
+    return acceptExts.some((ext) => lower.endsWith(ext));
+  };
+
+  const pickFirstFile = (dataTransfer) => {
+    if (!dataTransfer) return null;
+    if (dataTransfer.files && dataTransfer.files.length > 0) {
+      return dataTransfer.files[0];
+    }
+    if (dataTransfer.items && dataTransfer.items.length > 0) {
+      for (let i = 0; i < dataTransfer.items.length; i += 1) {
+        const item = dataTransfer.items[i];
+        if (item.kind === 'file') {
+          const maybeFile = item.getAsFile();
+          if (maybeFile) {
+            return maybeFile;
+          }
+        }
+      }
+    }
+    return null;
+  };
+
+  const handleDropFile = (resumeFile) => {
+    if (!resumeFile) {
+      setError('The dropped item is not a supported file type.');
+      return;
+    }
+    if (!isAcceptedFile(resumeFile)) {
+      setError('Unsupported file type. Please drop a PDF, DOC, DOCX, or TXT.');
+      return;
+    }
+    setError('');
+    setFile(resumeFile);
+  };
+
+  const handleDragEnter = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    dragDepthRef.current += 1;
+    setIsDragOver(true);
+  };
+
+  const handleDragOver = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!isDragOver) {
+      setIsDragOver(true);
+    }
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'copy';
+    }
+  };
+
+  const handleDragLeave = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    dragDepthRef.current = Math.max(dragDepthRef.current - 1, 0);
+    if (dragDepthRef.current === 0) {
+      setIsDragOver(false);
+    }
+  };
+
+  const handleDrop = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    dragDepthRef.current = 0;
+    setIsDragOver(false);
+    const droppedFile = pickFirstFile(event.dataTransfer);
+    handleDropFile(droppedFile);
+  };
+
+  useEffect(() => {
+    const preventDefault = (event) => {
+      if (!dropZoneRef.current) return;
+      if (!event.dataTransfer) return;
+      const hasFiles = event.dataTransfer.types?.includes?.('Files') || event.dataTransfer.files?.length;
+      if (!hasFiles) return;
+      event.preventDefault();
+      if (!dropZoneRef.current.contains(event.target)) {
+        dragDepthRef.current = 0;
+        setIsDragOver(false);
+      }
+    };
+
+    const listenerOptions = { passive: false };
+    window.addEventListener('dragover', preventDefault, listenerOptions);
+    window.addEventListener('drop', preventDefault, listenerOptions);
+
+    return () => {
+      window.removeEventListener('dragover', preventDefault, listenerOptions);
+      window.removeEventListener('drop', preventDefault, listenerOptions);
+    };
+  }, []);
 
   const handleResumeUpload = async (resumeFile) => {
     const form = new FormData();
@@ -151,15 +252,22 @@ const IntegratedBuilderStart = ({ onClose }) => {
                 Upload your existing resume and we will pre-fill the builder automatically.
               </p>
 
-              <div style={{
-                border: file ? '2px solid #3b82f6' : '2px dashed #d1d5db',
+              <div
+                ref={dropZoneRef}
+                onDragEnter={handleDragEnter}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                style={{
+                border: file || isDragOver ? '2px solid #3b82f6' : '2px dashed #d1d5db',
                 borderRadius: 8,
                 padding: '1.5rem',
                 textAlign: 'center',
-                background: file ? '#f0f9ff' : 'white',
+                background: file ? '#f0f9ff' : isDragOver ? '#eef2ff' : 'white',
                 transition: 'all 0.2s',
                 marginBottom: '1rem'
-              }}>
+              }}
+              >
                 <input
                   type="file"
                   accept=".pdf,.doc,.docx,.txt"
