@@ -18,7 +18,7 @@ import ImportResumeModal from '../components/ImportResumeModal';
 import UpgradeModal from '../components/UpgradeModal';
 import SubscriptionStatus from '../components/SubscriptionStatus';
 import SEO from '../components/SEO';
-import { trackResumeGeneration } from '../components/Analytics';
+import { trackResumeGeneration, trackStepCompletion } from '../components/Analytics';
 import './BuilderPage.css';
 
 const getAPIBaseURL = () => {
@@ -1011,33 +1011,7 @@ function BuilderPage() {
     setStep(1);
   };
 
-  // AI Resume Advice Handler
-  const handleGetResumeAdvice = async () => {
-    try {
-      setAdviceLoading(true);
-      const advice = await generateResumeAdviceAI(data, jobDescription);
-      setResumeAdvice(advice);
-      setShowAdvice(true);
-    } catch (err) {
-      alert(err.message);
-    } finally {
-      setAdviceLoading(false);
-    }
-  };
-
-  // AI Cover Letter Handler
-  const handleGenerateCoverLetter = async () => {
-    try {
-      setCoverLetterLoading(true);
-      const letter = await generateCoverLetterAI(data, jobDescription, companyName);
-      setCoverLetter(letter);
-      setShowCoverLetter(true);
-    } catch (err) {
-      alert(err.message);
-    } finally {
-      setCoverLetterLoading(false);
-    }
-  };
+  // Removed unused AI handler stubs that referenced undefined variables
 
   return (
     <>

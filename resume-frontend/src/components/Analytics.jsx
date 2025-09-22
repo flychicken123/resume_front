@@ -161,9 +161,9 @@ export const trackReferrer = () => {
   
   // Analytics tracking (debug logging removed for production)
   
-  if (typeof gtag !== 'undefined' && !isLocalhost()) {
+  if (typeof window !== 'undefined' && window.gtag && !isLocalhost()) {
     
-    gtag('event', 'page_referrer', {
+    window.gtag('event', 'page_referrer', {
       'event_category': 'user_acquisition',
       'event_label': userSource.source,
       'custom_parameter_1': userSource.medium,
@@ -173,7 +173,7 @@ export const trackReferrer = () => {
     });
     
     // Also track as a separate user source event for better analytics
-    gtag('event', 'user_source_detected', {
+    window.gtag('event', 'user_source_detected', {
       'event_category': 'user_acquisition',
       'event_label': userSource.source,
       'source_medium': userSource.medium,
@@ -188,10 +188,10 @@ export const trackReferrer = () => {
 
 // Track when user starts building resume (enhanced with source info)
 export const trackBuilderStart = (source) => {
-  if (typeof gtag !== 'undefined' && !isLocalhost()) {
+  if (typeof window !== 'undefined' && window.gtag && !isLocalhost()) {
     const userSource = getUserSource();
     
-    gtag('event', 'resume_builder_start', {
+    window.gtag('event', 'resume_builder_start', {
       'event_category': 'engagement',
       'event_label': source || 'unknown',
       'user_source': userSource.source,
@@ -224,8 +224,8 @@ export const getDetailedSourceInfo = () => {
 
 // Track when user completes a step
 export const trackStepCompletion = (stepName, stepNumber) => {
-  if (typeof gtag !== 'undefined' && !isLocalhost()) {
-    gtag('event', 'step_completion', {
+  if (typeof window !== 'undefined' && window.gtag && !isLocalhost()) {
+    window.gtag('event', 'step_completion', {
       'event_category': 'progress',
       'event_label': stepName,
       'custom_parameter_1': stepNumber,
