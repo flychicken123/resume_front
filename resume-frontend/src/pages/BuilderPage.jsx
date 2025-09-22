@@ -204,8 +204,10 @@ function BuilderPage() {
           clonedElement.style.margin = '0';
           clonedElement.style.minHeight = 'auto';
           clonedElement.style.height = 'auto';
+          clonedElement.style.background = '#ffffff';
+          clonedElement.style.boxShadow = 'none';
+          clonedElement.style.border = 'none';
         }
-        
         // Remove any control panels or debug elements
         const controlPanels = clonedElement.querySelectorAll('.boundary-toggle, [style*="textAlign: center"], [style*="text-align: center"]');
         controlPanels.forEach(panel => {
@@ -221,6 +223,23 @@ function BuilderPage() {
         if (downloadContainer && downloadContainer.innerHTML.includes('Download PDF')) {
           downloadContainer.remove();
         }
+        
+        const overlaySelectors = [
+          '.page-header',
+          '.page-number',
+          '.page-break-indicator',
+          '.page-boundary-line',
+          '.page-size-indicator',
+          '.page-corner-indicator',
+          '.page-margin-guide',
+          '.page-break-line',
+          '.page-content-area',
+          '.page-navigation',
+          '.page-info'
+        ];
+        overlaySelectors.forEach((selector) => {
+          clonedElement.querySelectorAll(selector).forEach((el) => el.remove());
+        });
         
         // Debug: Log structure to identify empty page cause
 
@@ -239,7 +258,30 @@ function BuilderPage() {
           Array.from(element.children || []).forEach(child => normalizeElementSizing(child));
         };
 
-        if (multiPageContainer && !singlePageContainer) {
+        let workingSinglePageContainer = singlePageContainer;
+
+        if (singlePageContainer && (!multiPageContainer || multiPageContainer.childElementCount === 0)) {
+          const containerClone = singlePageContainer.cloneNode(true);
+          normalizeElementSizing(containerClone);
+          containerClone.style.padding = '12px 20px 20px 20px';
+          containerClone.style.margin = '0';
+          containerClone.style.border = 'none';
+          containerClone.style.boxShadow = 'none';
+          containerClone.style.borderRadius = '0';
+          containerClone.style.background = '#ffffff';
+
+          const cleanRoot = document.createElement('div');
+          cleanRoot.className = 'pdf-single-page-root';
+          cleanRoot.style.cssText = 'background:#ffffff;color:#000;margin:0;padding:0;box-sizing:border-box;';
+          cleanRoot.appendChild(containerClone);
+
+          clonedElement.innerHTML = '';
+          clonedElement.appendChild(cleanRoot);
+
+          workingSinglePageContainer = containerClone;
+        }
+
+        if (multiPageContainer && !workingSinglePageContainer) {
           const pageWrappers = multiPageContainer.querySelectorAll('.page-wrapper');
           console.log("HTML before processing:", clonedElement.innerHTML.includes("EDUCATION") ? "Contains EDUCATION" : "Missing EDUCATION");
           console.log("Found", pageWrappers.length, "pages in multi-page container");
@@ -272,6 +314,13 @@ function BuilderPage() {
               paddingLeft = computedPadding.getPropertyValue('padding-left') || paddingLeft;
             }
 
+            const parsedTop = parseFloat(paddingTop);
+            if (!Number.isNaN(parsedTop)) {
+              paddingTop = `${Math.min(parsedTop, 12)}px`;
+            } else {
+              paddingTop = '12px';
+            }
+
             pageContainer.style.cssText = `
               width: 100%;
               padding: ${paddingTop} ${paddingRight} ${paddingBottom} ${paddingLeft};
@@ -279,6 +328,9 @@ function BuilderPage() {
               box-sizing: border-box;
               background: white;
               color: black;
+              border: none;
+              box-shadow: none;
+              border-radius: 0;
               page-break-inside: avoid;
             `;
 
@@ -300,6 +352,14 @@ function BuilderPage() {
           // No content containers found
         } else {
           // Using existing single-page container
+        }
+
+        if (workingSinglePageContainer) {
+          workingSinglePageContainer.style.paddingTop = '12px';
+          workingSinglePageContainer.style.boxShadow = 'none';
+          workingSinglePageContainer.style.border = 'none';
+          workingSinglePageContainer.style.borderRadius = '0';
+          workingSinglePageContainer.style.background = '#ffffff';
         }
 
         // DIFFERENT APPROACH: Clean up the HTML to prevent phantom pages
@@ -583,7 +643,7 @@ function BuilderPage() {
             width: 100% !important;
             max-width: none !important;
             min-width: 100% !important;
-            padding: 20px !important;
+            padding: 12px 20px 20px 20px !important;
             margin: 0 !important;
             box-sizing: border-box !important;
           }
