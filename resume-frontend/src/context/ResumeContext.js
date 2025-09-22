@@ -163,6 +163,18 @@ export const ResumeProvider = ({ children }) => {
     const storedData = getStoredData(userId);
     return storedData || createDefaultResumeData();
   });
+  const updateResume = (updater) => {
+    setData((prev) => {
+      const nextState = typeof updater === 'function' ? updater(prev) : updater;
+      if (!nextState || typeof nextState !== 'object') {
+        return prev;
+      }
+      if (JSON.stringify(prev) === JSON.stringify(nextState)) {
+        return prev;
+      }
+      return nextState;
+    });
+  };
 
   // Save data to localStorage whenever it changes (but not to database)
   useEffect(() => {
@@ -334,7 +346,7 @@ export const ResumeProvider = ({ children }) => {
   }, [user]);
 
   return (
-    <ResumeContext.Provider value={{ data, setData, clearData, loadUserData, saveToDatabaseNow, applyImportedData }}>
+    <ResumeContext.Provider value={{ data, setData: updateResume, clearData, loadUserData, saveToDatabaseNow, applyImportedData }}>
       {children}
     </ResumeContext.Provider>
   );
