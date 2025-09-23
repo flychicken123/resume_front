@@ -315,11 +315,11 @@ function BuilderPage() {
             }
 
             const parsedTop = parseFloat(paddingTop);
-            if (!Number.isNaN(parsedTop)) {
-              paddingTop = `${Math.min(parsedTop, 12)}px`;
-            } else {
-              paddingTop = '12px';
+            let normalizedTop = Number.isNaN(parsedTop) ? 18 : Math.min(parsedTop, 18);
+            if (index === 0) {
+              normalizedTop = 16;
             }
+            paddingTop = `${normalizedTop}px`;
 
             pageContainer.style.cssText = `
               width: 100%;
@@ -538,6 +538,29 @@ function BuilderPage() {
           }
           
           /* Ensure sections can break naturally if needed */
+          .live-preview-container {
+            padding: 0 !important;
+            margin: 0 !important;
+            background: #ffffff !important;
+          }
+
+          .pdf-single-page-root > :not(.single-page-container) {
+            display: none !important;
+            height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+          .live-preview-container > div[style*='text-align: center'][style*='margin-bottom: 20px'] {
+            display: none !important;
+            height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+
+          .pdf-single-page-root {
+            margin: 0 !important;
+            padding: 0 !important;
+          }
           .single-page-container {
             page-break-inside: auto;
             break-inside: auto;
@@ -545,7 +568,6 @@ function BuilderPage() {
             max-height: none !important;
             min-height: auto !important;
           }
-          
           /* IMPORTANT: Preserve font sizes from inline styles */
           /* Do not override fontSize that's already set inline */
           div[style*="fontSize"], 
@@ -561,7 +583,7 @@ function BuilderPage() {
                 break-before: page !important;
             -webkit-break-before: page !important;
                 margin-top: 0 !important;
-            padding-top: 0 !important;
+            padding-top: 16px !important;
           }
           
           /* Multi-page PDF container handling */
@@ -579,6 +601,14 @@ function BuilderPage() {
             /* max-height: 10in !important; */
             overflow: visible !important;
             box-sizing: border-box !important;
+          }
+          .multi-page-pdf-container > div[class^="pdf-page-"]:first-child {
+            padding-top: 16px !important;
+            margin-top: 0 !important;
+          }
+
+          .pdf-single-page-root > .single-page-container {
+            padding-top: 16px !important;
           }
 
           .multi-page-pdf-container,
@@ -643,7 +673,7 @@ function BuilderPage() {
             width: 100% !important;
             max-width: none !important;
             min-width: 100% !important;
-            padding: 12px 20px 20px 20px !important;
+            padding: 16px 16px 20px 16px !important;
             margin: 0 !important;
             box-sizing: border-box !important;
           }
@@ -1464,4 +1494,24 @@ function BuilderPage() {
 }
 
 export default BuilderPage;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
