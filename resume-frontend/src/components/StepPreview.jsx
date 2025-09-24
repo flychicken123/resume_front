@@ -19,6 +19,26 @@ const StepPreview = ({ onDownload }) => {
   
 
   
+  const parseSkills = (value) => {
+    const toArray = (input) =>
+      input
+        .replace(/\r?\n/g, ',')
+        .split(/[,;]+/)
+        .map((skill) => skill.trim())
+        .filter(Boolean);
+
+    if (!value) return [];
+    if (Array.isArray(value)) {
+      return value
+        .flatMap((item) => {
+          if (typeof item === "string") return toArray(item);
+          return toArray(toText(item));
+        });
+    }
+    return toArray(String(value));
+  };
+
+
   // Font size scaling factors - increased small and medium for better readability
   const fontSizeScaling = {
     'small': 1.0,
@@ -28,6 +48,8 @@ const StepPreview = ({ onDownload }) => {
   };
   
   const scale = fontSizeScaling[data.selectedFontSize || 'medium'] || 1.2;
+const isIndustryManager = (data.selectedFormat || 'temp1') === 'industry-manager';
+
   
   // Helper function to scale font sizes (match LivePreview exactly)
   const scaleFont = (baseSize) => {
@@ -39,12 +61,12 @@ const StepPreview = ({ onDownload }) => {
   useEffect(() => {
     const root = document.documentElement;
     // Use the same font sizes as LivePreview industry-manager template
-    root.style.setProperty('--font-size-base', scaleFont('9pt'));      // Container base
-    root.style.setProperty('--font-size-header', scaleFont('18pt'));   // Header/name
-    root.style.setProperty('--font-size-section', scaleFont('12pt'));  // Section titles
-    root.style.setProperty('--font-size-content', scaleFont('10pt'));  // Company/job titles
-    root.style.setProperty('--font-size-details', scaleFont('9pt'));   // Contact/dates
-    root.style.setProperty('--font-size-list', scaleFont('9pt'));      // Bullet points
+    root.style.setProperty('--font-size-base', scaleFont('10pt'));     // Container base
+    root.style.setProperty('--font-size-header', scaleFont('16pt'));  // Header/name
+    root.style.setProperty('--font-size-section', scaleFont('13pt')); // Section titles
+    root.style.setProperty('--font-size-content', scaleFont('11pt')); // Company/job titles
+    root.style.setProperty('--font-size-details', scaleFont('10pt')); // Contact/dates
+    root.style.setProperty('--font-size-list', scaleFont('10pt'));    // Bullet points
     
 
   }, [data.selectedFontSize, scale]);
@@ -65,53 +87,198 @@ const StepPreview = ({ onDownload }) => {
   // Format experience data
   const formatExperiences = () => {
     if (!data.experiences || data.experiences.length === 0) return null;
-    
-    return data.experiences.map((exp, idx) => {
-      if (!exp.jobTitle && !exp.company) return null;
-      
-      const startDate = exp.startDate ? new Date(exp.startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '';
-      const endDate = exp.currentlyWorking ? 'Present' : (exp.endDate ? new Date(exp.endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '');
-      
-      return (
-        <div key={idx} className="experience-item">
-          <div className="institution-header">
-            {toText(exp.jobTitle)} at {toText(exp.company)}
-          </div>
-          <div className="education-details">
-            {exp.remote ? 'Remote' : 
-             (exp.city && exp.state ? `${toText(exp.city)}, ${toText(exp.state)}` : 
-             toText(exp.city) || toText(exp.state) || '')} • {startDate} - {endDate}
-          </div>
-          {exp.description && (
-            <ul className="bullet-points">
-              {exp.description.split('\n').filter(point => point.trim()).map((point, pointIdx) => (
-                <li key={pointIdx}>{point.trim()}</li>
-              ))}
-            </ul>
-          )}
-        </div>
-      );
-    }).filter(Boolean);
-  };
 
+    const dash = isIndustryManager ? ' – ' : ' - ';
+
+    return data.experiences
+      .map((exp, idx) => {
+        if (!exp.jobTitle && !exp.company) return null;
+
+        const startDate = exp.startDate
+          ? new Date(exp.startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+          : '';
+        const endDate = exp.currentlyWorking
+          ? 'Present'
+          : exp.endDate
+          ? new Date(exp.endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+          : '';
+        const dateRange = startDate || endDate
+          ? (startDate ? `${startDate}${dash}${endDate || 'Present'}` : endDate)
+          : '';
+
+        const location = exp.remote
+          ? 'Remote'
+          : exp.city && exp.state
+          ? `${toText(exp.city)}, ${toText(exp.state)}`
+          : toText(exp.city) || toText(exp.state) || '';
+
+        const headerSegments = [
+          toText(exp.jobTitle),
+          toText(exp.company),
+          location,
+          dateRange
+        ]
+          .filter(Boolean)
+          .map((segment) => segment.replace(/\s+-\s+/g, ' – '));
+
+        const headerText = isIndustryManager
+          ? headerSegments.join(' | ')
+          : `${toText(exp.jobTitle)} at ${toText(exp.company)}`;
+
+        const secondaryLine = isIndustryManager
+          ? ''
+          : [location, dateRange].filter(Boolean).join(' • ');
+
+        const descriptionContent = exp.description
+          ? (
+              <ul className="bullet-points">
+                {exp.description
+                  .split(/\r?\n/)
+                  .filter((point) => point.trim())
+                  .map((point, pointIdx) => (
+                    <li key={pointIdx}>{point.trim().replace(/^[\u2022\u25AA-]+\s*/, '')}</li>
+                  ))}
+              </ul>
+            )
+          : null;
+
+        const node = (
+          <>
+            <div className="institution-header">{headerText}</div>
+            {!isIndustryManager && secondaryLine && (
+              <div className="education-details">{secondaryLine}</div>
+            )}
+            {descriptionContent}
+          </>
+        );
+
+        if (isIndustryManager) {
+          return (
+            <div key={idx} className="section-item">
+              <span className="section-item-marker">▪</span>
+              <div className="section-item-body">{node}</div>
+            </div>
+          );
+        }
+
+        return (
+          <div key={idx} className="experience-item">
+            {node}
+          </div>
+        );
+      })
+      .filter(Boolean);
+  };
   // Format education data
   const formatEducation = () => {
     if (!data.education || data.education.length === 0) return null;
-    
-    return data.education.map((edu, idx) => {
-      if (!edu.degree && !edu.school) return null;
-      
+
+    const dash = isIndustryManager ? ' – ' : ' - ';
+
+    return data.education
+      .map((edu, idx) => {
+        if (!edu.degree && !edu.school) return null;
+
+        if (isIndustryManager) {
+          const degreePart = [toText(edu.degree), edu.field ? toText(edu.field) : '']
+            .filter(Boolean)
+            .join(' in ');
+
+          let dateRange = '';
+          if (edu.startYear && edu.graduationYear) {
+            dateRange = `${edu.startYear}${dash}${edu.graduationYear}`;
+          } else if (edu.graduationYear) {
+            const gradYear = parseInt(edu.graduationYear, 10);
+            dateRange = Number.isNaN(gradYear) ? toText(edu.graduationYear) : `${gradYear - 4}${dash}${gradYear}`;
+          } else if (edu.startDate && edu.endDate) {
+            dateRange = `${toText(edu.startDate)}${dash}${toText(edu.endDate)}`;
+          } else if (edu.endDate) {
+            dateRange = toText(edu.endDate);
+          } else if (edu.startDate) {
+            dateRange = `${toText(edu.startDate)}${dash}Present`;
+          }
+
+          const location = [
+            toText(edu.school),
+            [toText(edu.city), toText(edu.state)].filter(Boolean).join(', ')
+          ]
+            .filter(Boolean)
+            .join(', ');
+
+          const segments = [degreePart, dateRange, location]
+            .filter(Boolean)
+            .map((segment) => segment.replace(/\s+-\s+/g, ' – ').toUpperCase());
+
+          if (segments.length === 0) return null;
+
+          const node = (
+            <div className="institution-header">{segments.join(' | ')}</div>
+          );
+
+          return (
+            <div key={idx} className="section-item">
+              <span className="section-item-marker">▪</span>
+              <div className="section-item-body">{node}</div>
+            </div>
+          );
+        }
+
+        return (
+          <div key={idx} className="education-item">
+            <div className="institution-header">
+              {toText(edu.degree)} {edu.field && `in ${toText(edu.field)}`}
+            </div>
+            <div className="education-details">
+              {toText(edu.school)} • {toText(edu.graduationYear)} {edu.gpa && `• GPA: ${toText(edu.gpa)}`} {edu.honors && `• ${toText(edu.honors)}`}
+            </div>
+          </div>
+        );
+      })
+      .filter(Boolean);
+  };
+  const wrapSectionContent = (content) => {
+    if (!content) return content;
+    if (!isIndustryManager) return content;
+    return <div className="section-content">{content}</div>;
+  };
+
+  const formatSkills = () => {
+    const skills = parseSkills(data.skills);
+    if (skills.length === 0) return null;
+
+    if (isIndustryManager) {
+      const columnCount = 2;
+      const itemsPerColumn = Math.ceil(skills.length / columnCount);
+      const columns = Array.from({ length: columnCount }, (_, columnIndex) =>
+        skills.slice(columnIndex * itemsPerColumn, (columnIndex + 1) * itemsPerColumn)
+      );
+      const activeColumns = columns.filter((column) => column.length > 0);
+      const columnCountResolved = activeColumns.length || 1;
+
       return (
-        <div key={idx} className="education-item">
-          <div className="institution-header">
-            {toText(edu.degree)} {edu.field && `in ${toText(edu.field)}`}
-          </div>
-          <div className="education-details">
-            {toText(edu.school)} • {toText(edu.graduationYear)} {edu.gpa && `• GPA: ${toText(edu.gpa)}`} {edu.honors && `• ${toText(edu.honors)}`}
-          </div>
+        <div className="skills-grid">
+          {activeColumns.map((column, columnIdx) => (
+            <ul
+              key={columnIdx}
+              className="skills-column"
+              style={{
+                width: `${100 / columnCountResolved}%`,
+                paddingRight: columnIdx < columnCountResolved - 1 ? '18pt' : 0,
+                display: 'inline-block',
+                verticalAlign: 'top',
+                boxSizing: 'border-box'
+              }}
+            >
+              {column.map((skill, skillIdx) => (
+                <li key={`${columnIdx}-${skillIdx}`}>{skill}</li>
+              ))}
+            </ul>
+          ))}
         </div>
       );
-    }).filter(Boolean);
+    }
+
+    return <p>{skills.join(', ')}</p>;
   };
 
   // Format projects data
@@ -121,8 +288,8 @@ const StepPreview = ({ onDownload }) => {
     return data.projects.map((project, idx) => {
       if (!project.projectName) return null;
       
-      return (
-        <div key={idx} className="experience-item">
+      const node = (
+        <div className="experience-item">
           <div className="institution-header">
             {toText(project.projectName)}
           </div>
@@ -138,18 +305,34 @@ const StepPreview = ({ onDownload }) => {
           )}
           {project.description && (
             <ul className="bullet-points">
-              {project.description.split('\n').filter(point => point.trim()).map((point, pointIdx) => (
+              {project.description.split(/\r?\n/).filter(point => point.trim()).map((point, pointIdx) => (
                 <li key={pointIdx}>
-                  {point.trim().replace(/^[•\-]\s*/, '')}
+                  {point.trim().replace(/^[\u2022\u25AA-]+\s*/, '')}
                 </li>
               ))}
             </ul>
           )}
         </div>
       );
+
+      if (isIndustryManager) {
+        return (
+          <div key={idx} className="section-item">
+            <span className="section-item-marker">▪</span>
+            <div className="section-item-body">{node}</div>
+          </div>
+        );
+      }
+
+      return node;
     }).filter(Boolean);
   };
-  
+  const summaryContent = data.summary ? <p>{toText(data.summary)}</p> : null;
+  const experiencesContent = formatExperiences();
+  const projectsContent = formatProjects();
+  const educationContent = formatEducation();
+
+  const skillsContent = formatSkills();
   return (
     <div className="preview-container" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
 
@@ -161,38 +344,38 @@ const StepPreview = ({ onDownload }) => {
           </div>
         </div>
         
-        {data.summary && (
+        {summaryContent && (
           <>
             <div className="section-header">Summary</div>
-            <p>{toText(data.summary)}</p>
+            {wrapSectionContent(summaryContent)}
           </>
         )}
         
-        {formatExperiences() && (
+        {experiencesContent && (
           <>
             <div className="section-header">Experience</div>
-            {formatExperiences()}
+            {wrapSectionContent(experiencesContent)}
           </>
         )}
         
-        {formatProjects() && (
+        {projectsContent && (
           <>
             <div className="section-header">Projects</div>
-            {formatProjects()}
+            {wrapSectionContent(projectsContent)}
           </>
         )}
         
-        {formatEducation() && (
+        {educationContent && (
           <>
             <div className="section-header">Education</div>
-            {formatEducation()}
+            {wrapSectionContent(educationContent)}
           </>
         )}
         
-        {data.skills && (
+        {skillsContent && (
           <>
             <div className="section-header">Skills</div>
-            <p>{toText(data.skills)}</p>
+            {wrapSectionContent(skillsContent)}
           </>
         )}
         
@@ -237,3 +420,6 @@ const StepPreview = ({ onDownload }) => {
 };
 
 export default StepPreview;
+
+
+
