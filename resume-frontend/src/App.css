@@ -309,7 +309,7 @@ button:disabled {
   margin-bottom: 3pt;
   text-align: justify;
   line-height: 1.15;
-  font-size: var(--font-size-list);
+  font-size: var(--font-size-content);
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
@@ -317,7 +317,7 @@ button:disabled {
 /* Modern template preview styles */
 .preview.modern {
   background: white;
-  padding: 0.5in;
+  padding: 0.4in 0.5in 0.25in 0.5in !important;
   border-radius: 0;
   border: none;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -391,57 +391,87 @@ button:disabled {
 }
 
 /* Industry manager template preview styles - Single Column Layout */
+
 .preview.industry-manager {
   background: white;
-  padding: 0.5in;
+  padding: 0.4in 0.5in 0.25in 0.5in !important;
   border-radius: 0;
   border: none;
-  font-family: Georgia, serif;
+  font-family: 'Georgia', serif;
   font-size: var(--font-size-base);
-  line-height: 1.15;
-  color: #000;
-  max-width: 8.5in;
-  width: 8.5in;
-  margin: 0 auto;
-  box-sizing: border-box;
-  min-height: auto;
-  height: auto;
-  overflow: visible;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  line-height: 1.2;
+  color: #2c3e50;
 }
 
 .preview.industry-manager .name {
   font-size: var(--font-size-header);
   font-weight: bold;
-  text-transform: uppercase;
   margin-bottom: 5pt;
-  color: #1a1a1a;
+  color: #2A7B88;
   text-align: center;
 }
 
 .preview.industry-manager .contact-info {
-  font-size: var(--font-size-content);
+  font-size: var(--font-size-details);
   margin-bottom: 10pt;
   color: #7f8c8d;
   text-align: center;
 }
 
 .preview.industry-manager .section-header {
-  font-size: var(--font-size-section);
+  font-size: calc(var(--font-size-section) * 1.25);
   font-weight: bold;
-  text-transform: uppercase;
   margin-top: 10pt;
+  margin-bottom: 4pt;
+  color: #2A7B88;
+  position: relative;
+  padding-left: 14pt;
+  text-transform: uppercase;
+  letter-spacing: 0.3pt;
+}
+
+.preview.industry-manager .section-header::before {
+  content: '▪';
+  color: #39A5B7;
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.85em;
+}
+
+.preview.industry-manager .section-content {
   margin-bottom: 6pt;
-  border-bottom: 2px solid #34495e;
-  padding-bottom: 3pt;
-  color: #2c3e50;
+}
+
+.preview.industry-manager .section-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 6pt;
+  margin-bottom: 4pt;
+}
+
+.preview.industry-manager .section-item-marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 12pt;
+  color: #39A5B7;
+  font-size: 1em;
+  line-height: 1.2;
+}
+
+.preview.industry-manager .section-item-body {
+  flex: 1;
 }
 
 .preview.industry-manager .institution-header {
   font-weight: bold;
   margin-bottom: 2pt;
   color: #2c3e50;
-  font-size: var(--font-size-content);
+  font-size: calc(var(--font-size-content) * 0.9);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
 }
 
 .preview.industry-manager .education-details {
@@ -460,38 +490,84 @@ button:disabled {
 }
 
 .preview.industry-manager ul {
-  margin-left: 0;
-  padding-left: 15pt;
-  margin-bottom: 0;
+  margin: 0;
+  padding: 0 0 0 14pt;
+  list-style: none;
 }
 
 .preview.industry-manager li {
   margin-bottom: 3pt;
   text-align: justify;
   line-height: 1.15;
-  font-size: var(--font-size-list);
+  font-size: var(--font-size-content);
   word-wrap: break-word;
   overflow-wrap: break-word;
   color: #374151;
+  position: relative;
+  padding-left: 12pt;
 }
 
-/* Add thick horizontal lines between sections like in the format preview */
-.preview.industry-manager .section-header:not(:first-of-type)::before {
-  content: '';
+.preview.industry-manager li::before {
+  content: '▪';
+  color: #39A5B7;
+  position: absolute;
+  left: 0;
+  top: 0.3em;
+  font-size: 0.7em;
+}
+
+.preview.industry-manager .section-item-body ul {
+  padding-left: 0;
+}
+
+.preview.industry-manager .section-item-body ul li {
+  padding-left: 12pt;
+}
+
+.preview.industry-manager .skills-grid {
   display: block;
-  height: 2px;
-  background: #34495e;
-  margin-bottom: 4pt;
+  width: 100%;
+  margin-top: 4pt;
+}
+
+.preview.industry-manager .skills-grid ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+  width: 50%;
+  vertical-align: top;
+  box-sizing: border-box;
+}
+
+.preview.industry-manager .skills-grid ul:not(:last-child) {
+  padding-right: 12pt;
+}
+
+.preview.industry-manager .skills-grid li {
+  position: relative;
+  padding-left: 12pt;
+  margin-bottom: 3pt;
+  font-size: var(--font-size-content);
+}
+
+.preview.industry-manager .skills-grid li::before {
+  content: '▪';
+  position: absolute;
+  left: 0;
+  top: 0.3em;
+  color: #39A5B7;
+  font-size: 0.7em;
 }
 
 /* CSS Custom Properties for dynamic font sizing */
 :root {
-  --font-size-base: 11pt;
+  --font-size-base: 10pt;
   --font-size-header: 16pt;
-  --font-size-section: 11pt;
+  --font-size-section: 13pt;
   --font-size-content: 11pt;
-  --font-size-details: 11pt;
-  --font-size-list: 11pt;
+  --font-size-details: 10pt;
+  --font-size-list: 10pt;
 }
 
 /* Ensure ALL elements in preview use the font scaling */
@@ -509,13 +585,13 @@ button:disabled {
 }
 
 .preview.industry-manager ul li {
-  font-size: var(--font-size-list) !important;
+  font-size: var(--font-size-content) !important;
 }
 
 /* Temp1 template preview styles (Classic Professional) */
 .preview {
   background: white;
-  padding: 0.5in;
+  padding: 0.4in 0.5in 0.25in 0.5in !important;
   border-radius: 0;
   border: none;
   font-family: Calibri, Arial, sans-serif;
@@ -851,3 +927,9 @@ body > div > div[style*='flex-direction:column'] {
 }
 
 /* Print styles for PDF generation */
+
+
+
+
+
+

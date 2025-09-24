@@ -615,7 +615,7 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
         return {
           container: { 
             fontFamily: 'Calibri, Arial, sans-serif', 
-            fontSize: `${7 * scaleFactor}px`, 
+            fontSize: `${8.5 * scaleFactor}px`, 
             lineHeight: '1.2',
             padding: '16px 16px 0 16px',
             background: 'white',
@@ -661,19 +661,24 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
             fontSize: `${6 * scaleFactor}px`, 
             marginBottom: `${4 * scaleFactor}px`
           },
-          skills: { 
-            color: '#374151', 
-            fontSize: `${6 * scaleFactor}px`
+          skills: {
+            color: '#374151',
+            fontSize: `${5.5 * scaleFactor}px`
           },
           item: { marginTop: `${3 * scaleFactor}px` }
         };
-      
-      case 'industry-manager':
-        // Executive Professional - exactly like StepFormat industry-manager
+      case 'industry-manager': {
+        const markerWidth = 10 * scaleFactor;
+        const gapWidth = 4 * scaleFactor;
+        const indent = markerWidth + gapWidth;
+        const sectionTitleFont = 6.4 * scaleFactor;
+        const headerLineFont = 5.2 * scaleFactor;
+        const bodyFont = 4.6 * scaleFactor;
+        const bulletFont = 4.9 * scaleFactor;
         return {
-          container: { 
-            fontFamily: 'Georgia, serif', 
-            fontSize: `${7 * scaleFactor}px`, 
+          container: {
+            fontFamily: 'Georgia, serif',
+            fontSize: `${bodyFont}px`,
             lineHeight: '1.2',
             padding: '16px 16px 0 16px',
             background: 'white',
@@ -681,56 +686,117 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
             borderRadius: '4px',
             overflow: 'visible'
           },
-          header: { 
-            textAlign: 'center', 
-            fontWeight: 'bold', 
-            fontSize: `${10 * scaleFactor}px`, 
-            marginBottom: `${3 * scaleFactor}px`, 
-            color: '#2c3e50'
+          header: {
+            textAlign: 'center',
+            fontWeight: 'bold',
+            fontSize: `${14 * scaleFactor}px`,
+            marginBottom: `${4 * scaleFactor}px`,
+            color: '#2A7B88'
           },
-          contact: { 
-            textAlign: 'center', 
-            color: '#7f8c8d', 
-            fontSize: `${6 * scaleFactor}px`, 
+          contact: {
+            textAlign: 'center',
+            color: '#7f8c8d',
+            fontSize: `${6 * scaleFactor}px`,
             marginBottom: `${6 * scaleFactor}px`
           },
-          sectionTitle: { 
-            color: '#2c3e50', 
-            fontWeight: 'bold', 
-            fontSize: `${7 * scaleFactor}px`,  // Slightly larger than body text
-            marginBottom: `${2 * scaleFactor}px`, 
-            borderBottom: '1px solid #000', 
-            paddingBottom: `${1 * scaleFactor}px`, 
-            textAlign: 'left'
+          sectionTitleBullet: '●',
+          sectionTitle: {
+            color: '#2A7B88',
+            fontWeight: 'bold',
+            fontSize: `${sectionTitleFont}px`,
+            marginBottom: `${2 * scaleFactor}px`,
+            textTransform: 'capitalize',
+            paddingLeft: `${indent}px`,
+            textIndent: `-${indent}px`,
+            letterSpacing: '0.3px'
           },
-          thickLine: {
-            borderBottom: '2px solid #34495e', 
-            marginBottom: `${4 * scaleFactor}px`
-          },
-          company: { 
-            color: '#2c3e50', 
-            fontWeight: 'bold', 
-            fontSize: `${6 * scaleFactor}px`
-          },
-          bullet: { 
-            color: '#374151', 
-            fontSize: `${6 * scaleFactor}px`, 
-            marginLeft: `${4 * scaleFactor}px`, 
+          sectionContent: {
             marginBottom: `${2 * scaleFactor}px`
           },
-          summary: { 
-            color: '#374151', 
-            fontSize: `${6 * scaleFactor}px`, 
+          headerBulletChar: '●',
+          company: {
+            fontWeight: 'bold',
+            fontSize: `${headerLineFont}px`,
+            textTransform: 'uppercase',
+            letterSpacing: '0.4px',
+            paddingLeft: `${indent}px`,
+            textIndent: `-${indent}px`,
+            color: '#2c3e50'
+          },
+          bullet: {
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: `${gapWidth}px`,
+            marginBottom: `${1.5 * scaleFactor}px`
+          },
+          bulletMarker: {
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: `${markerWidth}px`,
+            minWidth: `${markerWidth}px`,
+            fontSize: `${bulletFont}px`,
+            color: '#39A5B7',
+            lineHeight: '1.2'
+          },
+          bulletText: {
+            flex: 1,
+            fontSize: `${bodyFont}px`,
+            color: '#374151',
+            lineHeight: '1.3'
+          },
+          bulletMarkerChar: '▪',
+          summary: {
+            color: '#374151',
+            fontSize: `${bodyFont}px`,
             marginBottom: `${4 * scaleFactor}px`
           },
-          skills: { 
-            color: '#374151', 
-            fontSize: `${6 * scaleFactor}px`
+          skills: {
+            color: '#374151',
+            fontSize: `${bodyFont}px`
           },
+          skillsGrid: {
+            display: 'block',
+            width: '100%',
+            marginTop: `${2 * scaleFactor}px`
+          },
+          skillsColumn: {
+            display: 'inline-block',
+            verticalAlign: 'top',
+            listStyle: 'none',
+            padding: 0,
+            margin: 0,
+            width: '50%',
+            boxSizing: 'border-box'
+          },
+          skillsColumnSpacing: `${8 * scaleFactor}px`,
+          skillItem: {
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: `${gapWidth}px`,
+            marginBottom: `${2 * scaleFactor}px`
+          },
+          skillMarker: {
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: `${markerWidth}px`,
+            minWidth: `${markerWidth}px`,
+            fontSize: `${bulletFont}px`,
+            color: '#39A5B7',
+            lineHeight: '1.2'
+          },
+          skillText: {
+            flex: 1,
+            fontSize: `${bodyFont}px`,
+            color: '#374151',
+            lineHeight: '1.3'
+          },
+          skillMarkerChar: '▪',
           item: { marginTop: `${3 * scaleFactor}px` }
         };
-      
-      case 'modern':
+      }
+case 'modern':
         // Contemporary Tech - exactly like StepFormat modern
         return {
           container: { 
@@ -800,166 +866,480 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
     }
   };
 
-  // Render experience items
-  const renderExperiences = (experiences, styles) => {
-    if (!experiences || experiences.length === 0) return null;
+  const renderBulletLine = (line, key, styles) => {
+    if (!line || !line.trim()) return null;
+    const cleaned = line.trim().replace(/^[\u2022\u25AA-]+\s*/, '');
+    if (!cleaned) return null;
 
-    return experiences.map((exp, idx) => {
-      if (typeof exp === 'string') {
-        const lines = exp.split('\n');
-        const headerLine = lines[0] || '';
-        const descriptionLines = lines.slice(1);
-        
-        const headerParts = headerLine.split('|').map(part => part.trim());
-        const jobTitle = headerParts[0] || 'Job Title';
-        const company = headerParts[1] || 'Company';
-        const location = headerParts[2] || '';
-        const dates = headerParts[3] || '';
-        
-        return (
-          <div key={idx} style={styles.item}>
-            <div style={styles.company}>{jobTitle}</div>
-            <div style={styles.date}>
-              {company} {location && `• ${location}`} {dates && `• ${dates}`}
-            </div>
-            <div style={{ marginTop: '2px' }}>
-              {descriptionLines.map((line, lineIdx) => (
-                line.trim() && (
-                  <div key={lineIdx} style={styles.bullet}>
-                    • {line.trim()}
-                  </div>
-                )
-              ))}
-            </div>
-          </div>
-        );
-      } else {
-        const location = exp.city && exp.state ? `${toText(exp.city)}, ${toText(exp.state)}` : toText(exp.city) || toText(exp.state) || '';
-        
-        let startDate = '';
-        let endDate = '';
-        if (exp.startDate) {
-          const start = new Date(exp.startDate);
-          startDate = start.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
-        }
-        if (exp.endDate && !exp.currentlyWorking) {
-          const end = new Date(exp.endDate);
-          endDate = end.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
-        }
-        const dates = startDate && endDate ? `${startDate} - ${endDate}` : 
-                     startDate && exp.currentlyWorking ? `${startDate} - Present` :
-                     startDate ? startDate : '';
-        
-        return (
-          <div key={idx} style={styles.item}>
-            <div style={styles.company}>
-              {[
-                toText(exp.jobTitle) || 'Job Title',
-                toText(exp.company) || 'Company',
-                location,
-                dates
-              ].filter(Boolean).join(' • ')}
-            </div>
-            {exp.description && (
-              <div style={{ marginTop: '2px' }}>
-                {exp.description.split('\n').map((line, lineIdx) => (
-                  line.trim() && (
-                    <div key={lineIdx} style={styles.bullet}>
-                      • {line.trim()}
-                    </div>
-                  )
-                ))}
-              </div>
-            )}
-          </div>
-        );
-      }
-    });
+    if (data.selectedFormat === 'industry-manager') {
+      const containerStyle = styles.bullet || {
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: '8px',
+        marginBottom: '6px'
+      };
+      const markerStyle = styles.bulletMarker || {
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '18px',
+        minWidth: '18px',
+        fontSize: '11px',
+        color: '#39A5B7',
+        lineHeight: '1.2'
+      };
+      const textStyle = styles.bulletText || {
+        flex: 1,
+        fontSize: '11px',
+        color: '#374151',
+        lineHeight: '1.3'
+      };
+      const markerChar = styles.bulletMarkerChar || '▪';
+      return (
+        <div key={key} style={containerStyle}>
+          <span style={markerStyle}>{markerChar}</span>
+          <span style={textStyle}>{cleaned}</span>
+        </div>
+      );
+    }
+
+    return (
+      <div key={key} style={styles.bullet}>
+        • {cleaned}
+      </div>
+    );
   };
 
-  // Render education items - format like original PDF with school and location on same line
-  const renderEducation = (education, styles) => {
-    if (!education) return null;
 
-    if (Array.isArray(education)) {
-      return education.map((edu, idx) => {
-        // Format year range - handle both formats (startYear/graduationYear and startDate/endDate)
-        let yearRange = '';
-        
-        // Check for year format first (from form)
-        if (edu.startYear && edu.graduationYear) {
-          yearRange = `${edu.startYear} - ${edu.graduationYear}`;
-        } else if (edu.graduationYear) {
-          // If only graduation year, assume 4-year degree
-          const gradYear = parseInt(edu.graduationYear);
-          if (!isNaN(gradYear)) {
-            yearRange = `${gradYear - 4} - ${gradYear}`;
-          } else {
-            yearRange = edu.graduationYear;
-          }
-        } 
-        // Check for date format (from parsed resume)
-        else if (edu.startDate && edu.endDate) {
-          yearRange = `${edu.startDate} - ${edu.endDate}`;
-        } else if (edu.endDate) {
-          yearRange = edu.endDate;
-        } else if (edu.startDate) {
-          yearRange = `${edu.startDate} - Present`;
-        } else {
-          // Only show 'Year' if there's truly no date information
-          yearRange = '';
+const parseSkills = (value) => {
+    const toArray = (input) =>
+      input
+        .replace(/\r?\n/g, ',')
+        .split(/[,;]+/)
+        .map((skill) => skill.trim())
+        .filter(Boolean);
+
+    if (!value) return [];
+    if (Array.isArray(value)) {
+      return value
+        .flatMap((item) => {
+          if (typeof item === "string") return toArray(item);
+          return toArray(toText(item));
+        });
+    }
+    return toArray(String(value));
+  };
+
+
+  const renderSkillsSection = (skills, styles) => {
+    if (!skills || skills.length === 0) return null;
+    const isIndustryManager = data.selectedFormat === 'industry-manager';
+
+    if (isIndustryManager) {
+      const columnCount = 2;
+      const itemsPerColumn = Math.ceil(skills.length / columnCount);
+      const columns = Array.from({ length: columnCount }, (_, columnIndex) =>
+        skills.slice(columnIndex * itemsPerColumn, (columnIndex + 1) * itemsPerColumn)
+      );
+
+      const activeColumns = columns.filter((column) => column.length > 0);
+      const columnCountResolved = activeColumns.length || 1;
+
+      const skillMarkerChar = styles.skillMarkerChar || '▪';
+      return (
+        <div style={styles.skillsGrid}>
+          {activeColumns.map((column, columnIdx) => {
+            const columnStyle = {
+              ...(styles.skillsColumn || {}),
+              width: `${100 / columnCountResolved}%`
+            };
+
+            if (styles.skillsColumnSpacing && columnIdx < columnCountResolved - 1) {
+              columnStyle.paddingRight = styles.skillsColumnSpacing;
+            }
+
+            return (
+              <ul key={columnIdx} style={columnStyle}>
+                {column.map((skill, skillIdx) => (
+                  <li key={`${columnIdx}-${skillIdx}`} style={styles.skillItem || { display: 'flex', alignItems: 'flex-start', gap: '8px', marginBottom: '8px' }}>
+                    <span style={styles.skillMarker || { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '18px', minWidth: '18px', fontSize: '11px', color: '#39A5B7', lineHeight: '1.2' }}>{skillMarkerChar}</span>
+                    <span style={styles.skillText || { flex: 1, fontSize: '11px', color: '#374151', lineHeight: '1.3' }}>{skill}</span>
+                  </li>
+                ))}
+              </ul>
+            );
+          })}
+        </div>
+      );
+    }
+
+    return <div style={styles.skills}>{skills.join(', ')}</div>;
+  };
+
+  // Render experience items
+
+const renderExperiences = (experiences, styles) => {
+  if (!experiences || experiences.length === 0) return null;
+
+  const isIndustryManager = data.selectedFormat === 'industry-manager';
+
+  const normalizeRange = (start, end, currentlyWorking) => {
+    if (!start && !end) return '';
+    const separator = isIndustryManager ? ' – ' : ' - ';
+    if (start && end) return `${start}${separator}${end}`;
+    if (start && currentlyWorking) return `${start}${separator}Present`;
+    return start || end || '';
+  };
+
+  const formatHeaderSegments = (segments, upper = false) => {
+    const cleaned = segments
+      .filter(Boolean)
+      .map((segment) => segment.replace(/\s+-\s+/g, ' – ').trim());
+    const separator = upper ? ' | ' : ' • ';
+    return cleaned.join(separator);
+  };
+
+  return experiences
+
+    .map((exp, idx) => {
+
+      if (typeof exp === 'string') {
+
+        const lines = exp.split(/\r?\n/);
+
+        const headerLine = (lines[0] || '').trim();
+
+        const descriptionLines = lines.slice(1);
+
+
+
+        if (!headerLine && descriptionLines.filter((line) => line.trim()).length === 0) {
+
+          return null;
+
         }
 
-        return (
-          <div key={idx} style={styles.item}>
-            <div style={{ width: '100%', overflow: 'hidden' }}>
-              <div style={{ ...styles.company, float: 'left' }}>
-                {edu.school || 'University'}
+
+
+        const headerParts = headerLine.split('|').map((part) => part.trim());
+
+        const jobTitle = headerParts[0] || headerLine || 'Job Title';
+
+        const company = headerParts[1] || '';
+
+        const location = headerParts[2] || '';
+
+        const datePart = headerParts[3] || '';
+
+
+
+        const headerText = isIndustryManager
+
+          ? formatHeaderSegments([jobTitle, company, location, datePart], true)
+
+          : jobTitle;
+
+
+
+        const secondaryLine = !isIndustryManager
+
+          ? formatHeaderSegments([company, location, datePart])
+
+          : '';
+
+
+
+        const descriptionContent = descriptionLines.filter((line) => line.trim()).length > 0
+
+          ? (
+
+              <div style={{ marginTop: '2px' }}>
+
+                {descriptionLines.map((line, lineIdx) =>
+
+                  renderBulletLine(line, `${idx}-${lineIdx}`, styles)
+
+                )}
+
               </div>
-              {yearRange && (
-                <div
-                  style={{
-                    ...styles.date,
-                    fontWeight: 'normal',
-                    float: 'right',
-                    textAlign: 'right',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {yearRange}
-                </div>
-              )}
-            </div>
-            <div
-              style={{
-                ...styles.company,
-                fontWeight: 'normal',
-                marginTop: '2px',
-                clear: 'both',
-              }}
-            >
-              {edu.degree} {edu.field && `in ${edu.field}`}
-              {edu.gpa && ` • GPA: ${edu.gpa}`}
-            </div>
-          </div>
+
+            )
+
+          : null;
+
+
+
+        const contentNode = (
+
+          <>
+
+            <div style={styles.company}>{headerText}</div>
+
+            {!isIndustryManager && secondaryLine && (
+
+              <div style={styles.date}>{secondaryLine}</div>
+
+            )}
+
+            {descriptionContent}
+
+          </>
+
         );
-      });
-    } else {
-      return (
-        <div style={styles.item}>
-          <div style={{ width: '100%', overflow: 'hidden' }}>
-            <div style={{ ...styles.company, float: 'left' }}>Degree</div>
+
+
+
+        if (isIndustryManager) {
+
+          const headerBullet = styles.headerBulletChar || '●';
+          const itemStyle = styles.item || { marginTop: '6px' };
+
+          return (
+
             <div
-              style={{
-                ...styles.date,
-                fontWeight: 'normal',
-                float: 'right',
-                textAlign: 'right',
-                whiteSpace: 'nowrap',
-              }}
+
+              key={idx}
+
+              style={itemStyle}
+
             >
-              University • Year
+
+              <div style={styles.company}>{`${headerBullet} ${headerText}`}</div>
+
+              {descriptionContent}
+
             </div>
+
+          );
+
+        }
+
+
+
+        return (
+
+          <div key={idx} style={styles.item}>
+
+            {contentNode}
+
+          </div>
+
+        );
+
+      } else {
+
+        const location = exp.city && exp.state
+
+          ? `${toText(exp.city)}, ${toText(exp.state)}`
+
+          : toText(exp.city) || toText(exp.state) || '';
+
+
+
+        let startDate = '';
+
+        let endDate = '';
+
+        if (exp.startDate) {
+
+          const startDateObj = new Date(exp.startDate);
+
+          startDate = startDateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+
+        }
+
+        if (exp.endDate && !exp.currentlyWorking) {
+
+          const endDateObj = new Date(exp.endDate);
+
+          endDate = endDateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+
+        }
+
+
+
+        const dateRange = normalizeRange(startDate, endDate, exp.currentlyWorking);
+
+        const jobTitle = toText(exp.jobTitle) || 'Job Title';
+
+        const companyName = toText(exp.company) || 'Company';
+
+        const locationLabel = exp.remote ? 'Remote' : location;
+
+
+
+        const headerText = isIndustryManager
+
+          ? formatHeaderSegments([jobTitle, companyName, locationLabel, dateRange], true)
+
+          : formatHeaderSegments([jobTitle, companyName, locationLabel, dateRange]);
+
+
+
+        const descriptionContent = exp.description
+
+          ? (
+
+              <div style={{ marginTop: '2px' }}>
+
+                {exp.description.split(/\r?\n/).map((line, lineIdx) =>
+
+                  renderBulletLine(line, `${idx}-${lineIdx}`, styles)
+
+                )}
+
+              </div>
+
+            )
+
+          : null;
+
+
+
+        const contentNode = (
+
+          <>
+
+            <div style={styles.company}>{headerText}</div>
+
+            {descriptionContent}
+
+          </>
+
+        );
+
+
+
+        if (isIndustryManager) {
+
+          const headerBullet = styles.headerBulletChar || '●';
+          const itemStyle = styles.item || { marginTop: '6px' };
+
+          return (
+
+            <div
+
+              key={idx}
+
+              style={itemStyle}
+
+            >
+
+              <div style={styles.company}>{`${headerBullet} ${headerText}`}</div>
+
+              {descriptionContent}
+
+            </div>
+
+          );
+
+        }
+
+
+
+        return (
+
+          <div key={idx} style={styles.item}>
+
+            {contentNode}
+
+          </div>
+
+        );
+
+      }
+
+    })
+
+    .filter(Boolean);
+};
+
+
+// Render education items - format like original PDF with school and location on same line
+const renderEducation = (education, styles) => {
+  if (!education) return null;
+
+  const isIndustryManager = data.selectedFormat === 'industry-manager';
+
+  const normalizeRange = (edu) => {
+    const dash = isIndustryManager ? ' – ' : ' - ';
+    if (edu.startYear && edu.graduationYear) {
+      return `${edu.startYear}${dash}${edu.graduationYear}`;
+    }
+    if (edu.graduationYear) {
+      const gradYear = parseInt(edu.graduationYear, 10);
+      if (!Number.isNaN(gradYear)) {
+        return `${gradYear - 4}${dash}${gradYear}`;
+      }
+      return edu.graduationYear;
+    }
+    if (edu.startDate && edu.endDate) {
+      return `${edu.startDate}${dash}${edu.endDate}`;
+    }
+    if (edu.endDate) {
+      return edu.endDate;
+    }
+    if (edu.startDate) {
+      return `${edu.startDate}${dash}Present`;
+    }
+    return '';
+  };
+
+  const buildIndustryLine = (edu, key) => {
+    const degreePart = [toText(edu.degree), edu.field ? toText(edu.field) : '']
+      .filter(Boolean)
+      .join(' in ');
+    const datePart = normalizeRange(edu);
+    const locationParts = [
+      toText(edu.school),
+      [toText(edu.city), toText(edu.state)].filter(Boolean).join(', ')
+    ]
+      .filter(Boolean)
+      .join(', ');
+
+    const segments = [degreePart, datePart, locationParts]
+      .filter(Boolean)
+      .map((segment) => segment.replace(/\s+-\s+/g, ' – ').toUpperCase());
+
+    if (segments.length === 0) {
+      return null;
+    }
+
+    return (
+      <div key={key} style={styles.educationLine || styles.company}>
+        {segments.join(' | ')}
+      </div>
+    );
+  };
+
+  if (isIndustryManager) {
+    const items = Array.isArray(education) ? education : [education];
+    return items.map((edu, idx) => buildIndustryLine(edu, idx)).filter(Boolean);
+  }
+
+  if (Array.isArray(education)) {
+    return education.map((edu, idx) => {
+      let yearRange = normalizeRange(edu);
+
+      return (
+        <div key={idx} style={styles.item}>
+          <div style={{ width: '100%', overflow: 'hidden' }}>
+            <div style={{ ...styles.company, float: 'left' }}>
+              {edu.school || 'University'}
+            </div>
+            {yearRange && (
+              <div
+                style={{
+                  ...styles.date,
+                  fontWeight: 'normal',
+                  float: 'right',
+                  textAlign: 'right',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {yearRange}
+              </div>
+            )}
           </div>
           <div
             style={{
@@ -969,12 +1349,43 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
               clear: 'both',
             }}
           >
-            Degree • Field
+            {edu.degree} {edu.field && `in ${edu.field}`}
+            {edu.gpa && ` • GPA: ${edu.gpa}`}
           </div>
         </div>
       );
-    }
-  };
+    });
+  }
+
+  return (
+    <div style={styles.item}>
+      <div style={{ width: '100%', overflow: 'hidden' }}>
+        <div style={{ ...styles.company, float: 'left' }}>Degree</div>
+        <div
+          style={{
+            ...styles.date,
+            fontWeight: 'normal',
+            float: 'right',
+            textAlign: 'right',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          University • Year
+        </div>
+      </div>
+      <div
+        style={{
+          ...styles.company,
+          fontWeight: 'normal',
+          marginTop: '2px',
+          clear: 'both',
+        }}
+      >
+        Degree • Field
+      </div>
+    </div>
+  );
+};
 
   const renderProjects = (projects, styles) => {
     if (!projects || projects.length === 0) return null;
@@ -1007,13 +1418,9 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
           
           {project.description && (
             <div style={{ marginTop: '2px' }}>
-              {project.description.split('\n').map((line, lineIdx) => (
-                line.trim() && (
-                  <div key={lineIdx} style={styles.bullet}>
-                    • {line.trim().replace(/^[•\-]\s*/, '')}
-                  </div>
-                )
-              ))}
+              {project.description.split('\n').map((line, lineIdx) =>
+                renderBulletLine(line, `project-${idx}-${lineIdx}`, styles)
+              )}
             </div>
           )}
         </div>
@@ -1027,14 +1434,28 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
       return null;
     }
 
+    const isIndustryManager = data.selectedFormat === 'industry-manager';
+    const formatTitle = (raw) => {
+      if (!isIndustryManager) return raw;
+      const [main, extra] = raw.split('(');
+      const mainTitle = main
+        .trim()
+        .toLowerCase()
+        .replace(/(^|\s)([a-z])/g, (match, prefix, letter) => `${prefix}${letter.toUpperCase()}`);
+      if (!extra) return mainTitle;
+      const normalized = extra.replace(')', '').trim().toLowerCase();
+      return `${mainTitle} (${normalized})`;
+    };
+    const displayTitle = formatTitle(title);
+
     return (
       <div>
-        {/* Add thick line for industry-manager template */}
-        {data.selectedFormat === 'industry-manager' && styles.thickLine && (
-          <div style={styles.thickLine}></div>
-        )}
-        <div style={styles.sectionTitle}>{title}</div>
-        {content}
+        <div style={styles.sectionTitle}>
+          {isIndustryManager ? `${(styles.sectionTitleBullet || '●')} ${displayTitle}` : displayTitle}
+        </div>
+        {isIndustryManager && content ? (
+          <div style={styles.sectionContent || { paddingLeft: '14pt' }}>{content}</div>
+        ) : content}
       </div>
     );
   };
@@ -1092,8 +1513,10 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
           return <div key={idx}>{renderSection('EDUCATION', renderEducation(section.content, styles), styles)}</div>;
         case 'projects':
           return <div key={idx}>{renderSection('PROJECTS', renderProjects(section.content, styles), styles)}</div>;
-        case 'skills':
-          return <div key={idx}>{renderSection('SKILLS', <div style={styles.skills}>{toText(section.content)}</div>, styles)}</div>;
+        case 'skills': {
+          const skills = parseSkills(section.content);
+          return <div key={idx}>{renderSection('SKILLS', renderSkillsSection(skills, styles), styles)}</div>;
+        }
         default:
           return null;
       }
@@ -1101,6 +1524,7 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
   };
 
   const styles = getFormatStyles(data.selectedFormat || 'temp1', data.selectedFontSize || 'medium');
+  const singlePageSkills = parseSkills(data.skills);
 
   // Determine if we should show multiple pages
   const shouldShowMultiPage = pages.length > 1;
@@ -1188,9 +1612,8 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
             {data.education && (
               renderSection('EDUCATION', renderEducation(data.education, styles), styles)
             )}
-
-            {data.skills && toText(data.skills) && (
-              renderSection('SKILLS', <div style={styles.skills}>{toText(data.skills)}</div>, styles)
+            {singlePageSkills.length > 0 && (
+              renderSection('SKILLS', renderSkillsSection(singlePageSkills, styles), styles)
             )}
           </div>
         </div>
@@ -1214,4 +1637,10 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
 };
 
 export default LivePreview; 
+
+
+
+
+
+
 
