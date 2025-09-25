@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useResume } from '../context/ResumeContext';
+import { TEMPLATE_OPTIONS } from '../constants/templates';
 import { trackReferrer, trackBuilderStart } from '../components/Analytics';
 
 const TemplatesPage = () => {
@@ -13,26 +14,7 @@ const TemplatesPage = () => {
     trackBuilderStart('templates_page');
   }, []);
 
-  const templates = [
-    {
-      id: 'temp1',
-      name: 'Classic Professional',
-      description: 'Traditional layout with clean typography, perfect for corporate environments',
-      image: '/templates/classic.jpg'
-    },
-    {
-      id: 'modern',
-      name: 'Modern Clean',
-      description: 'Contemporary design with blue accents, ideal for tech and creative industries',
-      image: '/templates/modern.jpg'
-    },
-    {
-      id: 'industry-manager',
-      name: 'Industry Manager',
-      description: 'Executive style with serif fonts, great for senior positions and management roles',
-      image: '/templates/executive.jpg'
-    }
-  ];
+  const templates = TEMPLATE_OPTIONS;
 
   const handleTemplateSelect = (templateId) => {
     updateData({ selectedFormat: templateId });

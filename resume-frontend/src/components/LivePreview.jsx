@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useResume } from '../context/ResumeContext';
+import { TEMPLATE_SLUGS, DEFAULT_TEMPLATE_ID, normalizeTemplateId } from '../constants/templates';
 import './LivePreview.css';
 
 const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
   const { data } = useResume();
+  const selectedFormat = normalizeTemplateId(data.selectedFormat);
   const [pages, setPages] = useState([]);
   const [useConservativePaging, setUseConservativePaging] = useState(false);
-  const isIndustryManagerFormat = (data.selectedFormat === 'industry-manager');
+  const isIndustryManagerFormat = (selectedFormat === TEMPLATE_SLUGS.EXECUTIVE_SERIF);
   // Normalize any value into safe display text
   const toText = (val) => {
     if (val == null) return '';
@@ -295,7 +297,7 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
           
           // Check if adding this experience would exceed max height
           // Use higher threshold to maximize space usage
-          const threshold = aggressiveIndustry ? 0.995 : 0.95; // Allow industry-manager to pack tighter
+          const threshold = aggressiveIndustry ? 0.995 : 0.95; // Allow executive-serif to pack tighter
           if (currentHeight + expHeight > maxHeight * threshold && currentPart.length > 0) {
             // Current part is full, start new part
             parts.push([...currentPart]);
@@ -721,8 +723,8 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
     const scaleFactor = baseScaleFactor * (fontSizeMultipliers[fontSize] || fontSizeMultipliers['large'])
     
     switch (format) {
-      case 'temp1':
-        // Classic Professional - exactly like StepFormat temp1
+      case TEMPLATE_SLUGS.CLASSIC_PROFESSIONAL:
+        // Classic Professional - exactly like StepFormat classic-professional
         return {
           container: { 
             fontFamily: 'Calibri, Arial, sans-serif', 
@@ -778,7 +780,7 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
           },
           item: { marginTop: `${3 * scaleFactor}px` }
         };
-      case 'industry-manager': {
+      case TEMPLATE_SLUGS.EXECUTIVE_SERIF: {
         const markerWidth = 9 * scaleFactor;
         const gapWidth = 3.5 * scaleFactor;
         const indent = markerWidth + gapWidth;
@@ -907,7 +909,7 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
           item: { marginTop: `${3 * scaleFactor}px` }
         };
       }
-case 'modern':
+      case TEMPLATE_SLUGS.MODERN_CLEAN:
         // Contemporary Tech - exactly like StepFormat modern
         return {
           container: { 
@@ -973,7 +975,7 @@ case 'modern':
       
              default:
          // Default to Classic Professional
-         return getFormatStyles('temp1', fontSize);
+         return getFormatStyles(DEFAULT_TEMPLATE_ID, fontSize);
     }
   };
 
@@ -982,7 +984,7 @@ case 'modern':
     const cleaned = line.trim().replace(/^[\u2022\u25AA-]+\s*/, '');
     if (!cleaned) return null;
 
-    if (data.selectedFormat === 'industry-manager') {
+    if (selectedFormat === TEMPLATE_SLUGS.EXECUTIVE_SERIF) {
       const containerStyle = styles.bullet || {
         display: 'flex',
         alignItems: 'flex-start',
@@ -1044,7 +1046,7 @@ const parseSkills = (value) => {
 
   const renderSkillsSection = (skills, styles) => {
     if (!skills || skills.length === 0) return null;
-    const isIndustryManager = data.selectedFormat === 'industry-manager';
+    const isIndustryManager = selectedFormat === TEMPLATE_SLUGS.EXECUTIVE_SERIF;
 
     if (isIndustryManager) {
       const columnCount = 2;
@@ -1092,7 +1094,7 @@ const parseSkills = (value) => {
 const renderExperiences = (experiences, styles) => {
   if (!experiences || experiences.length === 0) return null;
 
-  const isIndustryManager = data.selectedFormat === 'industry-manager';
+  const isIndustryManager = selectedFormat === TEMPLATE_SLUGS.EXECUTIVE_SERIF;
 
   const normalizeRange = (start, end, currentlyWorking) => {
     if (!start && !end) return '';
@@ -1370,7 +1372,7 @@ const renderExperiences = (experiences, styles) => {
 const renderEducation = (education, styles) => {
   if (!education) return null;
 
-  const isIndustryManager = data.selectedFormat === 'industry-manager';
+  const isIndustryManager = selectedFormat === TEMPLATE_SLUGS.EXECUTIVE_SERIF;
 
   const normalizeRange = (edu) => {
     const dash = isIndustryManager ? ' – ' : ' - ';
@@ -1545,7 +1547,7 @@ const renderEducation = (education, styles) => {
       return null;
     }
 
-    const isIndustryManager = data.selectedFormat === 'industry-manager';
+    const isIndustryManager = selectedFormat === TEMPLATE_SLUGS.EXECUTIVE_SERIF;
     const formatTitle = (raw) => {
       if (!isIndustryManager) return raw;
       const [main, extra] = raw.split('(');
@@ -1578,7 +1580,7 @@ const renderEducation = (education, styles) => {
         case 'header':
           return (
             <div key={idx}>
-              {(data.selectedFormat === 'modern') ? (
+              {(selectedFormat === TEMPLATE_SLUGS.MODERN_CLEAN) ? (
                 <div style={styles.headerContainer}>
                   {section.content.name && (
                     <div style={styles.header}>
@@ -1634,7 +1636,7 @@ const renderEducation = (education, styles) => {
     });
   };
 
-  const styles = getFormatStyles(data.selectedFormat || 'temp1', data.selectedFontSize || 'medium');
+  const styles = getFormatStyles(selectedFormat || DEFAULT_TEMPLATE_ID, data.selectedFontSize || 'medium');
   const singlePageSkills = parseSkills(data.skills);
 
   // Determine if we should show multiple pages
@@ -1680,7 +1682,7 @@ const renderEducation = (education, styles) => {
           {/* Resume Content */}
           <div style={{ height: 'auto', overflow: 'visible' }}>
             {/* Header - handle modern template's special container */}
-            {(data.selectedFormat === 'modern') ? (
+            {(selectedFormat === TEMPLATE_SLUGS.MODERN_CLEAN) ? (
               <div style={styles.headerContainer}>
                 {data.name && (
                   <div style={styles.header}>

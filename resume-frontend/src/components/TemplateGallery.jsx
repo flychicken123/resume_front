@@ -3,6 +3,7 @@ import './TemplateGallery.css';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { trackBuilderStart } from './Analytics';
+import { normalizeTemplateId, TEMPLATE_SLUGS } from '../constants/templates';
 
 const TemplateGallery = ({ onSelectTemplate, showAuthModal }) => {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ const TemplateGallery = ({ onSelectTemplate, showAuthModal }) => {
 
   const templates = [
     {
-      id: 'modern',
+      id: TEMPLATE_SLUGS.MODERN_CLEAN,
       name: 'Modern Professional',
       category: 'professional',
       description: 'Clean and contemporary design perfect for tech and creative roles',
@@ -146,15 +147,16 @@ const TemplateGallery = ({ onSelectTemplate, showAuthModal }) => {
     : templates.filter(t => t.category === selectedCategory);
 
   const handleTemplateSelect = (template) => {
-    trackBuilderStart('template_selected', { templateId: template.id });
+    const normalizedId = normalizeTemplateId(template.id);
+    trackBuilderStart('template_selected', { templateId: normalizedId });
     
     if (!user) {
       showAuthModal(true);
     } else if (onSelectTemplate) {
-      onSelectTemplate(template);
+      onSelectTemplate({ ...template, id: normalizedId });
     } else {
       // Navigate to builder with selected template
-      navigate('/builder', { state: { selectedTemplate: template.id } });
+      navigate('/builder', { state: { selectedTemplate: normalizedId } });
     }
   };
 
@@ -252,7 +254,7 @@ const TemplateGallery = ({ onSelectTemplate, showAuthModal }) => {
           <p>You can always change your template later</p>
           <button 
             className="cta-button"
-            onClick={() => handleTemplateSelect(templates.find(t => t.id === 'modern'))}
+            onClick={() => handleTemplateSelect(templates.find(t => t.id === TEMPLATE_SLUGS.MODERN_CLEAN))}
           >
             Get Started with Modern Professional →
           </button>

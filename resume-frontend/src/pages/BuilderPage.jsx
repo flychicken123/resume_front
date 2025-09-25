@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { useAuth } from '../context/AuthContext';
 import { useResume } from '../context/ResumeContext';
+import { TEMPLATE_SLUGS, DEFAULT_TEMPLATE_ID, normalizeTemplateId } from '../constants/templates';
 import Stepper from '../components/Stepper';
 import StepPersonal from '../components/StepPersonal';
 import StepExperience from '../components/StepExperience';
@@ -62,6 +63,7 @@ function BuilderPage() {
   const { user, logout } = useAuth();
   const displayName = typeof user === 'string' ? user : (user?.name || user?.email || '');
   const { data } = useResume();
+  const selectedFormat = normalizeTemplateId(data.selectedFormat);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const toggleFullscreen = () => {
@@ -141,7 +143,7 @@ function BuilderPage() {
       }
 
       // Track resume generation
-      trackResumeGeneration(data.selectedFormat || 'default');
+      trackResumeGeneration(selectedFormat || 'default');
 
       // Update button state
       const viewButton = document.querySelector('button[onClick]');
@@ -471,24 +473,24 @@ function BuilderPage() {
         const fontScale = baseScaleFactor * (fontSizeMultipliers[selectedFontSize] || 1.0);
 
         const getTemplateFont = () => {
-          switch(data.selectedFormat || 'temp1') {
-            case 'temp1':
+          switch (selectedFormat || DEFAULT_TEMPLATE_ID) {
+            case TEMPLATE_SLUGS.CLASSIC_PROFESSIONAL:
               return "'Calibri', 'Arial', sans-serif";
-            case 'industry-manager':
+            case TEMPLATE_SLUGS.EXECUTIVE_SERIF:
               return "'Georgia', serif";
-            case 'modern':
+            case TEMPLATE_SLUGS.MODERN_CLEAN:
               return "'Segoe UI', 'Tahoma', 'Geneva', 'Verdana', sans-serif";
             default:
               return "'Calibri', 'Arial', sans-serif";
           }
         };
         const getTemplateLineHeight = () => {
-          switch (data.selectedFormat || 'temp1') {
-            case 'temp1':
+          switch (selectedFormat || DEFAULT_TEMPLATE_ID) {
+            case TEMPLATE_SLUGS.CLASSIC_PROFESSIONAL:
               return 1.15; // Match preview default for classic template
-            case 'modern':
+            case TEMPLATE_SLUGS.MODERN_CLEAN:
               return 1.2;
-            case 'industry-manager':
+            case TEMPLATE_SLUGS.EXECUTIVE_SERIF:
               return 1.25;
             default:
               return 1.2;
@@ -751,10 +753,10 @@ function BuilderPage() {
         
 
  
-        console.log("Current data.selectedFormat:", data.selectedFormat);
+        console.log("Current selectedFormat:", selectedFormat);
         console.log("Current data.template:", data.template);
-        console.log("Using font for template", data.selectedFormat, ":", templateFont);
-        console.log("Template (selectedFormat):", data.selectedFormat);
+        console.log("Using font for template", selectedFormat, ":", templateFont);
+        console.log("Template (selectedFormat):", selectedFormat);
         console.log("Font selected:", templateFont);
         console.log("All data keys:", Object.keys(data));
         

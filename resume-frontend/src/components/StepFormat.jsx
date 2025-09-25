@@ -1,5 +1,6 @@
 import React from 'react';
 import { useResume } from '../context/ResumeContext';
+import { TEMPLATE_OPTIONS, normalizeTemplateId } from '../constants/templates';
 import { trackReferrer, trackBuilderStart } from './Analytics';
 
 const StepFormat = ({ onNext }) => {
@@ -11,11 +12,7 @@ const StepFormat = ({ onNext }) => {
     trackBuilderStart('format_step');
   }, []);
 
-  const formats = [
-    { id: 'temp1', name: 'Classic Professional', description: 'Traditional layout with clean typography' },
-    { id: 'modern', name: 'Modern Clean', description: 'Contemporary design with blue accents' },
-    { id: 'industry-manager', name: 'Industry Manager', description: 'Executive style with serif fonts' }
-  ];
+  const formats = TEMPLATE_OPTIONS.map(({ id, name, description }) => ({ id, name, description }));
 
   const fontSizes = [
     { id: 'small', name: 'Small', description: 'Compact text size' },
@@ -25,7 +22,8 @@ const StepFormat = ({ onNext }) => {
   ];
 
   const handleFormatSelect = (formatId) => {
-    setData(prevData => ({ ...prevData, selectedFormat: formatId }));
+    const normalizedFormat = normalizeTemplateId(formatId);
+    setData(prevData => ({ ...prevData, selectedFormat: normalizedFormat }));
   };
 
   const handleFontSizeSelect = (fontSizeId) => {

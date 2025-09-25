@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { useAuth } from './AuthContext';
+import { DEFAULT_TEMPLATE_ID, normalizeTemplateId, getTemplateMetaById } from '../constants/templates';
 
 // Get API URL - use same logic as other files
 const getAPIBaseURL = () => {
@@ -39,9 +40,25 @@ const createDefaultResumeData = () => ({
   }],
   skills: "",
   summary: "",
-  selectedFormat: "temp1",
+  selectedFormat: DEFAULT_TEMPLATE_ID,
   selectedFontSize: "medium"
 });
+
+const normalizeResumeData = (resume) => {
+  if (!resume || typeof resume !== 'object') {
+    return createDefaultResumeData();
+  }
+
+  const normalizedFormat = normalizeTemplateId(resume.selectedFormat);
+  const template = getTemplateMetaById(normalizedFormat);
+  const nextFormat = template ? template.id : DEFAULT_TEMPLATE_ID;
+
+  if (resume.selectedFormat !== nextFormat) {
+    return { ...resume, selectedFormat: nextFormat };
+  }
+
+  return resume;
+};
 
 // Helper function to get data from localStorage with user-specific key
 const getStoredData = (userId) => {
@@ -161,7 +178,7 @@ export const ResumeProvider = ({ children }) => {
     // Initialize with stored data or default values
     const userId = (user && user.email) || initialUserEmailRef.current;
     const storedData = getStoredData(userId);
-    return storedData || createDefaultResumeData();
+    return storedData ? normalizeResumeData(storedData) : createDefaultResumeData();
   });
   const updateResume = (updater) => {
     setData((prev) => {
@@ -169,10 +186,13 @@ export const ResumeProvider = ({ children }) => {
       if (!nextState || typeof nextState !== 'object') {
         return prev;
       }
-      if (JSON.stringify(prev) === JSON.stringify(nextState)) {
+
+      const normalizedNext = normalizeResumeData(nextState);
+      if (JSON.stringify(prev) === JSON.stringify(normalizedNext)) {
         return prev;
       }
-      return nextState;
+
+      return normalizedNext;
     });
   };
 
@@ -226,13 +246,13 @@ export const ResumeProvider = ({ children }) => {
       try {
         const databaseData = await loadFromDatabase(user.email);
         if (databaseData) {
-          setData(databaseData);
+          setData(normalizeResumeData(databaseData));
           console.log('Loaded saved resume data from database for user:', user.email);
         } else {
           // Try localStorage as fallback
           const storedData = getStoredData(user.email);
           if (storedData) {
-            setData(storedData);
+            setData(normalizeResumeData(storedData));
             console.log('Loaded saved resume data from localStorage for user:', user.email);
           } else {
             console.log('No saved data found for user:', user.email);
@@ -243,7 +263,7 @@ export const ResumeProvider = ({ children }) => {
         // Fallback to localStorage
         const storedData = getStoredData(user.email);
         if (storedData) {
-          setData(storedData);
+          setData(normalizeResumeData(storedData));
           console.log('Loaded saved resume data from localStorage (fallback) for user:', user.email);
         }
       }
@@ -268,7 +288,7 @@ export const ResumeProvider = ({ children }) => {
         projects: [],
         skills: "",
         summary: "",
-        selectedFormat: data.selectedFormat || "temp1",
+        selectedFormat: normalizeTemplateId(data.selectedFormat || DEFAULT_TEMPLATE_ID),
         selectedFontSize: data.selectedFontSize || "medium"
       };
       console.log('Starting with clean data, preserving format settings');
@@ -331,7 +351,7 @@ export const ResumeProvider = ({ children }) => {
       }
 
       console.log('Mapped data:', mapped);
-      setData(mapped);
+      setData(normalizeResumeData(mapped));
       console.log('Data set successfully - old data cleared, new data applied');
     } catch (e) {
       console.error('Failed to apply imported data:', e);
@@ -346,7 +366,7 @@ export const ResumeProvider = ({ children }) => {
   }, [user]);
 
   return (
-    <ResumeContext.Provider value={{ data, setData: updateResume, clearData, loadUserData, saveToDatabaseNow, applyImportedData }}>
+    <ResumeContext.Provider value={{ data, setData: updateResume, updateData: updateResume, clearData, loadUserData, saveToDatabaseNow, applyImportedData }}>
       {children}
     </ResumeContext.Provider>
   );
