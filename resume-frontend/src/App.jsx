@@ -5,7 +5,6 @@ import { AuthProvider } from './context/AuthContext';
 import { ResumeProvider } from './context/ResumeContext';
 import Home from './components/Home';
 import { LoginPage, BuilderPage, AdminMembershipPage } from './pages';
-import JobApplicationPage from './pages/JobApplicationPage';
 import PricingPage from './components/PricingPage';
 import SubscriptionSuccess from './components/SubscriptionSuccess';
 import SubscriptionCancel from './components/SubscriptionCancel';

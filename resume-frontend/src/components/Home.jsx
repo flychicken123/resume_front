@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './Home.css';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useResume } from '../context/ResumeContext';
 import Login from './auth/Login';
 import IntegratedBuilderStart from './IntegratedBuilderStart';
 import ResumeHistory from './ResumeHistory';
-import JobSubmit from './JobSubmit';
 import SimpleHero from './SimpleHero';
 import About from './About';
 import Contact from './Contact';
@@ -14,14 +12,11 @@ import SEO from './SEO';
 import { trackReferrer, trackBuilderStart } from './Analytics';
 
 const Home = () => {
-  const navigate = useNavigate();
   const { user, login, isAdmin } = useAuth();
-  const { resumeData } = useResume();
   const displayName = typeof user === 'string' ? user : (user?.name || user?.email || '');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showIntegratedModal, setShowIntegratedModal] = useState(false);
   const [showResumeHistory, setShowResumeHistory] = useState(false);
-  const [showJobSubmit, setShowJobSubmit] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [usernameWidth, setUsernameWidth] = useState(100);
   const usernameRef = useRef(null);
@@ -56,12 +51,6 @@ const Home = () => {
     }
   };
 
-  const handleViewTemplates = () => {
-    trackReferrer();
-    trackBuilderStart('home_page_templates');
-    navigate('/templates');
-  };
-  
   return (
     <div>
       <SEO 
@@ -605,15 +594,6 @@ const Home = () => {
       <About />
       
       
-      {/* Hidden - Apply to Jobs feature
-      {showJobSubmit && (
-        <JobSubmit 
-          user={user}
-          resumeData={resumeData}
-          onClose={() => setShowJobSubmit(false)} 
-        />
-      )}
-      */}
       {/* Contact Section */}
       <Contact />
     </div>
@@ -621,4 +601,5 @@ const Home = () => {
 };
 
 export default Home; 
+
 

@@ -57,25 +57,6 @@ const SubscriptionStatus = ({ onLimitReached, minimal = false }) => {
   };
 
   // Check usage before generating resume
-  const checkCanGenerate = async () => {
-    try {
-      const token = localStorage.getItem('resumeToken');
-      const response = await fetch(`${getAPIBaseURL()}/api/subscription/check-limit`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        return data.can_generate;
-      }
-    } catch (error) {
-      console.error('Error checking limit:', error);
-    }
-    return false;
-  };
-
   if (!user || loading || !usage || !subscription) {
     return null;
   }
@@ -93,9 +74,6 @@ const SubscriptionStatus = ({ onLimitReached, minimal = false }) => {
 
   const usagePercentage = ((subscription.resume_limit - usage.remaining) / subscription.resume_limit) * 100;
   const isLimitReached = !usage.can_generate;
-  const resetDate = new Date(usage.reset_date);
-  const daysUntilReset = Math.ceil((resetDate - new Date()) / (1000 * 60 * 60 * 24));
-
   // Hide the status component completely when limit is reached
   // The modal will be shown instead
   if (isLimitReached) {
@@ -191,3 +169,4 @@ export const useSubscriptionLimit = () => {
 
   return { canGenerate, checking, checkLimit };
 };
+
