@@ -1,8 +1,10 @@
 import React, { useEffect } from 'react';
 import { useResume } from '../context/ResumeContext';
+import { TEMPLATE_SLUGS, DEFAULT_TEMPLATE_ID, normalizeTemplateId } from '../constants/templates';
 
 const StepPreview = ({ onDownload }) => {
   const { data } = useResume();
+  const normalizedFormat = normalizeTemplateId(data.selectedFormat);
   const toText = (val) => {
     if (val == null) return '';
     if (typeof val === 'string') return val;
@@ -48,7 +50,7 @@ const StepPreview = ({ onDownload }) => {
   };
   
   const scale = fontSizeScaling[data.selectedFontSize || 'medium'] || 1.2;
-const isIndustryManager = (data.selectedFormat || 'temp1') === 'industry-manager';
+const isIndustryManager = normalizedFormat === TEMPLATE_SLUGS.EXECUTIVE_SERIF;
 
   
   // Helper function to scale font sizes (match LivePreview exactly)
@@ -57,10 +59,10 @@ const isIndustryManager = (data.selectedFormat || 'temp1') === 'industry-manager
     return `${Math.round(size * scale)}pt`; // Use pt for consistency with CSS
   };
 
-  // Update CSS custom properties when font size changes (match industry-manager template)
+  // Update CSS custom properties when font size changes (match executive-serif template)
   useEffect(() => {
     const root = document.documentElement;
-    // Use the same font sizes as LivePreview industry-manager template
+    // Use the same font sizes as LivePreview executive-serif template
     root.style.setProperty('--font-size-base', scaleFont('10pt'));     // Container base
     root.style.setProperty('--font-size-header', scaleFont('16pt'));  // Header/name
     root.style.setProperty('--font-size-section', scaleFont('13pt')); // Section titles
@@ -73,14 +75,14 @@ const isIndustryManager = (data.selectedFormat || 'temp1') === 'industry-manager
 
   // Get template class based on selected format
   const getTemplateClass = () => {
-    const format = data.selectedFormat || 'temp1';
+    const format = normalizedFormat || DEFAULT_TEMPLATE_ID;
     switch (format) {
-      case 'modern':
-        return 'preview modern';
-      case 'industry-manager':
-        return 'preview industry-manager';
+      case TEMPLATE_SLUGS.MODERN_CLEAN:
+        return 'preview modern-clean';
+      case TEMPLATE_SLUGS.EXECUTIVE_SERIF:
+        return 'preview executive-serif';
       default:
-        return 'preview'; // temp1 template
+        return 'preview'; // classic-professional template
     }
   };
 
