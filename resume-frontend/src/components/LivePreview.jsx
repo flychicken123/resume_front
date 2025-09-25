@@ -5,6 +5,8 @@ import './LivePreview.css';
 const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
   const { data } = useResume();
   const [pages, setPages] = useState([]);
+  const [useConservativePaging, setUseConservativePaging] = useState(false);
+  const isIndustryManagerFormat = (data.selectedFormat === 'industry-manager');
   // Normalize any value into safe display text
   const toText = (val) => {
     if (val == null) return '';
@@ -25,7 +27,6 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
 
   // Page dimensions in pixels (8.5" x 11" at 96 DPI)
   const PAGE_HEIGHT = 1056;
-  const PAGE_WIDTH = 816;
   const CONTENT_MARGIN = 10; // Further reduced margin for maximum content
   const AVAILABLE_HEIGHT = PAGE_HEIGHT - (CONTENT_MARGIN * 2);
 
@@ -43,24 +44,60 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
   // Estimate height for different content types (more realistic estimates)
   const estimateSectionHeight = (content, type) => {
     if (!content) return 0;
-    
+
     // Get font size scale factor to adjust heights
     const fontScale = getFontSizeScaleFactor();
-    
+
+const applyFormatAdjustment = (value, sectionKey = type) => {
+  if (!isIndustryManagerFormat) {
+    return value;
+  }
+
+  const adjustmentSets = {
+    aggressive: {
+      header: { multiplier: 0.85, floor: 26 },
+      summary: { multiplier: 0.78, floor: 32 },
+      experience: { multiplier: 0.78, floor: 95 },
+      education: { multiplier: 0.8, floor: 42 },
+      projects: { multiplier: 0.78, floor: 64 },
+      skills: { multiplier: 0.76, floor: 34 },
+      default: { multiplier: 0.8, floor: 30 }
+    },
+    conservative: {
+      header: { multiplier: 0.92, floor: 30 },
+      summary: { multiplier: 0.85, floor: 36 },
+      experience: { multiplier: 0.88, floor: 110 },
+      education: { multiplier: 0.9, floor: 48 },
+      projects: { multiplier: 0.88, floor: 74 },
+      skills: { multiplier: 0.86, floor: 38 },
+      default: { multiplier: 0.88, floor: 34 }
+    }
+  };
+
+  const mode = useConservativePaging ? 'conservative' : 'aggressive';
+  const selected = adjustmentSets[mode];
+  const { multiplier, floor } = selected[sectionKey] || selected.default;
+  const adjusted = Math.max(floor, value * multiplier);
+  return Math.min(value, adjusted);
+};
+
     switch (type) {
-      case 'header':
-        return Math.round(35 * fontScale); // Reduced from 40
-        
-      case 'summary':
+      case 'header': {
+        const baseHeight = Math.round(35 * fontScale); // Reduced from 40
+        return applyFormatAdjustment(baseHeight, 'header');
+      }
+
+      case 'summary': {
         // Much more conservative estimation
         const contentText = toText(content);
         const charsPerLine = Math.round(120 / fontScale); // Increased from 100
         const lines = Math.ceil(contentText.length / charsPerLine);
         const lineHeight = Math.round(14 * fontScale); // Reduced from 16
         const summaryHeight = Math.max(18 * fontScale, lines * lineHeight);
-        return summaryHeight;
-        
-      case 'experience':
+        return applyFormatAdjustment(summaryHeight, 'summary');
+      }
+
+      case 'experience': {
         if (Array.isArray(content)) {
           const totalHeight = content.reduce((total, exp) => {
             let height = Math.round(28 * fontScale); // Reduced from 35
@@ -71,18 +108,20 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
             }
             return total + height + Math.round(6 * fontScale); // Reduced from 8
           }, 0);
-          return totalHeight;
+          return applyFormatAdjustment(totalHeight, 'experience');
         }
-        return Math.round(35 * fontScale);
-        
-      case 'education':
+        return applyFormatAdjustment(Math.round(35 * fontScale), 'experience');
+      }
+
+      case 'education': {
         if (Array.isArray(content)) {
           const eduHeight = content.length * Math.round(25 * fontScale); // Reduced from 30
-          return eduHeight;
+          return applyFormatAdjustment(eduHeight, 'education');
         }
-        return Math.round(25 * fontScale);
-        
-      case 'projects':
+        return applyFormatAdjustment(Math.round(25 * fontScale), 'education');
+      }
+
+      case 'projects': {
         if (Array.isArray(content)) {
           // Projects usually take more space due to descriptions
           const projectHeight = content.reduce((total, project) => {
@@ -92,9 +131,9 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
               const lines = project.description.split('\n').filter(l => l.trim());
               // Most bullet points fit on one line at preview scale
               let totalLines = lines.length;
-              
+
               const descCharsPerLine = Math.round(140 / fontScale); // Increased - more chars fit per line
-              
+
               // Only count extra lines for very long bullet points
               for (const line of lines) {
                 const cleanLine = line.replace('•', '').trim();
@@ -102,7 +141,7 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
                   totalLines += Math.floor(cleanLine.length / descCharsPerLine);
                 }
               }
-              
+
               height += totalLines * Math.round(12 * fontScale); // Reduced line height
             }
             if (project.technologies) {
@@ -112,20 +151,22 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
             if (project.projectUrl) height += Math.round(12 * fontScale);
             return total + height + Math.round(5 * fontScale); // Reduced spacing
           }, 0);
-          return projectHeight;
+          return applyFormatAdjustment(projectHeight, 'projects');
         }
-        return Math.round(60 * fontScale);
-        
-      case 'skills':
+        return applyFormatAdjustment(Math.round(60 * fontScale), 'projects');
+      }
+
+      case 'skills': {
         // More conservative skills section estimation
         const skillsText = toText(content);
         const skillCharsPerLine = Math.round(140 / fontScale); // Increased from 120
         const skillLines = Math.ceil(skillsText.length / skillCharsPerLine);
-        const skillsHeight = Math.max(18 * fontScale, skillLines * Math.round(14 * fontScale));
-        return skillsHeight;
-        
+        const skillsHeight = Math.max(17 * fontScale, skillLines * Math.round(13 * fontScale));
+        return applyFormatAdjustment(skillsHeight, 'skills');
+      }
+
       default:
-        return 20;
+        return applyFormatAdjustment(20, 'default');
     }
   };
 
@@ -144,8 +185,26 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
                            fontScale <= 1.0 ? 0.965 :  // Medium fonts
                            fontScale <= 1.15 ? 0.95 :  // Large fonts
                            0.93;                        // Extra-large
-    const effectiveAvailableHeight = AVAILABLE_HEIGHT * pageUtilization;
+    let effectiveAvailableHeight = AVAILABLE_HEIGHT * pageUtilization;
+
+    if (isIndustryManagerFormat && !useConservativePaging) {
+      if (fontScale >= 1.5 && fontScale < 1.8) {
+        effectiveAvailableHeight = Math.min(effectiveAvailableHeight, AVAILABLE_HEIGHT * 0.9);
+      } else if (fontScale >= 1.8) {
+        effectiveAvailableHeight = Math.min(effectiveAvailableHeight, AVAILABLE_HEIGHT * 0.88);
+      }
+    }
+
+    if (isIndustryManagerFormat) {
+      const marginByMode = useConservativePaging ? 22 : 14;
+      const marginLimit = AVAILABLE_HEIGHT - marginByMode;
+      const hardLimit = AVAILABLE_HEIGHT - Math.max(12, marginByMode / 2);
+      effectiveAvailableHeight = Math.min(effectiveAvailableHeight, marginLimit, hardLimit);
+    }
     
+    const sumEstimatedHeight = (sections) =>
+      sections.reduce((total, item) => total + (item?.estimatedHeight || 0), 0);
+
     // Helper function to add section to current page
     const addToCurrentPage = (section) => {
       currentPage.push(section);
@@ -169,6 +228,7 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
     // Helper function to split long content across pages
     const splitLongContent = (content, type, maxHeight) => {
       const fontScale = getFontSizeScaleFactor();
+      const aggressiveIndustry = isIndustryManagerFormat && !useConservativePaging;
       
       if (type === 'summary') {
         // Split summary more aggressively - try sentences first, then words if needed
@@ -235,7 +295,7 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
           
           // Check if adding this experience would exceed max height
           // Use higher threshold to maximize space usage
-          const threshold = 0.95; // Use 95% for better space utilization
+          const threshold = aggressiveIndustry ? 0.995 : 0.95; // Allow industry-manager to pack tighter
           if (currentHeight + expHeight > maxHeight * threshold && currentPart.length > 0) {
             // Current part is full, start new part
             parts.push([...currentPart]);
@@ -257,7 +317,8 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
       
       if (type === 'projects' && Array.isArray(content)) {
         // If we have very little space, don't try to split
-        if (maxHeight < 100) {
+        const minProjectSpace = aggressiveIndustry ? 160 : 100;
+        if (maxHeight < minProjectSpace) {
           return [content];
         }
         
@@ -269,16 +330,16 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
           // If we have many bullet points, try to split them
           if (lines.length > 4) {
             // Calculate how many bullet points might fit
-            const lineHeight = Math.round(13 * fontScale); // Slightly more conservative
+            const lineHeight = Math.round(aggressiveIndustry ? 10 * fontScale : 13 * fontScale); // Slightly more conservative
             const titleHeight = Math.round(16 * fontScale);
             const sectionTitleHeight = Math.round(20 * fontScale); // "PROJECTS" title
             const techHeight = project.technologies ? Math.round(12 * fontScale) : 0;
             const urlHeight = project.projectUrl ? Math.round(12 * fontScale) : 0;
-            const baseHeight = titleHeight + sectionTitleHeight + techHeight + urlHeight + 30; // More padding for safety
+            const baseHeight = titleHeight + sectionTitleHeight + techHeight + urlHeight + (aggressiveIndustry ? 14 : 30); // Padding for safety
             
             const availableForBullets = maxHeight - baseHeight;
             // Be more conservative - leave some buffer
-            const bulletsPerPage = Math.max(2, Math.floor(availableForBullets / lineHeight) - 2);
+            const bulletsPerPage = Math.max(2, Math.floor(availableForBullets / lineHeight) - (aggressiveIndustry ? 0 : 2));
             
             if (bulletsPerPage >= 2 && bulletsPerPage < lines.length) {
               // Split the bullet points
@@ -493,7 +554,7 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
         
         
         // Require at least 100px for any meaningful content
-        const minSpaceToSplit = 100;
+        const minSpaceToSplit = isIndustryManagerFormat ? (useConservativePaging ? 85 : 65) : 100;
         
         if (remainingHeight > minSpaceToSplit) {
           const parts = splitLongContent(section.content, section.type, remainingHeight);
@@ -580,6 +641,26 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
       newPages.push([...currentPage]);
     }
 
+    if (isIndustryManagerFormat && newPages.length > 1) {
+      const minUsefulHeight = effectiveAvailableHeight * (useConservativePaging ? 0.42 : 0.38);
+      const mergeAllowance = Math.max(12, effectiveAvailableHeight * (useConservativePaging ? 0.2 : 0.25));
+      const lastIndex = newPages.length - 1;
+      const lastPage = newPages[lastIndex];
+      const prevPage = newPages[lastIndex - 1];
+      const lastHeight = sumEstimatedHeight(lastPage);
+      const prevHeight = sumEstimatedHeight(prevPage);
+
+      if (lastHeight > 0 && lastHeight < minUsefulHeight && (prevHeight + lastHeight) <= (effectiveAvailableHeight + mergeAllowance)) {
+        const cleanedSections = lastPage.map((section) => ({
+          ...section,
+          isContinuation: false,
+          isContinued: false
+        }));
+        newPages[lastIndex - 1] = [...prevPage, ...cleanedSections];
+        newPages.pop();
+      }
+    }
+
     return newPages;
   };
 
@@ -587,7 +668,37 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
   useEffect(() => {
     const newPages = splitContentIntoPages();
     setPages(newPages);
-  }, [data]);
+  }, [data, useConservativePaging]);
+
+  useEffect(() => {
+    const node = contentRef.current;
+
+    if (!node) {
+      return;
+    }
+
+    if (pages.length > 1) {
+      return;
+    }
+
+    const enableThreshold = AVAILABLE_HEIGHT + 12;
+    const disableThreshold = Math.round(AVAILABLE_HEIGHT * 0.92);
+
+    const checkOverflow = () => {
+      if (!node.isConnected) {
+        return;
+      }
+      const actualHeight = node.scrollHeight;
+      if (!useConservativePaging && actualHeight > enableThreshold) {
+        setUseConservativePaging(true);
+      } else if (useConservativePaging && actualHeight < disableThreshold) {
+        setUseConservativePaging(false);
+      }
+    };
+
+    const raf = requestAnimationFrame(checkOverflow);
+    return () => cancelAnimationFrame(raf);
+  }, [pages, data, useConservativePaging]);
 
   if (!isVisible) {
     return null;
@@ -668,19 +779,19 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
           item: { marginTop: `${3 * scaleFactor}px` }
         };
       case 'industry-manager': {
-        const markerWidth = 10 * scaleFactor;
-        const gapWidth = 4 * scaleFactor;
+        const markerWidth = 9 * scaleFactor;
+        const gapWidth = 3.5 * scaleFactor;
         const indent = markerWidth + gapWidth;
-        const sectionTitleFont = 6.4 * scaleFactor;
-        const headerLineFont = 5.2 * scaleFactor;
-        const bodyFont = 4.6 * scaleFactor;
-        const bulletFont = 4.9 * scaleFactor;
+        const sectionTitleFont = 6.1 * scaleFactor;
+        const headerLineFont = 5.0 * scaleFactor;
+        const bodyFont = 4.3 * scaleFactor;
+        const bulletFont = 4.6 * scaleFactor;
         return {
           container: {
             fontFamily: 'Georgia, serif',
             fontSize: `${bodyFont}px`,
             lineHeight: '1.2',
-            padding: '16px 16px 0 16px',
+            padding: '16px 16px 18px 16px',
             background: 'white',
             border: '1px solid #e5e7eb',
             borderRadius: '4px',

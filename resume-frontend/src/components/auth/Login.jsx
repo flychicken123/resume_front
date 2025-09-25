@@ -4,7 +4,6 @@ import { trackUserLogin, trackGoogleUserRegistration } from '../Analytics';
 
 const Login = ({ onLogin, onClose, contextMessage }) => {
   const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');

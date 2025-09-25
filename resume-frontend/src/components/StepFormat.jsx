@@ -32,12 +32,6 @@ const StepFormat = ({ onNext }) => {
     setData(prevData => ({ ...prevData, selectedFontSize: fontSizeId }));
   };
 
-  const handleNext = () => {
-    if (data.selectedFormat) {
-      onNext();
-    }
-  };
-
   return (
     <div className="step-content" style={{ 
       flex: 'none', 
@@ -98,3 +92,4 @@ const StepFormat = ({ onNext }) => {
 };
 
 export default StepFormat; 
+

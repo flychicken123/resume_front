@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useResume } from '../context/ResumeContext';
 
 const StepPreview = ({ onDownload }) => {
-  const { data, setData } = useResume();
+  const { data } = useResume();
   const toText = (val) => {
     if (val == null) return '';
     if (typeof val === 'string') return val;

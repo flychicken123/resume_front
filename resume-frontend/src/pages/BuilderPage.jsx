@@ -18,7 +18,7 @@ import ImportResumeModal from '../components/ImportResumeModal';
 import UpgradeModal from '../components/UpgradeModal';
 import SubscriptionStatus from '../components/SubscriptionStatus';
 import SEO from '../components/SEO';
-import { trackResumeGeneration, trackStepCompletion } from '../components/Analytics';
+import { trackResumeGeneration } from '../components/Analytics';
 import './BuilderPage.css';
 
 const getAPIBaseURL = () => {
@@ -59,10 +59,9 @@ function BuilderPage() {
     }
   }, []);
   
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const { user, login, logout, getAuthHeaders } = useAuth();
+  const { user, logout } = useAuth();
   const displayName = typeof user === 'string' ? user : (user?.name || user?.email || '');
-  const { data, saveToDatabaseNow, clearData } = useResume();
+  const { data } = useResume();
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const toggleFullscreen = () => {
@@ -120,27 +119,8 @@ function BuilderPage() {
   }, [isFullscreen]);
 
   // Function to format date
-  const formatDate = (dateString) => {
-    if (!dateString || dateString === 'Present') return dateString;
-    const date = new Date(dateString);
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return `${months[date.getMonth()]} ${date.getFullYear()}`;
-  };
-
   // API base URL function
-  const getAPIBaseURL = () => {
-    if (typeof window !== 'undefined') {
-      // For local development, use localhost:8081
-      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        return 'http://localhost:8081';
-      }
-      // In production, use same-origin to avoid CORS
-      return '';
-    }
-    // Fallback for server-side rendering
-    return process.env.REACT_APP_API_URL || 'http://localhost:8081';
-  };
-
+  
   // Handler for view resume action
   const handleViewResume = async () => {
     let styleOverride = null;
@@ -149,6 +129,14 @@ function BuilderPage() {
       if (!user) {
         alert('Please log in to view your resume.');
         setShowAuthModal(true);
+        return;
+      }
+
+      const canProceed = await checkSubscriptionLimit();
+      if (!canProceed) {
+        if (styleOverride && styleOverride.parentNode) {
+          styleOverride.parentNode.removeChild(styleOverride);
+        }
         return;
       }
 
@@ -467,19 +455,8 @@ function BuilderPage() {
           .replace(/-webkit-box-shadow\s*:[^;]+;?/gi, '')
           .replace(/border-radius\s*:[^;]+;?/gi, '');
 
-        // Detect the current template class for targeted overrides
-        const previewClasses = previewElement.className.split(' ');
-        const templateClass = previewClasses.find(cls => cls !== 'live-preview-container') || '';
-        
-        
-        // Check if this is truly single-page content
-        const singlePageDiv = clonedElement.querySelector('.single-page-container');
-        const multiPageDiv = clonedElement.querySelector('.multi-page-container');
-        const isSinglePageContent = singlePageDiv && !multiPageDiv;
-        
         // CRITICAL FIX: Apply font size scaling to match preview
         const selectedFontSize = data.selectedFontSize || 'medium';
-        const selectedFormat = data.selectedFormat || 'temp1';
         
         // Font size multipliers (must match LivePreview.jsx)
         const fontSizeMultipliers = {
@@ -927,12 +904,6 @@ function BuilderPage() {
            }
 
             if (result.ok && result.data && result.data.downloadURL) {
-              // Extract filename from the downloadURL
-              const url = new URL(result.data.downloadURL);
-              const pathParts = url.pathname.split('/');
-              const filename = pathParts[pathParts.length - 1];
-              
-              // Just open the S3 URL directly - it's pre-signed
               window.open(result.data.downloadURL, '_blank');
             } else {
              console.error('PDF generation failed response:', result);
@@ -991,25 +962,6 @@ function BuilderPage() {
       localStorage.setItem('jobDescription', trimmed);
     } else {
       localStorage.removeItem('jobDescription');
-    }
-  };
-
-  const handleNext = () => {
-    if (step < steps.length) {
-      trackStepCompletion(steps[step - 1], step);
-      setStep(step + 1);
-    }
-  };
-
-  const handlePrevious = () => {
-    if (step > 1) {
-      setStep(step - 1);
-    }
-  };
-
-  const handleStepClick = (stepId) => {
-    if (stepId <= step) {
-      setStep(stepId);
     }
   };
 
@@ -1094,54 +1046,6 @@ function BuilderPage() {
       console.error('Error checking subscription limit:', error);
       return true; // Allow on error
     }
-  };
-
-  const handleDownload = async () => {
-    try {
-      // Check subscription limit first
-      const canProceed = await checkSubscriptionLimit();
-      if (!canProceed) {
-        return; // Stop if limit reached
-      }
-
-      const response = await fetch('/api/resume/download', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('resumeToken')}`
-        },
-        body: JSON.stringify(data)
-      });
-
-      if (response.status === 429) {
-        // Handle rate limit from server
-        const limitData = await response.json();
-        setSubscriptionData(limitData);
-        setShowUpgradeModal(true);
-        return;
-      }
-
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${data.name || 'resume'}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-      } else {
-        console.error('Download failed');
-      }
-    } catch (error) {
-      console.error('Download error:', error);
-    }
-  };
-
-  const handleStartOver = () => {
-    clearData();
-    setStep(1);
   };
 
   // Removed unused AI handler stubs that referenced undefined variables

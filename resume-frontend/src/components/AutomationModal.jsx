@@ -198,6 +198,31 @@ const AutomationModal = ({ isOpen, onClose, automationResult, onRetrySuccess }) 
             </div>
           )}
 
+          {automationResult.required_inputs && automationResult.required_inputs.length > 0 && (
+            <form className="automation-preferences-form" onSubmit={handleSubmit}>
+              <h3>Provide Additional Details</h3>
+              <p>Share the preferences the automation needs before retrying.</p>
+              <div className="form-grid">
+                {automationResult.required_inputs.map((field) => (
+                  <label key={field.name} className="form-field">
+                    <span className="form-label">{field.label || field.name.replace(/_/g, ' ')}</span>
+                    {renderField(field)}
+                    {field.help_text && (<span className="field-help">{field.help_text}</span>)}
+                  </label>
+                ))}
+              </div>
+              {error && <div className="form-error">{error}</div>}
+              <div className="form-actions">
+                <button type="submit" className="primary-button" disabled={submitting}>
+                  {submitting ? 'Saving…' : 'Save Preferences & Retry'}
+                </button>
+                <button type="button" className="secondary-button" onClick={onClose}>
+                  Cancel
+                </button>
+              </div>
+            </form>
+          )}
+
           {/* Automation Steps Log */}
           <div className="automation-steps">
             <h4>Automation Process:</h4>
