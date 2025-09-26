@@ -44,11 +44,7 @@ const Home = () => {
     // Track referrer and builder start when user clicks the button
     trackReferrer();
     trackBuilderStart('home_page_button');
-    if (!user) {
-      setShowAuthModal(true);
-    } else {
-      setShowIntegratedModal(true);
-    }
+    setShowIntegratedModal(true);
   };
 
   return (
@@ -76,11 +72,7 @@ const Home = () => {
           <button 
             className="home-nav-link" 
             onClick={() => {
-              if (!user) {
-                setShowAuthModal(true);
-              } else {
-                setShowIntegratedModal(true);
-              }
+              setShowIntegratedModal(true);
             }}
             style={{ background: 'none', border: 'none', cursor: 'pointer', font: 'inherit' }}
           >
@@ -189,11 +181,7 @@ const Home = () => {
               className="mobile-nav-link"
               onClick={() => {
                 setShowMobileMenu(false);
-                if (!user) {
-                  setShowAuthModal(true);
-                } else {
-                  setShowIntegratedModal(true);
-                }
+                setShowIntegratedModal(true);
               }}
             >
               Builder
@@ -267,19 +255,11 @@ const Home = () => {
       <SimpleHero 
         onImportClick={() => {
           trackBuilderStart('import_resume');
-          if (!user) {
-            setShowAuthModal(true);
-          } else {
-            setShowIntegratedModal(true);
-          }
+          setShowIntegratedModal(true);
         }}
         onCreateClick={() => {
           trackBuilderStart('create_resume');
-          if (!user) {
-            setShowAuthModal(true);
-          } else {
-            setShowIntegratedModal(true);
-          }
+          setShowIntegratedModal(true);
         }}
       />
 
@@ -305,11 +285,7 @@ const Home = () => {
           <button 
             className="home-btn primary home-jobdesc-cta" 
             onClick={() => {
-              if (!user) {
-                setShowAuthModal(true);
-              } else {
-                setShowIntegratedModal(true);
-              }
+              setShowIntegratedModal(true);
             }}
           >
 📝 Start Building Your Resume
@@ -601,5 +577,7 @@ const Home = () => {
 };
 
 export default Home; 
+
+
 
 

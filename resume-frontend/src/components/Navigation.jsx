@@ -28,13 +28,8 @@ const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setS
           <button
             className="nav-link nav-button"
             onClick={() => {
-              if (!user) {
-                if (setShowAuthModal) setShowAuthModal(true);
-                else navigate('/login');
-              } else {
-                if (setShowIntegratedModal) setShowIntegratedModal(true);
-                else navigate('/builder');
-              }
+              if (setShowIntegratedModal) setShowIntegratedModal(true);
+              else navigate('/builder');
             }}
           >
             Builder
@@ -102,13 +97,8 @@ const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setS
               className="mobile-nav-link"
               onClick={() => {
                 setShowMobileMenu(false);
-                if (!user) {
-                  if (setShowAuthModal) setShowAuthModal(true);
-                  else navigate('/login');
-                } else {
-                  if (setShowIntegratedModal) setShowIntegratedModal(true);
-                  else navigate('/builder');
-                }
+                if (setShowIntegratedModal) setShowIntegratedModal(true);
+                else navigate('/builder');
               }}
             >
               Builder
@@ -182,4 +172,8 @@ const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setS
 };
 
 export default Navigation;
+
+
+
+
 
