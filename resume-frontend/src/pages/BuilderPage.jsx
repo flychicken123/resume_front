@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Helmet } from 'react-helmet';
 import { useAuth } from '../context/AuthContext';
 import { useResume } from '../context/ResumeContext';
@@ -14,12 +14,14 @@ import StepFormat from '../components/StepFormat';
 import StepSummary from '../components/StepSummary';
 import StepCoverLetter from '../components/StepCoverLetter';
 import LivePreview from '../components/LivePreview';
+import JobRecommendations from '../components/JobRecommendations';
 import AuthModal from '../components/auth/AuthModal';
 import ImportResumeModal from '../components/ImportResumeModal';
 import UpgradeModal from '../components/UpgradeModal';
 import SubscriptionStatus from '../components/SubscriptionStatus';
 import SEO from '../components/SEO';
 import { trackResumeGeneration } from '../components/Analytics';
+import { fetchJobMatches } from '../api';
 import './BuilderPage.css';
 
 const getAPIBaseURL = () => {
@@ -30,6 +32,149 @@ const getAPIBaseURL = () => {
     return window.location.hostname === 'www.hihired.org' ? 'https://hihired.org' : window.location.origin;
   }
   return process.env.REACT_APP_API_URL || 'http://localhost:8081';
+};
+
+const normalizeLocaleCountry = (code = '') => {
+  const lc = code.toLowerCase();
+  switch (lc) {
+    case '':
+      return '';
+    case 'uk':
+    case 'gb':
+      return 'uk';
+    case 'us':
+    case 'usa':
+      return 'us';
+    default:
+      return lc;
+  }
+};
+
+const getCountryFromTimeZone = (timeZone) => {
+  if (!timeZone) return '';
+  const normalized = timeZone.toLowerCase();
+  const specialCases = {
+    'america/toronto': 'ca',
+    'america/vancouver': 'ca',
+    'america/edmonton': 'ca',
+    'america/winnipeg': 'ca',
+    'america/halifax': 'ca',
+    'america/st_johns': 'ca',
+    'america/regina': 'ca',
+    'america/swift_current': 'ca',
+    'america/mexico_city': 'mx',
+    'america/sao_paulo': 'br',
+    'america/bogota': 'co',
+    'america/lima': 'pe',
+    'america/argentina/buenos_aires': 'ar',
+    'america/santiago': 'cl',
+    'america/montevideo': 'uy',
+    'europe/london': 'uk',
+  };
+
+  if (specialCases[normalized]) {
+    return specialCases[normalized];
+  }
+
+  if (normalized.startsWith('america/')) {
+    return 'us';
+  }
+
+  return '';
+};
+
+const getBrowserCountryCode = () => {
+  if (typeof navigator === 'undefined') {
+    return '';
+  }
+
+  const locale = (navigator.languages && navigator.languages[0]) || navigator.language || '';
+  if (locale) {
+    const match = locale.match(/[-_]([A-Z]{2})$/i);
+    if (match) {
+      const normalized = normalizeLocaleCountry(match[1]);
+      if (normalized) {
+        return normalized;
+      }
+    }
+  }
+
+  if (typeof Intl !== 'undefined' && typeof Intl.DateTimeFormat === 'function') {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const tzCountry = getCountryFromTimeZone(tz);
+    if (tzCountry) {
+      return tzCountry;
+    }
+  }
+
+  return '';
+};
+
+const US_STATE_CODES = new Set(['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WI','WV','WY','DC']);
+
+const deriveCountryFromResume = (data = {}) => {
+  const tokens = [];
+  if (Array.isArray(data.experiences)) {
+    data.experiences.forEach((exp) => {
+      if (exp && typeof exp === 'object') {
+        if (exp.state) tokens.push(exp.state);
+        if (exp.city && exp.state) tokens.push(`${exp.city}, ${exp.state}`);
+        if (exp.city) tokens.push(exp.city);
+      }
+    });
+  }
+  if (Array.isArray(data.education)) {
+    data.education.forEach((edu) => {
+      if (edu && typeof edu === 'object' && edu.location) {
+        tokens.push(edu.location);
+      }
+    });
+  }
+  if (data.address) tokens.push(data.address);
+  if (data.city && data.state) tokens.push(`${data.city}, ${data.state}`);
+  if (data.state) tokens.push(data.state);
+  if (data.country) tokens.push(data.country);
+
+  const hasUSState = tokens.some((token) => {
+    if (!token) return false;
+    const upper = String(token).trim().toUpperCase();
+    if (US_STATE_CODES.has(upper)) return true;
+    const parts = upper.split(/[^A-Z]/g).filter(Boolean);
+    return parts.some((part) => US_STATE_CODES.has(part));
+  });
+  if (hasUSState) {
+    return 'us';
+  }
+
+  const lowered = tokens.map((token) => String(token || '').toLowerCase());
+  if (lowered.some((t) => t.includes('united states') || t.includes('usa'))) {
+    return 'us';
+  }
+  if (lowered.some((t) => t.includes('canada'))) {
+    return 'ca';
+  }
+  if (lowered.some((t) => t.includes('united kingdom') || t.includes('england') || t.includes('london'))) {
+    return 'uk';
+  }
+  if (lowered.some((t) => t.includes('australia'))) {
+    return 'au';
+  }
+  if (lowered.some((t) => t.includes('india'))) {
+    return 'in';
+  }
+  if (lowered.some((t) => t.includes('germany'))) {
+    return 'de';
+  }
+  if (lowered.some((t) => t.includes('france'))) {
+    return 'fr';
+  }
+  if (lowered.some((t) => t.includes('singapore'))) {
+    return 'sg';
+  }
+  if (lowered.some((t) => t.includes('china') || t.includes('beijing') || t.includes('shanghai') || t.includes('prc'))) {
+    return 'cn';
+  }
+  return '';
 };
 
 const steps = [
@@ -51,6 +196,11 @@ function BuilderPage() {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [jobDescription, setJobDescription] = useState('');
   const [subscriptionData, setSubscriptionData] = useState(null);
+  const browserCountry = useMemo(() => getBrowserCountryCode(), []);
+  const [jobMatches, setJobMatches] = useState([]);
+  const [jobMatchMeta, setJobMatchMeta] = useState(null);
+  const [jobMatchStatus, setJobMatchStatus] = useState({ loading: false, error: null });
+  const [showJobMatches, setShowJobMatches] = useState(false);
   
   // Load job description from localStorage on component mount
   useEffect(() => {
@@ -63,8 +213,44 @@ function BuilderPage() {
   const { user, logout } = useAuth();
   const displayName = typeof user === 'string' ? user : (user?.name || user?.email || '');
   const { data } = useResume();
+  const resumeCountry = useMemo(() => deriveCountryFromResume(data), [data]);
+  const effectiveCountry = resumeCountry || browserCountry;
   const selectedFormat = normalizeTemplateId(data.selectedFormat);
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const triggerJobMatches = useCallback(async (force = false) => {
+    if (!user) {
+      return;
+    }
+
+    if (jobMatchStatus.loading && !force) {
+      return;
+    }
+
+    setShowJobMatches(true);
+    setJobMatchStatus((prev) => ({ ...prev, loading: true, error: null }));
+
+    try {
+      const payload = await fetchJobMatches(data, jobDescription, 12, effectiveCountry);
+      if (!payload?.success) {
+        throw new Error(payload?.error || 'Unable to load job matches');
+      }
+
+      const result = payload.data || {};
+      setJobMatches(result.jobs || []);
+      setJobMatchMeta({
+        resumeKeywords: result.resumeKeywords || [],
+        providersUsed: result.providersUsed || [],
+        providersSkipped: result.providersSkipped || [],
+        countryHint: result.countryHint || effectiveCountry || '',
+        fetchedAt: new Date().toISOString()
+      });
+      setJobMatchStatus({ loading: false, error: null });
+    } catch (err) {
+      setJobMatchStatus({ loading: false, error: err?.message || 'Unable to load job matches' });
+    }
+  }, [user, data, jobDescription, jobMatchStatus.loading, effectiveCountry]);
+
 
   const toggleFullscreen = () => {
     const previewElement = document.getElementById('resume-preview-container');
@@ -449,7 +635,7 @@ function BuilderPage() {
           }
         });
         
-        const filteredCssText = cssRules.join('\n');
+        const filteredCssText = cssRules.join('\\n');
 
         // Remove screen-only visual effects that cause a visible edge in PDFs
         const cleanedCssText = filteredCssText
@@ -803,14 +989,10 @@ function BuilderPage() {
 
         // Minify HTML to keep payload very small
         const minifyHtml = (html) => html
-          .replace(/>\s+</g, '><')
-          .replace(/\n+/g, '')
-          .replace(/\s{2,}/g, ' ');
+          .replace(/>\\s+</g, '><')
+          .replace(/\\r\\n+/g, '')
+          .replace(/\\s{2,}/g, ' ');
         const minHtmlContent = minifyHtml(htmlContent);
-
-
-
-        // Call the backend to generate PDF using multipart upload (smaller, proxy-friendly)
         const htmlBlob = new Blob([minHtmlContent], { type: 'text/html' });
         const formData = new FormData();
         formData.append('html', htmlBlob, 'resume.html');
@@ -906,6 +1088,8 @@ function BuilderPage() {
            }
 
             if (result.ok && result.data && result.data.downloadURL) {
+              window.open(result.data.downloadURL, '_blank');
+              triggerJobMatches();
               window.open(result.data.downloadURL, '_blank');
             } else {
              console.error('PDF generation failed response:', result);
@@ -1155,6 +1339,16 @@ function BuilderPage() {
               )}
               
                              {/* Navigation Buttons */}
+                            {showJobMatches && (
+                              <JobRecommendations
+                                matches={jobMatches}
+                                loading={jobMatchStatus.loading}
+                                error={jobMatchStatus.error}
+                                metadata={jobMatchMeta}
+                                onRetry={() => triggerJobMatches(true)}
+                                onClose={() => setShowJobMatches(false)}
+                              />
+                            )}
                <div style={{ 
                  display: 'flex', 
                  gap: '1rem', 
@@ -1327,6 +1521,33 @@ function BuilderPage() {
               {user ? (
                 <span style={{ color: '#3b82f6', fontWeight: 500, fontSize: '0.9rem' }}>{displayName}</span>
               ) : null}
+              {user && (
+                <button
+                  onClick={() => {
+                    if (!showJobMatches) {
+                      if (!jobMatches.length && !jobMatchStatus.loading) {
+                        triggerJobMatches(false);
+                      } else {
+                        setShowJobMatches(true);
+                      }
+                    } else {
+                      triggerJobMatches(true);
+                    }
+                  }}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    border: '1px solid #bfdbfe',
+                    borderRadius: '4px',
+                    background: showJobMatches ? '#3b82f6' : '#eff6ff',
+                    color: showJobMatches ? 'white' : '#1d4ed8',
+                    cursor: 'pointer',
+                    fontSize: '0.85rem',
+                    fontWeight: 500
+                  }}
+                >
+                  {jobMatchStatus.loading ? 'Matching…' : showJobMatches ? 'Refresh matches' : 'Job Matches'}
+                </button>
+              )}
               <button
                 onClick={handleAuthButton}
                 style={{
@@ -1407,6 +1628,23 @@ function BuilderPage() {
 }
 
 export default BuilderPage;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -415,3 +415,22 @@ export async function saveJobProfile(profileData) {
   }
   return await res.json();
 }
+export async function fetchJobMatches(resumeData, jobDescription = '', limit = 12, clientCountry = '') {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/jobs/match`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({
+      resumeData,
+      jobDescription,
+      limit,
+      clientCountry
+    })
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Failed to fetch job matches');
+  }
+
+  return await res.json();
+}
