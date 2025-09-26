@@ -2,19 +2,34 @@ import { getAPIBaseURL } from '../api';
 
 let trackingInitialized = false;
 let lastPagePath = window?.location?.pathname || '/';
+let previousPagePath = '';
 let lastPageTitle = typeof document !== 'undefined' ? document.title : '';
 let lastStep = '';
+let lastStepAt = Date.now();
+let pageEnteredAt = Date.now();
+let sessionStart = Date.now();
 let eventSent = false;
 
 const apiBaseUrl = typeof window !== 'undefined' ? getAPIBaseURL() : '';
 
-const buildPayload = (reason = 'unload') => ({
-  page_path: lastPagePath,
-  page_title: lastPageTitle,
-  step: lastStep || `page:${lastPagePath}`,
-  reason,
-  user_email: getStoredUserEmail(),
-});
+const buildPayload = (reason = 'unload') => {
+  const now = Date.now();
+  const effectiveStep = lastStep || `page:${lastPagePath}`;
+  const lastStepDelta = lastStep ? now - lastStepAt : null;
+  return {
+    page_path: lastPagePath,
+    page_title: lastPageTitle,
+    previous_page_path: previousPagePath,
+    step: effectiveStep,
+    reason,
+    user_email: getStoredUserEmail(),
+    session_duration_ms: now - sessionStart,
+    page_duration_ms: now - pageEnteredAt,
+    last_step_delta_ms: lastStepDelta,
+    referrer: typeof document !== 'undefined' ? document.referrer || '' : '',
+    timestamp: new Date().toISOString(),
+  };
+};
 
 const getStoredUserEmail = () => {
   try {
@@ -51,15 +66,20 @@ const sendExitEvent = (reason) => {
 export const setLastStep = (step) => {
   if (typeof step === 'string' && step.trim()) {
     lastStep = step.trim();
+    lastStepAt = Date.now();
   }
 };
 
 export const setCurrentPage = (path, title = '') => {
   const previousPage = lastPagePath;
+  previousPagePath = previousPage;
   lastPagePath = path || '/';
   lastPageTitle = title;
+  pageEnteredAt = Date.now();
+  eventSent = false;
   if (!lastStep || lastStep.startsWith('page:') || lastStep === `page:${previousPage}`) {
     lastStep = `page:${lastPagePath}`;
+    lastStepAt = Date.now();
   }
 };
 
@@ -67,21 +87,35 @@ export const initExitTracking = () => {
   if (trackingInitialized || typeof window === 'undefined') return;
   trackingInitialized = true;
 
+  sessionStart = Date.now();
+  pageEnteredAt = Date.now();
+
   window.addEventListener('pageshow', () => {
     eventSent = false;
+    pageEnteredAt = Date.now();
   });
 
-  window.addEventListener('beforeunload', () => {
+  const handleBeforeUnload = () => {
     eventSent = false;
     sendExitEvent('beforeunload');
-  });
+  };
 
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') {
-      sendExitEvent('visibilitychange');
-    } else if (document.visibilityState === 'visible') {
+  const handlePageHide = (event) => {
+    if (event.persisted) {
       eventSent = false;
+      return;
     }
-  });
-};
+    sendExitEvent('pagehide');
+  };
 
+  const handleVisibilityChange = () => {
+    if (document.visibilityState === 'visible') {
+      eventSent = false;
+      pageEnteredAt = Date.now();
+    }
+  };
+
+  window.addEventListener('beforeunload', handleBeforeUnload);
+  window.addEventListener('pagehide', handlePageHide);
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+};
