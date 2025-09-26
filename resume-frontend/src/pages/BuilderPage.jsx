@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { useAuth } from '../context/AuthContext';
 import { useResume } from '../context/ResumeContext';
+import { useFeedback } from '../context/FeedbackContext';
+import { setLastStep } from '../utils/exitTracking';
 import { TEMPLATE_SLUGS, DEFAULT_TEMPLATE_ID, normalizeTemplateId } from '../constants/templates';
 import Stepper from '../components/Stepper';
 import StepPersonal from '../components/StepPersonal';
@@ -61,6 +63,7 @@ function BuilderPage() {
   }, []);
   
   const { user, logout } = useAuth();
+  const { triggerFeedbackPrompt, scheduleFollowUp } = useFeedback();
   const displayName = typeof user === 'string' ? user : (user?.name || user?.email || '');
   const { data } = useResume();
   const selectedFormat = normalizeTemplateId(data.selectedFormat);
@@ -837,7 +840,7 @@ function BuilderPage() {
         
         fetch(`${getAPIBaseURL()}/api/resume/generate-pdf-file`, {
           method: 'POST',
-          headers: headers,
+          headers,
           body: formData
         })
         .then(async (response) => {
@@ -849,75 +852,89 @@ function BuilderPage() {
             return { ok: response.ok, status: response.status, data: null, raw: text };
           }
         })
-                 .then(result => {
-           // Check if limit was reached (403 status)
-           if (result.status === 403) {
-             console.log('403 detected - setting up modal');
-             console.log('Result data:', result.data);
+        .then(result => {
+          if (result.status === 403) {
+            console.log('403 detected - setting up modal');
+            console.log('Result data:', result.data);
 
-             // Get current user's plan from token or default to free
-             const token = localStorage.getItem('resumeToken');
-             let currentPlan = 'free';
-             if (token) {
-               try {
-                 const payload = JSON.parse(atob(token.split('.')[1]));
-                 currentPlan = payload.plan || 'free';
-               } catch (e) {
-                 console.log('Could not parse token for plan');
-               }
-             }
+            const token = localStorage.getItem('resumeToken');
+            let currentPlan = 'free';
+            if (token) {
+              try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                currentPlan = payload.plan || 'free';
+              } catch (e) {
+                console.log('Could not parse token for plan');
+              }
+            }
 
-             // Parse the error data if available
-             const subscriptionInfo = {
-               usage: {
-                 can_generate: false,
-                 remaining: 0,
-                 reset_date: result.data?.resetDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-                 limitReached: true
-               },
-               subscription: {
-                 plan_name: result.data?.plan?.toLowerCase() || currentPlan,
-                 display_name: result.data?.plan || currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1),
-                 resume_limit: result.data?.limit || (currentPlan === 'premium' ? 30 : currentPlan === 'ultimate' ? 200 : 1),
-                 resume_period: result.data?.period || (currentPlan === 'free' ? 'week' : 'month')
-               }
-             };
+            const subscriptionInfo = {
+              usage: {
+                can_generate: false,
+                remaining: 0,
+                reset_date: result.data?.resetDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+                limitReached: true
+              },
+              subscription: {
+                plan_name: result.data?.plan?.toLowerCase() || currentPlan,
+                display_name: result.data?.plan || currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1),
+                resume_limit: result.data?.limit || (currentPlan === 'premium' ? 30 : currentPlan === 'ultimate' ? 200 : 1),
+                resume_period: result.data?.period || (currentPlan === 'free' ? 'week' : 'month')
+              }
+            };
 
-             setSubscriptionData(subscriptionInfo);
-             console.log('Subscription data set:', subscriptionInfo);
+            setSubscriptionData(subscriptionInfo);
+            console.log('Subscription data set:', subscriptionInfo);
 
-             // Show modal immediately - force a state update
-             console.log('Current modal state before:', showUpgradeModal);
-             setShowUpgradeModal(false); // Reset first
-             setTimeout(() => {
-               console.log('Setting modal to true');
-               setShowUpgradeModal(true); // Then set to true
-             }, 10);
+            console.log('Current modal state before:', showUpgradeModal);
+            setShowUpgradeModal(false);
+            setTimeout(() => {
+              console.log('Setting modal to true');
+              setShowUpgradeModal(true);
+            }, 10);
 
-             // Reset button state - find the actual button
-             const buttons = document.querySelectorAll('button');
-             buttons.forEach(btn => {
-               if (btn.textContent.includes('Generating PDF')) {
-                 btn.textContent = '📄 Generate Resume';
-                 btn.disabled = false;
-               }
-             });
-             return;
-           }
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(btn => {
+              if (btn.textContent.includes('Generating PDF')) {
+                btn.textContent = '📄 Generate Resume';
+                btn.disabled = false;
+              }
+            });
+            return;
+          }
 
-            if (result.ok && result.data && result.data.downloadURL) {
-              window.open(result.data.downloadURL, '_blank');
-            } else {
-             console.error('PDF generation failed response:', result);
-             // Don't throw error for 403 as it's already handled above
-             if (result.status !== 403) {
-               alert((result.data && (result.data.error || result.data.message)) || `Failed to generate PDF (status ${result.status})`);
-             }
-           }
-         })
+          if (result.ok && result.data && result.data.downloadURL) {
+            window.open(result.data.downloadURL, '_blank');
+            setLastStep('resume_download_success');
+            triggerFeedbackPrompt({
+              scenario: 'resume_download',
+              metadata: { template: selectedFormat },
+            });
+            scheduleFollowUp({
+              trigger: 'resume_download',
+              metadata: { template: selectedFormat },
+            });
+          } else {
+            console.error('PDF generation failed response:', result);
+            setLastStep('resume_download_error');
+            triggerFeedbackPrompt({
+              scenario: 'resume_download',
+              metadata: { result: 'error', status: result.status || null },
+              force: true,
+            });
+            if (result.status !== 403) {
+              alert((result.data && (result.data.error || result.data.message)) || `Failed to generate PDF (status ${result.status})`);
+            }
+          }
+        })
         .catch(error => {
           console.error('PDF generation error:', error);
-          // Don't show generic error for limit reached
+          setLastStep('resume_download_error');
+          triggerFeedbackPrompt({
+            scenario: 'resume_download',
+            metadata: { result: 'error', message: error?.message || '' },
+            force: true,
+          });
           if (!error.message?.includes('limit')) {
             alert('Failed to generate PDF. Please try again.');
           }
@@ -1407,6 +1424,13 @@ function BuilderPage() {
 }
 
 export default BuilderPage;
+
+
+
+
+
+
+
 
 
 

@@ -334,6 +334,51 @@ export async function deleteJobApplication(applicationId) {
   return await res.json();
 }
 
+// Feedback API functions
+export async function sendFeedback(feedbackPayload) {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/feedback`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(feedbackPayload),
+  });
+  if (!res.ok) {
+    let message = 'Failed to submit feedback';
+    try {
+      const err = await res.json();
+      message = err.error || message;
+    } catch (e) {
+      // ignore parse error
+    }
+    throw new Error(message);
+  }
+  return true;
+}
+
+export async function scheduleFeedbackFollowUp(trigger, userEmail, metadata = {}, delayHours = 24) {
+  const payload = {
+    trigger,
+    user_email: userEmail,
+    metadata,
+    delay_hours: delayHours,
+  };
+
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/feedback/follow-up`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    let message = 'Failed to schedule feedback follow-up';
+    try {
+      const err = await res.json();
+      message = err.error || message;
+    } catch (e) {
+      // ignore parse error
+    }
+    throw new Error(message);
+  }
+  return true;
+}
 // Job Automation API functions
 export async function saveUserPreferences(jobSiteDomain, preferences) {
   const res = await fetchWithAuth(`${API_BASE_URL}/api/job/preferences`, {
@@ -415,3 +460,4 @@ export async function saveJobProfile(profileData) {
   }
   return await res.json();
 }
+
