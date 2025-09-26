@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { parseResumeFile } from '../api';
+import { useFeedback } from '../context/FeedbackContext';
+import { setLastStep } from '../utils/exitTracking';
 import { useResume } from '../context/ResumeContext';
 
 const StepImport = ({ onSkip, jobDescription }) => {
@@ -9,6 +11,7 @@ const StepImport = ({ onSkip, jobDescription }) => {
   const [error, setError] = useState('');
   const [localJobDesc, setLocalJobDesc] = useState(jobDescription || '');
   const { applyImportedData } = useResume();
+  const { triggerFeedbackPrompt } = useFeedback();
 
   const handleNext = async () => {
     if (tab === 'file' && selectedFile) {
@@ -16,13 +19,23 @@ const StepImport = ({ onSkip, jobDescription }) => {
       setError('');
       try {
         const parsed = await parseResumeFile(selectedFile);
-        // Extract the structured data from the response
         if (parsed && parsed.structured) {
           applyImportedData(parsed.structured);
         }
+        setLastStep('resume_import_success');
+        triggerFeedbackPrompt({
+          scenario: 'resume_import',
+          metadata: { result: 'success', aiUsed: parsed?.aiUsed },
+        });
         onSkip();
       } catch (err) {
         setError('Failed to parse resume. Please try again.');
+        setLastStep('resume_import_error');
+        triggerFeedbackPrompt({
+          scenario: 'resume_import',
+          metadata: { result: 'error', message: err?.message || '' },
+          force: true,
+        });
       } finally {
         setLoading(false);
       }
@@ -121,3 +134,5 @@ const StepImport = ({ onSkip, jobDescription }) => {
 };
 
 export default StepImport;
+
+

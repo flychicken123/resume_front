@@ -3,6 +3,7 @@ import SEO from './components/SEO';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ResumeProvider } from './context/ResumeContext';
+import { FeedbackProvider } from './context/FeedbackContext';
 import Home from './components/Home';
 import { LoginPage, BuilderPage, AdminMembershipPage } from './pages';
 import PricingPage from './components/PricingPage';
@@ -32,34 +33,39 @@ function App() {
   return (
     <AuthProvider>
       <ResumeProvider>
-        <Router future={{ 
-          v7_startTransition: true,
-          v7_relativeSplatPath: true 
-        }}>
-          <SEO 
-            title="Free AI Resume Builder — Create Professional Resumes | HiHired"
-            description="Build a professional, ATS-friendly resume in minutes with our free AI resume builder. No signup required. Choose templates, tailor to job descriptions, and download as PDF."
-            ogImage="https://hihired.org/og-image.jpg"
-          />
-          <Analytics />
-          <SessionMonitor />
-          <ExitTrackingBridge />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/builder" element={<BuilderPage />} />
-            <Route path="/pricing" element={<PricingPage />} />
-            <Route path="/admin/memberships" element={<AdminMembershipPage />} />
-            <Route path="/subscription/success" element={<SubscriptionSuccess />} />
-            <Route path="/subscription/cancel" element={<SubscriptionCancel />} />
-            {/* Hidden - Apply to Jobs feature
-            <Route path="/apply" element={<JobApplicationPage />} />
-            */}
-          </Routes>\r\n          <ChatWidget />\r\n        </Router>
+        <Router
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true,
+          }}
+        >
+          <FeedbackProvider>
+            <SEO
+              title="Free AI Resume Builder — Create Professional Resumes | HiHired"
+              description="Build a professional, ATS-friendly resume in minutes with our free AI resume builder. No signup required. Choose templates, tailor to job descriptions, and download as PDF."
+              ogImage="https://hihired.org/og-image.jpg"
+            />
+            <Analytics />
+            <SessionMonitor />
+            <ExitTrackingBridge />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/builder" element={<BuilderPage />} />
+              <Route path="/pricing" element={<PricingPage />} />
+              <Route path="/admin/memberships" element={<AdminMembershipPage />} />
+              <Route path="/subscription/success" element={<SubscriptionSuccess />} />
+              <Route path="/subscription/cancel" element={<SubscriptionCancel />} />
+              {/* Hidden - Apply to Jobs feature
+              <Route path="/apply" element={<JobApplicationPage />} />
+              */}
+            </Routes>
+            <ChatWidget />
+          </FeedbackProvider>
+        </Router>
       </ResumeProvider>
     </AuthProvider>
   );
 }
 
 export default App;
-
