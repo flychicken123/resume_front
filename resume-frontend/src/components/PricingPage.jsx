@@ -26,6 +26,7 @@ const DEFAULT_PLAN_DETAILS = {
       '30 resumes per month'
     ],
     buttonText: 'Get Premium',
+    trialNotice: 'Includes a 7-day free trial',
     popular: true
   },
   ultimate: {
@@ -37,6 +38,7 @@ const DEFAULT_PLAN_DETAILS = {
       '200 resumes per month'
     ],
     buttonText: 'Get Ultimate',
+    trialNotice: 'Includes a 7-day free trial',
     popular: false
   }
 };
@@ -267,6 +269,17 @@ const PricingPage = () => {
 
       let features = extractFeatures();
 
+      if (key !== 'free') {
+        const trialFeatureText = '7-day free trial - cancel anytime';
+        const hasTrialFeature = features.some((item) => {
+          const textValue = String(item).toLowerCase();
+          return textValue.includes('7-day') && textValue.includes('trial');
+        });
+        if (!hasTrialFeature) {
+          features = [trialFeatureText, ...features];
+        }
+      }
+
       const limitValue =
         planData && planData.resume_limit !== undefined ? Number(planData.resume_limit) : Number.NaN;
       if (!Number.isNaN(limitValue) && limitValue > 0 && limitUnit) {
@@ -278,11 +291,19 @@ const PricingPage = () => {
         }
       }
 
+      const trialNotice =
+        key === 'free'
+          ? ''
+          : (planData && (planData.trial_notice || planData.trialNotice)) ||
+            base.trialNotice ||
+            'Includes a 7-day free trial';
+
       details[key] = {
         ...base,
         price,
         period: periodText || base.period,
         features,
+        trialNotice,
       };
     });
     return details;
@@ -320,6 +341,10 @@ const PricingPage = () => {
             <p className="pricing-subtitle">
               Pick the resume limit that fits your workflow
             </p>
+            <div className="trial-banner">
+              <span className="trial-banner-pill">7-day free trial</span>
+              <span className="trial-banner-text">Try Premium or Ultimate free for 7 days - cancel anytime before your trial ends.</span>
+            </div>
           </div>
 
         {/* Pricing Cards */}
@@ -346,6 +371,13 @@ const PricingPage = () => {
                     <span className="price">{plan.price}</span>
                     <span className="price-period">{plan.period}</span>
                   </div>
+
+                  {plan.trialNotice && (
+                    <div className="trial-note">
+                      <span className="trial-note-pill">7-day free trial</span>
+                      <span className="trial-note-text">{plan.trialNotice}</span>
+                    </div>
+                  )}
 
                   <ul className="features-list">
                     {plan.features.map((feature, idx) => (
@@ -436,5 +468,7 @@ const PricingPage = () => {
 };
 
 export default PricingPage;
+
+
 
 
