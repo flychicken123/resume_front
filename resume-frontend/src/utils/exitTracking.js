@@ -105,7 +105,8 @@ export const initExitTracking = () => {
       eventSent = false;
       return;
     }
-    sendExitEvent('pagehide');
+    // Ignore pagehide; wait for beforeunload so we capture the true exit state
+    eventSent = false;
   };
 
   const handleVisibilityChange = () => {
@@ -119,3 +120,4 @@ export const initExitTracking = () => {
   window.addEventListener('pagehide', handlePageHide);
   document.addEventListener('visibilitychange', handleVisibilityChange);
 };
+
