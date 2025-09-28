@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { setLastStep } from '../utils/exitTracking';
 import './Navigation.css';
 
 const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setShowIntegratedModal }) => {
@@ -15,6 +16,15 @@ const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setS
     window.location.href = '/';
   };
 
+  const openBuilder = (source) => {
+    setLastStep(source);
+    if (setShowIntegratedModal) {
+      setShowIntegratedModal(true);
+    } else {
+      navigate('/builder');
+    }
+  };
+
   return (
     <>
       <nav className="nav-navbar">
@@ -27,10 +37,7 @@ const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setS
           <Link to="/" className="nav-link">Home</Link>
           <button
             className="nav-link nav-button"
-            onClick={() => {
-              if (setShowIntegratedModal) setShowIntegratedModal(true);
-              else navigate('/builder');
-            }}
+            onClick={() => openBuilder('nav_builder_cta')}
           >
             Builder
           </button>
@@ -62,9 +69,10 @@ const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setS
             onClick={() => {
               if (user) {
                 handleLogout();
+              } else if (setShowAuthModal) {
+                setShowAuthModal(true);
               } else {
-                if (setShowAuthModal) setShowAuthModal(true);
-                else navigate('/login');
+                navigate('/login');
               }
             }}
           >
@@ -97,8 +105,7 @@ const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setS
               className="mobile-nav-link"
               onClick={() => {
                 setShowMobileMenu(false);
-                if (setShowIntegratedModal) setShowIntegratedModal(true);
-                else navigate('/builder');
+                openBuilder('nav_mobile_builder_cta');
               }}
             >
               Builder
@@ -157,8 +164,11 @@ const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setS
                 className="mobile-nav-link"
                 onClick={() => {
                   setShowMobileMenu(false);
-                  if (setShowAuthModal) setShowAuthModal(true);
-                  else navigate('/login');
+                  if (setShowAuthModal) {
+                    setShowAuthModal(true);
+                  } else {
+                    navigate('/login');
+                  }
                 }}
               >
                 Login
@@ -172,8 +182,3 @@ const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setS
 };
 
 export default Navigation;
-
-
-
-
-
