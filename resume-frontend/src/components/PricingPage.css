@@ -144,6 +144,13 @@
   margin-left: 0.25rem;
 }
 
+.intro-note {
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+  color: #2563eb;
+  font-weight: 600;
+}
+
 .features-list {
   list-style: none;
   padding: 0;

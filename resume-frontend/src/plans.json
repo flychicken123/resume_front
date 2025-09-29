@@ -9,7 +9,6 @@
       "resume_period": "weekly",
       "features": [
         "1 resume per week",
-        "Basic templates",
         "PDF export",
         "Email support"
       ]
@@ -17,7 +16,7 @@
     {
       "id": "premium",
       "name": "Premium Plan",
-      "price": 9.99,
+      "price": 7.99,
       "currency": "USD",
       "resume_limit": 30,
       "resume_period": "monthly",
@@ -33,13 +32,11 @@
       "name": "Ultimate Plan",
       "price": 29.99,
       "currency": "USD",
-      "resume_limit": 200,
+      "resume_limit": 300,
       "resume_period": "monthly",
       "features": [
-        "200 resumes per month",
-        "All templates",
-        "Bulk downloads",
-        "Agency tools"
+        "300 resumes per month",
+        "24 hours online support"
       ]
     }
   ]

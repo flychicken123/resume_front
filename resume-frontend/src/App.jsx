@@ -55,7 +55,9 @@ function App() {
             {/* Hidden - Apply to Jobs feature
             <Route path="/apply" element={<JobApplicationPage />} />
             */}
-          </Routes>\r\n          <ChatWidget />\r\n        </Router>
+          </Routes>
+          <ChatWidget />
+        </Router>
       </ResumeProvider>
     </AuthProvider>
   );
