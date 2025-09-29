@@ -67,66 +67,6 @@
   color: #6b7280;
 }
 
-.trial-banner {
-  margin: 1.5rem auto 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1.25rem;
-  border-radius: 9999px;
-  background: rgba(59, 130, 246, 0.1);
-  border: 1px solid rgba(59, 130, 246, 0.25);
-  color: #1d4ed8;
-  font-weight: 600;
-  box-shadow: 0 12px 30px rgba(37, 99, 235, 0.12);
-}
-
-.trial-banner-pill {
-  background: #2563eb;
-  color: #fff;
-  border-radius: 9999px;
-  padding: 0.3rem 0.9rem;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-weight: 700;
-}
-
-.trial-banner-text {
-  font-size: 0.95rem;
-  color: #1d4ed8;
-}
-
-.trial-note {
-  margin: 1rem 0 1.5rem;
-  padding: 0.75rem 1rem;
-  border-radius: 0.85rem;
-  background: rgba(59, 130, 246, 0.08);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  color: #1d4ed8;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  font-weight: 600;
-}
-
-.trial-note-pill {
-  background: #2563eb;
-  color: #fff;
-  border-radius: 9999px;
-  padding: 0.25rem 0.85rem;
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-weight: 700;
-}
-
-.trial-note-text {
-  font-size: 0.9rem;
-  color: #1d4ed8;
-  line-height: 1.4;
-}
-
 .pricing-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -202,6 +142,13 @@
 .price-period {
   color: #6b7280;
   margin-left: 0.25rem;
+}
+
+.intro-note {
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+  color: #2563eb;
+  font-weight: 600;
 }
 
 .features-list {
@@ -420,26 +367,5 @@
 
   .features-grid {
     grid-template-columns: 1fr;
-  }
-
-  .trial-banner {
-    flex-direction: column;
-    align-items: stretch;
-    text-align: center;
-    gap: 0.5rem;
-  }
-
-  .trial-banner-text {
-    font-size: 0.9rem;
-  }
-
-  .trial-note {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-
-  .trial-note-text {
-    font-size: 0.85rem;
   }
 }
