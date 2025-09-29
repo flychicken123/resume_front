@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+﻿import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckIcon } from '@heroicons/react/24/solid';
 import { useAuth } from '../context/AuthContext';
@@ -23,7 +23,8 @@ const DEFAULT_PLAN_DETAILS = {
     period: '/month',
     color: 'blue',
     features: [
-      '30 resumes per month'
+      '30 resumes per month',
+      'AI-generated cover letters included'
     ],
     buttonText: 'Get Premium',
     trialNotice: 'Includes a 7-day free trial',
@@ -35,7 +36,8 @@ const DEFAULT_PLAN_DETAILS = {
     period: '/month',
     color: 'purple',
     features: [
-      '200 resumes per month'
+      '200 resumes per month',
+      '24-hour priority support from resume experts'
     ],
     buttonText: 'Get Ultimate',
     trialNotice: 'Includes a 7-day free trial',
@@ -289,6 +291,22 @@ const PricingPage = () => {
         if (!lowerFeatures.includes(limitLabel.toLowerCase())) {
           features = [limitLabel, ...features];
         }
+      }
+
+      const ensureFeature = (needle, displayText = needle) => {
+        const normalizedNeedle = needle.toLowerCase();
+        const hasNeedle = features.some((item) => String(item).toLowerCase().includes(normalizedNeedle));
+        if (!hasNeedle) {
+          features.push(displayText);
+        }
+      };
+
+      if (key === 'premium') {
+        ensureFeature('cover letter', 'AI-generated cover letters included');
+      }
+
+      if (key === 'ultimate') {
+        ensureFeature('24-hour', '24-hour priority support from resume experts');
       }
 
       const trialNotice =
