@@ -51,19 +51,21 @@ const UpgradeModal = ({ isOpen, onClose, currentPlan = 'free', usage = {} }) => 
     premium: {
       name: 'Premium',
       limit: '30 resumes per month',
-      price: '$0.01',
+      price: '$7.99',
       period: '/month',
       features: [
-        '30 resumes per month'
+        '30 resumes per month',
+        'AI-generated cover letters included'
       ]
     },
     ultimate: {
       name: 'Ultimate',
-      limit: '200 resumes per month',
-      price: '$0.02',
+      limit: '300 resumes per month',
+      price: '$29.99',
       period: '/month',
       features: [
-        '200 resumes per month'
+        '300 resumes per month',
+        '24 hours online support'
       ]
     }
   };
@@ -210,12 +212,40 @@ const UpgradeModal = ({ isOpen, onClose, currentPlan = 'free', usage = {} }) => 
                   </ul>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <p style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#2563eb' }}>$9.99</p>
+                  <p style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#2563eb' }}>$7.99</p>
                   <p style={{ margin: 0, color: '#9ca3af', fontSize: '12px' }}>{plans.premium.period}</p>
+                  <p style={{ margin: 0, color: '#2563eb', fontSize: '12px', fontWeight: 600 }}>First month $1.99</p>
                 </div>
               </div>
               <div style={{ marginTop: 8, display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
                 <button onClick={() => startCheckout('premium')} style={{...primaryBtnStyle, flex: '0 0 auto', padding: '8px 12px'}}>Get Premium</button>
+              </div>
+            </div>
+            )}
+
+            {currentPlan === 'free' && (
+            <div style={{ background: 'white', borderRadius: '10px', padding: '12px', border: '1px solid #e5e7eb' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <div>
+                  <h4 style={{ margin: 0, fontWeight: 600, color: '#111827' }}>Ultimate Plan</h4>
+                  <p style={{ margin: 0, color: '#6b7280', fontSize: '12px' }}>300 resumes per month</p>
+                  <ul style={{ margin: '8px 0 0', padding: 0, listStyle: 'none' }}>
+                    {plans.ultimate.features.map((feature, idx) => (
+                      <li key={idx} style={{ display: 'flex', alignItems: 'center', fontSize: '12px', color: '#6b7280' }}>
+                        <CheckIcon width={12} height={12} color="#10b981" style={{ marginRight: 4 }} />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <p style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#7c3aed' }}>$29.99</p>
+                  <p style={{ margin: 0, color: '#9ca3af', fontSize: '12px' }}>{plans.ultimate.period}</p>
+                  <p style={{ margin: 0, color: '#7c3aed', fontSize: '12px', fontWeight: 600 }}>First month $6.99</p>
+                </div>
+              </div>
+              <div style={{ marginTop: 8, display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+                <button onClick={() => startCheckout('ultimate')} style={{...primaryBtnStyle, background: '#7c3aed', flex: '0 0 auto', padding: '8px 12px'}}>Get Ultimate</button>
               </div>
             </div>
             )}
