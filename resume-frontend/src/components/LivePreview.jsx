@@ -1089,6 +1089,30 @@ const parseSkills = (value) => {
     return <div style={styles.skills}>{skills.join(', ')}</div>;
   };
 
+  const renderSummaryContent = (value, styles) => {
+    const summaryText = toText(value);
+    if (!summaryText) {
+      return null;
+    }
+
+    const summaryStyle = {
+      ...styles.summary,
+      whiteSpace: 'pre-wrap',
+      overflowWrap: styles.summary?.overflowWrap || 'anywhere',
+      wordBreak: styles.summary?.wordBreak || 'break-word',
+      hyphens: styles.summary?.hyphens || 'auto',
+      maxWidth: '100%',
+      display: 'block'
+    };
+
+    return (
+      <div className="live-preview-summary" style={summaryStyle}>
+        {summaryText}
+      </div>
+    );
+  };
+
+
   // Render experience items
 
 const renderExperiences = (experiences, styles) => {
@@ -1619,7 +1643,7 @@ const renderEducation = (education, styles) => {
             summaryTitle = 'SUMMARY';
           }
           
-          return <div key={idx}>{renderSection(summaryTitle, <div style={styles.summary}>{section.content}</div>, styles)}</div>;
+          return <div key={idx}>{renderSection(summaryTitle, renderSummaryContent(section.content, styles), styles)}</div>;
         case 'experience':
           return <div key={idx}>{renderSection('EXPERIENCE', renderExperiences(section.content, styles), styles)}</div>;
         case 'education':
@@ -1711,7 +1735,7 @@ const renderEducation = (education, styles) => {
             )}
 
             {data.summary && (
-              renderSection('SUMMARY', <div style={styles.summary}>{toText(data.summary)}</div>, styles)
+              renderSection('SUMMARY', renderSummaryContent(data.summary, styles), styles)
             )}
 
             {data.experiences && data.experiences.length > 0 && (
