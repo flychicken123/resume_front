@@ -29,7 +29,7 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload }) => {
 
   // Page dimensions in pixels (8.5" x 11" at 96 DPI)
   const PAGE_HEIGHT = 1056;
-  const CONTENT_MARGIN = 10; // Further reduced margin for maximum content
+  const CONTENT_MARGIN = 20; // Matches 20px padding so page height stays aligned
   const AVAILABLE_HEIGHT = PAGE_HEIGHT - (CONTENT_MARGIN * 2);
 
   // Font size scale factors that match the rendering scale
@@ -56,23 +56,24 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
   }
 
   const adjustmentSets = {
+    // Do not shrink estimates in aggressive mode; slightly inflate instead
     aggressive: {
-      header: { multiplier: 0.85, floor: 26 },
-      summary: { multiplier: 0.78, floor: 32 },
-      experience: { multiplier: 0.78, floor: 95 },
-      education: { multiplier: 0.8, floor: 42 },
-      projects: { multiplier: 0.78, floor: 64 },
-      skills: { multiplier: 0.76, floor: 34 },
-      default: { multiplier: 0.8, floor: 30 }
+      header: { multiplier: 1.00, floor: 26 },
+      summary: { multiplier: 1.02, floor: 32 },
+      experience: { multiplier: 1.06, floor: 100 },
+      education: { multiplier: 1.04, floor: 44 },
+      projects: { multiplier: 1.06, floor: 68 },
+      skills: { multiplier: 1.04, floor: 36 },
+      default: { multiplier: 1.02, floor: 32 }
     },
     conservative: {
-      header: { multiplier: 0.92, floor: 30 },
-      summary: { multiplier: 0.85, floor: 36 },
-      experience: { multiplier: 0.88, floor: 110 },
-      education: { multiplier: 0.9, floor: 48 },
-      projects: { multiplier: 0.88, floor: 74 },
-      skills: { multiplier: 0.86, floor: 38 },
-      default: { multiplier: 0.88, floor: 34 }
+      header: { multiplier: 1.08, floor: 30 },
+      summary: { multiplier: 1.12, floor: 36 },
+      experience: { multiplier: 1.15, floor: 115 },
+      education: { multiplier: 1.10, floor: 50 },
+      projects: { multiplier: 1.15, floor: 78 },
+      skills: { multiplier: 1.10, floor: 40 },
+      default: { multiplier: 1.10, floor: 36 }
     }
   };
 
@@ -80,7 +81,8 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
   const selected = adjustmentSets[mode];
   const { multiplier, floor } = selected[sectionKey] || selected.default;
   const adjusted = Math.max(floor, value * multiplier);
-  return Math.min(value, adjusted);
+  // Allow increasing estimates to prevent overflow/cutoff
+  return adjusted;
 };
 
     switch (type) {
@@ -159,10 +161,10 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
       }
 
       case 'skills': {
-        // More conservative skills section estimation
+        // Estimation aware of executive-serif two-column layout
         const skillsText = toText(content);
-        const skillCharsPerLine = Math.round(140 / fontScale); // Increased from 120
-        const skillLines = Math.ceil(skillsText.length / skillCharsPerLine);
+        const perLine = Math.round((isIndustryManagerFormat ? 70 : 140) / fontScale);
+        const skillLines = Math.ceil(skillsText.length / Math.max(1, perLine));
         const skillsHeight = Math.max(17 * fontScale, skillLines * Math.round(13 * fontScale));
         return applyFormatAdjustment(skillsHeight, 'skills');
       }
@@ -177,16 +179,15 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
     const newPages = [];
     let currentPage = [];
     let currentHeight = 0;
-    
+
     // Get font scale factor to adjust page capacity
     const fontScale = getFontSizeScaleFactor();
-    
-    // Adjust available height based on font size - balanced for better space usage
-    // Slightly higher percentages since our estimates are now more accurate
-    const pageUtilization = fontScale <= 0.85 ? 0.97 :  // Small fonts - use more of the page
-                           fontScale <= 1.0 ? 0.965 :  // Medium fonts
-                           fontScale <= 1.15 ? 0.95 :  // Large fonts
-                           0.93;                        // Extra-large
+
+    // Adjust available height based on font size - tuned to reduce false overflows
+    const pageUtilization = fontScale <= 1.0 ? 0.975 :   // Small
+                           fontScale <= 1.2 ? 0.96  :   // Medium (default)
+                           fontScale <= 1.5 ? 0.94  :   // Large
+                           0.92;                        // Extra-large
     let effectiveAvailableHeight = AVAILABLE_HEIGHT * pageUtilization;
 
     if (isIndustryManagerFormat && !useConservativePaging) {
@@ -203,16 +204,37 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
       const hardLimit = AVAILABLE_HEIGHT - Math.max(12, marginByMode / 2);
       effectiveAvailableHeight = Math.min(effectiveAvailableHeight, marginLimit, hardLimit);
     }
-    
+
+    const basePageBuffer = useConservativePaging ? 16 : 22;
+    const bufferedLimit = AVAILABLE_HEIGHT - basePageBuffer;
+    effectiveAvailableHeight = Math.min(effectiveAvailableHeight, bufferedLimit);
+
+    const sectionPadding = {
+      header: useConservativePaging ? 8 : 12,
+      summary: useConservativePaging ? 12 : 18,
+      experience: useConservativePaging ? 14 : 20,
+      projects: useConservativePaging ? 14 : 20,
+      education: useConservativePaging ? 12 : 18,
+      skills: useConservativePaging ? 10 : 16,
+      default: useConservativePaging ? 8 : 12
+    };
+
+    const getSectionPadding = (type) => sectionPadding[type] ?? sectionPadding.default;
+
+    const addBuffer = (height, type) => {
+      const safeHeight = Math.max(0, height || 0);
+      return safeHeight + getSectionPadding(type);
+    };
+
     const sumEstimatedHeight = (sections) =>
-      sections.reduce((total, item) => total + (item?.estimatedHeight || 0), 0);
+      sections.reduce((total, item) => total + addBuffer(item?.estimatedHeight || 0, item?.type), 0);
 
     // Helper function to add section to current page
     const addToCurrentPage = (section) => {
       currentPage.push(section);
-      currentHeight += section.estimatedHeight;
+      currentHeight += addBuffer(section.estimatedHeight, section.type);
     };
-    
+
     // Helper function to start new page
     const startNewPage = () => {
       if (currentPage.length > 0) {
@@ -223,14 +245,63 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
     };
 
     // Helper function to check if content can fit on current page
-    const canFitOnCurrentPage = (contentHeight) => {
-      return (currentHeight + contentHeight) <= effectiveAvailableHeight;
+    const canFitOnCurrentPage = (contentHeight, sectionType) => {
+      return (currentHeight + addBuffer(contentHeight, sectionType)) <= effectiveAvailableHeight;
     };
 
     // Helper function to split long content across pages
     const splitLongContent = (content, type, maxHeight) => {
       const fontScale = getFontSizeScaleFactor();
       const aggressiveIndustry = isIndustryManagerFormat && !useConservativePaging;
+      
+      if (type === 'skills') {
+        // Split skills list across pages. Executive Serif uses 2-column grid,
+        // so height is the tallest column. We simulate packing items into
+        // columns and stop before exceeding maxHeight.
+        const items = parseSkills(content);
+        if (!items || items.length === 0) return [content];
+
+        const columnCount = isIndustryManagerFormat ? 2 : 1;
+        const perLine = Math.max(10, Math.round((isIndustryManagerFormat ? 70 : 140) / fontScale));
+        const lineHeight = Math.round(13 * fontScale);
+        const itemGap = Math.max(2, Math.round(2 * fontScale));
+
+        // Estimate height for a set of items laid out in columns
+        const estimateSetHeight = (arr) => {
+          if (arr.length === 0) return 0;
+          const colHeights = new Array(columnCount).fill(0);
+          for (const skill of arr) {
+            const clean = String(skill).trim();
+            const lines = Math.max(1, Math.ceil(clean.length / perLine));
+            const h = lines * lineHeight + itemGap;
+            // Greedy: place into shortest column
+            let idx = 0;
+            for (let i = 1; i < columnCount; i++) {
+              if (colHeights[i] < colHeights[idx]) idx = i;
+            }
+            colHeights[idx] += h;
+          }
+          return Math.max(...colHeights);
+        };
+
+        const parts = [];
+        let current = [];
+
+        for (let i = 0; i < items.length; i++) {
+          const next = [...current, items[i]];
+          const heightWithNext = estimateSetHeight(next);
+          if (heightWithNext <= maxHeight || current.length === 0) {
+            current = next;
+          } else {
+            parts.push(current);
+            current = [items[i]];
+          }
+        }
+        if (current.length) parts.push(current);
+
+        // Convert parts back to strings so downstream parsing still works
+        return parts.map(p => p.join(', '));
+      }
       
       if (type === 'summary') {
         // Split summary more aggressively - try sentences first, then words if needed
@@ -533,7 +604,8 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
           type: 'skills',
           content: skillsText,
           estimatedHeight: skillsHeight,
-          priority: 6
+          priority: 6,
+          canSplit: true
         });
       }
     }
@@ -544,22 +616,42 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
     
     while (sectionIndex < allSections.length) {
       const section = allSections[sectionIndex];
-      
-      if (canFitOnCurrentPage(section.estimatedHeight)) {
+
+      // Soft-fit allowance to avoid pushing small sections (like Education)
+      // to the next page when there is clearly visible space left.
+      const softAllowance = (() => {
+        // Be a bit more permissive for Executive Serif
+        if (isIndustryManagerFormat) {
+          return {
+            education: 48,
+            summary: 24,
+            experience: 16,
+            projects: 16,
+            skills: 24,
+            default: 12,
+          };
+        }
+        return { education: 32, default: 8 };
+      })();
+      const requiredWithPadding = currentHeight + addBuffer(section.estimatedHeight, section.type);
+      const fitsNow = requiredWithPadding <= effectiveAvailableHeight;
+      const fitsWithSlack = !fitsNow && (requiredWithPadding <= (effectiveAvailableHeight + (softAllowance[section.type] ?? softAllowance.default ?? 0)));
+
+      if (fitsNow || (!section.canSplit && fitsWithSlack)) {
         // Section fits completely on current page
         addToCurrentPage(section);
         sectionIndex++;
-      } else if (section.canSplit && currentHeight > 0) {
-        // Section doesn't fit completely, but we have content on the page
-        // Try to split if there's meaningful space left
-        const remainingHeight = effectiveAvailableHeight - currentHeight;
+      } else if (section.canSplit) {
+        // Section doesn't fit completely. Try to split to use remaining space
+        const remainingHeight = Math.max(0, effectiveAvailableHeight - currentHeight);
         
         
         // Require at least 100px for any meaningful content
         const minSpaceToSplit = isIndustryManagerFormat ? (useConservativePaging ? 85 : 65) : 100;
         
-        if (remainingHeight > minSpaceToSplit) {
-          const parts = splitLongContent(section.content, section.type, remainingHeight);
+        const rawRemainingHeight = Math.max(0, remainingHeight - getSectionPadding(section.type));
+        if (rawRemainingHeight > minSpaceToSplit) {
+          const parts = splitLongContent(section.content, section.type, rawRemainingHeight);
           
           // Check if we actually got a meaningful split
           // For projects, parts[0] should be an array of projects, not the full content
@@ -588,7 +680,7 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
                 const partHeight = estimateSectionHeight(parts[i], section.type);
                 const isLast = i === parts.length - 1;
                 
-                if (canFitOnCurrentPage(partHeight)) {
+                if (canFitOnCurrentPage(partHeight, section.type)) {
                   addToCurrentPage({
                     ...section,
                     content: parts[i],
@@ -611,23 +703,59 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
             
             sectionIndex++;
           } else {
-            // Can't split effectively, move to new page
+            // Can't split effectively on this page; try on a fresh page
             startNewPage();
-            addToCurrentPage(section);
-            sectionIndex++;
+            const fullPageAvailable = Math.max(0, effectiveAvailableHeight - getSectionPadding(section.type));
+            if (fullPageAvailable > minSpaceToSplit) {
+              const partsOnNew = splitLongContent(section.content, section.type, fullPageAvailable);
+              if (partsOnNew.length > 1) {
+                const firstPartHeight = estimateSectionHeight(partsOnNew[0], section.type);
+                addToCurrentPage({ ...section, content: partsOnNew[0], estimatedHeight: firstPartHeight, isContinued: true });
+                for (let i = 1; i < partsOnNew.length; i++) {
+                  const partHeight = estimateSectionHeight(partsOnNew[i], section.type);
+                  if (!canFitOnCurrentPage(partHeight, section.type)) startNewPage();
+                  addToCurrentPage({ ...section, content: partsOnNew[i], estimatedHeight: partHeight, isContinuation: i > 0, isContinued: i < partsOnNew.length - 1 });
+                }
+                sectionIndex++;
+              } else {
+                addToCurrentPage(section);
+                sectionIndex++;
+              }
+            } else {
+              addToCurrentPage(section);
+              sectionIndex++;
+            }
           }
         } else {
           // Not enough space to split meaningfully, move to new page
           startNewPage();
-          addToCurrentPage(section);
-          sectionIndex++;
+          const fullPageAvailable = Math.max(0, effectiveAvailableHeight - getSectionPadding(section.type));
+          if (fullPageAvailable > minSpaceToSplit) {
+            const partsOnNew = splitLongContent(section.content, section.type, fullPageAvailable);
+            if (partsOnNew.length > 1) {
+              const firstPartHeight = estimateSectionHeight(partsOnNew[0], section.type);
+              addToCurrentPage({ ...section, content: partsOnNew[0], estimatedHeight: firstPartHeight, isContinued: true });
+              for (let i = 1; i < partsOnNew.length; i++) {
+                const partHeight = estimateSectionHeight(partsOnNew[i], section.type);
+                if (!canFitOnCurrentPage(partHeight, section.type)) startNewPage();
+                addToCurrentPage({ ...section, content: partsOnNew[i], estimatedHeight: partHeight, isContinuation: i > 0, isContinued: i < partsOnNew.length - 1 });
+              }
+              sectionIndex++;
+            } else {
+              addToCurrentPage(section);
+              sectionIndex++;
+            }
+          } else {
+            addToCurrentPage(section);
+            sectionIndex++;
+          }
         }
       } else {
         // Section doesn't fit, start new page
         startNewPage();
         
         // Try to fit it on the new page
-        if (canFitOnCurrentPage(section.estimatedHeight)) {
+        if (canFitOnCurrentPage(section.estimatedHeight, section.type)) {
           addToCurrentPage(section);
           sectionIndex++;
         } else {
@@ -660,6 +788,97 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
         }));
         newPages[lastIndex - 1] = [...prevPage, ...cleanedSections];
         newPages.pop();
+      }
+
+      // Rebalance: only pull forward the next page's first section if it
+      // continues the same section type. This preserves section ordering
+      // and prevents, e.g., Education moving ahead of remaining Experience.
+      for (let i = 0; i < newPages.length - 1; i++) {
+        const page = newPages[i];
+        const next = newPages[i + 1];
+        if (!page || !next || next.length === 0) continue;
+
+        const lastType = page.length ? page[page.length - 1].type : null;
+        const nextFirst = next[0];
+        if (!lastType || !nextFirst || nextFirst.type !== lastType) {
+          // Do not move across type boundaries
+          continue;
+        }
+
+        let leftover = effectiveAvailableHeight - sumEstimatedHeight(page);
+        if (leftover < 80) continue;
+
+        // Try to pull only the first section (same type)
+        const sec = nextFirst;
+        const softAllowance = sec.type === 'education' ? (isIndustryManagerFormat ? 48 : 32) : (sec.type === 'summary' ? 24 : 12);
+        // If we are appending the same section type, the visual header will be hidden.
+        // Remove section-title height from the needed estimate so we don't block moves unnecessarily.
+        const sectionTitleHeightPx = Math.round(20 * getFontSizeScaleFactor());
+        const adjustedSecHeight = Math.max(0, sec.estimatedHeight - sectionTitleHeightPx);
+        const needed = sumEstimatedHeight(page) + addBuffer(adjustedSecHeight, sec.type);
+        const fits = needed <= effectiveAvailableHeight || (!sec.canSplit && needed <= (effectiveAvailableHeight + softAllowance));
+        if (fits) {
+          // Push with adjusted estimate since the header will be suppressed on this page
+          page.push({ ...sec, estimatedHeight: adjustedSecHeight, _suppressTitle: true });
+          next.shift();
+        } else if (sec.canSplit) {
+          const allowance = Math.max(0, effectiveAvailableHeight - sumEstimatedHeight(page) - getSectionPadding(sec.type));
+          if (allowance > 60) {
+            const parts = splitLongContent(sec.content, sec.type, allowance);
+            if (parts.length > 1) {
+              const firstPartHeight = estimateSectionHeight(parts[0], sec.type);
+              // First part on this page: suppress title
+              page.push({ ...sec, content: parts[0], estimatedHeight: firstPartHeight, isContinued: true, _suppressTitle: true });
+              const remainder = parts.slice(1);
+              // Replace on next page
+              next.shift();
+              // Insert remainders at the beginning to keep order
+              for (let r = remainder.length - 1; r >= 0; r--) {
+                const partHeight = estimateSectionHeight(remainder[r], sec.type);
+                // First remainder part starts a visible block on the next page; include title height
+                const needsTitle = (r === 0);
+                const adjPartHeight = needsTitle ? (partHeight + sectionTitleHeightPx) : partHeight;
+                next.unshift({ ...sec, content: remainder[r], estimatedHeight: adjPartHeight, isContinuation: true, isContinued: r < remainder.length - 1 });
+              }
+            }
+          }
+        }
+
+        // Clean up if next page emptied
+        if (next.length === 0) newPages.splice(i + 1, 1);
+      }
+    }
+
+    // Final safety pass: ensure no page exceeds available height.
+    // If a page still overflows due to estimation error, move/split the
+    // last section forward until it fits.
+    for (let i = 0; i < newPages.length; i++) {
+      let safetyGuard = 0;
+      while (sumEstimatedHeight(newPages[i]) > (effectiveAvailableHeight - 4) && safetyGuard < 20) {
+        safetyGuard++;
+        const page = newPages[i];
+        if (!page || page.length === 0) break;
+        const last = page.pop();
+        const current = sumEstimatedHeight(page);
+        const allowance = Math.max(0, effectiveAvailableHeight - current - getSectionPadding(last.type));
+
+        if (last && last.canSplit && allowance > 40) {
+          const parts = splitLongContent(last.content, last.type, allowance);
+          if (parts.length > 1) {
+            const firstPartHeight = estimateSectionHeight(parts[0], last.type);
+            page.push({ ...last, content: parts[0], estimatedHeight: firstPartHeight, isContinued: true });
+            if (i + 1 >= newPages.length) newPages.push([]);
+            const remainder = parts.slice(1);
+            for (let k = 0; k < remainder.length; k++) {
+              const partHeight = estimateSectionHeight(remainder[k], last.type);
+              newPages[i + 1].unshift({ ...last, content: remainder[k], estimatedHeight: partHeight, isContinuation: true, isContinued: k < remainder.length - 1 });
+            }
+            continue;
+          }
+        }
+
+        if (i + 1 >= newPages.length) newPages.push([]);
+        newPages[i + 1].unshift(last);
       }
     }
 
@@ -720,7 +939,7 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
     };
     
     // Combined scale factor
-    const scaleFactor = baseScaleFactor * (fontSizeMultipliers[fontSize] || fontSizeMultipliers['large'])
+    const scaleFactor = baseScaleFactor * (fontSizeMultipliers[fontSize] || fontSizeMultipliers['medium'])
     
     switch (format) {
       case TEMPLATE_SLUGS.CLASSIC_PROFESSIONAL:
@@ -728,7 +947,8 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
         return {
           container: { 
             fontFamily: 'Calibri, Arial, sans-serif', 
-            fontSize: `${8.5 * scaleFactor}px`, 
+            // Normalize base body size across templates to keep preview consistent
+            fontSize: `${6 * scaleFactor}px`, 
             lineHeight: '1.2',
             padding: '16px 16px 0 16px',
             background: 'white',
@@ -784,13 +1004,16 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
         const markerWidth = 9 * scaleFactor;
         const gapWidth = 3.5 * scaleFactor;
         const indent = markerWidth + gapWidth;
-        const sectionTitleFont = 6.1 * scaleFactor;
-        const headerLineFont = 5.0 * scaleFactor;
-        const bodyFont = 4.3 * scaleFactor;
-        const bulletFont = 4.6 * scaleFactor;
+        // Normalize typography to match the other templates
+        const sectionTitleFont = 7.0 * scaleFactor;
+        const headerLineFont = 6.0 * scaleFactor;
+        const bodyFont = 6.0 * scaleFactor;
+        const bulletFont = 6.0 * scaleFactor;
         return {
+          // Expose indent so other renderers (e.g., PDF transformer) have the exact value
+          indentPx: indent,
           container: {
-            fontFamily: 'Georgia, serif',
+            fontFamily: "'Noto Serif', Georgia, serif",
             fontSize: `${bodyFont}px`,
             lineHeight: '1.2',
             padding: '16px 16px 18px 16px',
@@ -802,7 +1025,7 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
           header: {
             textAlign: 'center',
             fontWeight: 'bold',
-            fontSize: `${14 * scaleFactor}px`,
+            fontSize: `${10 * scaleFactor}px`,
             marginBottom: `${4 * scaleFactor}px`,
             color: '#2A7B88'
           },
@@ -839,7 +1062,6 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
           bullet: {
             display: 'flex',
             alignItems: 'flex-start',
-            gap: `${gapWidth}px`,
             marginBottom: `${1.5 * scaleFactor}px`
           },
           bulletMarker: {
@@ -850,7 +1072,9 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
             minWidth: `${markerWidth}px`,
             fontSize: `${bulletFont}px`,
             color: '#39A5B7',
-            lineHeight: '1.2'
+            lineHeight: '1.2',
+            // Use same horizontal gap as section title so text aligns
+            marginRight: `${gapWidth}px`
           },
           bulletText: {
             flex: 1,
@@ -886,7 +1110,6 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
           skillItem: {
             display: 'flex',
             alignItems: 'flex-start',
-            gap: `${gapWidth}px`,
             marginBottom: `${2 * scaleFactor}px`
           },
           skillMarker: {
@@ -897,7 +1120,9 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
             minWidth: `${markerWidth}px`,
             fontSize: `${bulletFont}px`,
             color: '#39A5B7',
-            lineHeight: '1.2'
+            lineHeight: '1.2',
+            // Keep skills alignment consistent with section/bullet text
+            marginRight: `${gapWidth}px`
           },
           skillText: {
             flex: 1,
@@ -914,7 +1139,8 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
         return {
           container: { 
             fontFamily: 'Segoe UI, sans-serif', 
-            fontSize: `${7 * scaleFactor}px`, 
+            // Normalize body size to align with other templates
+            fontSize: `${6 * scaleFactor}px`, 
             lineHeight: '1.2',
             padding: '16px 16px 0 16px',
             background: 'white',
@@ -985,10 +1211,10 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
     if (!cleaned) return null;
 
     if (selectedFormat === TEMPLATE_SLUGS.EXECUTIVE_SERIF) {
+      // Revert: render marker + text using flex, same as preview
       const containerStyle = styles.bullet || {
         display: 'flex',
         alignItems: 'flex-start',
-        gap: '8px',
         marginBottom: '6px'
       };
       const markerStyle = styles.bulletMarker || {
@@ -999,7 +1225,8 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
         minWidth: '18px',
         fontSize: '11px',
         color: '#39A5B7',
-        lineHeight: '1.2'
+        lineHeight: '1.2',
+        marginRight: '8px'
       };
       const textStyle = styles.bulletText || {
         flex: 1,
@@ -1008,10 +1235,13 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
         lineHeight: '1.3'
       };
       const markerChar = styles.bulletMarkerChar || '▪';
+      // Include the computed indent as a data attribute so PDF transformer
+      // can align text precisely without depending on computed widths.
+      const indentAttr = (styles.indentPx != null) ? String(styles.indentPx) : undefined;
       return (
-        <div key={key} style={containerStyle}>
-          <span style={markerStyle}>{markerChar}</span>
-          <span style={textStyle}>{cleaned}</span>
+        <div key={key} style={containerStyle} className="es-bullet" data-es-indent={indentAttr}>
+          <span style={markerStyle} className="es-bullet-marker">{markerChar}</span>
+          <span style={textStyle} className="es-bullet-text">{cleaned}</span>
         </div>
       );
     }
@@ -1074,8 +1304,8 @@ const parseSkills = (value) => {
             return (
               <ul key={columnIdx} style={columnStyle}>
                 {column.map((skill, skillIdx) => (
-                  <li key={`${columnIdx}-${skillIdx}`} style={styles.skillItem || { display: 'flex', alignItems: 'flex-start', gap: '8px', marginBottom: '8px' }}>
-                    <span style={styles.skillMarker || { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '18px', minWidth: '18px', fontSize: '11px', color: '#39A5B7', lineHeight: '1.2' }}>{skillMarkerChar}</span>
+                  <li key={`${columnIdx}-${skillIdx}`} style={styles.skillItem || { display: 'flex', alignItems: 'flex-start', marginBottom: '8px' }}>
+                    <span style={styles.skillMarker || { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '18px', minWidth: '18px', fontSize: '11px', color: '#39A5B7', lineHeight: '1.2', marginRight: '8px' }}>{skillMarkerChar}</span>
                     <span style={styles.skillText || { flex: 1, fontSize: '11px', color: '#374151', lineHeight: '1.3' }}>{skill}</span>
                   </li>
                 ))}
@@ -1566,12 +1796,13 @@ const renderEducation = (education, styles) => {
   };
 
   // Render a single section
-  const renderSection = (title, content, styles) => {
+  const renderSection = (title, content, styles, opts = {}) => {
     if (!content || (Array.isArray(content) && content.length === 0)) {
       return null;
     }
 
     const isIndustryManager = selectedFormat === TEMPLATE_SLUGS.EXECUTIVE_SERIF;
+    const showTitle = opts.showTitle !== false;
     const formatTitle = (raw) => {
       if (!isIndustryManager) return raw;
       const [main, extra] = raw.split('(');
@@ -1587,9 +1818,11 @@ const renderEducation = (education, styles) => {
 
     return (
       <div>
-        <div style={styles.sectionTitle}>
-          {isIndustryManager ? `${(styles.sectionTitleBullet || '●')} ${displayTitle}` : displayTitle}
-        </div>
+        {showTitle && (
+          <div style={styles.sectionTitle}>
+            {isIndustryManager ? `${(styles.sectionTitleBullet || '●')} ${displayTitle}` : displayTitle}
+          </div>
+        )}
         {isIndustryManager && content ? (
           <div style={styles.sectionContent || { paddingLeft: '14pt' }}>{content}</div>
         ) : content}
@@ -1600,6 +1833,8 @@ const renderEducation = (education, styles) => {
   // Render page content based on section type
   const renderPageContent = (pageSections, styles) => {
     return pageSections.map((section, idx) => {
+      const prevType = idx > 0 ? pageSections[idx - 1]?.type : null;
+      const showTitle = !section._suppressTitle && prevType !== section.type;
       switch (section.type) {
         case 'header':
           return (
@@ -1643,16 +1878,16 @@ const renderEducation = (education, styles) => {
             summaryTitle = 'SUMMARY';
           }
           
-          return <div key={idx}>{renderSection(summaryTitle, renderSummaryContent(section.content, styles), styles)}</div>;
+          return <div key={idx}>{renderSection(summaryTitle, renderSummaryContent(section.content, styles), styles, { showTitle })}</div>;
         case 'experience':
-          return <div key={idx}>{renderSection('EXPERIENCE', renderExperiences(section.content, styles), styles)}</div>;
+          return <div key={idx}>{renderSection('EXPERIENCE', renderExperiences(section.content, styles), styles, { showTitle })}</div>;
         case 'education':
-          return <div key={idx}>{renderSection('EDUCATION', renderEducation(section.content, styles), styles)}</div>;
+          return <div key={idx}>{renderSection('EDUCATION', renderEducation(section.content, styles), styles, { showTitle })}</div>;
         case 'projects':
-          return <div key={idx}>{renderSection('PROJECTS', renderProjects(section.content, styles), styles)}</div>;
+          return <div key={idx}>{renderSection('PROJECTS', renderProjects(section.content, styles), styles, { showTitle })}</div>;
         case 'skills': {
           const skills = parseSkills(section.content);
-          return <div key={idx}>{renderSection('SKILLS', renderSkillsSection(skills, styles), styles)}</div>;
+          return <div key={idx}>{renderSection('SKILLS', renderSkillsSection(skills, styles), styles, { showTitle })}</div>;
         }
         default:
           return null;
@@ -1660,7 +1895,12 @@ const renderEducation = (education, styles) => {
     });
   };
 
+
   const styles = getFormatStyles(selectedFormat || DEFAULT_TEMPLATE_ID, data.selectedFontSize || 'medium');
+  const pageContainerStyle = {
+    ...(styles?.container || {}),
+    overflow: 'visible'
+  };
   const singlePageSkills = parseSkills(data.skills);
 
   // Determine if we should show multiple pages
@@ -1701,7 +1941,7 @@ const renderEducation = (education, styles) => {
         <div
           ref={contentRef}
           className="single-page-container"
-          style={styles.container}
+          style={pageContainerStyle}
         >
           {/* Resume Content */}
           <div style={{ height: 'auto', overflow: 'visible' }}>
@@ -1760,7 +2000,7 @@ const renderEducation = (education, styles) => {
       {shouldShowMultiPage && (
         <div className="multi-page-container">
           {pages.map((pageSections, pageIndex) => (
-            <div key={pageIndex} className="page-wrapper" style={styles.container}>
+            <div key={pageIndex} className="page-wrapper" style={pageContainerStyle}>
               {/* Page Content - Rendered based on section types */}
               <div className="page-content">
                 {renderPageContent(pageSections, styles)}
@@ -1774,10 +2014,3 @@ const renderEducation = (education, styles) => {
 };
 
 export default LivePreview; 
-
-
-
-
-
-
-
