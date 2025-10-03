@@ -7,6 +7,7 @@ import { setLastStep } from '../utils/exitTracking';
 import { TEMPLATE_SLUGS, DEFAULT_TEMPLATE_ID, normalizeTemplateId } from '../constants/templates';
 import Stepper from '../components/Stepper';
 import StepPersonal from '../components/StepPersonal';
+import StepImport from '../components/StepImport';
 import StepExperience from '../components/StepExperience';
 import StepEducation from '../components/StepEducation';
 import StepProjects from '../components/StepProjects';
@@ -35,8 +36,9 @@ const getAPIBaseURL = () => {
 };
 
 const steps = [
+  "Import Resume",
   "Personal Details",
-    "Job Description (Optional)",
+  "Job Description (Optional)",
   "Experience",
   "Projects",
   "Education",
@@ -45,14 +47,37 @@ const steps = [
   "Summary",
   "Cover Letter"
 ];
+const STEP_IDS = {
+  IMPORT: 1,
+  PERSONAL: 2,
+  JOB_DESCRIPTION: 3,
+  EXPERIENCE: 4,
+  PROJECTS: 5,
+  EDUCATION: 6,
+  SKILLS: 7,
+  FORMAT: 8,
+  SUMMARY: 9,
+  COVER_LETTER: 10,
+};
+
 
 function BuilderPage() {
-  const [step, setStep] = useState(1); // Start with Personal Details step
+  const [step, setStep] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const seenImport = window.localStorage.getItem('resumeImportSeen');
+      if (seenImport === 'true') {
+        return STEP_IDS.PERSONAL;
+      }
+    }
+    return STEP_IDS.IMPORT;
+  });
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [jobDescription, setJobDescription] = useState('');
   const [subscriptionData, setSubscriptionData] = useState(null);
+  const [downloadNotice, setDownloadNotice] = useState(null);
+  const [userRequestedImport, setUserRequestedImport] = useState(false);
   
   // Load job description from localStorage on component mount
   useEffect(() => {
@@ -61,12 +86,37 @@ function BuilderPage() {
       setJobDescription(savedJobDesc);
     }
   }, []);
+
   
   const { user, logout } = useAuth();
   const { triggerFeedbackPrompt, scheduleFollowUp } = useFeedback();
   const displayName = typeof user === 'string' ? user : (user?.name || user?.email || '');
   const { data } = useResume();
   const selectedFormat = normalizeTemplateId(data.selectedFormat);
+  const hasExistingResumeData = React.useMemo(() => {
+    if (!data) return false;
+    const hasPersonal = Boolean(data.name || data.email || data.phone);
+    const hasExperience = Array.isArray(data.experiences) && data.experiences.some((exp) => exp && (exp.jobTitle || exp.company || exp.description));
+    const hasEducation = Array.isArray(data.education) && data.education.some((edu) => edu && (edu.degree || edu.school || edu.field || edu.graduationYear));
+    const hasProjects = Array.isArray(data.projects) && data.projects.some((proj) => proj && (proj.projectName || proj.description || proj.technologies));
+    const hasSummary = Boolean(data.summary);
+    return hasPersonal || hasExperience || hasEducation || hasProjects || hasSummary;
+  }, [data]);
+
+  useEffect(() => {
+    if (step !== STEP_IDS.IMPORT || userRequestedImport) {
+      return;
+    }
+    const seenImport = typeof window !== 'undefined' && window.localStorage.getItem('resumeImportSeen') === 'true';
+    if (seenImport || hasExistingResumeData) {
+      if (!seenImport && typeof window !== 'undefined') {
+        window.localStorage.setItem('resumeImportSeen', 'true');
+      }
+      setUserRequestedImport(false);
+      setStep(STEP_IDS.PERSONAL);
+    }
+  }, [step, hasExistingResumeData, userRequestedImport]);
+
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const toggleFullscreen = () => {
@@ -91,6 +141,36 @@ function BuilderPage() {
       }
     }
   };
+
+  const handleImportComplete = () => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('resumeImportSeen', 'true');
+    }
+    setUserRequestedImport(false);
+    setStep(STEP_IDS.PERSONAL);
+  };
+  const handleStepChange = (nextStep) => {
+    if (nextStep === STEP_IDS.IMPORT) {
+      setUserRequestedImport(true);
+    } else {
+      setUserRequestedImport(false);
+    }
+    setStep(nextStep);
+  };
+
+  const goToPreviousStep = () => {
+    handleStepChange(Math.max(step - 1, STEP_IDS.IMPORT));
+  };
+
+  const goToNextStep = () => {
+    if (step === STEP_IDS.IMPORT) {
+      handleImportComplete();
+      return;
+    }
+    handleStepChange(Math.min(step + 1, steps.length));
+  };
+
+
 
   // Listen for fullscreen changes
   useEffect(() => {
@@ -144,6 +224,8 @@ function BuilderPage() {
         }
         return;
       }
+
+      setDownloadNotice(null);
 
       // Track resume generation
       trackResumeGeneration(selectedFormat || 'default');
@@ -904,7 +986,36 @@ function BuilderPage() {
           }
 
           if (result.ok && result.data && result.data.downloadURL) {
-            window.open(result.data.downloadURL, '_blank');
+            const downloadUrl = result.data.downloadURL;
+            let popupWindow = null;
+            let popupBlocked = false;
+            try {
+              popupWindow = window.open(downloadUrl, '_blank');
+              if (popupWindow) {
+                try {
+                  popupWindow.opener = null;
+                } catch (_) { /* noop */ }
+                if (typeof popupWindow.focus === 'function') {
+                  popupWindow.focus();
+                }
+              } else {
+                popupBlocked = true;
+              }
+            } catch (popupError) {
+              console.error('Unable to open resume in new tab automatically:', popupError);
+              popupBlocked = true;
+            }
+            if (!popupBlocked && popupWindow && popupWindow.closed === true) {
+              popupBlocked = true;
+            }
+            setDownloadNotice({
+              message: popupBlocked
+                ? 'Your browser blocked the download pop-up. Please allow pop-ups for HiHired or use the direct link below.'
+                : 'We opened your resume in a new tab. If it did not appear, allow pop-ups for HiHired or use the direct link below.',
+              link: downloadUrl,
+              blocked: popupBlocked,
+            });
+
             setLastStep('resume_download_success');
             triggerFeedbackPrompt({
               scenario: 'resume_download',
@@ -1092,36 +1203,6 @@ function BuilderPage() {
           <div className="site-header" style={{ width: '100%', paddingTop: '2.5rem', paddingBottom: '1.5rem', textAlign: 'center', background: 'transparent', position: 'relative' }}>
                          <div style={{ position: 'absolute', right: '2rem', top: '50%', transform: 'translateY(-50%)', display: 'flex', gap: '1rem', zIndex: 20 }}>
 
-              <button
-                onClick={() => window.location.href = '/'}
-                style={{
-                  padding: '0.75rem 1.5rem',
-                  border: '2px solid #d1d5db',
-                  borderRadius: '8px',
-                  background: 'white',
-                  color: '#374151',
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                  fontSize: '0.95rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.background = '#f3f4f6';
-                  e.target.style.transform = 'translateY(-2px)';
-                  e.target.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.15)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.background = 'white';
-                  e.target.style.transform = 'translateY(0)';
-                  e.target.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
-                }}
-              >
-                ← Back to Home
-              </button>
             </div>
             <h1 style={{
               fontSize: '2.5rem',
@@ -1149,23 +1230,29 @@ function BuilderPage() {
           {/* Stepper and Content */}
           <div style={{ display: 'flex', width: '100%', flex: 1 }}>
             <div className="stepper-container">
-              <Stepper steps={steps} currentStep={step} setStep={setStep} />
+              <Stepper steps={steps} currentStep={step} setStep={handleStepChange} />
             </div>
             <div className="builder-content">
-              {step === 1 && <StepPersonal />}
-              {step === 3 && <StepExperience />}
-              {step === 4 && <StepProjects />}
-              {step === 5 && <StepEducation />}
-              {step === 6 && <StepSkills />}
-              {step === 2 && (
+              {step === STEP_IDS.IMPORT && (
+                <StepImport
+                  onSkip={handleImportComplete}
+                  jobDescription={jobDescription}
+                />
+              )}
+              {step === STEP_IDS.PERSONAL && <StepPersonal />}
+              {step === STEP_IDS.JOB_DESCRIPTION && (
                 <StepJobDescription
                   jobDescription={jobDescription}
                   onJobDescriptionChange={handleJobDescriptionChange}
                 />
               )}
-              {step === 7 && <StepFormat />}
-              {step === 8 && <StepSummary />}
-              {step === 9 && (
+              {step === STEP_IDS.EXPERIENCE && <StepExperience />}
+              {step === STEP_IDS.PROJECTS && <StepProjects />}
+              {step === STEP_IDS.EDUCATION && <StepEducation />}
+              {step === STEP_IDS.SKILLS && <StepSkills />}
+              {step === STEP_IDS.FORMAT && <StepFormat />}
+              {step === STEP_IDS.SUMMARY && <StepSummary />}
+              {step === STEP_IDS.COVER_LETTER && (
                 <StepCoverLetter
                   onGeneratePremiumFeature={() => setShowUpgradeModal(true)}
                 />
@@ -1181,8 +1268,8 @@ function BuilderPage() {
                  width: '100%'
                }}>
                  {step > 1 && (
-                   <button
-                     onClick={() => setStep(step - 1)}
+                    <button
+                     onClick={goToPreviousStep}
                      style={{
                        padding: '1rem 2.5rem',
                        border: '2px solid #d1d5db',
@@ -1214,8 +1301,8 @@ function BuilderPage() {
                    </button>
                  )}
                  {step < steps.length && (
-                   <button
-                     onClick={() => setStep(step + 1)}
+                    <button
+                     onClick={goToNextStep}
                      style={{
                        padding: '1rem 2.5rem',
                        border: 'none',
@@ -1247,75 +1334,40 @@ function BuilderPage() {
                      Next →
                    </button>
                  )}
-                 {step === steps.length && (
-                   <>
-                     <button
-                       onClick={handleViewResume}
-                       style={{
-                         padding: '1rem 2.5rem',
-                         border: 'none',
-                         borderRadius: '8px',
-                         background: '#10b981',
-                         color: 'white',
-                         cursor: 'pointer',
-                         fontWeight: 600,
-                         fontSize: '1rem',
-                         boxShadow: '0 4px 6px rgba(16, 185, 129, 0.25)',
-                         transition: 'all 0.2s ease',
-                         minWidth: '200px',
-                         height: '48px',
-                         display: 'flex',
-                         alignItems: 'center',
-                         justifyContent: 'center'
-                       }}
-                       onMouseEnter={(e) => {
-                         e.target.style.background = '#059669';
-                         e.target.style.transform = 'translateY(-2px)';
-                         e.target.style.boxShadow = '0 6px 12px rgba(16, 185, 129, 0.3)';
-                       }}
-                       onMouseLeave={(e) => {
-                         e.target.style.background = '#10b981';
-                         e.target.style.transform = 'translateY(0)';
-                         e.target.style.boxShadow = '0 4px 6px rgba(16, 185, 129, 0.25)';
-                       }}
-                     >
-                       📄 View Resume
-                     </button>
-                     <button
-                       onClick={() => window.location.href = '/'}
-                       style={{
-                         padding: '1rem 2.5rem',
-                         border: '2px solid #3b82f6',
-                         borderRadius: '8px',
-                         background: 'white',
-                         color: '#3b82f6',
-                         cursor: 'pointer',
-                         fontWeight: 600,
-                         fontSize: '1rem',
-                         transition: 'all 0.2s ease',
-                         minWidth: '200px',
-                         height: '48px',
-                         display: 'flex',
-                         alignItems: 'center',
-                         justifyContent: 'center'
-                       }}
-                       onMouseEnter={(e) => {
-                         e.target.style.background = '#3b82f6';
-                         e.target.style.color = 'white';
-                         e.target.style.transform = 'translateY(-2px)';
-                         e.target.style.boxShadow = '0 6px 12px rgba(59, 130, 246, 0.3)';
-                       }}
-                       onMouseLeave={(e) => {
-                         e.target.style.background = 'white';
-                         e.target.style.color = '#3b82f6';
-                         e.target.style.transform = 'translateY(0)';
-                         e.target.style.boxShadow = 'none';
-                       }}
-                     >
-                       ✅ Complete & Return Home
-                     </button>
-                   </>
-                 )}
+                  {step === steps.length && (
+                    <button
+                      onClick={handleViewResume}
+                      style={{
+                        padding: '1rem 2.5rem',
+                        border: 'none',
+                        borderRadius: '8px',
+                        background: '#10b981',
+                        color: 'white',
+                        cursor: 'pointer',
+                        fontWeight: 600,
+                        fontSize: '1rem',
+                        boxShadow: '0 4px 6px rgba(16, 185, 129, 0.25)',
+                        transition: 'all 0.2s ease',
+                        minWidth: '200px',
+                        height: '48px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.background = '#059669';
+                        e.target.style.transform = 'translateY(-2px)';
+                        e.target.style.boxShadow = '0 6px 12px rgba(16, 185, 129, 0.3)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.background = '#10b981';
+                        e.target.style.transform = 'translateY(0)';
+                        e.target.style.boxShadow = '0 4px 6px rgba(16, 185, 129, 0.25)';
+                      }}
+                    >
+                      📄 View Resume
+                    </button>
+                  )}
                </div>
             </div>
           </div>
@@ -1388,8 +1440,8 @@ function BuilderPage() {
               flexDirection: 'column'
             }}
           >
-                            {step !== 9 && <LivePreview onDownload={handleViewResume} />}
-                            {step === 9 && (
+                            {step !== STEP_IDS.COVER_LETTER && <LivePreview onDownload={handleViewResume} downloadNotice={downloadNotice} />}
+                            {step === STEP_IDS.COVER_LETTER && (
                               <div style={{
                                 display: 'flex',
                                 alignItems: 'center',
@@ -1419,7 +1471,7 @@ function BuilderPage() {
            />
          );
        })()}
-    </>
+      </>
   );
 }
 
