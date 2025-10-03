@@ -18,16 +18,6 @@ const createEmptyExperience = () => ({
 
 const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
-const toISODateString = (date) => {
-  if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
-    return '';
-  }
-  const year = date.getUTCFullYear();
-  const month = `${date.getUTCMonth() + 1}`.padStart(2, '0');
-  const day = `${date.getUTCDate()}`.padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
-
 const coerceDate = (value) => {
   if (value === null || value === undefined || value === '') {
     return null;
@@ -133,7 +123,13 @@ const coerceDate = (value) => {
 
 const normalizeDateValue = (value) => {
   const parsed = coerceDate(value);
-  return parsed ? toISODateString(parsed) : '';
+  if (!parsed) {
+    return '';
+  }
+
+  const year = parsed.getUTCFullYear();
+  const month = `${parsed.getUTCMonth() + 1}`.padStart(2, '0');
+  return `${year}-${month}`;
 };
 
 const formatDateRange = (exp) => {
@@ -517,7 +513,7 @@ const StepExperience = () => {
                   START DATE
                 </label>
                 <input
-                  type="date"
+                  type="month"
                   value={normalizeDateValue(exp.startDate)}
                   onChange={(e) => handleChange(idx, 'startDate', e.target.value)}
                   style={{
@@ -543,7 +539,7 @@ const StepExperience = () => {
                   END DATE
                 </label>
                 <input
-                  type="date"
+                  type="month"
                   value={normalizeDateValue(exp.endDate)}
                   onChange={(e) => handleChange(idx, 'endDate', e.target.value)}
                   disabled={exp.currentlyWorking}
