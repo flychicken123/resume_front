@@ -163,6 +163,8 @@ function BuilderPage() {
   const [jobMatchesError, setJobMatchesError] = useState(null);
   const [jobMatchesLocation, setJobMatchesLocation] = useState('');
   const [locationManuallySet, setLocationManuallySet] = useState(false);
+  const [isResumeGenerating, setIsResumeGenerating] = useState(false);
+  const [navigateToJobMatchesPending, setNavigateToJobMatchesPending] = useState(false);
   const { user, logout } = useAuth();
   const { triggerFeedbackPrompt, scheduleFollowUp } = useFeedback();
   const { data } = useResume();
@@ -302,11 +304,17 @@ function BuilderPage() {
   };
   const handlePreferredLocationChange = (value) => {
     setJobMatchesLocation(value);
-    if (!locationManuallySet) {
-      setLocationManuallySet(true);
-    }
-    if (!value) {
+  };
+
+  const handlePreferredLocationFocus = () => {
+    setLocationManuallySet(true);
+  };
+
+  const handlePreferredLocationBlur = () => {
+    const trimmed = (jobMatchesLocation || '').trim();
+    if (!trimmed) {
       setLocationManuallySet(false);
+      setJobMatchesLocation(autoLocation || '');
     }
   };
 
@@ -333,9 +341,7 @@ function BuilderPage() {
     };
   }, [data, jobDescription, jobMatchesLocation, autoLocation]);
 
-  const fetchJobMatches = useCallback(async (options = {}) => {
-    const { autoSwitchToStep = false } = options;
-
+  const fetchJobMatches = useCallback(async () => {
     if (!user) {
       setJobMatchesError('Log in to see matching jobs.');
       return;
@@ -347,24 +353,21 @@ function BuilderPage() {
       return;
     }
 
+    setJobMatchesLoading(true);
+    setJobMatchesError(null);
+
     try {
-      setJobMatchesLoading(true);
-      setJobMatchesError(null);
       const response = await computeJobMatches(payload);
       const matches = Array.isArray(response.matches) ? response.matches : [];
       setJobMatches(matches);
       setJobMatchesHash(response.resumeHash || null);
-      if (autoSwitchToStep && matches.length > 0 && step !== STEP_IDS.JOB_MATCHES) {
-        setStep(STEP_IDS.JOB_MATCHES);
-      }
-
     } catch (error) {
       console.error('Failed to compute job matches', error);
       setJobMatchesError(error.message || 'Unable to compute job matches.');
     } finally {
       setJobMatchesLoading(false);
     }
-  }, [user, buildMatchPayload, step]);
+  }, [user, buildMatchPayload]);
   useEffect(() => {
     if (step !== STEP_IDS.JOB_MATCHES) {
       return;
@@ -375,13 +378,35 @@ function BuilderPage() {
     if (jobMatchesLoading) {
       return;
     }
+    if (jobMatchesError) {
+      return;
+    }
+    if (jobMatchesHash) {
+      return;
+    }
     if (jobMatches.length > 0) {
       return;
     }
-    fetchJobMatches({ autoSwitchToStep: false }).catch((error) => {
+    fetchJobMatches().catch((error) => {
       console.error('Automatic job match fetch failed', error);
     });
-  }, [step, user, jobMatches.length, jobMatchesLoading, fetchJobMatches]);
+  }, [step, user, jobMatches.length, jobMatchesLoading, jobMatchesError, jobMatchesHash, fetchJobMatches]);
+
+  useEffect(() => {
+    if (!navigateToJobMatchesPending) {
+      return;
+    }
+    if (isResumeGenerating) {
+      return;
+    }
+    if (jobMatchesLoading) {
+      return;
+    }
+    if (step !== STEP_IDS.JOB_MATCHES) {
+      setStep(STEP_IDS.JOB_MATCHES);
+    }
+    setNavigateToJobMatchesPending(false);
+  }, [navigateToJobMatchesPending, isResumeGenerating, jobMatchesLoading, step]);
 
 
   const handleImportComplete = () => {
@@ -451,6 +476,7 @@ function BuilderPage() {
   // Handler for view resume action
   const handleViewResume = async () => {
     let styleOverride = null;
+    let fetchInFlight = false;
     try {
       // Check if user is authenticated
       if (!user) {
@@ -471,7 +497,11 @@ function BuilderPage() {
 
       // Track resume generation
       trackResumeGeneration(selectedFormat || 'default');
-      fetchJobMatches({ autoSwitchToStep: true }).catch((error) => console.error('Job match computation during download failed', error));
+      setIsResumeGenerating(true);
+      setNavigateToJobMatchesPending(true);
+      fetchJobMatches().catch((error) => {
+        console.error('Job match computation during download failed', error);
+      });
 
       // Update button state
       const viewButton = document.querySelector('button[onClick]');
@@ -1163,6 +1193,7 @@ function BuilderPage() {
         }
         console.log('Headers being sent:', headers); // Debug log
         
+        fetchInFlight = true;
         fetch(`${getAPIBaseURL()}/api/resume/generate-pdf-file`, {
           method: 'POST',
           headers,
@@ -1218,6 +1249,8 @@ function BuilderPage() {
               setShowUpgradeModal(true);
             }, 10);
 
+            setNavigateToJobMatchesPending(false);
+
             const buttons = document.querySelectorAll('button');
             buttons.forEach(btn => {
               if (btn.textContent.includes('Generating PDF')) {
@@ -1269,6 +1302,7 @@ function BuilderPage() {
               metadata: { template: selectedFormat },
             });
           } else {
+            setNavigateToJobMatchesPending(false);
             console.error('PDF generation failed response:', result);
             setLastStep('resume_download_error');
             triggerFeedbackPrompt({
@@ -1283,6 +1317,7 @@ function BuilderPage() {
         })
         .catch(error => {
           console.error('PDF generation error:', error);
+          setNavigateToJobMatchesPending(false);
           setLastStep('resume_download_error');
           triggerFeedbackPrompt({
             scenario: 'resume_download',
@@ -1292,24 +1327,42 @@ function BuilderPage() {
           if (!error.message?.includes('limit')) {
             alert('Failed to generate PDF. Please try again.');
           }
+        })
+        .finally(() => {
+          setIsResumeGenerating(false);
+          const viewButton = document.querySelector('button[onClick]');
+          if (viewButton) {
+            viewButton.textContent = '📄 View Resume';
+            viewButton.disabled = false;
+          }
+          if (styleOverride && styleOverride.parentNode) {
+            styleOverride.parentNode.removeChild(styleOverride);
+          }
         });
 
       } else {
+        setIsResumeGenerating(false);
+        setNavigateToJobMatchesPending(false);
         alert('Could not find resume preview. Please try again.');
       }
 
     } catch (error) {
       console.error('View resume error:', error);
+      setIsResumeGenerating(false);
+      setNavigateToJobMatchesPending(false);
       alert('Failed to generate PDF. Please try again.');
     } finally {
-      // Reset button state
-      const viewButton = document.querySelector('button[onClick]');
-      if (viewButton) {
-        viewButton.textContent = '📄 View Resume';
-        viewButton.disabled = false;
-      }
-      if (styleOverride && styleOverride.parentNode) {
-        styleOverride.parentNode.removeChild(styleOverride);
+      if (!fetchInFlight) {
+        setIsResumeGenerating(false);
+        setNavigateToJobMatchesPending(false);
+        const viewButton = document.querySelector('button[onClick]');
+        if (viewButton) {
+          viewButton.textContent = '📄 View Resume';
+          viewButton.disabled = false;
+        }
+        if (styleOverride && styleOverride.parentNode) {
+          styleOverride.parentNode.removeChild(styleOverride);
+        }
       }
     }
   };
@@ -1520,7 +1573,7 @@ function BuilderPage() {
                       {jobMatchesLoading && <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Updating...</span>}
                       <button
                         type="button"
-                        onClick={() => fetchJobMatches({ autoSwitchToStep: false })}
+                        onClick={() => fetchJobMatches()}
                         disabled={jobMatchesLoading || !user}
                         style={{
                           padding: '0.4rem 0.9rem',
@@ -1545,6 +1598,8 @@ function BuilderPage() {
                         type="text"
                         value={jobMatchesLocation}
                         onChange={(e) => handlePreferredLocationChange(e.target.value)}
+                        onFocus={handlePreferredLocationFocus}
+                        onBlur={handlePreferredLocationBlur}
                         placeholder={autoLocation ? `e.g., ${autoLocation}` : 'City, State or Remote'}
                         style={{
                           flex: '1 1 200px',
@@ -1922,6 +1977,29 @@ function BuilderPage() {
           </div>
         )}
       </div>
+
+      {isResumeGenerating && (
+        <div
+          aria-live="polite"
+          style={{
+            position: 'fixed',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: '#1d4ed8',
+            color: '#fff',
+            textAlign: 'center',
+            padding: '0.9rem 1rem',
+            fontWeight: 600,
+            fontSize: '0.95rem',
+            letterSpacing: '0.01em',
+            boxShadow: '0 -4px 12px rgba(30, 64, 175, 0.35)',
+            zIndex: 2000,
+          }}
+        >
+          Resume is generating… preparing matching jobs for you.
+        </div>
+      )}
 
              {/* Modals */}
        {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}

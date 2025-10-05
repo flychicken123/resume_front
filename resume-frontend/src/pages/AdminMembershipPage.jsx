@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getAPIBaseURL } from "../api";
@@ -33,6 +33,8 @@ const AdminMembershipPage = () => {
   const [jobError, setJobError] = useState('');
   const [jobMessage, setJobMessage] = useState('');
   const [syncingAll, setSyncingAll] = useState(false);
+  const [importingCompanies, setImportingCompanies] = useState(false);
+  const [importErrors, setImportErrors] = useState([]);
   const [newCompany, setNewCompany] = useState({
     name: '',
     website_url: '',
@@ -43,6 +45,7 @@ const AdminMembershipPage = () => {
   });
 
   const API_BASE_URL = getAPIBaseURL();
+  const importInputRef = useRef(null);
 
   useEffect(() => {
     if (!loading && isAdmin) {
@@ -152,6 +155,70 @@ const AdminMembershipPage = () => {
     } catch (err) {
       console.error('Failed to create company', err);
       setJobError(err.message || 'Failed to create company');
+    }
+  };
+
+  const handleOpenImportDialog = () => {
+    if (importInputRef.current) {
+      importInputRef.current.value = '';
+      importInputRef.current.click();
+    }
+  };
+
+  const handleImportCompanies = async (event) => {
+    const { files } = event.target;
+    if (!files || files.length === 0) {
+      return;
+    }
+
+    const file = files[0];
+    event.target.value = '';
+    setJobError('');
+    setJobMessage('');
+    setImportErrors([]);
+    setImportingCompanies(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const authHeaders = getAuthHeaders() || {};
+      const headers = { ...authHeaders };
+      delete headers['Content-Type'];
+      delete headers['content-type'];
+
+      const response = await fetch(`${API_BASE_URL}/api/admin/jobs/companies/import`, {
+        method: 'POST',
+        headers,
+        body: formData,
+      });
+
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.error || 'Failed to import companies');
+      }
+
+      const summary = payload.summary || {};
+      const inserted = summary.inserted ?? 0;
+      const updated = summary.updated ?? 0;
+      const skipped = summary.skipped ?? 0;
+      const processed = summary.processed ?? 0;
+      const errors = Array.isArray(summary.errors) ? summary.errors : [];
+
+      const parts = [`Processed ${processed} rows`, `${inserted} inserted`, `${updated} updated`];
+      if (skipped > 0) {
+        parts.push(`${skipped} skipped`);
+      }
+      setJobMessage(`${payload.message || 'Import completed.'} ${parts.join(', ')}.`);
+      setImportErrors(errors);
+
+      await loadJobCompanies();
+    } catch (err) {
+      console.error('Company import failed', err);
+      setJobError(err.message || 'Failed to import companies');
+      setImportErrors([]);
+    } finally {
+      setImportingCompanies(false);
     }
   };
 
@@ -384,6 +451,30 @@ const AdminMembershipPage = () => {
             >
               {jobLoading ? 'Refreshing...' : 'Refresh Companies'}
             </button>
+            <button
+              type="button"
+              onClick={handleOpenImportDialog}
+              disabled={importingCompanies || jobLoading || syncingAll}
+              style={{
+                padding: '0.6rem 1.2rem',
+                borderRadius: '6px',
+                border: '1px solid #15803d',
+                background: importingCompanies ? '#bbf7d0' : '#d1fae5',
+                color: '#047857',
+                fontWeight: 600,
+                cursor: importingCompanies || jobLoading || syncingAll ? 'not-allowed' : 'pointer',
+                opacity: importingCompanies || jobLoading || syncingAll ? 0.8 : 1
+              }}
+            >
+              {importingCompanies ? 'Importing...' : 'Import CSV'}
+            </button>
+            <input
+              ref={importInputRef}
+              type="file"
+              accept=".csv,text/csv"
+              style={{ display: 'none' }}
+              onChange={handleImportCompanies}
+            />
           </div>
         </div>
         {jobError && (
@@ -394,6 +485,21 @@ const AdminMembershipPage = () => {
         {jobMessage && (
           <div style={{ background: '#dbeafe', border: '1px solid #93c5fd', color: '#1d4ed8', padding: '0.75rem 1rem', borderRadius: '8px', marginBottom: '0.75rem' }}>
             {jobMessage}
+          </div>
+        )}
+        {importErrors.length > 0 && (
+          <div style={{ background: '#fef3c7', border: '1px solid #facc15', color: '#92400e', padding: '0.75rem 1rem', borderRadius: '8px', marginBottom: '0.75rem' }}>
+            <div style={{ fontWeight: 600, marginBottom: '0.5rem' }}>Some rows were skipped during import:</div>
+            <ul style={{ margin: 0, paddingLeft: '1.1rem', fontSize: '0.85rem' }}>
+              {importErrors.slice(0, 5).map((entry, index) => (
+                <li key={`${entry.row}-${index}`}>
+                  Row {entry.row}: {entry.message}
+                </li>
+              ))}
+            </ul>
+            {importErrors.length > 5 && (
+              <div style={{ marginTop: '0.5rem', fontSize: '0.8rem' }}>+ {importErrors.length - 5} more issues. Check your CSV and try again.</div>
+            )}
           </div>
         )}
 
