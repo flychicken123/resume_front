@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Helmet } from 'react-helmet';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useResume } from '../context/ResumeContext';
 import { useFeedback } from '../context/FeedbackContext';
@@ -23,6 +24,7 @@ import UpgradeModal from '../components/UpgradeModal';
 import SubscriptionStatus from '../components/SubscriptionStatus';
 import SEO from '../components/SEO';
 import { trackResumeGeneration } from '../components/Analytics';
+import { computeJobMatches, getJobMatches } from '../api';
 import './BuilderPage.css';
 
 const getAPIBaseURL = () => {
@@ -35,6 +37,81 @@ const getAPIBaseURL = () => {
   return process.env.REACT_APP_API_URL || 'http://localhost:8081';
 };
 
+const derivePrimaryLocation = (resumeData) => {
+  if (!resumeData || typeof resumeData !== 'object') {
+    return '';
+  }
+
+  const formatLocation = (parts) => parts.filter(Boolean).join(', ');
+
+  const experiences = Array.isArray(resumeData.experiences) ? resumeData.experiences.filter(Boolean) : [];
+  for (let i = experiences.length - 1; i >= 0; i -= 1) {
+    const exp = experiences[i];
+    if (!exp) continue;
+    if (exp.remote) {
+      return 'Remote';
+    }
+    const loc = formatLocation([exp.city, exp.state, exp.country]);
+    if (loc) {
+      return loc;
+    }
+    if (typeof exp.location === 'string' && exp.location.trim()) {
+      return exp.location.trim();
+    }
+  }
+
+  const education = Array.isArray(resumeData.education) ? resumeData.education.filter(Boolean) : [];
+  for (let i = education.length - 1; i >= 0; i -= 1) {
+    const edu = education[i];
+    if (!edu) continue;
+    if (typeof edu.location === 'string' && edu.location.trim()) {
+      return edu.location.trim();
+    }
+    const loc = formatLocation([edu.city, edu.state, edu.country]);
+    if (loc) {
+      return loc;
+    }
+  }
+
+  return '';
+};
+
+const US_STATE_ABBREVIATIONS = new Set([
+  'al', 'ak', 'az', 'ar', 'ca', 'co', 'ct', 'de', 'dc', 'fl', 'ga', 'hi', 'id', 'il', 'in', 'ia', 'ks', 'ky', 'la', 'me', 'md', 'ma', 'mi', 'mn', 'ms', 'mo', 'mt', 'ne', 'nv', 'nh', 'nj', 'nm', 'ny', 'nc', 'nd', 'oh', 'ok', 'or', 'pa', 'ri', 'sc', 'sd', 'tn', 'tx', 'ut', 'vt', 'va', 'wa', 'wv', 'wi', 'wy',
+]);
+
+const US_STATE_NAMES = [
+  'alabama', 'alaska', 'arizona', 'arkansas', 'california', 'colorado', 'connecticut', 'delaware', 'district of columbia', 'florida', 'georgia', 'hawaii', 'idaho', 'illinois', 'indiana', 'iowa', 'kansas', 'kentucky', 'louisiana', 'maine', 'maryland', 'massachusetts', 'michigan', 'minnesota', 'mississippi', 'missouri', 'montana', 'nebraska', 'nevada', 'new hampshire', 'new jersey', 'new mexico', 'new york', 'north carolina', 'north dakota', 'ohio', 'oklahoma', 'oregon', 'pennsylvania', 'rhode island', 'south carolina', 'south dakota', 'tennessee', 'texas', 'utah', 'vermont', 'virginia', 'washington', 'west virginia', 'wisconsin', 'wyoming',
+];
+
+const US_KEYWORDS = ['united states', 'usa', 'u.s.', 'u.s.a', 'america', 'us-based'];
+const NON_US_KEYWORDS = ['canada', 'ontario', 'quebec', 'british columbia', 'alberta', 'saskatchewan', 'manitoba', 'new brunswick', 'nova scotia', 'pei', 'prince edward island', 'toronto', 'vancouver', 'montreal', 'ottawa', 'calgary', 'europe', 'united kingdom', 'uk', 'germany', 'france', 'spain', 'italy', 'netherlands', 'belgium', 'sweden', 'norway', 'denmark', 'finland', 'switzerland', 'poland', 'india', 'australia', 'new zealand', 'mexico', 'brazil', 'singapore'];
+
+const sanitizeLocationToken = (token) => token.replace(/[^a-z]/g, '');
+
+const isLikelyUSLocation = (value) => {
+  if (!value || typeof value !== 'string') {
+    return false;
+  }
+  const normalized = value.toLowerCase();
+  if (NON_US_KEYWORDS.some((keyword) => normalized.includes(keyword))) {
+    return false;
+  }
+  if (US_KEYWORDS.some((keyword) => normalized.includes(keyword))) {
+    return true;
+  }
+  if (US_STATE_NAMES.some((state) => normalized.includes(state))) {
+    return true;
+  }
+  const tokens = normalized.split(/[,/\-\s]+/).filter(Boolean);
+  for (const token of tokens) {
+    if (US_STATE_ABBREVIATIONS.has(sanitizeLocationToken(token))) {
+      return true;
+    }
+  }
+  return false;
+};
+
 const steps = [
   "Import Resume",
   "Personal Details",
@@ -45,6 +122,7 @@ const steps = [
   "Skills",
   "Template & Format",
   "Summary",
+  "Job Matches",
   "Cover Letter"
 ];
 const STEP_IDS = {
@@ -57,7 +135,8 @@ const STEP_IDS = {
   SKILLS: 7,
   FORMAT: 8,
   SUMMARY: 9,
-  COVER_LETTER: 10,
+  JOB_MATCHES: 10,
+  COVER_LETTER: 11,
 };
 
 
@@ -78,6 +157,28 @@ function BuilderPage() {
   const [subscriptionData, setSubscriptionData] = useState(null);
   const [downloadNotice, setDownloadNotice] = useState(null);
   const [userRequestedImport, setUserRequestedImport] = useState(false);
+  const [jobMatches, setJobMatches] = useState([]);
+  const [jobMatchesHash, setJobMatchesHash] = useState(null);
+  const [jobMatchesLoading, setJobMatchesLoading] = useState(false);
+  const [jobMatchesError, setJobMatchesError] = useState(null);
+  const [jobMatchesLocation, setJobMatchesLocation] = useState('');
+  const [locationManuallySet, setLocationManuallySet] = useState(false);
+  const { user, logout } = useAuth();
+  const { triggerFeedbackPrompt, scheduleFollowUp } = useFeedback();
+  const { data } = useResume();
+  const displayName = typeof user === 'string' ? user : (user?.name || user?.email || '');
+  const selectedFormat = normalizeTemplateId(data?.selectedFormat);
+  const autoLocation = useMemo(() => derivePrimaryLocation(data), [data]);
+  const hasExistingResumeData = useMemo(() => {
+    if (!data) return false;
+    const hasPersonal = Boolean(data.name || data.email || data.phone);
+    const hasExperience = Array.isArray(data.experiences) && data.experiences.some((exp) => exp && (exp.jobTitle || exp.company || exp.description));
+    const hasEducation = Array.isArray(data.education) && data.education.some((edu) => edu && (edu.degree || edu.school || edu.field || edu.graduationYear));
+    const hasProjects = Array.isArray(data.projects) && data.projects.some((proj) => proj && (proj.projectName || proj.description || proj.technologies));
+    const hasSummary = Boolean(data.summary);
+    return hasPersonal || hasExperience || hasEducation || hasProjects || hasSummary;
+  }, [data]);
+
   
   // Load job description from localStorage on component mount
   useEffect(() => {
@@ -88,20 +189,78 @@ function BuilderPage() {
   }, []);
 
   
-  const { user, logout } = useAuth();
-  const { triggerFeedbackPrompt, scheduleFollowUp } = useFeedback();
-  const displayName = typeof user === 'string' ? user : (user?.name || user?.email || '');
-  const { data } = useResume();
-  const selectedFormat = normalizeTemplateId(data.selectedFormat);
-  const hasExistingResumeData = React.useMemo(() => {
-    if (!data) return false;
-    const hasPersonal = Boolean(data.name || data.email || data.phone);
-    const hasExperience = Array.isArray(data.experiences) && data.experiences.some((exp) => exp && (exp.jobTitle || exp.company || exp.description));
-    const hasEducation = Array.isArray(data.education) && data.education.some((edu) => edu && (edu.degree || edu.school || edu.field || edu.graduationYear));
-    const hasProjects = Array.isArray(data.projects) && data.projects.some((proj) => proj && (proj.projectName || proj.description || proj.technologies));
-    const hasSummary = Boolean(data.summary);
-    return hasPersonal || hasExperience || hasEducation || hasProjects || hasSummary;
-  }, [data]);
+  useEffect(() => {
+    if (!locationManuallySet) {
+      setJobMatchesLocation(autoLocation || '');
+    }
+  }, [autoLocation, locationManuallySet]);
+
+  useEffect(() => {
+    if (!user) {
+      setJobMatches([]);
+      setJobMatchesHash(null);
+      setJobMatchesError(null);
+      setJobMatchesLocation(autoLocation || '');
+      setLocationManuallySet(false);
+      return;
+    }
+
+    let cancelled = false;
+    setJobMatchesLoading(true);
+    getJobMatches({ limit: 20 })
+      .then((response) => {
+        if (cancelled) return;
+        const matches = Array.isArray(response.matches) ? response.matches : [];
+        setJobMatches(matches);
+        setJobMatchesHash(response.resumeHash || null);
+        setJobMatchesError(null);
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        console.error('Failed to load stored job matches', error);
+        setJobMatchesError(error.message || 'Unable to load job matches.');
+        setJobMatches([]);
+        setJobMatchesHash(null);
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setJobMatchesLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user, autoLocation]);
+
+
+  const effectiveLocation = (jobMatchesLocation && jobMatchesLocation.trim()) || autoLocation || '';
+  const isUSPreferredLocation = useMemo(() => isLikelyUSLocation(effectiveLocation), [effectiveLocation]);
+  const filteredJobMatches = useMemo(() => {
+    if (!Array.isArray(jobMatches)) {
+      return [];
+    }
+    if (!isUSPreferredLocation) {
+      return jobMatches;
+    }
+    return jobMatches.filter((match) => {
+      if (!match) {
+        return false;
+      }
+      const location = typeof match.job_location === 'string' ? match.job_location : '';
+      const remoteType = typeof match.job_remote_type === 'string' ? match.job_remote_type.toLowerCase() : '';
+      if (isLikelyUSLocation(location)) {
+        return true;
+      }
+      if (remoteType.includes('us') || remoteType.includes('united states')) {
+        return true;
+      }
+      return false;
+    });
+  }, [jobMatches, isUSPreferredLocation]);
+  const filteredOutCount = Math.max(jobMatches.length - filteredJobMatches.length, 0);
+  const topMatch = filteredJobMatches.length > 0 ? filteredJobMatches[0] : null;
+  const secondaryMatches = filteredJobMatches.length > 1 ? filteredJobMatches.slice(1) : [];
+
 
   useEffect(() => {
     if (step !== STEP_IDS.IMPORT || userRequestedImport) {
@@ -141,6 +300,89 @@ function BuilderPage() {
       }
     }
   };
+  const handlePreferredLocationChange = (value) => {
+    setJobMatchesLocation(value);
+    if (!locationManuallySet) {
+      setLocationManuallySet(true);
+    }
+    if (!value) {
+      setLocationManuallySet(false);
+    }
+  };
+
+  const handleUseDetectedLocation = () => {
+    setJobMatchesLocation(autoLocation || '');
+    setLocationManuallySet(false);
+  };
+
+  const handleUseRemoteLocation = () => {
+    setJobMatchesLocation('Remote (US)');
+    setLocationManuallySet(true);
+  };
+
+  const buildMatchPayload = useCallback(() => {
+    if (!data) {
+      return null;
+    }
+
+    const preferredLocation = (jobMatchesLocation && jobMatchesLocation.trim()) || autoLocation || '';
+    return {
+      resume: data,
+      jobDescription,
+      preferredLocation,
+    };
+  }, [data, jobDescription, jobMatchesLocation, autoLocation]);
+
+  const fetchJobMatches = useCallback(async (options = {}) => {
+    const { autoSwitchToStep = false } = options;
+
+    if (!user) {
+      setJobMatchesError('Log in to see matching jobs.');
+      return;
+    }
+
+    const payload = buildMatchPayload();
+    if (!payload) {
+      setJobMatchesError('Add resume details to view matching jobs.');
+      return;
+    }
+
+    try {
+      setJobMatchesLoading(true);
+      setJobMatchesError(null);
+      const response = await computeJobMatches(payload);
+      const matches = Array.isArray(response.matches) ? response.matches : [];
+      setJobMatches(matches);
+      setJobMatchesHash(response.resumeHash || null);
+      if (autoSwitchToStep && matches.length > 0 && step !== STEP_IDS.JOB_MATCHES) {
+        setStep(STEP_IDS.JOB_MATCHES);
+      }
+
+    } catch (error) {
+      console.error('Failed to compute job matches', error);
+      setJobMatchesError(error.message || 'Unable to compute job matches.');
+    } finally {
+      setJobMatchesLoading(false);
+    }
+  }, [user, buildMatchPayload, step]);
+  useEffect(() => {
+    if (step !== STEP_IDS.JOB_MATCHES) {
+      return;
+    }
+    if (!user) {
+      return;
+    }
+    if (jobMatchesLoading) {
+      return;
+    }
+    if (jobMatches.length > 0) {
+      return;
+    }
+    fetchJobMatches({ autoSwitchToStep: false }).catch((error) => {
+      console.error('Automatic job match fetch failed', error);
+    });
+  }, [step, user, jobMatches.length, jobMatchesLoading, fetchJobMatches]);
+
 
   const handleImportComplete = () => {
     if (typeof window !== 'undefined') {
@@ -229,6 +471,7 @@ function BuilderPage() {
 
       // Track resume generation
       trackResumeGeneration(selectedFormat || 'default');
+      fetchJobMatches({ autoSwitchToStep: true }).catch((error) => console.error('Job match computation during download failed', error));
 
       // Update button state
       const viewButton = document.querySelector('button[onClick]');
@@ -1201,8 +1444,11 @@ function BuilderPage() {
         {/* Left Side - Resume Builder */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#f8fafc' }}>
           <div className="site-header" style={{ width: '100%', paddingTop: '2.5rem', paddingBottom: '1.5rem', textAlign: 'center', background: 'transparent', position: 'relative' }}>
-                         <div style={{ position: 'absolute', right: '2rem', top: '50%', transform: 'translateY(-50%)', display: 'flex', gap: '1rem', zIndex: 20 }}>
-
+            <div className="back-home-wrapper">
+              <Link to="/" className="back-home-link">
+                <span aria-hidden="true">←</span>
+                <span>Back to Home</span>
+              </Link>
             </div>
             <h1 style={{
               fontSize: '2.5rem',
@@ -1228,233 +1474,453 @@ function BuilderPage() {
 
           
           {/* Stepper and Content */}
-          <div style={{ display: 'flex', width: '100%', flex: 1 }}>
+          <div className="builder-main-section">
             <div className="stepper-container">
               <Stepper steps={steps} currentStep={step} setStep={handleStepChange} />
             </div>
             <div className="builder-content">
-              {step === STEP_IDS.IMPORT && (
-                <StepImport
-                  onSkip={handleImportComplete}
-                  jobDescription={jobDescription}
-                />
-              )}
-              {step === STEP_IDS.PERSONAL && <StepPersonal />}
-              {step === STEP_IDS.JOB_DESCRIPTION && (
-                <StepJobDescription
-                  jobDescription={jobDescription}
-                  onJobDescriptionChange={handleJobDescriptionChange}
-                />
-              )}
-              {step === STEP_IDS.EXPERIENCE && <StepExperience />}
-              {step === STEP_IDS.PROJECTS && <StepProjects />}
-              {step === STEP_IDS.EDUCATION && <StepEducation />}
-              {step === STEP_IDS.SKILLS && <StepSkills />}
-              {step === STEP_IDS.FORMAT && <StepFormat />}
-              {step === STEP_IDS.SUMMARY && <StepSummary />}
-              {step === STEP_IDS.COVER_LETTER && (
-                <StepCoverLetter
-                  onGeneratePremiumFeature={() => setShowUpgradeModal(true)}
-                />
-              )}
-              
-                             {/* Navigation Buttons */}
-               <div style={{ 
-                 display: 'flex', 
-                 gap: '1rem', 
-                 marginTop: '2rem',
-                 alignItems: 'center',
-                 justifyContent: 'center',
-                 width: '100%'
-               }}>
-                 {step > 1 && (
-                    <button
-                     onClick={goToPreviousStep}
-                     style={{
-                       padding: '1rem 2.5rem',
-                       border: '2px solid #d1d5db',
-                       borderRadius: '8px',
-                       background: 'white',
-                       color: '#374151',
-                       cursor: 'pointer',
-                       fontWeight: 600,
-                       fontSize: '1rem',
-                       transition: 'all 0.2s ease',
-                       minWidth: '200px',
-                       height: '48px',
-                       display: 'flex',
-                       alignItems: 'center',
-                       justifyContent: 'center'
-                     }}
-                     onMouseEnter={(e) => {
-                       e.target.style.background = '#f3f4f6';
-                       e.target.style.transform = 'translateY(-2px)';
-                       e.target.style.boxShadow = '0 6px 12px rgba(0, 0, 0, 0.1)';
-                     }}
-                     onMouseLeave={(e) => {
-                       e.target.style.background = 'white';
-                       e.target.style.transform = 'translateY(0)';
-                       e.target.style.boxShadow = 'none';
-                     }}
-                   >
-                     ← Previous
-                   </button>
-                 )}
-                 {step < steps.length && (
-                    <button
-                     onClick={goToNextStep}
-                     style={{
-                       padding: '1rem 2.5rem',
-                       border: 'none',
-                       borderRadius: '8px',
-                       background: '#3b82f6',
-                       color: 'white',
-                       cursor: 'pointer',
-                       fontWeight: 600,
-                       fontSize: '1rem',
-                       transition: 'all 0.2s ease',
-                       minWidth: '200px',
-                       height: '48px',
-                       display: 'flex',
-                       alignItems: 'center',
-                       justifyContent: 'center',
-                       boxShadow: '0 4px 6px rgba(59, 130, 246, 0.25)'
-                     }}
-                     onMouseEnter={(e) => {
-                       e.target.style.background = '#2563eb';
-                       e.target.style.transform = 'translateY(-2px)';
-                       e.target.style.boxShadow = '0 6px 12px rgba(59, 130, 246, 0.3)';
-                     }}
-                     onMouseLeave={(e) => {
-                       e.target.style.background = '#3b82f6';
-                       e.target.style.transform = 'translateY(0)';
-                       e.target.style.boxShadow = '0 4px 6px rgba(59, 130, 246, 0.25)';
-                     }}
-                   >
-                     Next →
-                   </button>
-                 )}
-                  {step === steps.length && (
-                    <button
-                      onClick={handleViewResume}
+            {step === STEP_IDS.IMPORT && (
+              <StepImport
+                onSkip={handleImportComplete}
+                jobDescription={jobDescription}
+              />
+            )}
+            {step === STEP_IDS.PERSONAL && <StepPersonal />}
+            {step === STEP_IDS.JOB_DESCRIPTION && (
+              <StepJobDescription
+                jobDescription={jobDescription}
+                onJobDescriptionChange={handleJobDescriptionChange}
+              />
+            )}
+            {step === STEP_IDS.EXPERIENCE && <StepExperience />}
+            {step === STEP_IDS.PROJECTS && <StepProjects />}
+            {step === STEP_IDS.EDUCATION && <StepEducation />}
+            {step === STEP_IDS.SKILLS && <StepSkills />}
+            {step === STEP_IDS.FORMAT && <StepFormat />}
+            {step === STEP_IDS.SUMMARY && <StepSummary />}
+            {step === STEP_IDS.JOB_MATCHES && (
+              <section className="job-matches-wrapper" aria-live="polite">
+                <div className="job-matches-panel">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                      <h3 style={{ margin: 0, fontSize: '1.05rem', color: '#1d4ed8' }}>Matching Jobs</h3>
+                      {jobMatchesHash && (
+                        <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Snapshot: {jobMatchesHash.slice(0, 8)}</span>
+                      )}
+                      {isUSPreferredLocation && user && (
+                        <span style={{ fontSize: '0.75rem', color: '#0f172a' }}>
+                          Showing US-based roles only
+                          {filteredOutCount > 0
+                            ? ` — filtered ${filteredOutCount} non-US listing${filteredOutCount === 1 ? '' : 's'}.`
+                            : '.'}
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      {jobMatchesLoading && <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Updating...</span>}
+                      <button
+                        type="button"
+                        onClick={() => fetchJobMatches({ autoSwitchToStep: false })}
+                        disabled={jobMatchesLoading || !user}
+                        style={{
+                          padding: '0.4rem 0.9rem',
+                          borderRadius: '999px',
+                          border: '1px solid #bfdbfe',
+                          background: jobMatchesLoading || !user ? '#e2e8f0' : '#eff6ff',
+                          color: jobMatchesLoading || !user ? '#94a3b8' : '#1d4ed8',
+                          fontWeight: 600,
+                          cursor: jobMatchesLoading || !user ? 'not-allowed' : 'pointer',
+                          fontSize: '0.85rem',
+                        }}
+                      >
+                        {jobMatchesLoading ? 'Refreshing...' : !user ? 'Login required' : 'Refresh'}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#1e293b' }}>Preferred location</label>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
+                      <input
+                        type="text"
+                        value={jobMatchesLocation}
+                        onChange={(e) => handlePreferredLocationChange(e.target.value)}
+                        placeholder={autoLocation ? `e.g., ${autoLocation}` : 'City, State or Remote'}
+                        style={{
+                          flex: '1 1 200px',
+                          minWidth: '160px',
+                          padding: '0.5rem 0.75rem',
+                          borderRadius: '8px',
+                          border: '1px solid #cbd5f5',
+                          fontSize: '0.9rem',
+                        }}
+                      />
+                      {autoLocation && (
+                        <button
+                          type="button"
+                          onClick={handleUseDetectedLocation}
+                          style={{
+                            padding: '0.45rem 0.9rem',
+                            borderRadius: '999px',
+                            border: '1px solid #bfdbfe',
+                            background: '#eff6ff',
+                            color: '#1d4ed8',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            fontSize: '0.8rem',
+                          }}
+                        >
+                          Use {autoLocation}
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={handleUseRemoteLocation}
+                        style={{
+                          padding: '0.45rem 0.9rem',
+                          borderRadius: '999px',
+                          border: '1px solid #14b8a6',
+                          background: '#ecfeff',
+                          color: '#0f766e',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          fontSize: '0.8rem',
+                        }}
+                      >
+                        Remote OK
+                      </button>
+                    </div>
+                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>We prioritize roles near this location or remote roles.</span>
+                    {user && effectiveLocation && (
+                      <span style={{ fontSize: '0.8rem', color: '#0f172a', fontWeight: 500 }}>
+                        Prioritizing roles near <span style={{ color: '#1d4ed8' }}>{effectiveLocation}</span>
+                      </span>
+                    )}
+                  </div>
+
+                  <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    {!user && (
+                      <p style={{ color: '#475569', fontSize: '0.9rem', margin: 0 }}>Sign in to generate personalized job matches.</p>
+                    )}
+
+                    {user && jobMatchesError && (
+                      <div style={{ color: '#b91c1c', fontSize: '0.9rem' }}>{jobMatchesError}</div>
+                    )}
+
+                    {user && !jobMatchesError && !jobMatchesLoading && filteredJobMatches.length === 0 && (
+                      <p style={{ color: '#475569', fontSize: '0.9rem', margin: 0 }}>
+                        {jobMatches.length > 0
+                          ? 'No US-based matches found yet. Adjust your location or refresh to explore more roles.'
+                          : 'Complete your profile or add experience, then refresh to see curated openings.'}
+                      </p>
+                    )}
+                  </div>
+
+                  {user && topMatch && (
+                    <div
                       style={{
-                        padding: '1rem 2.5rem',
-                        border: 'none',
-                        borderRadius: '8px',
-                        background: '#10b981',
-                        color: 'white',
-                        cursor: 'pointer',
-                        fontWeight: 600,
-                        fontSize: '1rem',
-                        boxShadow: '0 4px 6px rgba(16, 185, 129, 0.25)',
-                        transition: 'all 0.2s ease',
-                        minWidth: '200px',
-                        height: '48px',
+                        padding: '1rem',
+                        borderRadius: '12px',
+                        background: '#f0f9ff',
+                        border: '1px solid #bae6fd',
+                        boxShadow: '0 6px 12px rgba(148, 163, 184, 0.15)',
                         display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.target.style.background = '#059669';
-                        e.target.style.transform = 'translateY(-2px)';
-                        e.target.style.boxShadow = '0 6px 12px rgba(16, 185, 129, 0.3)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.background = '#10b981';
-                        e.target.style.transform = 'translateY(0)';
-                        e.target.style.boxShadow = '0 4px 6px rgba(16, 185, 129, 0.25)';
+                        flexDirection: 'column',
+                        gap: '0.5rem',
                       }}
                     >
-                      📄 View Resume
-                    </button>
+                      <span style={{ fontSize: '0.75rem', color: '#0ea5e9', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Top match</span>
+                      <h4 style={{ margin: 0, fontSize: '1.1rem', color: '#0f172a' }}>{topMatch.job_title || 'Role'}</h4>
+                      <div style={{ color: '#1e293b', fontSize: '0.9rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                        <span>{topMatch.company_name || 'Hiring company'}</span>
+                        <span>{[topMatch.job_location, topMatch.job_remote_type].filter(Boolean).join(' • ')}</span>
+                        {typeof topMatch.match_score === 'number' && (
+                          <span style={{ fontWeight: 600, color: '#0284c7' }}>Match score: {topMatch.match_score.toFixed(1)}</span>
+                        )}
+                      </div>
+                      {topMatch.job_url && (
+                        <a
+                          href={topMatch.job_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.4rem',
+                            padding: '0.45rem 0.9rem',
+                            borderRadius: '999px',
+                            background: '#2563eb',
+                            color: '#ffffff',
+                            fontSize: '0.85rem',
+                            fontWeight: 600,
+                            textDecoration: 'none',
+                            width: 'fit-content',
+                          }}
+                        >
+                          View job
+                        </a>
+                      )}
+                    </div>
                   )}
-               </div>
+
+                  {user && secondaryMatches.length > 0 && (
+                    <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: '0.75rem' }}>
+                      {secondaryMatches.map((match, index) => (
+                        <li
+                          key={`${match.id || match.job_posting_id || index}`}
+                          style={{
+                            padding: '0.85rem',
+                            borderRadius: '10px',
+                            border: '1px solid #dbeafe',
+                            background: '#ffffff',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '0.4rem',
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '0.5rem' }}>
+                            <strong style={{ color: '#1e293b', fontSize: '0.95rem' }}>{match.job_title || 'Role'}</strong>
+                            {typeof match.match_score === 'number' && (
+                              <span style={{ fontSize: '0.75rem', color: '#0284c7', fontWeight: 600 }}>{match.match_score.toFixed(1)}</span>
+                            )}
+                          </div>
+                          <span style={{ color: '#334155', fontSize: '0.85rem' }}>
+                            {[match.company_name, match.job_location].filter(Boolean).join(' — ')}
+                          </span>
+                          {match.job_department && (
+                            <span style={{ color: '#64748b', fontSize: '0.8rem' }}>{match.job_department}</span>
+                          )}
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', flexWrap: 'wrap' }}>
+                            {match.job_url ? (
+                              <a
+                                href={match.job_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ color: '#2563eb', fontWeight: 600, fontSize: '0.85rem' }}
+                              >
+                                View listing
+                              </a>
+                            ) : (
+                              <span style={{ color: '#94a3b8', fontSize: '0.8rem' }}>Listing link unavailable</span>
+                            )}
+                            {match.job_remote_type && (
+                              <span style={{ color: '#0ea5e9', fontSize: '0.75rem', fontWeight: 600 }}>{match.job_remote_type}</span>
+                            )}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </section>
+            )}
+            {step === STEP_IDS.COVER_LETTER && (
+              <StepCoverLetter
+                onGeneratePremiumFeature={() => setShowUpgradeModal(true)}
+              />
+            )}
+
+            {/* Navigation Buttons */}
+            <div
+              style={{
+                display: 'flex',
+                gap: '1rem',
+                marginTop: '2rem',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '100%',
+              }}
+            >
+              {step > 1 && (
+                <button
+                  onClick={goToPreviousStep}
+                  style={{
+                    padding: '1rem 2.5rem',
+                    border: '2px solid #d1d5db',
+                    borderRadius: '8px',
+                    background: 'white',
+                    color: '#374151',
+                    cursor: 'pointer',
+                    fontWeight: 600,
+                    fontSize: '1rem',
+                    transition: 'all 0.2s ease',
+                    minWidth: '200px',
+                    height: '48px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = '#f3f4f6';
+                    e.target.style.transform = 'translateY(-2px)';
+                    e.target.style.boxShadow = '0 6px 12px rgba(0, 0, 0, 0.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = 'white';
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.boxShadow = 'none';
+                  }}
+                >
+                  ← Previous
+                </button>
+              )}
+              {step < steps.length && (
+                <button
+                  onClick={goToNextStep}
+                  style={{
+                    padding: '1rem 2.5rem',
+                    border: 'none',
+                    borderRadius: '8px',
+                    background: '#3b82f6',
+                    color: 'white',
+                    cursor: 'pointer',
+                    fontWeight: 600,
+                    fontSize: '1rem',
+                    transition: 'all 0.2s ease',
+                    minWidth: '200px',
+                    height: '48px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 4px 6px rgba(59, 130, 246, 0.25)',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = '#2563eb';
+                    e.target.style.transform = 'translateY(-2px)';
+                    e.target.style.boxShadow = '0 6px 12px rgba(59, 130, 246, 0.3)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = '#3b82f6';
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.boxShadow = '0 4px 6px rgba(59, 130, 246, 0.25)';
+                  }}
+                >
+                  Next →
+                </button>
+              )}
+              {step === steps.length && (
+                <button
+                  onClick={handleViewResume}
+                  style={{
+                    padding: '1rem 2.5rem',
+                    border: 'none',
+                    borderRadius: '8px',
+                    background: '#10b981',
+                    color: 'white',
+                    cursor: 'pointer',
+                    fontWeight: 600,
+                    fontSize: '1rem',
+                    boxShadow: '0 4px 6px rgba(16, 185, 129, 0.25)',
+                    transition: 'all 0.2s ease',
+                    minWidth: '200px',
+                    height: '48px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = '#059669';
+                    e.target.style.transform = 'translateY(-2px)';
+                    e.target.style.boxShadow = '0 6px 12px rgba(16, 185, 129, 0.3)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = '#10b981';
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.boxShadow = '0 4px 6px rgba(16, 185, 129, 0.25)';
+                  }}
+                >
+                  📄 View Resume
+                </button>
+              )}
             </div>
           </div>
+          </div>
+          )}
         </div>
 
         {/* Right Side - Live Resume Preview */}
-        <div style={{ 
-          flex: 1, 
-          background: 'white', 
-          borderLeft: '1px solid #e5e7eb',
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: '100vh',
-          overflow: 'auto'
-        }}>
-          <div style={{
-            padding: '1rem',
-            borderBottom: '1px solid #e5e7eb',
-            background: '#f9fafb',
+          <div style={{ 
+            flex: 1, 
+            background: 'white', 
+            borderLeft: '1px solid #e5e7eb',
             display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
+            flexDirection: 'column',
+            minHeight: '100vh',
+            overflow: 'auto'
           }}>
-            <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#374151' }}>Live Resume Preview</h2>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              {user ? (
-                <span style={{ color: '#3b82f6', fontWeight: 500, fontSize: '0.9rem' }}>{displayName}</span>
-              ) : null}
-              <button
-                onClick={handleAuthButton}
-                style={{
-                  padding: '0.5rem 1rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '4px',
-                  background: 'white',
-                  color: '#3b82f6',
-                  cursor: 'pointer',
-                  fontSize: '0.875rem',
-                  fontWeight: 500
-                }}
-              >
-                {user ? 'Logout' : 'Login / Signup'}
-              </button>
-              <button
-                onClick={toggleFullscreen}
-                className="fullscreen-button"
-                title={`${isFullscreen ? 'Exit' : 'Enter'} fullscreen mode (F11)`}
-                style={{
-                  padding: '0.5rem 1rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '4px',
-                  background: 'white',
-                  color: '#374151',
-                  cursor: 'pointer',
-                  fontSize: '0.875rem'
-                }}
-              >
-                {isFullscreen ? 'Exit Full Screen' : 'Open Full Screen'}
-              </button>
+            <div style={{
+              padding: '1rem',
+              borderBottom: '1px solid #e5e7eb',
+              background: '#f9fafb',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#374151' }}>Live Resume Preview</h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                {user ? (
+                  <span style={{ color: '#3b82f6', fontWeight: 500, fontSize: '0.9rem' }}>{displayName}</span>
+                ) : null}
+                <button
+                  onClick={handleAuthButton}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '4px',
+                    background: 'white',
+                    color: '#3b82f6',
+                    cursor: 'pointer',
+                    fontSize: '0.875rem',
+                    fontWeight: 500
+                  }}
+                >
+                  {user ? 'Logout' : 'Login / Signup'}
+                </button>
+                <button
+                  onClick={toggleFullscreen}
+                  className="fullscreen-button"
+                  title={`${isFullscreen ? 'Exit' : 'Enter'} fullscreen mode (F11)`}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '4px',
+                    background: 'white',
+                    color: '#374151',
+                    cursor: 'pointer',
+                    fontSize: '0.875rem'
+                  }}
+                >
+                  {isFullscreen ? 'Exit Full Screen' : 'Open Full Screen'}
+                </button>
+              </div>
+            </div>
+            <div 
+              id="resume-preview-container"
+              style={{ 
+                flex: 1, 
+                overflow: 'visible', 
+                padding: '1rem',
+                background: 'white',
+                display: 'flex',
+                flexDirection: 'column'
+              }}
+            >
+                              {step !== STEP_IDS.COVER_LETTER && <LivePreview onDownload={handleViewResume} downloadNotice={downloadNotice} />}
+                              {step === STEP_IDS.COVER_LETTER && (
+                                <div style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  height: '100%',
+                                  color: '#6b7280',
+                                  fontSize: '1.1rem'
+                                }}>
+                                  Resume preview not available for Cover Letter
+                                </div>
+                              )}
             </div>
           </div>
-          <div 
-            id="resume-preview-container"
-            style={{ 
-              flex: 1, 
-              overflow: 'visible', 
-              padding: '1rem',
-              background: 'white',
-              display: 'flex',
-              flexDirection: 'column'
-            }}
-          >
-                            {step !== STEP_IDS.COVER_LETTER && <LivePreview onDownload={handleViewResume} downloadNotice={downloadNotice} />}
-                            {step === STEP_IDS.COVER_LETTER && (
-                              <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                height: '100%',
-                                color: '#6b7280',
-                                fontSize: '1.1rem'
-                              }}>
-                                Resume preview not available for Cover Letter
-                              </div>
-                            )}
-          </div>
-        </div>
+        )}
       </div>
 
              {/* Modals */}
@@ -1476,6 +1942,45 @@ function BuilderPage() {
 }
 
 export default BuilderPage;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

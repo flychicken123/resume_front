@@ -68,6 +68,39 @@ export async function generateResume(data) {
   return await res.json();
 }
 
+export async function computeJobMatches(payload) {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/jobs/matches`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || "Unable to compute job matches.");
+  }
+  return await res.json();
+}
+
+export async function getJobMatches(params = {}) {
+  const searchParams = new URLSearchParams();
+  if (params.resumeHash) {
+    searchParams.set('resume_hash', params.resumeHash);
+  }
+  if (typeof params.limit === 'number' && params.limit > 0) {
+    searchParams.set('limit', params.limit.toString());
+  }
+  const query = searchParams.toString();
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/jobs/matches${query ? `?${query}` : ''}`, {
+    method: "GET",
+    headers: getAuthHeaders(),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || "Unable to load job matches.");
+  }
+  return await res.json();
+}
+
 // AI assistant endpoints
 export async function generateExperienceAI(experience, jobDescription = '') {
   const res = await fetchWithAuth(`${API_BASE_URL}/api/experience/optimize`, {
