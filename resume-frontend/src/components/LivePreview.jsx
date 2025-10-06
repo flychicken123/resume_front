@@ -144,12 +144,57 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
         return applyFormatAdjustment(Math.round(60 * fontScale), 'projects');
       }
       case 'skills': {
-        // Estimation aware of executive-serif two-column layout
-        const skillsText = toText(content);
-        const perLine = Math.round((isIndustryManagerFormat ? 70 : 140) / fontScale);
-        const skillLines = Math.ceil(skillsText.length / Math.max(1, perLine));
-        const skillsHeight = Math.max(17 * fontScale, skillLines * Math.round(13 * fontScale));
-        return applyFormatAdjustment(skillsHeight, 'skills');
+        const skillsArray = parseSkills(content);
+        const lineHeight = Math.round(13 * fontScale);
+        const baseHeight = Math.max(lineHeight, Math.round(17 * fontScale));
+        const itemGap = Math.max(2, Math.round(2 * fontScale));
+
+        if (!skillsArray || skillsArray.length === 0) {
+          return applyFormatAdjustment(baseHeight, 'skills');
+        }
+
+        if (isIndustryManagerFormat) {
+          const columnCount = 2;
+          const perLineChars = Math.max(8, Math.round(70 / fontScale));
+          const columnHeights = new Array(columnCount).fill(0);
+
+          skillsArray.forEach((skill) => {
+            const clean = String(skill || '').trim();
+            const lines = Math.max(1, Math.ceil(clean.length / perLineChars));
+            const blockHeight = lines * lineHeight + itemGap;
+
+            let targetIndex = 0;
+            for (let i = 1; i < columnCount; i += 1) {
+              if (columnHeights[i] < columnHeights[targetIndex]) {
+                targetIndex = i;
+              }
+            }
+
+            columnHeights[targetIndex] += blockHeight;
+          });
+
+          const estimated = Math.max(...columnHeights);
+          return applyFormatAdjustment(Math.max(baseHeight, estimated), 'skills');
+        }
+
+        const perLineChars = Math.max(20, Math.round(140 / fontScale));
+        let currentLineChars = 0;
+        let lineCount = 1;
+
+        skillsArray.forEach((skill, index) => {
+          const value = String(skill || '');
+          const lengthWithSeparator = value.length + (index === skillsArray.length - 1 ? 0 : 2);
+
+          if (currentLineChars > 0 && (currentLineChars + lengthWithSeparator) > perLineChars) {
+            lineCount += 1;
+            currentLineChars = lengthWithSeparator;
+          } else {
+            currentLineChars += lengthWithSeparator;
+          }
+        });
+
+        const estimated = (lineCount * lineHeight) + ((lineCount - 1) * itemGap);
+        return applyFormatAdjustment(Math.max(baseHeight, estimated), 'skills');
       }
       default:
         return applyFormatAdjustment(20, 'default');
@@ -796,34 +841,63 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
         if (next.length === 0) newPages.splice(i + 1, 1);
       }
     }
+    // If the last page only contains skills and would fit on the previous page, pull it back.
+    for (let i = 0; i < newPages.length - 1; i += 1) {
+      const page = newPages[i];
+      const next = newPages[i + 1];
+      if (!page || !next || next.length !== 1) continue;
+      const section = next[0];
+      if (!section || section.type !== 'skills' || section.isContinuation) continue;
+      const pageHeight = sumEstimatedHeight(page);
+      const sectionHeight = addBuffer(section.estimatedHeight, section.type);
+      const tolerance = Math.max(32, getSectionPadding(section.type));
+      if ((pageHeight + sectionHeight) <= (effectiveAvailableHeight + tolerance)) {
+        page.push(section);
+        newPages.splice(i + 1, 1);
+        i = Math.max(-1, i - 2);
+      }
+    }
     // Final safety pass: ensure no page exceeds available height.
     // If a page still overflows due to estimation error, move/split the
     // last section forward until it fits.
     for (let i = 0; i < newPages.length; i++) {
       let safetyGuard = 0;
-      while (sumEstimatedHeight(newPages[i]) > (effectiveAvailableHeight - 4) && safetyGuard < 20) {
-        safetyGuard++;
+      while (safetyGuard < 20) {
+        const pageEstimate = sumEstimatedHeight(newPages[i]);
+        if (pageEstimate <= (effectiveAvailableHeight - 4)) {
+          break;
+        }
         const page = newPages[i];
-        if (!page || page.length === 0) break;
-        const last = page.pop();
+        if (!page || page.length === 0) {
+          break;
+        }
+        const last = page[page.length - 1];
+        if (last && !last.isContinuation && last.type === 'skills') {
+          const slackAllowance = effectiveAvailableHeight + 60;
+          if (pageEstimate <= slackAllowance) {
+            break;
+          }
+        }
+        safetyGuard++;
+        const popped = page.pop();
         const current = sumEstimatedHeight(page);
-        const allowance = Math.max(0, effectiveAvailableHeight - current - getSectionPadding(last.type));
-        if (last && last.canSplit && allowance > 40) {
-          const parts = splitLongContent(last.content, last.type, allowance);
+        const allowance = Math.max(0, effectiveAvailableHeight - current - getSectionPadding(popped.type));
+        if (popped && popped.canSplit && allowance > 40) {
+          const parts = splitLongContent(popped.content, popped.type, allowance);
           if (parts.length > 1) {
-            const firstPartHeight = estimateSectionHeight(parts[0], last.type);
-            page.push({ ...last, content: parts[0], estimatedHeight: firstPartHeight, isContinued: true });
+            const firstPartHeight = estimateSectionHeight(parts[0], popped.type);
+            page.push({ ...popped, content: parts[0], estimatedHeight: firstPartHeight, isContinued: true });
             if (i + 1 >= newPages.length) newPages.push([]);
             const remainder = parts.slice(1);
             for (let k = 0; k < remainder.length; k++) {
-              const partHeight = estimateSectionHeight(remainder[k], last.type);
-              newPages[i + 1].unshift({ ...last, content: remainder[k], estimatedHeight: partHeight, isContinuation: true, isContinued: k < remainder.length - 1 });
+              const partHeight = estimateSectionHeight(remainder[k], popped.type);
+              newPages[i + 1].unshift({ ...popped, content: remainder[k], estimatedHeight: partHeight, isContinuation: true, isContinued: k < remainder.length - 1 });
             }
             continue;
           }
         }
         if (i + 1 >= newPages.length) newPages.push([]);
-        newPages[i + 1].unshift(last);
+        newPages[i + 1].unshift(popped);
       }
     }
     return newPages;

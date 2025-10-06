@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Helmet } from 'react-helmet';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -24,7 +24,7 @@ import UpgradeModal from '../components/UpgradeModal';
 import SubscriptionStatus from '../components/SubscriptionStatus';
 import SEO from '../components/SEO';
 import { trackResumeGeneration } from '../components/Analytics';
-import { computeJobMatches, getJobMatches } from '../api';
+import { computeJobMatches, getJobMatches, generateExperienceAI, optimizeProjectAI, generateSummaryAI } from '../api';
 import './BuilderPage.css';
 
 const getAPIBaseURL = () => {
@@ -37,21 +37,36 @@ const getAPIBaseURL = () => {
   return process.env.REACT_APP_API_URL || 'http://localhost:8081';
 };
 
+const formatLocationParts = (parts) => {
+  if (!Array.isArray(parts)) {
+    return '';
+  }
+  return parts
+    .map((part) => (typeof part === 'string' ? part.trim() : ''))
+    .filter(Boolean)
+    .join(', ');
+};
+
 const derivePrimaryLocation = (resumeData) => {
   if (!resumeData || typeof resumeData !== 'object') {
     return '';
   }
 
-  const formatLocation = (parts) => parts.filter(Boolean).join(', ');
-
   const experiences = Array.isArray(resumeData.experiences) ? resumeData.experiences.filter(Boolean) : [];
   for (let i = experiences.length - 1; i >= 0; i -= 1) {
     const exp = experiences[i];
-    if (!exp) continue;
+    if (!exp || typeof exp !== 'object') continue;
     if (exp.remote) {
-      return 'Remote';
+      const countryHint = typeof exp.country === 'string' ? exp.country.toLowerCase() : '';
+      if (countryHint.includes('canada')) {
+        return 'Remote (Canada)';
+      }
+      if (countryHint.includes('kingdom') || countryHint.includes('uk')) {
+        return 'Remote (UK)';
+      }
+      return 'Remote (US)';
     }
-    const loc = formatLocation([exp.city, exp.state, exp.country]);
+    const loc = formatLocationParts([exp.city, exp.state, exp.country]);
     if (loc) {
       return loc;
     }
@@ -63,17 +78,402 @@ const derivePrimaryLocation = (resumeData) => {
   const education = Array.isArray(resumeData.education) ? resumeData.education.filter(Boolean) : [];
   for (let i = education.length - 1; i >= 0; i -= 1) {
     const edu = education[i];
-    if (!edu) continue;
+    if (!edu || typeof edu !== 'object') continue;
     if (typeof edu.location === 'string' && edu.location.trim()) {
       return edu.location.trim();
     }
-    const loc = formatLocation([edu.city, edu.state, edu.country]);
+    const loc = formatLocationParts([edu.city, edu.state, edu.country]);
     if (loc) {
       return loc;
     }
   }
 
+  if (typeof resumeData.location === 'string' && resumeData.location.trim()) {
+    return resumeData.location.trim();
+  }
+
   return '';
+};
+
+const extractResumeLocations = (resumeData) => {
+  if (!resumeData || typeof resumeData !== 'object') {
+    return [];
+  }
+
+  const seen = new Set();
+  const ordered = [];
+  const pushLocation = (value) => {
+    if (!value || typeof value !== 'string') {
+      return;
+    }
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return;
+    }
+    const normalized = trimmed.toLowerCase();
+    if (seen.has(normalized)) {
+      return;
+    }
+    seen.add(normalized);
+    ordered.push(trimmed);
+  };
+
+  const experiences = Array.isArray(resumeData.experiences) ? resumeData.experiences.filter(Boolean) : [];
+  for (let i = experiences.length - 1; i >= 0; i -= 1) {
+    const exp = experiences[i];
+    if (!exp || typeof exp !== 'object') {
+      continue;
+    }
+    if (exp.remote) {
+      const countryHint = typeof exp.country === 'string' ? exp.country.toLowerCase() : '';
+      if (countryHint.includes('canada')) {
+        pushLocation('Remote (Canada)');
+      } else if (countryHint.includes('kingdom') || countryHint.includes('uk')) {
+        pushLocation('Remote (UK)');
+      } else {
+        pushLocation('Remote (US)');
+      }
+    }
+    const combined = formatLocationParts([exp.city, exp.state, exp.country]);
+    if (combined) {
+      pushLocation(combined);
+    }
+    if (typeof exp.location === 'string') {
+      pushLocation(exp.location);
+    }
+  }
+
+  const education = Array.isArray(resumeData.education) ? resumeData.education.filter(Boolean) : [];
+  for (let i = education.length - 1; i >= 0; i -= 1) {
+    const edu = education[i];
+    if (!edu || typeof edu !== 'object') {
+      continue;
+    }
+    const combined = formatLocationParts([edu.city, edu.state, edu.country]);
+    if (combined) {
+      pushLocation(combined);
+    }
+    if (typeof edu.location === 'string') {
+      pushLocation(edu.location);
+    }
+  }
+
+  if (typeof resumeData.location === 'string') {
+    pushLocation(resumeData.location);
+  }
+  if (
+    typeof resumeData.city === 'string' ||
+    typeof resumeData.state === 'string' ||
+    typeof resumeData.country === 'string'
+  ) {
+    const combined = formatLocationParts([resumeData.city, resumeData.state, resumeData.country]);
+    if (combined) {
+      pushLocation(combined);
+    }
+  }
+
+  return ordered.slice(0, 8);
+};
+
+const NOMINATIM_ENDPOINT = 'https://nominatim.openstreetmap.org/search';
+const NOMINATIM_REVERSE_ENDPOINT = 'https://nominatim.openstreetmap.org/reverse';
+const NOMINATIM_MAX_RESULTS = 6;
+const MIN_LOCATION_QUERY_LENGTH = 3;
+const NOMINATIM_CONTACT_EMAIL = process.env.REACT_APP_NOMINATIM_EMAIL || 'support@hihired.org';
+
+const normalizeGeocoderLocation = (item) => {
+  if (!item || typeof item !== 'object') {
+    return null;
+  }
+  const address = typeof item.address === 'object' && item.address ? item.address : {};
+  const city = address.city
+    || address.town
+    || address.village
+    || address.hamlet
+    || address.municipality
+    || address.locality
+    || address.county;
+  const state = address.state
+    || address.state_district
+    || address.region
+    || address.province;
+  const labelParts = [city, state].filter(Boolean);
+  if (labelParts.length > 0) {
+    return labelParts.join(', ');
+  }
+  if (typeof item.display_name === 'string' && item.display_name.trim()) {
+    const slices = item.display_name.split(',').map((part) => part.trim()).filter(Boolean);
+    if (slices.length >= 2) {
+      return `${slices[0]}, ${slices[1]}`;
+    }
+    if (slices.length === 1) {
+      return slices[0];
+    }
+  }
+  return null;
+};
+
+const dedupeLocationList = (values) => {
+  const seen = new Set();
+  const result = [];
+  values.forEach((value) => {
+    if (!value || typeof value !== 'string') {
+      return;
+    }
+    const normalized = value.trim();
+    if (!normalized) {
+      return;
+    }
+    const key = normalized.toLowerCase();
+    if (seen.has(key)) {
+      return;
+    }
+    seen.add(key);
+    result.push(normalized);
+  });
+  return result;
+};
+
+const reverseGeocodeCoordinates = async (latitude, longitude) => {
+  if (typeof fetch !== 'function') {
+    throw new Error('Geocoder unavailable in this environment.');
+  }
+
+  const params = new URLSearchParams({
+    format: 'jsonv2',
+    lat: String(latitude),
+    lon: String(longitude),
+    addressdetails: '1',
+  });
+  if (NOMINATIM_CONTACT_EMAIL) {
+    params.set('email', NOMINATIM_CONTACT_EMAIL);
+  }
+
+  const response = await fetch(`${NOMINATIM_REVERSE_ENDPOINT}?${params.toString()}`, {
+    method: 'GET',
+    headers: {
+      Accept: 'application/json',
+      'Accept-Language': 'en-US,en;q=0.9',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Geocoder reverse lookup failed with status ${response.status}`);
+  }
+
+  const payload = await response.json();
+  return normalizeGeocoderLocation(payload);
+};
+
+const JOB_TITLE_KEYWORDS = [
+  'engineer',
+  'developer',
+  'manager',
+  'designer',
+  'scientist',
+  'analyst',
+  'consultant',
+  'architect',
+  'specialist',
+  'lead',
+  'director',
+  'strategist',
+  'administrator',
+  'coordinator',
+  'marketer',
+  'technician',
+  'researcher',
+  'product manager',
+  'product designer',
+  'product owner',
+  'project manager',
+  'program manager',
+  'software',
+  'frontend',
+  'backend',
+  'full stack',
+  'devops',
+  'security',
+  'marketing manager',
+  'sales manager',
+  'recruiter',
+  'data engineer',
+  'data scientist',
+  'data analyst',
+  'operations manager',
+];
+
+const looksLikeJobTitle = (value) => {
+  if (!value || typeof value !== 'string') {
+    return false;
+  }
+  const lower = value.toLowerCase();
+  return JOB_TITLE_KEYWORDS.some((keyword) => lower.includes(keyword));
+};
+
+const deriveTargetPosition = (resumeData, jobDescription = '') => {
+  if (!resumeData || typeof resumeData !== 'object') {
+    return '';
+  }
+
+  const directFields = ['position', 'desiredRole', 'role', 'headline', 'title'];
+  for (const field of directFields) {
+    const value = resumeData[field];
+    if (typeof value === 'string' && value.trim()) {
+      return value.trim();
+    }
+  }
+
+  const experiences = Array.isArray(resumeData.experiences) ? resumeData.experiences.filter(Boolean) : [];
+  for (let i = experiences.length - 1; i >= 0; i -= 1) {
+    const exp = experiences[i];
+    if (exp && typeof exp.jobTitle === 'string' && exp.jobTitle.trim()) {
+      return exp.jobTitle.trim();
+    }
+  }
+
+  if (typeof resumeData.summary === 'string' && resumeData.summary.trim()) {
+    const summary = resumeData.summary.trim();
+    const summaryLower = summary.toLowerCase();
+    const cleaned = summary.replace(/[|•·].*$/, '').replace(/-.*/, '').replace(/,.*/, '');
+    if (looksLikeJobTitle(cleaned) && cleaned.split(/\s+/).length <= 6) {
+      return cleaned;
+    }
+    const keywordMatch = JOB_TITLE_KEYWORDS
+      .map((keyword) => ({ keyword, index: summaryLower.indexOf(keyword) }))
+      .filter((entry) => entry.index >= 0)
+      .sort((a, b) => a.index - b.index)[0];
+    if (keywordMatch) {
+      const { index, keyword } = keywordMatch;
+      const sliceStart = summary.lastIndexOf(' ', Math.max(0, index - 35));
+      const sliceEnd = summary.indexOf(' ', index + keyword.length);
+      const candidate = summary
+        .slice(sliceStart >= 0 ? sliceStart : 0, sliceEnd >= 0 ? sliceEnd : summary.length)
+        .replace(/[|•·].*$/, '')
+        .trim();
+      if (looksLikeJobTitle(candidate) && candidate.split(/\s+/).length <= 6) {
+        return candidate;
+      }
+    }
+  }
+
+  if (typeof jobDescription === 'string' && jobDescription.trim()) {
+    const lines = jobDescription
+      .split(/\n+/)
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0 && line.length <= 60);
+    for (const line of lines) {
+      if (/^role:/i.test(line)) {
+        const after = line.replace(/^role:\s*/i, '');
+        if (after && looksLikeJobTitle(after)) {
+          return after;
+        }
+      }
+      const stripped = line.replace(/[:\-–].*$/, '').trim();
+      if (looksLikeJobTitle(stripped) && stripped.split(/\s+/).length <= 6) {
+        return stripped;
+      }
+    }
+  }
+
+  return '';
+};
+
+const summariseExperiences = (experiences) => {
+  return (Array.isArray(experiences) ? experiences : [])
+    .filter((exp) => exp && (exp.jobTitle || exp.company || exp.description))
+    .map((exp) => {
+      const header = [exp.jobTitle, exp.company].filter(Boolean).join(' at ');
+      const desc = (exp.description || '').replace(/\s+/g, ' ').trim();
+      if (header && desc) {
+        return `${header}: ${desc}`;
+      }
+      return header || desc;
+    })
+    .filter(Boolean)
+    .join('\n\n');
+};
+
+const summariseEducation = (education) => {
+  return (Array.isArray(education) ? education : [])
+    .filter((edu) => edu && (edu.school || edu.degree || edu.field || edu.graduationYear))
+    .map((edu) => {
+      const parts = [edu.degree, edu.field].filter(Boolean).join(' — ');
+      const school = edu.school || '';
+      const year = edu.graduationYear || '';
+      return [parts, school, year].filter(Boolean).join(', ');
+    })
+    .filter(Boolean)
+    .join('\n');
+};
+
+const normaliseSkillsForSummary = (skills) => {
+  if (Array.isArray(skills)) {
+    return skills.map((skill) => (skill || '').trim()).filter(Boolean);
+  }
+  if (typeof skills === 'string') {
+    return skills
+      .split(/[,\n;|]/)
+      .map((skill) => skill.trim())
+      .filter(Boolean);
+  }
+  return [];
+};
+
+const collectResumeSkills = (resumeData) => {
+  if (!resumeData || typeof resumeData !== 'object') {
+    return [];
+  }
+
+  const skillSet = new Set();
+  normaliseSkillsForSummary(resumeData.skills).forEach((skill) => skillSet.add(skill));
+
+  const projects = Array.isArray(resumeData.projects) ? resumeData.projects : [];
+  projects.forEach((project) => {
+    if (!project || typeof project !== 'object') {
+      return;
+    }
+    if (typeof project.technologies === 'string' || Array.isArray(project.technologies)) {
+      normaliseSkillsForSummary(project.technologies).forEach((skill) => skillSet.add(skill));
+    }
+    if (Array.isArray(project.skills) || typeof project.skills === 'string') {
+      normaliseSkillsForSummary(project.skills).forEach((skill) => skillSet.add(skill));
+    }
+  });
+
+  const experiencesCollection = Array.isArray(resumeData.experiences) ? resumeData.experiences : [];
+  experiencesCollection.forEach((exp) => {
+    if (!exp || typeof exp !== 'object') {
+      return;
+    }
+    if (Array.isArray(exp.skills) || typeof exp.skills === 'string') {
+      normaliseSkillsForSummary(exp.skills).forEach((skill) => skillSet.add(skill));
+    }
+    if (typeof exp.tools === 'string' || Array.isArray(exp.tools)) {
+      normaliseSkillsForSummary(exp.tools).forEach((skill) => skillSet.add(skill));
+    }
+  });
+
+  return Array.from(skillSet).slice(0, 60);
+};
+
+const getMatchKey = (match) => {
+  if (!match) {
+    return '';
+  }
+  if (match.job_posting_id) {
+    return `posting-${match.job_posting_id}`;
+  }
+  if (match.id) {
+    return `match-${match.id}`;
+  }
+  if (match.job_url) {
+    return `url-${match.job_url}`;
+  }
+  if (match.job_title) {
+    return `title-${match.job_title}`;
+  }
+  return 'job-match';
 };
 
 const US_STATE_ABBREVIATIONS = new Set([
@@ -112,6 +512,39 @@ const isLikelyUSLocation = (value) => {
   return false;
 };
 
+const POPULAR_LOCATION_GROUPS = [
+  {
+    label: 'United States',
+    options: [
+      'Remote (US)',
+      'New York, NY',
+      'San Francisco Bay Area, CA',
+      'Los Angeles, CA',
+      'Chicago, IL',
+      'Boston, MA',
+      'Seattle, WA',
+      'Austin, TX',
+      'Dallas, TX',
+      'Houston, TX',
+      'Denver, CO',
+      'Phoenix, AZ',
+      'Las Vegas, NV',
+      'San Diego, CA',
+      'Portland, OR',
+      'Salt Lake City, UT',
+      'Atlanta, GA',
+      'Miami, FL',
+      'Washington, DC',
+      'Charlotte, NC',
+      'Raleigh, NC',
+      'Philadelphia, PA',
+      'Minneapolis, MN',
+      'Nashville, TN',
+    ],
+  },
+];
+const POPULAR_LOCATION_VALUES = POPULAR_LOCATION_GROUPS.flatMap((group) => group.options);
+
 const steps = [
   "Import Resume",
   "Personal Details",
@@ -139,7 +572,6 @@ const STEP_IDS = {
   COVER_LETTER: 11,
 };
 
-
 function BuilderPage() {
   const [step, setStep] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -162,15 +594,142 @@ function BuilderPage() {
   const [jobMatchesLoading, setJobMatchesLoading] = useState(false);
   const [jobMatchesError, setJobMatchesError] = useState(null);
   const [jobMatchesLocation, setJobMatchesLocation] = useState('');
-  const [locationManuallySet, setLocationManuallySet] = useState(false);
+  const [geocodedLocationHints, setGeocodedLocationHints] = useState([]);
+  const [isGeocodingLocation, setIsGeocodingLocation] = useState(false);
+  const [isResolvingCurrentLocation, setIsResolvingCurrentLocation] = useState(false);
+  const [geocoderError, setGeocoderError] = useState(null);
+  const geocoderLastQueryRef = useRef('');
   const [isResumeGenerating, setIsResumeGenerating] = useState(false);
   const [navigateToJobMatchesPending, setNavigateToJobMatchesPending] = useState(false);
+  const [tailorActiveJobId, setTailorActiveJobId] = useState(null);
+  const [tailorNotice, setTailorNotice] = useState(null);
+  const [tailorError, setTailorError] = useState(null);
   const { user, logout } = useAuth();
   const { triggerFeedbackPrompt, scheduleFollowUp } = useFeedback();
-  const { data } = useResume();
+  const { data, updateData } = useResume();
   const displayName = typeof user === 'string' ? user : (user?.name || user?.email || '');
   const selectedFormat = normalizeTemplateId(data?.selectedFormat);
   const autoLocation = useMemo(() => derivePrimaryLocation(data), [data]);
+  const resumeLocationSuggestions = useMemo(() => {
+    const suggestions = extractResumeLocations(data);
+    if (!Array.isArray(suggestions)) {
+      return [];
+    }
+    return suggestions
+      .filter((loc) => {
+        if (!loc) return false;
+        if (!autoLocation) return true;
+        return loc.toLowerCase() !== autoLocation.toLowerCase();
+      })
+      .slice(0, 6);
+  }, [data, autoLocation]);
+
+  const locationSuggestionOptions = useMemo(() => {
+    const seen = new Set();
+    const options = [];
+    const addOption = (value) => {
+      if (!value || typeof value !== 'string') {
+        return;
+      }
+      const trimmed = value.trim();
+      if (!trimmed) {
+        return;
+      }
+      const key = trimmed.toLowerCase();
+      if (seen.has(key)) {
+        return;
+      }
+      seen.add(key);
+      options.push(trimmed);
+    };
+    addOption(autoLocation);
+    resumeLocationSuggestions.forEach(addOption);
+    geocodedLocationHints.forEach(addOption);
+    POPULAR_LOCATION_VALUES.forEach(addOption);
+    return options;
+  }, [autoLocation, resumeLocationSuggestions, geocodedLocationHints]);
+
+
+  useEffect(() => {
+    const query = (jobMatchesLocation || '').trim();
+    if (!query || query.length < MIN_LOCATION_QUERY_LENGTH) {
+      setGeocodedLocationHints([]);
+      setGeocoderError(null);
+      setIsGeocodingLocation(false);
+      if (!query) {
+        geocoderLastQueryRef.current = '';
+      }
+      return;
+    }
+
+    const normalizedQuery = query.toLowerCase();
+    if (geocoderLastQueryRef.current === normalizedQuery) {
+      return;
+    }
+
+    if (normalizedQuery.includes('remote')) {
+      setGeocodedLocationHints([]);
+      setGeocoderError(null);
+      setIsGeocodingLocation(false);
+      geocoderLastQueryRef.current = normalizedQuery;
+      return;
+    }
+
+    const controller = new AbortController();
+    setIsGeocodingLocation(true);
+    setGeocoderError(null);
+
+    const debounceId = setTimeout(async () => {
+      try {
+        const params = new URLSearchParams({
+          format: 'jsonv2',
+          addressdetails: '1',
+          limit: String(NOMINATIM_MAX_RESULTS),
+          countrycodes: 'us',
+          q: query,
+        });
+        if (NOMINATIM_CONTACT_EMAIL) {
+          params.set('email', NOMINATIM_CONTACT_EMAIL);
+        }
+
+        const response = await fetch(`${NOMINATIM_ENDPOINT}?${params.toString()}`, {
+          method: 'GET',
+          headers: {
+            Accept: 'application/json',
+            'Accept-Language': 'en-US,en;q=0.9',
+          },
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error(`Geocoder request failed with status ${response.status}`);
+        }
+
+        const payload = await response.json();
+        const normalized = Array.isArray(payload)
+          ? dedupeLocationList(payload.map((item) => normalizeGeocoderLocation(item)).filter(Boolean)).slice(0, NOMINATIM_MAX_RESULTS)
+          : [];
+
+        setGeocodedLocationHints(normalized);
+        geocoderLastQueryRef.current = normalizedQuery;
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          return;
+        }
+        console.error('Location autocomplete lookup failed', error);
+        setGeocodedLocationHints([]);
+        setGeocoderError('Unable to load city suggestions right now.');
+      } finally {
+        setIsGeocodingLocation(false);
+      }
+    }, 350);
+
+    return () => {
+      clearTimeout(debounceId);
+      controller.abort();
+    };
+  }, [jobMatchesLocation]);
+
   const hasExistingResumeData = useMemo(() => {
     if (!data) return false;
     const hasPersonal = Boolean(data.name || data.email || data.phone);
@@ -190,20 +749,12 @@ function BuilderPage() {
     }
   }, []);
 
-  
-  useEffect(() => {
-    if (!locationManuallySet) {
-      setJobMatchesLocation(autoLocation || '');
-    }
-  }, [autoLocation, locationManuallySet]);
-
   useEffect(() => {
     if (!user) {
       setJobMatches([]);
       setJobMatchesHash(null);
       setJobMatchesError(null);
-      setJobMatchesLocation(autoLocation || '');
-      setLocationManuallySet(false);
+      setJobMatchesLocation('');
       return;
     }
 
@@ -234,7 +785,6 @@ function BuilderPage() {
     };
   }, [user, autoLocation]);
 
-
   const effectiveLocation = (jobMatchesLocation && jobMatchesLocation.trim()) || autoLocation || '';
   const isUSPreferredLocation = useMemo(() => isLikelyUSLocation(effectiveLocation), [effectiveLocation]);
   const filteredJobMatches = useMemo(() => {
@@ -262,7 +812,8 @@ function BuilderPage() {
   const filteredOutCount = Math.max(jobMatches.length - filteredJobMatches.length, 0);
   const topMatch = filteredJobMatches.length > 0 ? filteredJobMatches[0] : null;
   const secondaryMatches = filteredJobMatches.length > 1 ? filteredJobMatches.slice(1) : [];
-
+  const topMatchKey = topMatch ? getMatchKey(topMatch) : '';
+  const topMatchHasDescription = topMatch ? Boolean(((topMatch.job_description || '').trim()) || jobDescription.trim()) : false;
 
   useEffect(() => {
     if (step !== STEP_IDS.IMPORT || userRequestedImport) {
@@ -304,28 +855,87 @@ function BuilderPage() {
   };
   const handlePreferredLocationChange = (value) => {
     setJobMatchesLocation(value);
-  };
-
-  const handlePreferredLocationFocus = () => {
-    setLocationManuallySet(true);
+    setGeocoderError(null);
   };
 
   const handlePreferredLocationBlur = () => {
     const trimmed = (jobMatchesLocation || '').trim();
-    if (!trimmed) {
-      setLocationManuallySet(false);
-      setJobMatchesLocation(autoLocation || '');
+    if (trimmed !== jobMatchesLocation) {
+      setJobMatchesLocation(trimmed);
     }
-  };
-
-  const handleUseDetectedLocation = () => {
-    setJobMatchesLocation(autoLocation || '');
-    setLocationManuallySet(false);
   };
 
   const handleUseRemoteLocation = () => {
     setJobMatchesLocation('Remote (US)');
-    setLocationManuallySet(true);
+    setGeocodedLocationHints([]);
+    setGeocoderError(null);
+    geocoderLastQueryRef.current = 'remote (us)';
+  };
+
+  const handleSelectLocationSuggestion = (value) => {
+    if (!value) {
+      return;
+    }
+    setJobMatchesLocation(value);
+    setGeocoderError(null);
+    geocoderLastQueryRef.current = value.toLowerCase();
+  };
+
+  const handleClearPreferredLocation = () => {
+    setJobMatchesLocation('');
+    setGeocodedLocationHints([]);
+    setGeocoderError(null);
+    setIsGeocodingLocation(false);
+    geocoderLastQueryRef.current = '';
+  };
+
+  const handleUseCurrentLocation = () => {
+    if (isResolvingCurrentLocation) {
+      return;
+    }
+
+    if (typeof window === 'undefined' || !navigator || !navigator.geolocation) {
+      setGeocoderError('Geolocation is not supported in this browser.');
+      return;
+    }
+
+    setIsResolvingCurrentLocation(true);
+    setGeocoderError(null);
+
+    navigator.geolocation.getCurrentPosition(async (position) => {
+      try {
+        const { latitude, longitude } = position.coords || {};
+        const label = await reverseGeocodeCoordinates(latitude, longitude);
+        if (!label) {
+          throw new Error('No city returned from geocoder');
+        }
+        setJobMatchesLocation(label);
+        setGeocodedLocationHints((prev) => dedupeLocationList([label, ...prev]).slice(0, NOMINATIM_MAX_RESULTS));
+        geocoderLastQueryRef.current = label.toLowerCase();
+      } catch (error) {
+        console.error('Unable to resolve current location', error);
+        setGeocoderError('Unable to detect current city. Please type it manually.');
+      } finally {
+        setIsResolvingCurrentLocation(false);
+      }
+    }, (error) => {
+      let message = 'Unable to detect current city. Please type it manually.';
+      if (error && typeof error.code === 'number') {
+        if (error.code === error.PERMISSION_DENIED) {
+          message = 'Location permission denied. You can type your city instead.';
+        } else if (error.code === error.POSITION_UNAVAILABLE) {
+          message = 'Location information is unavailable right now.';
+        } else if (error.code === error.TIMEOUT) {
+          message = 'Timed out trying to detect your location.';
+        }
+      }
+      setGeocoderError(message);
+      setIsResolvingCurrentLocation(false);
+    }, {
+      enableHighAccuracy: false,
+      timeout: 10000,
+      maximumAge: 5 * 60 * 1000,
+    });
   };
 
   const buildMatchPayload = useCallback(() => {
@@ -334,10 +944,26 @@ function BuilderPage() {
     }
 
     const preferredLocation = (jobMatchesLocation && jobMatchesLocation.trim()) || autoLocation || '';
+    const experienceSummary = summariseExperiences(data.experiences);
+    const educationSummary = summariseEducation(data.education);
+    const summaryText = typeof data.summary === 'string' ? data.summary : '';
+    const position = deriveTargetPosition(data, jobDescription);
+    const skills = collectResumeSkills(data);
+    const normalizedJobDescription = typeof jobDescription === 'string' ? jobDescription.trim() : '';
+
     return {
-      resume: data,
-      jobDescription,
-      preferredLocation,
+      position,
+      name: data.name || '',
+      email: data.email || '',
+      summary: summaryText,
+      experience: experienceSummary,
+      education: educationSummary,
+      jobDescription: normalizedJobDescription,
+      location: preferredLocation,
+      skills,
+      htmlContent: '',
+      candidateJobLimit: 400,
+      maxResults: 25,
     };
   }, [data, jobDescription, jobMatchesLocation, autoLocation]);
 
@@ -368,6 +994,136 @@ function BuilderPage() {
       setJobMatchesLoading(false);
     }
   }, [user, buildMatchPayload]);
+
+  const handleAutoTailorResume = useCallback(async (match) => {
+    if (!match) {
+      setTailorError('Unable to run One-Click AI Resume: job details are missing.');
+      return;
+    }
+    if (!user) {
+      setTailorError('Please sign in to use One-Click AI Resume.');
+      return;
+    }
+    if (!data) {
+      setTailorError('Resume data has not loaded yet. Please try again in a moment.');
+      return;
+    }
+
+    const jobDescriptionSource = ((match.job_description || '').trim()) || jobDescription.trim();
+    if (!jobDescriptionSource) {
+      setTailorError('This job does not include a description yet. Add a job description to use One-Click AI Resume.');
+      return;
+    }
+
+    const jobKey = getMatchKey(match);
+    setTailorActiveJobId(jobKey);
+    setTailorError(null);
+    setTailorNotice(null);
+
+    try {
+      const experiences = Array.isArray(data.experiences) ? data.experiences : [];
+      const updatedExperiences = [];
+      for (const exp of experiences) {
+        if (exp && typeof exp.description === 'string' && exp.description.trim()) {
+          try {
+            const optimizedDescription = await generateExperienceAI(exp.description, jobDescriptionSource);
+            const cleanedDescription = typeof optimizedDescription === 'string' ? optimizedDescription.trim() : '';
+            if (cleanedDescription) {
+              updatedExperiences.push({ ...exp, description: optimizedDescription });
+            } else {
+              updatedExperiences.push(exp);
+            }
+          } catch (experienceError) {
+            console.warn('Experience optimization failed', experienceError);
+            updatedExperiences.push(exp);
+          }
+        } else {
+          updatedExperiences.push(exp);
+        }
+      }
+
+      const projects = Array.isArray(data.projects) ? data.projects : [];
+      const updatedProjects = [];
+      for (const project of projects) {
+        if (project && (project.description?.trim() || project.projectName)) {
+          try {
+            const optimizedProject = await optimizeProjectAI(project, jobDescriptionSource);
+            if (optimizedProject && typeof optimizedProject === 'object') {
+              const mergedProject = { ...project };
+              Object.entries(optimizedProject).forEach(([key, value]) => {
+                if (value === undefined || value === null) {
+                  return;
+                }
+                if (typeof value === 'string') {
+                  const trimmedValue = value.trim();
+                  if (trimmedValue) {
+                    mergedProject[key] = value;
+                  }
+                  return;
+                }
+                mergedProject[key] = value;
+              });
+              if (typeof mergedProject.description === 'string' && !mergedProject.description.trim() && project.description) {
+                mergedProject.description = project.description;
+              }
+              updatedProjects.push(mergedProject);
+            } else if (typeof optimizedProject === 'string') {
+              const trimmedDescription = optimizedProject.trim();
+              if (trimmedDescription) {
+                updatedProjects.push({ ...project, description: optimizedProject });
+              } else {
+                updatedProjects.push(project);
+              }
+            } else {
+              updatedProjects.push(project);
+            }
+          } catch (projectError) {
+            console.warn('Project optimization failed', projectError);
+            updatedProjects.push(project);
+          }
+        } else {
+          updatedProjects.push(project);
+        }
+      }
+
+      const education = Array.isArray(data.education) ? data.education : [];
+      const skillsList = normaliseSkillsForSummary(data.skills);
+
+      let updatedSummary = data.summary;
+      try {
+        const experienceSummaryText = summariseExperiences(updatedExperiences);
+        const educationSummaryText = summariseEducation(education);
+        const experiencePayload = [
+          experienceSummaryText,
+          jobDescriptionSource ? `Job Description:\n${jobDescriptionSource}` : ''
+        ]
+          .filter(Boolean)
+          .join('\n\n');
+
+        updatedSummary = await generateSummaryAI({
+          experience: experiencePayload,
+          education: educationSummaryText,
+          skills: skillsList,
+        });
+      } catch (summaryError) {
+        console.warn('Summary generation failed', summaryError);
+      }
+
+      updateData({
+        ...data,
+        experiences: updatedExperiences,
+        projects: updatedProjects,
+        summary: updatedSummary || data.summary,
+      });
+
+      setTailorNotice(`One-Click AI Resume generated for ${match.job_title || 'this job'}. Review and tweak before downloading.`);
+    } catch (err) {
+      console.error('Failed to run One-Click AI Resume', err);
+      setTailorError(err.message || 'Failed to run One-Click AI Resume.');
+    } finally {
+      setTailorActiveJobId(null);
+    }
+  }, [data, jobDescription, updateData, user]);
   useEffect(() => {
     if (step !== STEP_IDS.JOB_MATCHES) {
       return;
@@ -408,7 +1164,6 @@ function BuilderPage() {
     setNavigateToJobMatchesPending(false);
   }, [navigateToJobMatchesPending, isResumeGenerating, jobMatchesLoading, step]);
 
-
   const handleImportComplete = () => {
     if (typeof window !== 'undefined') {
       window.localStorage.setItem('resumeImportSeen', 'true');
@@ -436,8 +1191,6 @@ function BuilderPage() {
     }
     handleStepChange(Math.min(step + 1, steps.length));
   };
-
-
 
   // Listen for fullscreen changes
   useEffect(() => {
@@ -960,7 +1713,6 @@ function BuilderPage() {
             font-family: ${templateFont} !important;
           }
 
-
           /* Last page shouldn't have page break after */
           .multi-page-pdf-container > div[class^="pdf-page-"]:last-child {
             page-break-after: avoid !important;
@@ -1165,8 +1917,6 @@ function BuilderPage() {
           .replace(/\n+/g, '')
           .replace(/\s{2,}/g, ' ');
         const minHtmlContent = minifyHtml(htmlContent);
-
-
 
         // Call the backend to generate PDF using multipart upload (smaller, proxy-friendly)
         const htmlBlob = new Blob([minHtmlContent], { type: 'text/html' });
@@ -1592,65 +2342,322 @@ function BuilderPage() {
                   </div>
 
                   <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+
                     <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#1e293b' }}>Preferred location</label>
+
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
+
                       <input
+
                         type="text"
+
                         value={jobMatchesLocation}
+
                         onChange={(e) => handlePreferredLocationChange(e.target.value)}
-                        onFocus={handlePreferredLocationFocus}
+
                         onBlur={handlePreferredLocationBlur}
+
                         placeholder={autoLocation ? `e.g., ${autoLocation}` : 'City, State or Remote'}
+
+                        list="job-location-suggestions"
+
+                        autoComplete="off"
+
                         style={{
-                          flex: '1 1 200px',
-                          minWidth: '160px',
+
+                          flex: '1 1 220px',
+
+                          minWidth: '180px',
+
                           padding: '0.5rem 0.75rem',
+
                           borderRadius: '8px',
+
                           border: '1px solid #cbd5f5',
+
                           fontSize: '0.9rem',
+
                         }}
+
                       />
-                      {autoLocation && (
-                        <button
-                          type="button"
-                          onClick={handleUseDetectedLocation}
-                          style={{
-                            padding: '0.45rem 0.9rem',
-                            borderRadius: '999px',
-                            border: '1px solid #bfdbfe',
-                            background: '#eff6ff',
-                            color: '#1d4ed8',
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                            fontSize: '0.8rem',
-                          }}
-                        >
-                          Use {autoLocation}
-                        </button>
-                      )}
+
                       <button
+
                         type="button"
+
                         onClick={handleUseRemoteLocation}
+
                         style={{
+
                           padding: '0.45rem 0.9rem',
+
                           borderRadius: '999px',
+
                           border: '1px solid #14b8a6',
+
                           background: '#ecfeff',
+
                           color: '#0f766e',
+
                           fontWeight: 600,
+
                           cursor: 'pointer',
+
                           fontSize: '0.8rem',
+
                         }}
+
                       >
+
                         Remote OK
+
                       </button>
+
+                      <button
+
+                        type="button"
+
+                        onClick={handleUseCurrentLocation}
+
+                        disabled={isResolvingCurrentLocation}
+
+                        style={{
+
+                          padding: '0.45rem 0.9rem',
+
+                          borderRadius: '999px',
+
+                          border: '1px solid #60a5fa',
+
+                          background: isResolvingCurrentLocation ? '#dbeafe' : '#eff6ff',
+
+                          color: '#1d4ed8',
+
+                          fontWeight: 600,
+
+                          cursor: isResolvingCurrentLocation ? 'wait' : 'pointer',
+
+                          fontSize: '0.8rem',
+
+                        }}
+
+                      >
+
+                        {isResolvingCurrentLocation ? 'Locating…' : 'Use Current Location'}
+
+                      </button>
+
+                      <button
+
+                        type="button"
+
+                        onClick={handleClearPreferredLocation}
+
+                        style={{
+
+                          padding: '0.45rem 0.9rem',
+
+                          borderRadius: '999px',
+
+                          border: '1px solid #e2e8f0',
+
+                          background: '#f8fafc',
+
+                          color: '#475569',
+
+                          fontWeight: 600,
+
+                          cursor: 'pointer',
+
+                          fontSize: '0.8rem',
+
+                        }}
+
+                      >
+
+                        Clear
+
+                      </button>
+
                     </div>
-                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>We prioritize roles near this location or remote roles.</span>
-                    {user && effectiveLocation && (
-                      <span style={{ fontSize: '0.8rem', color: '#0f172a', fontWeight: 500 }}>
-                        Prioritizing roles near <span style={{ color: '#1d4ed8' }}>{effectiveLocation}</span>
-                      </span>
+
+                    {isGeocodingLocation && (
+                      <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Searching cities…</span>
                     )}
+                    {geocoderError && (
+                      <span style={{ fontSize: '0.75rem', color: '#f97316' }}>{geocoderError}</span>
+                    )}
+                    {!isGeocodingLocation && !geocoderError && geocodedLocationHints.length > 0 && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }} aria-live="polite">
+                        <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#475569' }}>Matching cities</span>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+                          {geocodedLocationHints.map((hint) => (
+                            <button
+                              key={`geo-hint-${hint}`}
+                              type="button"
+                              onClick={() => handleSelectLocationSuggestion(hint)}
+                              style={{
+                                padding: '0.35rem 0.75rem',
+                                borderRadius: '999px',
+                                border: '1px solid #bfdbfe',
+                                background: '#ffffff',
+                                color: '#1d4ed8',
+                                fontSize: '0.75rem',
+                                cursor: 'pointer',
+                                fontWeight: 600,
+                              }}
+                            >
+                              {hint}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {locationSuggestionOptions.length > 0 && (
+
+                      <datalist id="job-location-suggestions">
+
+                        {locationSuggestionOptions.map((option) => (
+
+                          <option key={option} value={option} />
+
+                        ))}
+
+                      </datalist>
+
+                    )}
+
+                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>We prioritize roles near this location or remote roles.</span>
+
+                    {user && effectiveLocation && (
+
+                      <span style={{ fontSize: '0.8rem', color: '#0f172a', fontWeight: 500 }}>
+
+                        Prioritizing roles near <span style={{ color: '#1d4ed8' }}>{effectiveLocation}</span>
+
+                      </span>
+
+                    )}
+
+                    {(resumeLocationSuggestions.length > 0 || POPULAR_LOCATION_GROUPS.length > 0) && (
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginTop: '0.5rem' }}>
+
+                        {resumeLocationSuggestions.length > 0 && (
+
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+
+                            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>From your resume</span>
+
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+
+                              {resumeLocationSuggestions.map((loc) => (
+
+                                <button
+
+                                  key={`resume-loc-${loc}`}
+
+                                  type="button"
+
+                                  onClick={() => handleSelectLocationSuggestion(loc)}
+
+                                  style={{
+
+                                    padding: '0.35rem 0.75rem',
+
+                                    borderRadius: '999px',
+
+                                    border: '1px solid #bfdbfe',
+
+                                    background: '#f1f5f9',
+
+                                    color: '#0f172a',
+
+                                    fontSize: '0.75rem',
+
+                                    cursor: 'pointer',
+
+                                    fontWeight: 600,
+
+                                  }}
+
+                                >
+
+                                  {loc}
+
+                                </button>
+
+                              ))}
+
+                            </div>
+
+                          </div>
+
+                        )}
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+
+                          <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>Popular picks</span>
+
+                          {POPULAR_LOCATION_GROUPS.map((group) => (
+
+                            <div key={group.label} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+
+                              <span style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{group.label}</span>
+
+                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+
+                                {group.options.map((option) => (
+
+                                  <button
+
+                                    key={`${group.label}-${option}`}
+
+                                    type="button"
+
+                                    onClick={() => handleSelectLocationSuggestion(option)}
+
+                                    style={{
+
+                                      padding: '0.35rem 0.75rem',
+
+                                      borderRadius: '999px',
+
+                                      border: '1px solid #bfdbfe',
+
+                                      background: '#ffffff',
+
+                                      color: '#1d4ed8',
+
+                                      fontSize: '0.75rem',
+
+                                      cursor: 'pointer',
+
+                                      fontWeight: 600,
+
+                                    }}
+
+                                  >
+
+                                    {option}
+
+                                  </button>
+
+                                ))}
+
+                              </div>
+
+                            </div>
+
+                          ))}
+
+                        </div>
+
+                      </div>
+
+                    )}
+
                   </div>
 
                   <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -1658,12 +2665,24 @@ function BuilderPage() {
                       <p style={{ color: '#475569', fontSize: '0.9rem', margin: 0 }}>Sign in to generate personalized job matches.</p>
                     )}
 
-                    {user && jobMatchesError && (
-                      <div style={{ color: '#b91c1c', fontSize: '0.9rem' }}>{jobMatchesError}</div>
-                    )}
+                  {user && jobMatchesError && (
+                    <div style={{ color: '#b91c1c', fontSize: '0.9rem' }}>{jobMatchesError}</div>
+                  )}
 
-                    {user && !jobMatchesError && !jobMatchesLoading && filteredJobMatches.length === 0 && (
-                      <p style={{ color: '#475569', fontSize: '0.9rem', margin: 0 }}>
+                  {tailorError && (
+                    <div style={{ background: '#fee2e2', border: '1px solid #fca5a5', color: '#b91c1c', padding: '0.75rem 1rem', borderRadius: '8px', marginBottom: '0.75rem' }}>
+                      {tailorError}
+                    </div>
+                  )}
+
+                  {tailorNotice && (
+                    <div style={{ background: '#ecfdf5', border: '1px solid #34d399', color: '#065f46', padding: '0.75rem 1rem', borderRadius: '8px', marginBottom: '0.75rem' }}>
+                      {tailorNotice}
+                    </div>
+                  )}
+
+                  {user && !jobMatchesError && !jobMatchesLoading && filteredJobMatches.length === 0 && (
+                    <p style={{ color: '#475569', fontSize: '0.9rem', margin: 0 }}>
                         {jobMatches.length > 0
                           ? 'No US-based matches found yet. Adjust your location or refresh to explore more roles.'
                           : 'Complete your profile or add experience, then refresh to see curated openings.'}
@@ -1693,77 +2712,127 @@ function BuilderPage() {
                           <span style={{ fontWeight: 600, color: '#0284c7' }}>Match score: {topMatch.match_score.toFixed(1)}</span>
                         )}
                       </div>
-                      {topMatch.job_url && (
-                        <a
-                          href={topMatch.job_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        {topMatch.job_url && (
+                          <a
+                            href={topMatch.job_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.4rem',
+                              padding: '0.45rem 0.9rem',
+                              borderRadius: '999px',
+                              background: '#2563eb',
+                              color: '#ffffff',
+                              fontSize: '0.85rem',
+                              fontWeight: 600,
+                              textDecoration: 'none',
+                              width: 'fit-content',
+                            }}
+                          >
+                            View job
+                          </a>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleAutoTailorResume(topMatch)}
+                          disabled={tailorActiveJobId === topMatchKey || !topMatchHasDescription}
                           style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '0.4rem',
                             padding: '0.45rem 0.9rem',
                             borderRadius: '999px',
-                            background: '#2563eb',
-                            color: '#ffffff',
-                            fontSize: '0.85rem',
+                            border: '1px solid #0ea5e9',
+                            background: tailorActiveJobId === topMatchKey ? '#bae6fd' : '#e0f2fe',
+                            color: '#0369a1',
                             fontWeight: 600,
-                            textDecoration: 'none',
-                            width: 'fit-content',
+                            cursor: tailorActiveJobId === topMatchKey || !topMatchHasDescription ? 'not-allowed' : 'pointer',
+                            fontSize: '0.85rem',
                           }}
                         >
-                          View job
-                        </a>
+                          {tailorActiveJobId === topMatchKey ? 'Generating…' : 'One-Click AI Resume'}
+                        </button>
+                      </div>
+                      {!topMatchHasDescription && (
+                        <span style={{ fontSize: '0.75rem', color: '#f97316' }}>
+                          Add a job description to enable One-Click AI Resume.
+                        </span>
                       )}
                     </div>
                   )}
 
                   {user && secondaryMatches.length > 0 && (
                     <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: '0.75rem' }}>
-                      {secondaryMatches.map((match, index) => (
-                        <li
-                          key={`${match.id || match.job_posting_id || index}`}
-                          style={{
-                            padding: '0.85rem',
-                            borderRadius: '10px',
-                            border: '1px solid #dbeafe',
-                            background: '#ffffff',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '0.4rem',
-                          }}
-                        >
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '0.5rem' }}>
-                            <strong style={{ color: '#1e293b', fontSize: '0.95rem' }}>{match.job_title || 'Role'}</strong>
-                            {typeof match.match_score === 'number' && (
-                              <span style={{ fontSize: '0.75rem', color: '#0284c7', fontWeight: 600 }}>{match.match_score.toFixed(1)}</span>
+                      {secondaryMatches.map((match, index) => {
+                        const matchKey = getMatchKey(match) || `match-${index}`;
+                        const canTailorMatch = Boolean(((match.job_description || '').trim()) || jobDescription.trim());
+                        return (
+                          <li
+                            key={`${match.id || match.job_posting_id || index}`}
+                            style={{
+                              padding: '0.85rem',
+                              borderRadius: '10px',
+                              border: '1px solid #dbeafe',
+                              background: '#ffffff',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '0.4rem',
+                            }}
+                          >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '0.5rem' }}>
+                              <strong style={{ color: '#1e293b', fontSize: '0.95rem' }}>{match.job_title || 'Role'}</strong>
+                              {typeof match.match_score === 'number' && (
+                                <span style={{ fontSize: '0.75rem', color: '#0284c7', fontWeight: 600 }}>{match.match_score.toFixed(1)}</span>
+                              )}
+                            </div>
+                            <span style={{ color: '#334155', fontSize: '0.85rem' }}>
+                              {[match.company_name, match.job_location].filter(Boolean).join(' — ')}
+                            </span>
+                            {match.job_department && (
+                              <span style={{ color: '#64748b', fontSize: '0.8rem' }}>{match.job_department}</span>
                             )}
-                          </div>
-                          <span style={{ color: '#334155', fontSize: '0.85rem' }}>
-                            {[match.company_name, match.job_location].filter(Boolean).join(' — ')}
-                          </span>
-                          {match.job_department && (
-                            <span style={{ color: '#64748b', fontSize: '0.8rem' }}>{match.job_department}</span>
-                          )}
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', flexWrap: 'wrap' }}>
-                            {match.job_url ? (
-                              <a
-                                href={match.job_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={{ color: '#2563eb', fontWeight: 600, fontSize: '0.85rem' }}
-                              >
-                                View listing
-                              </a>
-                            ) : (
-                              <span style={{ color: '#94a3b8', fontSize: '0.8rem' }}>Listing link unavailable</span>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', flexWrap: 'wrap' }}>
+                              {match.job_url ? (
+                                <a
+                                  href={match.job_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  style={{ color: '#2563eb', fontWeight: 600, fontSize: '0.85rem' }}
+                                >
+                                  View listing
+                                </a>
+                              ) : (
+                                <span style={{ color: '#94a3b8', fontSize: '0.8rem' }}>Listing link unavailable</span>
+                              )}
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                {match.job_remote_type && (
+                                  <span style={{ color: '#0ea5e9', fontSize: '0.75rem', fontWeight: 600 }}>{match.job_remote_type}</span>
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={() => handleAutoTailorResume(match)}
+                                  disabled={tailorActiveJobId === matchKey || !canTailorMatch}
+                                  style={{
+                                    padding: '0.35rem 0.8rem',
+                                    borderRadius: '999px',
+                                    border: '1px solid #0ea5e9',
+                                    background: tailorActiveJobId === matchKey ? '#bae6fd' : '#e0f2fe',
+                                    color: '#0369a1',
+                                    fontWeight: 600,
+                                    cursor: tailorActiveJobId === matchKey || !canTailorMatch ? 'not-allowed' : 'pointer',
+                                    fontSize: '0.8rem',
+                                  }}
+                                >
+                                  {tailorActiveJobId === matchKey ? 'Generating…' : 'One-Click AI Resume'}
+                                </button>
+                              </div>
+                            </div>
+                            {!canTailorMatch && (
+                              <span style={{ color: '#f97316', fontSize: '0.75rem' }}>Add a job description to enable One-Click AI Resume.</span>
                             )}
-                            {match.job_remote_type && (
-                              <span style={{ color: '#0ea5e9', fontSize: '0.75rem', fontWeight: 600 }}>{match.job_remote_type}</span>
-                            )}
-                          </div>
-                        </li>
-                      ))}
+                          </li>
+                        );
+                      })}
                     </ul>
                   )}
                 </div>
@@ -2020,70 +3089,4 @@ function BuilderPage() {
 }
 
 export default BuilderPage;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
