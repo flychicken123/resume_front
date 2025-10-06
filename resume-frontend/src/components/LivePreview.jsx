@@ -378,7 +378,7 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
           
           // Check if adding this experience would exceed max height
           // Use higher threshold to maximize space usage
-          const threshold = aggressiveIndustry ? 0.995 : 0.95; // Allow executive-serif to pack tighter
+          const threshold = aggressiveIndustry ? 0.995 : 0.99; // Allow tighter packing before splitting
           if (currentHeight + expHeight > maxHeight * threshold && currentPart.length > 0) {
             // Current part is full, start new part
             parts.push([...currentPart]);
@@ -787,57 +787,69 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
         newPages[lastIndex - 1] = [...prevPage, ...cleanedSections];
         newPages.pop();
       }
-      // Rebalance: only pull forward the next page's first section if it
-      // continues the same section type. This preserves section ordering
-      // and prevents, e.g., Education moving ahead of remaining Experience.
+      // Rebalance: try to reclaim unused space by pulling the next page's leading
+      // section forward when it fits. This keeps ordering intact but avoids leaving
+      // small blocks (like SKILLS) stranded on a new page.
       for (let i = 0; i < newPages.length - 1; i++) {
         const page = newPages[i];
         const next = newPages[i + 1];
         if (!page || !next || next.length === 0) continue;
-        const lastType = page.length ? page[page.length - 1].type : null;
+
         const nextFirst = next[0];
-        if (!lastType || !nextFirst || nextFirst.type !== lastType) {
-          // Do not move across type boundaries
+        if (!nextFirst) continue;
+
+        const pageHeight = sumEstimatedHeight(page);
+        const available = effectiveAvailableHeight - pageHeight;
+        if (available < 60) continue;
+
+        const lastType = page.length ? page[page.length - 1].type : null;
+        const sameTypeContinuation = Boolean(lastType && nextFirst.type === lastType);
+        const sectionTitleHeightPx = Math.round(20 * getFontSizeScaleFactor());
+        const baseEstimate = nextFirst.estimatedHeight;
+        const adjustedEstimate = sameTypeContinuation ? Math.max(0, baseEstimate - sectionTitleHeightPx) : baseEstimate;
+        const needed = pageHeight + addBuffer(adjustedEstimate, nextFirst.type);
+
+        const softAllowance = nextFirst.type === 'education' ? (isIndustryManagerFormat ? 64 : 42)
+          : nextFirst.type === 'summary' ? 28
+          : nextFirst.type === 'skills' ? 40
+          : 24;
+
+        const fits = needed <= effectiveAvailableHeight
+          || (!nextFirst.canSplit && needed <= (effectiveAvailableHeight + softAllowance));
+
+        if (fits) {
+          page.push({ ...nextFirst, estimatedHeight: adjustedEstimate, _suppressTitle: sameTypeContinuation });
+          next.shift();
+          if (!sameTypeContinuation) {
+            page[page.length - 1]._suppressTitle = false;
+          }
+          if (next.length === 0) {
+            newPages.splice(i + 1, 1);
+          } else {
+            i = Math.max(-1, i - 2);
+          }
           continue;
         }
-        let leftover = effectiveAvailableHeight - sumEstimatedHeight(page);
-        if (leftover < 80) continue;
-        // Try to pull only the first section (same type)
-        const sec = nextFirst;
-        const softAllowance = sec.type === 'education' ? (isIndustryManagerFormat ? 48 : 32) : (sec.type === 'summary' ? 24 : 12);
-        // If we are appending the same section type, the visual header will be hidden.
-        // Remove section-title height from the needed estimate so we don't block moves unnecessarily.
-        const sectionTitleHeightPx = Math.round(20 * getFontSizeScaleFactor());
-        const adjustedSecHeight = Math.max(0, sec.estimatedHeight - sectionTitleHeightPx);
-        const needed = sumEstimatedHeight(page) + addBuffer(adjustedSecHeight, sec.type);
-        const fits = needed <= effectiveAvailableHeight || (!sec.canSplit && needed <= (effectiveAvailableHeight + softAllowance));
-        if (fits) {
-          // Push with adjusted estimate since the header will be suppressed on this page
-          page.push({ ...sec, estimatedHeight: adjustedSecHeight, _suppressTitle: true });
-          next.shift();
-        } else if (sec.canSplit) {
-          const allowance = Math.max(0, effectiveAvailableHeight - sumEstimatedHeight(page) - getSectionPadding(sec.type));
+
+        if (sameTypeContinuation && nextFirst.canSplit) {
+          const allowance = Math.max(0, effectiveAvailableHeight - pageHeight - getSectionPadding(nextFirst.type));
           if (allowance > 60) {
-            const parts = splitLongContent(sec.content, sec.type, allowance);
+            const parts = splitLongContent(nextFirst.content, nextFirst.type, allowance);
             if (parts.length > 1) {
-              const firstPartHeight = estimateSectionHeight(parts[0], sec.type);
-              // First part on this page: suppress title
-              page.push({ ...sec, content: parts[0], estimatedHeight: firstPartHeight, isContinued: true, _suppressTitle: true });
+              const firstPartHeight = estimateSectionHeight(parts[0], nextFirst.type);
+              page.push({ ...nextFirst, content: parts[0], estimatedHeight: firstPartHeight, isContinued: true, _suppressTitle: true });
               const remainder = parts.slice(1);
-              // Replace on next page
               next.shift();
-              // Insert remainders at the beginning to keep order
               for (let r = remainder.length - 1; r >= 0; r--) {
-                const partHeight = estimateSectionHeight(remainder[r], sec.type);
-                // First remainder part starts a visible block on the next page; include title height
+                const partHeight = estimateSectionHeight(remainder[r], nextFirst.type);
                 const needsTitle = (r === 0);
                 const adjPartHeight = needsTitle ? (partHeight + sectionTitleHeightPx) : partHeight;
-                next.unshift({ ...sec, content: remainder[r], estimatedHeight: adjPartHeight, isContinuation: true, isContinued: r < remainder.length - 1 });
+                next.unshift({ ...nextFirst, content: remainder[r], estimatedHeight: adjPartHeight, isContinuation: true, isContinued: r < remainder.length - 1 });
               }
             }
           }
         }
-        // Clean up if next page emptied
+
         if (next.length === 0) newPages.splice(i + 1, 1);
       }
     }

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useResume } from '../context/ResumeContext';
 import { TEMPLATE_OPTIONS } from '../constants/templates';
 import { trackReferrer, trackBuilderStart } from '../components/Analytics';
+import SEO from '../components/SEO';
 
 const TemplatesPage = () => {
   const navigate = useNavigate();
@@ -25,6 +26,12 @@ const TemplatesPage = () => {
 
   return (
     <div className="templates-page">
+      <SEO
+        title="Free Resume Templates | Pick an ATS-Ready Design | HiHired"
+        description="Browse professional, ATS-friendly resume templates. Customize any design in minutes with our free AI resume builder and download a polished resume instantly."
+        keywords="free resume templates, ats resume templates, professional resume designs, resume formats, hi hired templates"
+        canonical="https://hihired.org/templates"
+      />
       <div className="templates-header">
         <h1>Choose Your Resume Template</h1>
         <p>Select a professional template that matches your industry and personal style</p>
@@ -49,6 +56,3 @@ const TemplatesPage = () => {
 };
 
 export default TemplatesPage;
-
-
-
