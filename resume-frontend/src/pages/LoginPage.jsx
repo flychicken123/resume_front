@@ -1,34 +1,17 @@
 import React from 'react';
-import { useAuth } from '../context/AuthContext';
-import Login from '../components/auth/Login';
+import SEO from '../components/SEO';
 
-const LoginPage = () => {
-  const { login } = useAuth();
-  
-  const handleLogin = (userData, token) => {
-    login(userData, token);
-    // Redirect to home page after successful login
-    window.location.href = '/';
-  };
-  
-  const handleClose = () => {
-    // Redirect to home page if user closes login
-    window.location.href = '/';
-  };
-  
-  return (
-    <div style={{ 
-      minHeight: '100vh', 
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '1rem'
-    }}>
-      <Login onLogin={handleLogin} onClose={handleClose} />
-    </div>
-  );
-};
+const LoginPage = () => (
+  <div className="login-page">
+    <SEO
+      title="Login to HiHired | Access Your AI Resume Builder"
+      description="Sign in to HiHired to continue building and matching resumes. Access saved resumes, job matches, and personalized career tools."
+      canonical="https://hihired.org/login"
+      keywords="hihired login, resume builder login, ai resume account"
+    />
+    <h1>Login</h1>
+    <p>Use the top navigation to sign in or create an account.</p>
+  </div>
+);
 
 export default LoginPage;
-

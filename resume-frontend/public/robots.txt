@@ -9,4 +9,3 @@ Disallow: /admin/
 Disallow: /private/
 
 # Allow all other content
-Allow: / 
