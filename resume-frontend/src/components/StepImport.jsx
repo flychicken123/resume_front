@@ -1,127 +1,175 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { parseResumeFile } from '../api';
 import { useFeedback } from '../context/FeedbackContext';
 import { setLastStep } from '../utils/exitTracking';
 import { useResume } from '../context/ResumeContext';
 
-const StepImport = ({ onSkip, jobDescription }) => {
-  const [tab, setTab] = useState(jobDescription ? 'jobdesc' : 'file');
-  const [selectedFile, setSelectedFile] = useState(null);
+const StepImport = ({ onSkip }) => {
+  const [tab, setTab] = useState('file');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [localJobDesc, setLocalJobDesc] = useState(jobDescription || '');
+  const [selectedFileName, setSelectedFileName] = useState('');
+  const fileInputRef = useRef(null);
   const { applyImportedData } = useResume();
   const { triggerFeedbackPrompt } = useFeedback();
 
-  const handleNext = async () => {
-    if (tab === 'file' && selectedFile) {
-      setLoading(true);
-      setError('');
-      try {
-        const parsed = await parseResumeFile(selectedFile);
-        if (parsed && parsed.structured) {
-          applyImportedData(parsed.structured);
-        }
-        setLastStep('resume_import_success');
-        triggerFeedbackPrompt({
-          scenario: 'resume_import',
-          metadata: { result: 'success', aiUsed: parsed?.aiUsed },
-        });
-        onSkip();
-      } catch (err) {
-        setError('Failed to parse resume. Please try again.');
-        setLastStep('resume_import_error');
-        triggerFeedbackPrompt({
-          scenario: 'resume_import',
-          metadata: { result: 'error', message: err?.message || '' },
-          force: true,
-        });
-      } finally {
-        setLoading(false);
-      }
-    } else {
-      onSkip();
+  const importFromFile = async (file) => {
+    if (!file) {
+      return;
     }
+    setError('');
+    setSelectedFileName(file.name);
+    setLoading(true);
+
+    try {
+      const parsed = await parseResumeFile(file);
+      if (parsed && parsed.structured) {
+        applyImportedData(parsed.structured);
+      }
+      setLastStep('resume_import_success');
+      triggerFeedbackPrompt({
+        scenario: 'resume_import',
+        metadata: {
+          result: 'success',
+          aiUsed: parsed?.aiUsed,
+          source: 'file',
+          fileName: file.name,
+        },
+      });
+      onSkip();
+    } catch (err) {
+      console.error('Resume import failed', err);
+      setError(err?.message || 'Failed to parse resume. Please try a different file.');
+      setLastStep('resume_import_error');
+      triggerFeedbackPrompt({
+        scenario: 'resume_import',
+        metadata: {
+          result: 'error',
+          source: 'file',
+          message: err?.message || 'parse_failed',
+        },
+        force: true,
+      });
+    } finally {
+      setLoading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleFileChange = (event) => {
+    const file = event.target.files && event.target.files[0];
+    if (!file || loading) {
+      return;
+    }
+    importFromFile(file);
   };
 
   return (
     <div>
       <h2>Let's import your career history</h2>
       <p>Import your information from an existing resume, LinkedIn profile, or add it manually.</p>
-      {localJobDesc && (
-        <div style={{ 
-          background: '#f8fafc', 
-          border: '1px solid #e2e8f0', 
-          borderRadius: '8px', 
-          padding: '1rem', 
-          marginBottom: '1rem' 
-        }}>
-          <h4 style={{ margin: '0 0 0.5rem 0', color: '#3b82f6' }}>Job Description for Resume Tailoring:</h4>
-          <p style={{ margin: 0, fontSize: '0.9rem', color: '#64748b' }}>{localJobDesc}</p>
-        </div>
-      )}
+
       <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center', margin: '2rem 0' }}>
-        <button type="button" onClick={() => setTab('file')} style={{ fontWeight: tab === 'file' ? 'bold' : 'normal' }}>Resume File</button>
-        <button type="button" onClick={() => setTab('linkedin')} style={{ fontWeight: tab === 'linkedin' ? 'bold' : 'normal' }}>LinkedIn Import</button>
-        <button type="button" onClick={() => setTab('paste')} style={{ fontWeight: tab === 'paste' ? 'bold' : 'normal' }}>Paste Text</button>
-        <button type="button" onClick={() => setTab('jobdesc')} style={{ fontWeight: tab === 'jobdesc' ? 'bold' : 'normal' }}>Job Description</button>
+        <button
+          type="button"
+          onClick={() => setTab('file')}
+          style={{ fontWeight: tab === 'file' ? 'bold' : 'normal' }}
+        >
+          Resume File
+        </button>
+        <button
+          type="button"
+          onClick={() => setTab('linkedin')}
+          style={{ fontWeight: tab === 'linkedin' ? 'bold' : 'normal' }}
+          disabled
+          title="LinkedIn import coming soon"
+        >
+          LinkedIn Import
+        </button>
+        <button
+          type="button"
+          onClick={() => setTab('paste')}
+          style={{ fontWeight: tab === 'paste' ? 'bold' : 'normal' }}
+        >
+          Paste Text
+        </button>
       </div>
+
       {tab === 'file' && (
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <input
-            type="file"
-            accept=".pdf,.doc,.docx"
-            style={{ marginBottom: '1rem' }}
-            onChange={e => setSelectedFile(e.target.files[0])}
-          />
-          <div style={{ color: '#94a3b8', fontSize: '0.95rem' }}>.doc, .docx or .pdf, up to 50 MB.</div>
-          <button
-            type="button"
-            disabled={!selectedFile || loading}
-            style={{ marginTop: '1rem' }}
-            onClick={handleNext}
+          <label
+            htmlFor="resume-file-input"
+            style={{
+              display: 'inline-flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.75rem',
+              border: '2px dashed #94a3b8',
+              borderRadius: '12px',
+              padding: '2rem',
+              width: '100%',
+              maxWidth: '420px',
+              margin: '0 auto',
+              cursor: loading ? 'wait' : 'pointer',
+              background: '#f8fafc',
+              color: '#1f2937',
+              transition: 'border-color 0.2s ease',
+            }}
           >
-            {loading ? 'Parsing...' : 'Next'}
-          </button>
-          {error && <div style={{ color: 'red', marginTop: 8 }}>{error}</div>}
+            <span style={{ fontSize: '1rem', fontWeight: 600 }}>Upload your resume (PDF, DOC, DOCX)</span>
+            <span style={{ fontSize: '0.85rem', color: '#64748b' }}>{selectedFileName || 'Click to browse or drop a file here'}</span>
+            <input
+              id="resume-file-input"
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.doc,.docx"
+              style={{ display: 'none' }}
+              onChange={handleFileChange}
+              disabled={loading}
+            />
+            <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>.doc, .docx or .pdf, up to 50 MB.</span>
+          </label>
+          {loading && (
+            <div style={{ marginTop: '1rem', color: '#2563eb', fontWeight: 600 }}>Parsing your resume…</div>
+          )}
+          {error && (
+            <div style={{ color: '#b91c1c', marginTop: '1rem' }}>{error}</div>
+          )}
         </div>
       )}
+
       {tab === 'linkedin' && (
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <button type="button" disabled style={{ marginBottom: '1rem' }}>Connect to LinkedIn (Coming Soon)</button>
+        <div style={{ textAlign: 'center', marginBottom: '2rem', color: '#94a3b8' }}>
+          LinkedIn import is coming soon. In the meantime, upload your resume file or paste your details below.
         </div>
       )}
+
       {tab === 'paste' && (
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <textarea placeholder="Paste your resume text here..." rows={8} style={{ width: '100%', maxWidth: 400, marginBottom: '1rem' }} />
-          <button type="button" disabled>Next</button>
-        </div>
-      )}
-      {tab === 'jobdesc' && (
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <textarea 
-            placeholder="Paste job description here to tailor your resume..." 
-            rows={8} 
-            style={{ width: '100%', maxWidth: 400, marginBottom: '1rem' }}
-            value={localJobDesc}
-            onChange={(e) => {
-              setLocalJobDesc(e.target.value);
-              // Update the job description in the URL
-              const newJobDesc = e.target.value;
-              const encodedJobDesc = encodeURIComponent(newJobDesc);
-              window.history.replaceState(null, '', `/build/${encodedJobDesc}`);
-            }}
+          <textarea
+            placeholder="Paste your resume text here..."
+            rows={8}
+            style={{ width: '100%', maxWidth: 420, marginBottom: '1rem', padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5f5' }}
           />
-          <p style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '1rem' }}>
-            Add a job description to help tailor your resume for specific positions.
-          </p>
-          <button type="button" onClick={onSkip}>Continue to Personal Details</button>
+          <button type="button" disabled>Import from text (Coming Soon)</button>
         </div>
       )}
+
       <div style={{ textAlign: 'center', margin: '2rem 0' }}>
-        <button type="button" onClick={onSkip} style={{ background: 'none', color: '#3b82f6', border: 'none', textDecoration: 'underline', cursor: 'pointer' }}>Skip and enter manually</button>
+        <button
+          type="button"
+          onClick={onSkip}
+          style={{ background: 'none', color: '#3b82f6', border: 'none', textDecoration: 'underline', cursor: 'pointer' }}
+          disabled={loading}
+        >
+          Skip and enter manually
+        </button>
       </div>
-      <div style={{marginTop: '2rem'}}>
+
+      <div style={{ marginTop: '2rem' }}>
         <h4>Steps to create your resume:</h4>
         <ol>
           <li>Import or enter your information</li>
@@ -134,5 +182,3 @@ const StepImport = ({ onSkip, jobDescription }) => {
 };
 
 export default StepImport;
-
-
