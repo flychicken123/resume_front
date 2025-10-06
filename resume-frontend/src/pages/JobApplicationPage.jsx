@@ -7,8 +7,8 @@ import { trackJobApplicationSubmit } from '../components/Analytics';
 import SEO from '../components/SEO';
 
 const JobApplicationPage = () => {
-  const [jobInfo, setJobInfo] = useState(getJobMatchContext());
-  const [resumeData, setResumeData] = useState(buildDefaultResumeContext());
+  const [jobInfo] = useState(getJobMatchContext());
+  const [resumeData] = useState(buildDefaultResumeContext());
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -154,3 +154,4 @@ const JobApplicationPage = () => {
 };
 
 export default JobApplicationPage;
+
