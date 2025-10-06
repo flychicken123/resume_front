@@ -3,6 +3,14 @@ import { useResume } from '../context/ResumeContext';
 import { TEMPLATE_SLUGS, DEFAULT_TEMPLATE_ID, normalizeTemplateId } from '../constants/templates';
 import './LivePreview.css';
 const LivePreview = ({ isVisible = true, onToggle, onDownload, downloadNotice }) => {
+  const isBrowser = typeof window !== 'undefined';
+  const DEBUG_PAGINATION = isBrowser && (
+    process.env.REACT_APP_DEBUG_PAGINATION === 'true' ||
+    (window.localStorage && window.localStorage.getItem('DEBUG_PAGINATION') === 'true')
+  );
+  if (DEBUG_PAGINATION && isBrowser) {
+    console.log('[Pagination] debug enabled');
+  }
   const { data } = useResume();
   const selectedFormat = normalizeTemplateId(data.selectedFormat);
   const [pages, setPages] = useState([]);
@@ -54,7 +62,7 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
       header: { multiplier: 1.00, floor: 26 },
       summary: { multiplier: 1.02, floor: 32 },
       experience: { multiplier: 1.06, floor: 100 },
-      education: { multiplier: 1.04, floor: 44 },
+      education: { multiplier: 1.02, floor: 30 },
       projects: { multiplier: 1.06, floor: 68 },
       skills: { multiplier: 1.04, floor: 36 },
       default: { multiplier: 1.02, floor: 32 }
@@ -63,7 +71,7 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
       header: { multiplier: 1.08, floor: 30 },
       summary: { multiplier: 1.12, floor: 36 },
       experience: { multiplier: 1.15, floor: 115 },
-      education: { multiplier: 1.10, floor: 50 },
+      education: { multiplier: 1.08, floor: 36 },
       projects: { multiplier: 1.15, floor: 78 },
       skills: { multiplier: 1.10, floor: 40 },
       default: { multiplier: 1.10, floor: 36 }
@@ -95,9 +103,19 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
           const totalHeight = content.reduce((total, exp) => {
             let height = Math.round(28 * fontScale); // Reduced from 35
             if (exp.description) {
-              const descCharsPerLine = Math.round(110 / fontScale); // Increased from 90
-              const descLines = Math.ceil(exp.description.length / descCharsPerLine);
-              height += descLines * Math.round(14 * fontScale); // Reduced from 16
+              const rawLines = String(exp.description).split(/\n+/).filter((line) => line.trim());
+              const descCharsPerLine = Math.round(140 / fontScale);
+              const lineHeightPx = Math.round(13 * fontScale);
+              let descLines = 0;
+              for (const rawLine of rawLines.length ? rawLines : [String(exp.description)]) {
+                const cleanLine = rawLine.replace(/[•\u2022-]+/g, '').trim();
+                const effectiveLength = cleanLine.length || rawLine.trim().length || 1;
+                descLines += Math.max(1, Math.ceil(effectiveLength / Math.max(1, descCharsPerLine)));
+              }
+              height += descLines * lineHeightPx;
+              if (rawLines.length > 1) {
+                height += Math.round(Math.min(6, 2 * fontScale));
+              }
             }
             return total + height + Math.round(6 * fontScale); // Reduced from 8
           }, 0);
@@ -107,10 +125,10 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
       }
       case 'education': {
         if (Array.isArray(content)) {
-          const eduHeight = content.length * Math.round(25 * fontScale); // Reduced from 30
+          const eduHeight = content.length * Math.round(18 * fontScale);
           return applyFormatAdjustment(eduHeight, 'education');
         }
-        return applyFormatAdjustment(Math.round(25 * fontScale), 'education');
+        return applyFormatAdjustment(Math.round(18 * fontScale), 'education');
       }
       case 'projects': {
         if (Array.isArray(content)) {
@@ -378,7 +396,7 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
           
           // Check if adding this experience would exceed max height
           // Use higher threshold to maximize space usage
-          const threshold = aggressiveIndustry ? 0.995 : 0.99; // Allow tighter packing before splitting
+          const threshold = aggressiveIndustry ? 1.0 : 1.0; // Allow packing until hard limit
           if (currentHeight + expHeight > maxHeight * threshold && currentPart.length > 0) {
             // Current part is full, start new part
             parts.push([...currentPart]);
@@ -770,7 +788,7 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
     if (currentPage.length > 0) {
       newPages.push([...currentPage]);
     }
-    if (isIndustryManagerFormat && newPages.length > 1) {
+    if (newPages.length > 1) {
       const minUsefulHeight = effectiveAvailableHeight * (useConservativePaging ? 0.42 : 0.38);
       const mergeAllowance = Math.max(12, effectiveAvailableHeight * (useConservativePaging ? 0.2 : 0.25));
       const lastIndex = newPages.length - 1;
@@ -793,29 +811,48 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
       for (let i = 0; i < newPages.length - 1; i++) {
         const page = newPages[i];
         const next = newPages[i + 1];
-        if (!page || !next || next.length === 0) continue;
+        if (!page || !next || next.length === 0) {
+          if (DEBUG_PAGINATION) {
+            console.log('[Pagination] skip iteration – missing next page', { pageIndex: i, hasPage: Boolean(page), hasNext: Boolean(next), nextLength: next ? next.length : 0 });
+          }
+          continue;
+        }
 
         const nextFirst = next[0];
-        if (!nextFirst) continue;
+        if (!nextFirst) {
+          if (DEBUG_PAGINATION) console.log('[Pagination] skip iteration – no leading section', { pageIndex: i });
+          continue;
+        }
 
         const pageHeight = sumEstimatedHeight(page);
-        const available = effectiveAvailableHeight - pageHeight;
-        if (available < 60) continue;
+        const trailingPadding = page.length ? getSectionPadding(page[page.length - 1].type) : 0;
+        const adjustedPageHeight = Math.max(0, pageHeight - trailingPadding);
+        const available = effectiveAvailableHeight - adjustedPageHeight;
+        if (DEBUG_PAGINATION) {
+          console.log('[Pagination] available space check', { pageIndex: i, pageHeight, trailingPadding, adjustedPageHeight, available, effectiveAvailableHeight });
+        }
+        if (available < 8) {
+          if (DEBUG_PAGINATION) console.log('[Pagination] skip iteration – not enough space', { pageIndex: i, available });
+          continue;
+        }
 
         const lastType = page.length ? page[page.length - 1].type : null;
         const sameTypeContinuation = Boolean(lastType && nextFirst.type === lastType);
         const sectionTitleHeightPx = Math.round(20 * getFontSizeScaleFactor());
         const baseEstimate = nextFirst.estimatedHeight;
         const adjustedEstimate = sameTypeContinuation ? Math.max(0, baseEstimate - sectionTitleHeightPx) : baseEstimate;
-        const needed = pageHeight + addBuffer(adjustedEstimate, nextFirst.type);
+        const requiredHeight = addBuffer(adjustedEstimate, nextFirst.type);
 
         const softAllowance = nextFirst.type === 'education' ? (isIndustryManagerFormat ? 64 : 42)
           : nextFirst.type === 'summary' ? 28
           : nextFirst.type === 'skills' ? 40
           : 24;
 
-        const fits = needed <= effectiveAvailableHeight
-          || (!nextFirst.canSplit && needed <= (effectiveAvailableHeight + softAllowance));
+        const fits = requiredHeight <= (available + softAllowance);
+
+        if (DEBUG_PAGINATION) {
+          console.log('[Pagination] considering pull-forward', { pageIndex: i, nextType: nextFirst.type, availableSpace: available, requiredHeight, softAllowance, sameTypeContinuation, canSplit: nextFirst.canSplit, effectiveAvailableHeight, adjustedPageHeight, currentPageHeight: sumEstimatedHeight(page) });
+        }
 
         if (fits) {
           page.push({ ...nextFirst, estimatedHeight: adjustedEstimate, _suppressTitle: sameTypeContinuation });
@@ -832,7 +869,10 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
         }
 
         if (sameTypeContinuation && nextFirst.canSplit) {
-          const allowance = Math.max(0, effectiveAvailableHeight - pageHeight - getSectionPadding(nextFirst.type));
+          const allowance = Math.max(0, available - getSectionPadding(nextFirst.type));
+          if (DEBUG_PAGINATION) {
+            console.log('[Pagination] considering split', { pageIndex: i, allowance, nextType: nextFirst.type });
+          }
           if (allowance > 60) {
             const parts = splitLongContent(nextFirst.content, nextFirst.type, allowance);
             if (parts.length > 1) {
@@ -850,7 +890,10 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
           }
         }
 
-        if (next.length === 0) newPages.splice(i + 1, 1);
+        if (next.length === 0) {
+          if (DEBUG_PAGINATION) console.log('[Pagination] removed empty trailing page', { removedIndex: i + 1 });
+          newPages.splice(i + 1, 1);
+        }
       }
     }
     // If the last page only contains skills and would fit on the previous page, pull it back.
@@ -864,8 +907,35 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
       const sectionHeight = addBuffer(section.estimatedHeight, section.type);
       const tolerance = Math.max(32, getSectionPadding(section.type));
       if ((pageHeight + sectionHeight) <= (effectiveAvailableHeight + tolerance)) {
+        if (DEBUG_PAGINATION) {
+          console.log('[Pagination] pulling skills forward', { pageIndex: i, nextLength: next.length, pageHeight, sectionHeight, tolerance, effectiveAvailableHeight });
+        }
         page.push(section);
         newPages.splice(i + 1, 1);
+        i = Math.max(-1, i - 2);
+      }
+    }
+    // Pull education forward when whitespace remains on the current page.
+    for (let i = 0; i < newPages.length - 1; i += 1) {
+      const page = newPages[i];
+      const next = newPages[i + 1];
+      if (!page || !next || next.length === 0) continue;
+      const section = next[0];
+      if (!section || section.type !== 'education' || section.isContinuation) continue;
+      const pageHeight = sumEstimatedHeight(page);
+      const sectionHeight = addBuffer(section.estimatedHeight, section.type);
+      const trailingPadding = page.length ? getSectionPadding(page[page.length - 1].type) : 0;
+      const adjustedPageHeight = Math.max(0, pageHeight - trailingPadding);
+      const tolerance = Math.max(24, getSectionPadding(section.type));
+      if ((adjustedPageHeight + sectionHeight) <= (effectiveAvailableHeight + tolerance)) {
+        if (DEBUG_PAGINATION) {
+          console.log('[Pagination] pulling education forward', { pageIndex: i, nextLength: next.length, adjustedPageHeight, sectionHeight, tolerance, effectiveAvailableHeight, trailingPadding });
+        }
+        page.push({ ...section, _suppressTitle: false });
+        next.shift();
+        if (next.length === 0) {
+          newPages.splice(i + 1, 1);
+        }
         i = Math.max(-1, i - 2);
       }
     }
@@ -912,6 +982,44 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
         newPages[i + 1].unshift(popped);
       }
     }
+    if (newPages.length === 2) {
+      const firstPage = newPages[0];
+      const secondPage = newPages[1];
+      const firstPageTotal = firstPage.reduce((acc, section) => acc + (section?.estimatedHeight || 0), 0);
+      const secondTotal = secondPage.reduce((acc, section) => acc + (section?.estimatedHeight || 0), 0);
+      const trailingAllowance = Math.max(60, getSectionPadding(firstPage[firstPage.length - 1]?.type || 'default')) +
+        Math.max(24, getSectionPadding(secondPage[0]?.type || 'default'));
+      const fitsOnOnePage = (firstPageTotal + secondTotal) <= (effectiveAvailableHeight + trailingAllowance);
+      const secondTypes = secondPage.map((section) => section.type);
+      if (DEBUG_PAGINATION) {
+        console.log('[Pagination] post-pass merge evaluation', {
+          firstPageTypes: firstPage.map((section) => section.type),
+          secondTypes,
+          firstPageTotal,
+          secondTotal,
+          effectiveAvailableHeight,
+          trailingAllowance,
+          fitsOnOnePage,
+        });
+      }
+      if (fitsOnOnePage) {
+        if (DEBUG_PAGINATION) {
+          console.log('[Pagination] force-merging trailing sections onto page 1');
+        }
+        secondPage.forEach((section) => {
+          firstPage.push({ ...section, _suppressTitle: false });
+        });
+        newPages.splice(1, 1);
+      }
+    }
+    if (DEBUG_PAGINATION) {
+      console.log('[Pagination] final page structure', newPages.map((pageSections, pageIdx) => ({
+        page: pageIdx + 1,
+        types: pageSections.map((section) => section.type),
+        heights: pageSections.map((section) => section.estimatedHeight),
+        totalEstimated: pageSections.reduce((acc, section) => acc + (section?.estimatedHeight || 0), 0),
+      })));
+    }
     return newPages;
   };
   // Recalculate pages when data changes
@@ -919,6 +1027,16 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
     const newPages = splitContentIntoPages();
     setPages(newPages);
   }, [data, useConservativePaging]);
+
+  useEffect(() => {
+    if (DEBUG_PAGINATION) {
+      console.log('[Pagination] pages state updated', pages.map((pageSections, pageIdx) => ({
+        page: pageIdx + 1,
+        types: pageSections.map((section) => section.type),
+        totalEstimated: pageSections.reduce((acc, section) => acc + (section?.estimatedHeight || 0), 0),
+      })));
+    }
+  }, [pages, DEBUG_PAGINATION]);
   useEffect(() => {
     const node = contentRef.current;
     if (!node) {
