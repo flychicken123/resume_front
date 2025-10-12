@@ -547,26 +547,26 @@ const POPULAR_LOCATION_VALUES = POPULAR_LOCATION_GROUPS.flatMap((group) => group
 
 const steps = [
   "Import Resume",
+  "Template & Format",
   "Personal Details",
   "Job Description (Optional)",
   "Experience",
   "Projects",
   "Education",
   "Skills",
-  "Template & Format",
   "Summary",
   "Job Matches",
   "Cover Letter"
 ];
 const STEP_IDS = {
   IMPORT: 1,
-  PERSONAL: 2,
-  JOB_DESCRIPTION: 3,
-  EXPERIENCE: 4,
-  PROJECTS: 5,
-  EDUCATION: 6,
-  SKILLS: 7,
-  FORMAT: 8,
+  FORMAT: 2,
+  PERSONAL: 3,
+  JOB_DESCRIPTION: 4,
+  EXPERIENCE: 5,
+  PROJECTS: 6,
+  EDUCATION: 7,
+  SKILLS: 8,
   SUMMARY: 9,
   JOB_MATCHES: 10,
   COVER_LETTER: 11,
@@ -1928,10 +1928,8 @@ function BuilderPage() {
         formData.append('email', data.email || '');
         formData.append('phone', data.phone || '');
         
-        // Debug: Check FormData contents
-        for (let [key, value] of formData.entries()) {
-          console.log('FormData entry:', key, value);
-        }
+        // Force Chromium engine usage in backend
+        formData.append('engine', 'chromium-strict');
 
         // Get token directly and only set Authorization header
         const token = localStorage.getItem('resumeToken');
