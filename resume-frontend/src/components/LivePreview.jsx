@@ -57,24 +57,24 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
     return value;
   }
   const adjustmentSets = {
-    // Do not shrink estimates in aggressive mode; slightly inflate instead
+    // Keep aggressive mode close to measured height
     aggressive: {
-      header: { multiplier: 1.00, floor: 26 },
-      summary: { multiplier: 1.02, floor: 32 },
-      experience: { multiplier: 1.06, floor: 100 },
-      education: { multiplier: 1.02, floor: 30 },
-      projects: { multiplier: 1.06, floor: 68 },
-      skills: { multiplier: 1.04, floor: 36 },
-      default: { multiplier: 1.02, floor: 32 }
+      header: { multiplier: 1.00, floor: 24 },
+      summary: { multiplier: 1.01, floor: 30 },
+      experience: { multiplier: 1.04, floor: 92 },
+      education: { multiplier: 1.01, floor: 28 },
+      projects: { multiplier: 1.04, floor: 64 },
+      skills: { multiplier: 1.03, floor: 34 },
+      default: { multiplier: 1.01, floor: 30 }
     },
     conservative: {
-      header: { multiplier: 1.08, floor: 30 },
-      summary: { multiplier: 1.12, floor: 36 },
-      experience: { multiplier: 1.15, floor: 115 },
-      education: { multiplier: 1.08, floor: 36 },
-      projects: { multiplier: 1.15, floor: 78 },
-      skills: { multiplier: 1.10, floor: 40 },
-      default: { multiplier: 1.10, floor: 36 }
+      header: { multiplier: 1.06, floor: 28 },
+      summary: { multiplier: 1.1, floor: 34 },
+      experience: { multiplier: 1.12, floor: 110 },
+      education: { multiplier: 1.06, floor: 34 },
+      projects: { multiplier: 1.12, floor: 74 },
+      skills: { multiplier: 1.08, floor: 38 },
+      default: { multiplier: 1.08, floor: 34 }
     }
   };
   const mode = useConservativePaging ? 'conservative' : 'aggressive';
@@ -225,11 +225,11 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
     let currentHeight = 0;
     // Get font scale factor to adjust page capacity
     const fontScale = getFontSizeScaleFactor();
-    // Adjust available height based on font size - tuned to reduce false overflows
-    const pageUtilization = fontScale <= 1.0 ? 0.98  :   // Small
-                           fontScale <= 1.2 ? 0.965 :   // Medium (default)
-                           fontScale <= 1.5 ? 0.94  :   // Large
-                           0.92;                        // Extra-large
+    // Adjust available height based on font size - keep conservative so we split earlier
+    const pageUtilization = fontScale <= 1.0 ? 0.96  :   // Small
+                           fontScale <= 1.2 ? 0.94  :   // Medium (default)
+                           fontScale <= 1.5 ? 0.92  :   // Large
+                           0.90;                        // Extra-large
     let effectiveAvailableHeight = AVAILABLE_HEIGHT * pageUtilization;
     if (isIndustryManagerFormat && !useConservativePaging) {
       if (fontScale >= 1.5 && fontScale < 1.8) {
@@ -244,19 +244,19 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
       const hardLimit = AVAILABLE_HEIGHT - Math.max(16, Math.floor(marginByMode * 0.75));
       effectiveAvailableHeight = Math.min(effectiveAvailableHeight, marginLimit, hardLimit);
     }
-    const basePageBuffer = useConservativePaging ? 18 : 18;
+    const basePageBuffer = useConservativePaging ? 24 : 20;
     const bufferedLimit = AVAILABLE_HEIGHT - basePageBuffer;
     effectiveAvailableHeight = Math.min(effectiveAvailableHeight, bufferedLimit);
-    const hardPageLimit = AVAILABLE_HEIGHT - (useConservativePaging ? 32 : 36);
+    const hardPageLimit = AVAILABLE_HEIGHT - (useConservativePaging ? 40 : 34);
     effectiveAvailableHeight = Math.min(effectiveAvailableHeight, hardPageLimit);
     const sectionPadding = {
-      header: useConservativePaging ? 8 : 12,
-      summary: useConservativePaging ? 12 : 18,
-      experience: useConservativePaging ? 14 : 20,
-      projects: useConservativePaging ? 14 : 20,
-      education: useConservativePaging ? 12 : 18,
-      skills: useConservativePaging ? 10 : 16,
-      default: useConservativePaging ? 8 : 12
+      header: useConservativePaging ? 12 : 16,
+      summary: useConservativePaging ? 16 : 22,
+      experience: useConservativePaging ? 18 : 26,
+      projects: useConservativePaging ? 18 : 24,
+      education: useConservativePaging ? 16 : 22,
+      skills: useConservativePaging ? 14 : 22,
+      default: useConservativePaging ? 12 : 18
     };
     const getSectionPadding = (type) => sectionPadding[type] ?? sectionPadding.default;
     const addBuffer = (height, type) => {
@@ -939,6 +939,68 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
         i = Math.max(-1, i - 2);
       }
     }
+    // Generic pull forward: try to reclaim space across page boundaries for any section.
+    for (let i = 0; i < newPages.length - 1; i += 1) {
+      const page = newPages[i];
+      const next = newPages[i + 1];
+      if (!page || !next || next.length === 0) {
+        continue;
+      }
+      const section = next[0];
+      if (!section || section.isContinuation) {
+        continue;
+      }
+      const pageHeight = sumEstimatedHeight(page);
+      const trailingPadding = page.length ? getSectionPadding(page[page.length - 1].type) : 0;
+      const adjustedPageHeight = Math.max(0, pageHeight - trailingPadding);
+      const sectionHeight = addBuffer(section.estimatedHeight, section.type);
+      const tolerance = Math.max(24, getSectionPadding(section.type));
+      if ((adjustedPageHeight + sectionHeight) <= (effectiveAvailableHeight + tolerance)) {
+        if (DEBUG_PAGINATION) {
+          console.log('[Pagination] general pull-forward', {
+            pageIndex: i,
+            sectionType: section.type,
+            adjustedPageHeight,
+            sectionHeight,
+            tolerance,
+            effectiveAvailableHeight,
+          });
+        }
+        page.push({ ...section, _suppressTitle: false });
+        next.shift();
+        if (next.length === 0) {
+          newPages.splice(i + 1, 1);
+        }
+        i = Math.max(-1, i - 2);
+      }
+    }
+    // Ensure header pages are not left empty
+    for (let i = 0; i < newPages.length - 1; i += 1) {
+      const page = newPages[i];
+      const next = newPages[i + 1];
+      if (!page || page.length !== 1 || page[0].type !== 'header' || !next || next.length === 0) {
+        continue;
+      }
+      const candidate = next[0];
+      const pageHeight = sumEstimatedHeight(page);
+      const candidateHeight = addBuffer(candidate.estimatedHeight, candidate.type);
+      if ((pageHeight + candidateHeight) <= (effectiveAvailableHeight + getSectionPadding(candidate.type))) {
+        if (DEBUG_PAGINATION) {
+          console.log('[Pagination] header-only page fix, pulling section forward', {
+            sectionType: candidate.type,
+            pageIndex: i,
+            pageHeight,
+            candidateHeight,
+            effectiveAvailableHeight,
+          });
+        }
+        page.push({ ...candidate, _suppressTitle: false });
+        next.shift();
+        if (next.length === 0) {
+          newPages.splice(i + 1, 1);
+        }
+      }
+    }
     // Final safety pass: ensure no page exceeds available height.
     // If a page still overflows due to estimation error, move/split the
     // last section forward until it fits.
@@ -1019,6 +1081,15 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
         heights: pageSections.map((section) => section.estimatedHeight),
         totalEstimated: pageSections.reduce((acc, section) => acc + (section?.estimatedHeight || 0), 0),
       })));
+    }
+    // Safety: avoid header-only leading page
+    if (newPages.length > 1 && newPages[0].length === 1 && newPages[0][0]?.type === 'header') {
+      if (DEBUG_PAGINATION) {
+        console.log('[Pagination] collapsing header-only first page');
+      }
+      const headerSection = newPages[0][0];
+      newPages[1].unshift(headerSection);
+      newPages.shift();
     }
     return newPages;
   };
