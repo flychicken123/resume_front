@@ -41,6 +41,9 @@ const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setS
           >
             Builder
           </button>
+          <Link to="/#job-match" className="nav-link">
+            Job Match
+          </Link>
           {user && (
             <Link to="/history" className="nav-link">
               Resume History
@@ -110,6 +113,13 @@ const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setS
             >
               Builder
             </button>
+            <Link
+              to="/#job-match"
+              className="mobile-nav-link"
+              onClick={() => setShowMobileMenu(false)}
+            >
+              Job Match
+            </Link>
             {user && (
               <Link
                 to="/history"

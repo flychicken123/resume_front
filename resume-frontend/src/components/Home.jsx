@@ -125,6 +125,20 @@ const Home = () => {
             Builder
           </button>
 
+          <a
+            href="#job-match"
+            className="home-nav-link"
+            onClick={(e) => {
+              e.preventDefault();
+
+              document
+                .getElementById("job-match")
+                ?.scrollIntoView({ behavior: "smooth" });
+            }}
+          >
+            Job Match Resume
+          </a>
+
           {user && (
             <button
               className="home-nav-link"
@@ -339,6 +353,22 @@ const Home = () => {
               Builder
             </button>
 
+            <a
+              href="#job-match"
+              className="mobile-nav-link"
+              onClick={(e) => {
+                e.preventDefault();
+
+                document
+                  .getElementById("job-match")
+                  ?.scrollIntoView({ behavior: "smooth" });
+
+                setShowMobileMenu(false);
+              }}
+            >
+              Job Match Resume
+            </a>
+
             {user && (
               <button
                 className="mobile-nav-link"
@@ -503,69 +533,104 @@ const Home = () => {
         }}
       />
 
-      {/* Job Description Feature Section */}
+      {/* Job Match Resume Feature */}
 
-      <div className="home-jobdesc-feature">
-        <div className="home-jobdesc-feature-content">
-          <h2>🎯 Smart Job Matching & Resume Optimization</h2>
+      <div className="home-jobdesc-feature" id="job-match">
+        <div className="home-jobdesc-surface">
+          <div className="home-jobdesc-header">
+            <span className="home-jobdesc-pill">✨ New · Job Match Resume</span>
+            <h2>Tailor every resume to the job in front of you</h2>
+            <p>
+              Paste any job description and Job Match Resume highlights the must-have
+              skills, rewrites your bullet points with role-specific language, and
+              ships a polished, ATS-ready version in seconds.
+            </p>
+          </div>
 
-          <p>
-            Paste any job posting and we'll instantly customize your resume to
-            match what employers are looking for. Our system identifies critical
-            keywords, highlights relevant experience, and formats everything
-            professionally. Beat automated screening systems and get noticed by
-            hiring managers.
-          </p>
-
-          <div className="home-jobdesc-feature-benefits">
-            <div className="benefit-item">
-              <span>🔍 Keyword analysis & optimization</span>
+          <div className="home-jobmatch-grid">
+            <div className="home-jobmatch-card">
+              <div className="home-jobmatch-card-icon">📥</div>
+              <div className="home-jobmatch-card-title">Drop in the job post</div>
+              <p>
+                We scan the description to surface must-have skills, keywords, and hiring
+                priorities straight from the employer.
+              </p>
             </div>
 
-            <div className="benefit-item">
-              <span>📊 Smart skill prioritization</span>
+            <div className="home-jobmatch-card">
+              <div className="home-jobmatch-card-icon">✍️</div>
+              <div className="home-jobmatch-card-title">Rewrite your experience</div>
+              <p>
+                Bullet points get reshaped with role-specific phrasing, quantified wins,
+                and context that keeps your voice authentic.
+              </p>
             </div>
 
-            <div className="benefit-item">
-              <span>🎯 ATS-friendly formatting</span>
+            <div className="home-jobmatch-card">
+              <div className="home-jobmatch-card-icon">🚀</div>
+              <div className="home-jobmatch-card-title">Ship an ATS-ready resume</div>
+              <p>
+                Export a polished version with match scores, keyword coverage, and formatting
+                engineered to clear automated screeners.
+              </p>
             </div>
           </div>
 
-          <button
-            className="home-btn primary home-jobdesc-cta"
-            onClick={() => {
-              openBuilderFrom("home_jobdesc_cta");
-            }}
-          >
-            📝 Start Building Your Resume
-          </button>
+          <div className="home-jobmatch-flags">
+            <div className="home-jobmatch-flag">
+              <span className="home-jobmatch-flag-icon">🔍</span>
+              Extracts critical skills from any job description
+            </div>
+            <div className="home-jobmatch-flag">
+              <span className="home-jobmatch-flag-icon">🧠</span>
+              Mirrors the role with AI-tailored bullet points
+            </div>
+            <div className="home-jobmatch-flag">
+              <span className="home-jobmatch-flag-icon">📈</span>
+              Surfaces match score and ATS-ready keywords
+            </div>
+          </div>
+
+          <div className="home-jobdesc-ctaWrap">
+            <button
+              className="home-btn primary home-jobdesc-cta"
+              onClick={() => {
+                openBuilderFrom("home_jobdesc_cta");
+              }}
+            >
+              🚀 Try Job Match Resume
+            </button>
+            <span className="home-jobdesc-cta-note">No credit card required · instant resume tailoring</span>
+          </div>
         </div>
       </div>
 
       <div className="home-hero">
         <div className="home-hero-content">
           <div className="hero-main-content">
+            <div className="hero-badge">✨ New: Job Match Resume</div>
+
             <h1 className="hero-title">
-              📝 Build Professional Resumes & Land Your Dream Job
+              📝 Build Job-Matched Resumes That Land Interviews
             </h1>
 
             <p className="hero-subtitle">
-              Create stunning resumes that get noticed by employers and pass
-              through applicant tracking systems. From building your resume to
-              applying for jobs - we've got you covered.
+              Job Match Resume pairs our AI builder with role-specific tailoring
+              so every version mirrors the job you want. Paste a description and
+              instantly get recruiter-ready language that clears ATS screens.
             </p>
 
             <div className="hero-features">
               <div className="hero-feature">
-                <span>📝 Professional resume templates</span>
+                <span>🎯 Tailors achievements to each job post</span>
               </div>
 
               <div className="hero-feature">
-                <span>🎯 Optimized for job applications</span>
+                <span>🧠 AI suggestions backed by hiring data</span>
               </div>
 
               <div className="hero-feature">
-                <span>⚡ Apply to jobs instantly</span>
+                <span>📈 Instant ATS keyword insights</span>
               </div>
             </div>
 
@@ -575,8 +640,8 @@ const Home = () => {
                 onClick={handleStartBuilding}
               >
                 {user
-                  ? "📝 Continue Building Resume"
-                  : "🚀 Start Building Your Resume - Free!"}
+                  ? "📝 Continue with Job Match Resume"
+                  : "🚀 Try Job Match Resume - Free!"}
               </button>
             </div>
           </div>
