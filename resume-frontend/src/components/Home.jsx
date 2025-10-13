@@ -542,8 +542,8 @@ const Home = () => {
             <h2>Tailor every resume to the job in front of you</h2>
             <p>
               Paste any job description and Job Match Resume highlights the must-have
-              skills, rewrites your bullet points with role-specific language, and
-              ships a polished, ATS-ready version in seconds.
+              skills, maps them to your proven experience, and ships a polished,
+              ATS-ready version in seconds without fabricating anything.
             </p>
           </div>
 
@@ -559,10 +559,10 @@ const Home = () => {
 
             <div className="home-jobmatch-card">
               <div className="home-jobmatch-card-icon">✍️</div>
-              <div className="home-jobmatch-card-title">Rewrite your experience</div>
+              <div className="home-jobmatch-card-title">Refine your experience</div>
               <p>
-                Bullet points get reshaped with role-specific phrasing, quantified wins,
-                and context that keeps your voice authentic.
+                Bullet points get refreshed with role-specific phrasing, quantified wins,
+                and context that keeps your voice authentic while never inventing new experience.
               </p>
             </div>
 
@@ -583,7 +583,7 @@ const Home = () => {
             </div>
             <div className="home-jobmatch-flag">
               <span className="home-jobmatch-flag-icon">🧠</span>
-              Mirrors the role with AI-tailored bullet points
+              Aligns your real experience with role requirements
             </div>
             <div className="home-jobmatch-flag">
               <span className="home-jobmatch-flag-icon">📈</span>
@@ -616,13 +616,14 @@ const Home = () => {
 
             <p className="hero-subtitle">
               Job Match Resume pairs our AI builder with role-specific tailoring
-              so every version mirrors the job you want. Paste a description and
-              instantly get recruiter-ready language that clears ATS screens.
+              that keeps your real experience front and center. Paste a
+              description and instantly surface recruiter-ready language that
+              reflects what you already bring to the table.
             </p>
 
             <div className="hero-features">
               <div className="hero-feature">
-                <span>🎯 Tailors achievements to each job post</span>
+                <span>🎯 Highlights your proven achievements for each job</span>
               </div>
 
               <div className="hero-feature">
