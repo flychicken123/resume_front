@@ -136,7 +136,7 @@ const Home = () => {
                 ?.scrollIntoView({ behavior: "smooth" });
             }}
           >
-            Job Match Resume
+            Job Match
           </a>
 
           {user && (
@@ -160,6 +160,14 @@ const Home = () => {
             style={{ textDecoration: "none" }}
           >
             Pricing
+          </Link>
+
+          <Link
+            to="/terms"
+            className="home-nav-link"
+            style={{ textDecoration: "none" }}
+          >
+            Terms & Privacy
           </Link>
 
           {isAdmin && (
@@ -366,7 +374,7 @@ const Home = () => {
                 setShowMobileMenu(false);
               }}
             >
-              Job Match Resume
+              Job Match
             </a>
 
             {user && (
@@ -389,6 +397,15 @@ const Home = () => {
               style={{ textDecoration: "none" }}
             >
               Pricing
+            </Link>
+
+            <Link
+              to="/terms"
+              className="mobile-nav-link"
+              onClick={() => setShowMobileMenu(false)}
+              style={{ textDecoration: "none" }}
+            >
+              Terms & Privacy
             </Link>
 
             {isAdmin && (
@@ -533,15 +550,15 @@ const Home = () => {
         }}
       />
 
-      {/* Job Match Resume Feature */}
+      {/* Job Match Feature */}
 
       <div className="home-jobdesc-feature" id="job-match">
         <div className="home-jobdesc-surface">
           <div className="home-jobdesc-header">
-            <span className="home-jobdesc-pill">✨ New · Job Match Resume</span>
+            <span className="home-jobdesc-pill">✨ New · Job Match</span>
             <h2>Tailor every resume to the job in front of you</h2>
             <p>
-              Paste any job description and Job Match Resume highlights the must-have
+              Paste any job description and Job Match highlights the must-have
               skills, maps them to your proven experience, and ships a polished,
               ATS-ready version in seconds without fabricating anything.
             </p>
@@ -598,7 +615,7 @@ const Home = () => {
                 openBuilderFrom("home_jobdesc_cta");
               }}
             >
-              🚀 Try Job Match Resume
+              🚀 Try Job Match
             </button>
             <span className="home-jobdesc-cta-note">No credit card required · instant resume tailoring</span>
           </div>
@@ -608,14 +625,14 @@ const Home = () => {
       <div className="home-hero">
         <div className="home-hero-content">
           <div className="hero-main-content">
-            <div className="hero-badge">✨ New: Job Match Resume</div>
+            <div className="hero-badge">✨ New: Job Match</div>
 
             <h1 className="hero-title">
               📝 Build Job-Matched Resumes That Land Interviews
             </h1>
 
             <p className="hero-subtitle">
-              Job Match Resume pairs our AI builder with role-specific tailoring
+              Job Match pairs our AI builder with role-specific tailoring
               that keeps your real experience front and center. Paste a
               description and instantly surface recruiter-ready language that
               reflects what you already bring to the table.
@@ -641,8 +658,8 @@ const Home = () => {
                 onClick={handleStartBuilding}
               >
                 {user
-                  ? "📝 Continue with Job Match Resume"
-                  : "🚀 Try Job Match Resume - Free!"}
+                  ? "📝 Continue with Job Match"
+                  : "🚀 Try Job Match - Free!"}
               </button>
             </div>
           </div>
@@ -1008,6 +1025,29 @@ const Home = () => {
       {/* Contact Section */}
 
       <Contact />
+
+      <footer
+        style={{
+          marginTop: '60px',
+          padding: '40px 20px',
+          borderTop: '1px solid #e2e8f0',
+          textAlign: 'center',
+          color: '#64748b',
+          fontSize: '0.95rem',
+        }}
+      >
+        <div style={{ maxWidth: '960px', margin: '0 auto' }}>
+          <span>© {new Date().getFullYear()} HiHired. All rights reserved.</span>
+          <span style={{ margin: '0 12px' }}>•</span>
+          <Link to="/terms" style={{ color: '#2563eb', fontWeight: 600 }}>
+            Terms of Service
+          </Link>
+          <span style={{ margin: '0 12px' }}>•</span>
+          <Link to="/privacy" style={{ color: '#2563eb', fontWeight: 600 }}>
+            Privacy Policy
+          </Link>
+        </div>
+      </footer>
     </div>
   );
 };
