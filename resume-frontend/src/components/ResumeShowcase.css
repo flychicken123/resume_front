@@ -24,19 +24,21 @@
 }
 
 .resume-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 30px;
   margin-bottom: 50px;
 }
 
 .resume-example {
+  display: flex;
+  align-items: stretch;
+  gap: 32px;
   background: white;
-  border-radius: 12px;
-  overflow: hidden;
+  border-radius: 16px;
+  padding: 28px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  cursor: default;
 }
 
 .resume-example:hover {
@@ -44,12 +46,30 @@
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
 }
 
-.resume-image {
-  width: 100%;
-  height: 400px;
-  object-fit: cover;
-  object-position: top;
-  display: block;
+.resume-example .template-thumbnail-wrapper {
+  flex-shrink: 0;
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.12);
+}
+
+.resume-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+}
+
+.resume-name {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.resume-description {
+  font-size: 16px;
+  color: #475569;
+  margin: 0;
+  line-height: 1.6;
 }
 
 .showcase-benefits {
@@ -92,13 +112,14 @@
     font-size: 16px;
   }
 
-  .resume-grid {
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  .resume-example {
+    flex-direction: column;
     gap: 20px;
+    padding: 22px;
   }
 
-  .resume-image {
-    height: 350px;
+  .resume-example .template-thumbnail-wrapper {
+    width: 100%;
   }
 
   .showcase-benefits {
@@ -114,14 +135,6 @@
 @media (max-width: 480px) {
   .showcase-title {
     font-size: 24px;
-  }
-
-  .resume-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .resume-image {
-    height: 300px;
   }
 
   .benefit {

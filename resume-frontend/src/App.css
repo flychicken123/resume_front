@@ -549,6 +549,9 @@ button:disabled {
   padding-left: 12pt;
   margin-bottom: 3pt;
   font-size: var(--font-size-content);
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .preview.executive-serif .skills-grid li::before {

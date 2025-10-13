@@ -2,8 +2,9 @@ import React, { useEffect } from 'react';
 import { useResume } from '../context/ResumeContext';
 import { TEMPLATE_SLUGS, DEFAULT_TEMPLATE_ID, normalizeTemplateId } from '../constants/templates';
 
-const StepPreview = ({ onDownload }) => {
-  const { data } = useResume();
+const StepPreview = ({ onDownload, hideActions = false, dataOverride }) => {
+  const resumeContext = useResume();
+  const data = dataOverride || resumeContext.data;
   const normalizedFormat = normalizeTemplateId(data.selectedFormat);
   const toText = (val) => {
     if (val == null) return '';
@@ -258,21 +259,36 @@ const isIndustryManager = normalizedFormat === TEMPLATE_SLUGS.EXECUTIVE_SERIF;
       const columnCountResolved = activeColumns.length || 1;
 
       return (
-        <div className="skills-grid">
+        <div
+          className="skills-grid"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: `repeat(${columnCountResolved}, minmax(0, 1fr))`,
+            columnGap: '16pt',
+            rowGap: '8pt',
+            width: '100%',
+          }}
+        >
           {activeColumns.map((column, columnIdx) => (
             <ul
               key={columnIdx}
               className="skills-column"
               style={{
-                width: `${100 / columnCountResolved}%`,
-                paddingRight: columnIdx < columnCountResolved - 1 ? '18pt' : 0,
-                display: 'inline-block',
-                verticalAlign: 'top',
-                boxSizing: 'border-box'
+                listStyle: 'none',
+                margin: 0,
+                padding: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8pt',
+                minWidth: 0,
+                wordBreak: 'break-word',
+                overflowWrap: 'anywhere'
               }}
             >
               {column.map((skill, skillIdx) => (
-                <li key={`${columnIdx}-${skillIdx}`}>{skill}</li>
+                <li key={`${columnIdx}-${skillIdx}`} style={{ minWidth: 0 }}>
+                  {skill}
+                </li>
               ))}
             </ul>
           ))}
@@ -381,41 +397,43 @@ const isIndustryManager = normalizedFormat === TEMPLATE_SLUGS.EXECUTIVE_SERIF;
           </>
         )}
         
-        <div style={{ 
-          textAlign: 'center', 
-          marginTop: 'auto',
-          marginBottom: '2rem',
-          padding: '1rem',
-          position: 'relative',
-          zIndex: 10,
-          flexShrink: 0
-        }}>
-          <button 
-            onClick={onDownload} 
-            style={{ 
-              padding: '0.75rem 2rem', 
-              fontSize: '0.9rem', 
-              fontWeight: 600,
-              backgroundColor: '#3b82f6',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseOver={(e) => {
-              e.target.style.backgroundColor = '#2563eb';
-              e.target.style.transform = 'translateY(-1px)';
-            }}
-            onMouseOut={(e) => {
-              e.target.style.backgroundColor = '#3b82f6';
-              e.target.style.transform = 'translateY(0)';
-            }}
-          >
-            Download Resume
-          </button>
-        </div>
+        {!hideActions && (
+          <div style={{ 
+            textAlign: 'center', 
+            marginTop: 'auto',
+            marginBottom: '2rem',
+            padding: '1rem',
+            position: 'relative',
+            zIndex: 10,
+            flexShrink: 0
+          }}>
+            <button 
+              onClick={onDownload} 
+              style={{ 
+                padding: '0.75rem 2rem', 
+                fontSize: '0.9rem', 
+                fontWeight: 600,
+                backgroundColor: '#3b82f6',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseOver={(e) => {
+                e.target.style.backgroundColor = '#2563eb';
+                e.target.style.transform = 'translateY(-1px)';
+              }}
+              onMouseOut={(e) => {
+                e.target.style.backgroundColor = '#3b82f6';
+                e.target.style.transform = 'translateY(0)';
+              }}
+            >
+              Download Resume
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

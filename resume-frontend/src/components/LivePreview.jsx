@@ -16,6 +16,10 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload, downloadNotice })
   const [pages, setPages] = useState([]);
   const [useConservativePaging, setUseConservativePaging] = useState(false);
   const isIndustryManagerFormat = (selectedFormat === TEMPLATE_SLUGS.EXECUTIVE_SERIF);
+  // Reset paging heuristics whenever template changes so new format starts fresh
+  useEffect(() => {
+    setUseConservativePaging(false);
+  }, [selectedFormat]);
   // Normalize any value into safe display text
   const toText = (val) => {
     if (val == null) return '';
@@ -218,6 +222,17 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
         return applyFormatAdjustment(20, 'default');
     }
   };
+  const adjustSkillContentEstimate = (contentHeight, { includeHeader = false } = {}) => {
+    const fontScale = getFontSizeScaleFactor();
+    if (!isIndustryManagerFormat) {
+      return includeHeader ? contentHeight + Math.round(18 * fontScale) : contentHeight;
+    }
+    const headerAllowance = includeHeader ? Math.round(18 * fontScale) : 0;
+    const base = contentHeight + headerAllowance;
+    const multiplier = includeHeader ? 1.12 : 1.06;
+    const extra = includeHeader ? 12 : 6;
+    return Math.round(base * multiplier + extra);
+  };
   // Split content into pages based on estimated heights
   const splitContentIntoPages = () => {
     const newPages = [];
@@ -294,9 +309,11 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
         const items = parseSkills(content);
         if (!items || items.length === 0) return [content];
         const columnCount = isIndustryManagerFormat ? 2 : 1;
-        const perLine = Math.max(10, Math.round((isIndustryManagerFormat ? 70 : 140) / fontScale));
-        const lineHeight = Math.round(13 * fontScale);
+        const perLine = Math.max(10, Math.round((isIndustryManagerFormat ? 64 : 120) / fontScale));
+        const lineHeight = Math.round(12 * fontScale);
         const itemGap = Math.max(2, Math.round(2 * fontScale));
+        const rowGap = Math.max(4, Math.round(4 * fontScale));
+        const heightAllowance = Math.max(0, maxHeight - rowGap);
         // Estimate height for a set of items laid out in columns
         const estimateSetHeight = (arr) => {
           if (arr.length === 0) return 0;
@@ -304,22 +321,26 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
           for (const skill of arr) {
             const clean = String(skill).trim();
             const lines = Math.max(1, Math.ceil(clean.length / perLine));
-            const h = lines * lineHeight + itemGap;
+            const h = (lines * lineHeight) + itemGap;
             // Greedy: place into shortest column
             let idx = 0;
             for (let i = 1; i < columnCount; i++) {
               if (colHeights[i] < colHeights[idx]) idx = i;
             }
+            if (colHeights[idx] > 0) {
+              colHeights[idx] += rowGap;
+            }
             colHeights[idx] += h;
           }
           return Math.max(...colHeights);
         };
+        const fitsWithinLimit = (arr) => estimateSetHeight(arr) <= heightAllowance;
         const parts = [];
         let current = [];
         for (let i = 0; i < items.length; i++) {
           const next = [...current, items[i]];
           const heightWithNext = estimateSetHeight(next);
-          if (heightWithNext <= maxHeight || current.length === 0) {
+          if (heightWithNext <= heightAllowance || current.length === 0) {
             current = next;
           } else {
             parts.push(current);
@@ -327,6 +348,54 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
           }
         }
         if (current.length) parts.push(current);
+        // Ensure each chunk stays within height limit by shifting overflow forward
+        for (let i = 0; i < parts.length; i++) {
+          while (!fitsWithinLimit(parts[i]) && parts[i].length > 1) {
+            const spill = parts[i].pop();
+            if (!parts[i + 1]) {
+              parts[i + 1] = [];
+            }
+            parts[i + 1].unshift(spill);
+          }
+        }
+        // Balance items between adjacent parts to reduce large gaps
+        if (parts.length > 1) {
+          for (let idx = parts.length - 1; idx > 0; idx--) {
+            const prev = parts[idx - 1];
+            const curr = parts[idx];
+            let moved = false;
+            while (curr.length > 0) {
+              const candidate = [...prev, curr[0]];
+              if (fitsWithinLimit(candidate)) {
+                prev.push(curr.shift());
+                moved = true;
+              } else {
+                break;
+              }
+            }
+            if (curr.length === 0) {
+              parts.splice(idx, 1);
+            } else if (!moved && prev.length > 1) {
+              // Try moving last item from prev to current if prev still too short
+              if (estimateSetHeight(prev) <= heightAllowance * 0.85) {
+                curr.unshift(prev.pop());
+                if (!fitsWithinLimit(curr)) {
+                  prev.push(curr.shift());
+                }
+              }
+            }
+          }
+        }
+        // Final safety pass in case balancing reintroduced overflow
+        for (let i = 0; i < parts.length; i++) {
+          while (!fitsWithinLimit(parts[i]) && parts[i].length > 1) {
+            const spill = parts[i].pop();
+            if (!parts[i + 1]) {
+              parts[i + 1] = [];
+            }
+            parts[i + 1].unshift(spill);
+          }
+        }
         // Convert parts back to strings so downstream parsing still works
         return parts.map(p => p.join(', '));
       }
@@ -620,8 +689,8 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
     if (data.skills) {
       const skillsText = toText(data.skills);
       if (skillsText) {
-        const sectionTitleHeight = Math.round(20 * fontScale); // Add height for section title
-        const skillsHeight = estimateSectionHeight(skillsText, 'skills') + sectionTitleHeight;
+        const rawSkillsHeight = estimateSectionHeight(skillsText, 'skills');
+        const skillsHeight = adjustSkillContentEstimate(rawSkillsHeight, { includeHeader: true });
         allSections.push({
           type: 'skills',
           content: skillsText,
@@ -669,6 +738,13 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
         const minSpaceToSplit = isIndustryManagerFormat ? (useConservativePaging ? 85 : 65) : 100;
         
         const rawRemainingHeight = Math.max(0, remainingHeight - getSectionPadding(section.type));
+        const computePartHeight = (partContent, includeHeader = false) => {
+          let height = estimateSectionHeight(partContent, section.type);
+          if (section.type === 'skills') {
+            height = adjustSkillContentEstimate(height, { includeHeader });
+          }
+          return height;
+        };
         if (rawRemainingHeight > minSpaceToSplit) {
           const parts = splitLongContent(section.content, section.type, rawRemainingHeight);
           
@@ -681,7 +757,7 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
             // We got split parts - add them even if just one part fits
             
             // Add first part to current page
-            const firstPartHeight = estimateSectionHeight(parts[0], section.type);
+            const firstPartHeight = computePartHeight(parts[0], true);
             addToCurrentPage({
               ...section,
               content: parts[0],
@@ -696,7 +772,7 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
               
               // Add remaining parts
               for (let i = 1; i < parts.length; i++) {
-                const partHeight = estimateSectionHeight(parts[i], section.type);
+                const partHeight = computePartHeight(parts[i], false);
                 const isLast = i === parts.length - 1;
                 
                 if (canFitOnCurrentPage(partHeight, section.type)) {
@@ -723,20 +799,20 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
             sectionIndex++;
           } else {
             // Can't split effectively on this page; try on a fresh page
-            startNewPage();
-            const fullPageAvailable = Math.max(0, effectiveAvailableHeight - getSectionPadding(section.type));
-            if (fullPageAvailable > minSpaceToSplit) {
-              const partsOnNew = splitLongContent(section.content, section.type, fullPageAvailable);
-              if (partsOnNew.length > 1) {
-                const firstPartHeight = estimateSectionHeight(partsOnNew[0], section.type);
-                addToCurrentPage({ ...section, content: partsOnNew[0], estimatedHeight: firstPartHeight, isContinued: true });
-                for (let i = 1; i < partsOnNew.length; i++) {
-                  const partHeight = estimateSectionHeight(partsOnNew[i], section.type);
-                  if (!canFitOnCurrentPage(partHeight, section.type)) startNewPage();
-                  addToCurrentPage({ ...section, content: partsOnNew[i], estimatedHeight: partHeight, isContinuation: i > 0, isContinued: i < partsOnNew.length - 1 });
-                }
-                sectionIndex++;
-              } else {
+              startNewPage();
+              const fullPageAvailable = Math.max(0, effectiveAvailableHeight - getSectionPadding(section.type));
+              if (fullPageAvailable > minSpaceToSplit) {
+                const partsOnNew = splitLongContent(section.content, section.type, fullPageAvailable);
+                if (partsOnNew.length > 1) {
+                  const firstPartHeight = computePartHeight(partsOnNew[0], true);
+                  addToCurrentPage({ ...section, content: partsOnNew[0], estimatedHeight: firstPartHeight, isContinued: true });
+                  for (let i = 1; i < partsOnNew.length; i++) {
+                    const partHeight = computePartHeight(partsOnNew[i], false);
+                    if (!canFitOnCurrentPage(partHeight, section.type)) startNewPage();
+                    addToCurrentPage({ ...section, content: partsOnNew[i], estimatedHeight: partHeight, isContinuation: i > 0, isContinued: i < partsOnNew.length - 1 });
+                  }
+                  sectionIndex++;
+                } else {
                 addToCurrentPage(section);
                 sectionIndex++;
               }
@@ -752,10 +828,10 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
           if (fullPageAvailable > minSpaceToSplit) {
             const partsOnNew = splitLongContent(section.content, section.type, fullPageAvailable);
             if (partsOnNew.length > 1) {
-              const firstPartHeight = estimateSectionHeight(partsOnNew[0], section.type);
+              const firstPartHeight = computePartHeight(partsOnNew[0], true);
               addToCurrentPage({ ...section, content: partsOnNew[0], estimatedHeight: firstPartHeight, isContinued: true });
               for (let i = 1; i < partsOnNew.length; i++) {
-                const partHeight = estimateSectionHeight(partsOnNew[i], section.type);
+                const partHeight = computePartHeight(partsOnNew[i], false);
                 if (!canFitOnCurrentPage(partHeight, section.type)) startNewPage();
                 addToCurrentPage({ ...section, content: partsOnNew[i], estimatedHeight: partHeight, isContinuation: i > 0, isContinued: i < partsOnNew.length - 1 });
               }
@@ -1314,7 +1390,9 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
             padding: 0,
             margin: 0,
             width: '50%',
-            boxSizing: 'border-box'
+            boxSizing: 'border-box',
+            wordBreak: 'break-word',
+            overflowWrap: 'anywhere'
           },
           skillsColumnSpacing: `${8 * scaleFactor}px`,
           skillItem: {
@@ -1338,7 +1416,9 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
             flex: 1,
             fontSize: `${bodyFont}px`,
             color: '#374151',
-            lineHeight: '1.3'
+            lineHeight: '1.3',
+            wordBreak: 'break-word',
+            overflowWrap: 'anywhere'
           },
           skillMarkerChar: '▪',
           item: { marginTop: `${3 * scaleFactor}px` }
@@ -1489,22 +1569,77 @@ const parseSkills = (value) => {
       const activeColumns = columns.filter((column) => column.length > 0);
       const columnCountResolved = activeColumns.length || 1;
       const skillMarkerChar = styles.skillMarkerChar || '▪';
+      const columnGap = styles.skillsColumnSpacing || '12pt';
+      const rowGap = styles.skillRowGap || '8pt';
+      const markerStyle = {
+        ...(styles.skillMarker || {
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '18px',
+          minWidth: '18px',
+          fontSize: '11px',
+          color: '#39A5B7',
+          lineHeight: '1.2',
+        }),
+        marginRight: 0,
+      };
+      const textStyle = {
+        ...(styles.skillText || {
+          flex: 1,
+          fontSize: '11px',
+          color: '#374151',
+          lineHeight: '1.3',
+        }),
+        flex: 1,
+        minWidth: 0,
+        wordBreak: 'break-word',
+        overflowWrap: 'anywhere',
+      };
+      const baseItemStyle = {
+        ...(styles.skillItem || {}),
+      };
+      baseItemStyle.display = 'flex';
+      baseItemStyle.alignItems = baseItemStyle.alignItems || 'flex-start';
+      if (!('gap' in baseItemStyle)) {
+        baseItemStyle.gap = columnGap;
+      }
+      if (!('margin' in baseItemStyle) && !('marginBottom' in baseItemStyle)) {
+        baseItemStyle.margin = 0;
+      }
+      const gridStyle = {
+        ...(styles.skillsGrid || {}),
+        display: 'grid',
+        gridTemplateColumns: `repeat(${columnCountResolved}, minmax(0, 1fr))`,
+        columnGap,
+        rowGap,
+        width: '100%',
+      };
       return (
-        <div style={styles.skillsGrid}>
+        <div style={gridStyle}>
           {activeColumns.map((column, columnIdx) => {
             const columnStyle = {
               ...(styles.skillsColumn || {}),
-              width: `${100 / columnCountResolved}%`
+              listStyle: 'none',
+              margin: 0,
+              padding: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: rowGap,
+              minWidth: 0,
             };
-            if (styles.skillsColumnSpacing && columnIdx < columnCountResolved - 1) {
-              columnStyle.paddingRight = styles.skillsColumnSpacing;
-            }
             return (
               <ul key={columnIdx} style={columnStyle}>
                 {column.map((skill, skillIdx) => (
-                  <li key={`${columnIdx}-${skillIdx}`} style={styles.skillItem || { display: 'flex', alignItems: 'flex-start', marginBottom: '8px' }}>
-                    <span style={styles.skillMarker || { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '18px', minWidth: '18px', fontSize: '11px', color: '#39A5B7', lineHeight: '1.2', marginRight: '8px' }}>{skillMarkerChar}</span>
-                    <span style={styles.skillText || { flex: 1, fontSize: '11px', color: '#374151', lineHeight: '1.3' }}>{skill}</span>
+                  <li
+                    key={`${columnIdx}-${skillIdx}`}
+                    style={{
+                      ...(styles.skillItem || {}),
+                      ...baseItemStyle,
+                    }}
+                  >
+                    <span style={markerStyle}>{skillMarkerChar}</span>
+                    <span style={textStyle}>{skill}</span>
                   </li>
                 ))}
               </ul>
