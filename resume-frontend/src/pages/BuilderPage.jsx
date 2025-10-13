@@ -573,15 +573,7 @@ const STEP_IDS = {
 };
 
 function BuilderPage() {
-  const [step, setStep] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const seenImport = window.localStorage.getItem('resumeImportSeen');
-      if (seenImport === 'true') {
-        return STEP_IDS.PERSONAL;
-      }
-    }
-    return STEP_IDS.IMPORT;
-  });
+  const [step, setStep] = useState(STEP_IDS.FORMAT);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);

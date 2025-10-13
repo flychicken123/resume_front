@@ -1,0 +1,54 @@
+.template-thumbnail-wrapper {
+  position: relative;
+  width: min(100%, 320px);
+  margin: 0 auto;
+  aspect-ratio: 8.5 / 11;
+  overflow: hidden;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  border: none;
+  transition: transform 0.25s ease;
+}
+
+.template-thumbnail-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 8.5in;
+  height: 11in;
+  transform-origin: top left;
+}
+
+.template-thumbnail-canvas {
+  width: 8.5in;
+  min-height: 11in;
+  border-radius: 0 !important;
+  background: transparent;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.template-thumbnail-canvas .preview-container {
+  min-height: 11in !important;
+  padding-bottom: 0 !important;
+}
+
+.template-thumbnail-canvas .preview-container > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.template-thumbnail-wrapper * {
+  pointer-events: none !important;
+}
+
+.template-thumbnail-image {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.18);
+}

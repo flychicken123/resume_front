@@ -2,6 +2,8 @@ import React from 'react';
 import { useResume } from '../context/ResumeContext';
 import { TEMPLATE_OPTIONS, normalizeTemplateId } from '../constants/templates';
 import { trackReferrer, trackBuilderStart } from './Analytics';
+import TemplateThumbnail from './TemplateThumbnail';
+import './StepFormat.css';
 
 const StepFormat = ({ onNext }) => {
   const { data, setData } = useResume();
@@ -30,6 +32,8 @@ const StepFormat = ({ onNext }) => {
     setData(prevData => ({ ...prevData, selectedFontSize: fontSizeId }));
   };
 
+  const selectedFormatId = normalizeTemplateId(data.selectedFormat);
+
   return (
     <div className="step-content" style={{ 
       flex: 'none', 
@@ -42,20 +46,24 @@ const StepFormat = ({ onNext }) => {
 
       <div style={{ marginBottom: '1rem' }}>
         <h3 style={{ marginBottom: '0.75rem' }}>Templates</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '0.75rem' }}>
+        <div className="template-options-grid">
           {formats.map((format) => (
             <div
               key={format.id}
               onClick={() => handleFormatSelect(format.id)}
               style={{
                 padding: '0.75rem',
-                border: data.selectedFormat === format.id ? '2px solid #3b82f6' : '2px solid #e5e7eb',
-                borderRadius: '6px',
+                border: selectedFormatId === format.id ? '2px solid #3b82f6' : '1px solid #e5e7eb',
+                borderRadius: '10px',
                 cursor: 'pointer',
-                backgroundColor: data.selectedFormat === format.id ? '#f0f9ff' : 'white',
-                transition: 'all 0.2s ease'
+                backgroundColor: selectedFormatId === format.id ? '#eff6ff' : '#ffffff',
+                transition: 'all 0.2s ease',
+                boxShadow: selectedFormatId === format.id ? '0 12px 26px rgba(59, 130, 246, 0.18)' : '0 4px 12px rgba(15, 23, 42, 0.06)',
               }}
             >
+              <div style={{ marginBottom: '0.6rem' }}>
+                <TemplateThumbnail templateId={format.id} width={190} />
+              </div>
               <h4 style={{ margin: '0 0 0.25rem 0', color: '#1f2937', fontSize: '1rem' }}>{format.name}</h4>
               <p style={{ margin: 0, color: '#6b7280', fontSize: '0.85rem' }}>{format.description}</p>
             </div>

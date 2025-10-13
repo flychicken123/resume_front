@@ -16,7 +16,7 @@ const getAPIBaseURL = () => {
 
 const API_BASE_URL = getAPIBaseURL();
 
-const ResumeContext = createContext();
+export const ResumeContext = createContext();
 
 const createDefaultResumeData = () => ({
   name: "",

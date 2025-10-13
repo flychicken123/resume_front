@@ -24,19 +24,19 @@ export const TEMPLATE_OPTIONS = [
     id: TEMPLATE_SLUGS.CLASSIC_PROFESSIONAL,
     name: 'Classic Professional',
     description: 'Traditional layout with clean typography, perfect for corporate environments',
-    image: '/templates/classic.jpg',
+    image: '/templates/classic.svg',
   },
   {
     id: TEMPLATE_SLUGS.MODERN_CLEAN,
     name: 'Modern Clean',
     description: 'Contemporary design with blue accents, ideal for tech and creative industries',
-    image: '/templates/modern.jpg',
+    image: '/templates/modern.svg',
   },
   {
     id: TEMPLATE_SLUGS.EXECUTIVE_SERIF,
     name: 'Executive Serif',
     description: 'Executive style with refined serif typography, great for leadership roles',
-    image: '/templates/executive.jpg',
+    image: '/templates/executive.svg',
   },
 ];
 
