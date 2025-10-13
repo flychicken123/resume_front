@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
+import { Link } from 'react-router-dom';
 import { trackUserLogin, trackGoogleUserRegistration } from '../Analytics';
 
 const Login = ({ onLogin, onClose, contextMessage }) => {
@@ -8,9 +9,37 @@ const Login = ({ onLogin, onClose, contextMessage }) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [mode, setMode] = useState('login'); // 'login' or 'signup'
+  const [acceptedPolicies, setAcceptedPolicies] = useState(false);
+  const [pendingGoogleAuth, setPendingGoogleAuth] = useState(null);
+
+  useEffect(() => {
+    setAcceptedPolicies(false);
+    setError('');
+    setPendingGoogleAuth(null);
+  }, [mode]);
+
+  const needsConsent = mode === 'signup';
+  const consentRequired = needsConsent && !acceptedPolicies;
+
+  useEffect(() => {
+    if (pendingGoogleAuth && !consentRequired) {
+      const { token, userPayload, isNewUser } = pendingGoogleAuth;
+      setError('');
+      trackUserLogin('google_oauth');
+      if (isNewUser) {
+        trackGoogleUserRegistration();
+      }
+      onLogin(userPayload, token);
+      setPendingGoogleAuth(null);
+    }
+  }, [pendingGoogleAuth, acceptedPolicies, onLogin]);
 
   const handleGoogleLogin = async (googleToken, email) => {
     try {
+      if (consentRequired) {
+        setError('Please accept the Terms & Privacy before signing up.');
+        return;
+      }
       setError('');
       
       // Decode the Google token to get user information
@@ -48,19 +77,22 @@ const Login = ({ onLogin, onClose, contextMessage }) => {
       
       if (result.success) {
         console.log('Google login successful, token:', result.token);
-        
-        // Track Google login
-        trackUserLogin('google_oauth');
-        
-        // Check if this is a new user registration
-        if (result.message && result.message.includes('created')) {
-          trackGoogleUserRegistration();
-        }
         const userPayload = result.user || {
           email,
           name: decodedToken?.name || email,
           is_admin: result.user?.is_admin ?? false,
         };
+        const isNewUser = !!(result.message && result.message.toLowerCase().includes('created'));
+        if (isNewUser && !acceptedPolicies) {
+          setMode('signup');
+          setPendingGoogleAuth({ token: result.token, userPayload, isNewUser });
+          setError('We created your account. Please review and accept the Terms & Privacy to finish signing up.');
+          return;
+        }
+        trackUserLogin('google_oauth');
+        if (isNewUser) {
+          trackGoogleUserRegistration();
+        }
         onLogin(userPayload, result.token);
       } else {
         console.log('Google login failed:', result.message);
@@ -76,6 +108,10 @@ const Login = ({ onLogin, onClose, contextMessage }) => {
     e.preventDefault();
     if (!email || !password) {
       setError('Please enter both email and password.');
+      return;
+    }
+    if (consentRequired) {
+      setError('Please accept the Terms & Privacy before signing up.');
       return;
     }
     // Remove name validation since we use email as name
@@ -199,6 +235,24 @@ const Login = ({ onLogin, onClose, contextMessage }) => {
             margin-bottom: 0.2rem !important;
             display: block !important;
           }
+          .compact-login-modal .inline-checkbox {
+            display: flex !important;
+            align-items: flex-start !important;
+            gap: 8px !important;
+            font-size: 0.8rem !important;
+            color: #475569 !important;
+            margin-bottom: 0.75rem !important;
+          }
+          .compact-login-modal .inline-checkbox input {
+            width: auto !important;
+            height: auto !important;
+            margin: 3px 0 0 0 !important;
+            flex: 0 0 auto !important;
+          }
+          .compact-login-modal .inline-checkbox span {
+            flex: 1 1 auto !important;
+            line-height: 1.45 !important;
+          }
           .compact-login-modal h2 {
             font-size: 1.1rem !important;
             margin-bottom: 0.8rem !important;
@@ -288,37 +342,49 @@ const Login = ({ onLogin, onClose, contextMessage }) => {
           {contextMessage}
         </div>
       )}
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
-        <GoogleLogin
-          onSuccess={credentialResponse => {
-            console.log('Google login success:', credentialResponse);
-            const info = decodeJwt(credentialResponse.credential);
-            if (info && info.email) {
-              // For Google OAuth, we need to call the backend to validate the token
-              // and get a proper JWT token for our app
-              handleGoogleLogin(credentialResponse.credential, info.email);
-            } else {
-              setError('Google login failed: could not get email');
-            }
-          }}
-          onError={(error) => {
-            console.error('Google login error:', error);
-            if (process.env.NODE_ENV === 'development') {
-              setError('Google OAuth not configured for localhost. Please use email/password login or configure Google OAuth client ID for localhost:3000.');
-            } else {
-              setError('Google login failed. Please try email/password login instead.');
-            }
-          }}
-          width="100%"
-          size="large"
-        />
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          marginBottom: '1rem',
+        }}
+      >
+        <div style={{ width: '100%' }}>
+          <GoogleLogin
+            onSuccess={credentialResponse => {
+              console.log('Google login success:', credentialResponse);
+              const info = decodeJwt(credentialResponse.credential);
+              if (info && info.email) {
+                handleGoogleLogin(credentialResponse.credential, info.email);
+              } else {
+                setError('Google login failed: could not get email');
+              }
+            }}
+            onError={(error) => {
+              console.error('Google login error:', error);
+              if (process.env.NODE_ENV === 'development') {
+                setError('Google OAuth not configured for localhost. Please use email/password login or configure Google OAuth client ID for localhost:3000.');
+              } else {
+                setError('Google login failed. Please try email/password login instead.');
+              }
+            }}
+            width="100%"
+            size="large"
+          />
+        </div>
       </div>
+      {pendingGoogleAuth && consentRequired && (
+        <div style={{ textAlign: 'center', fontSize: '0.8rem', color: '#f97316', marginTop: '0.5rem', marginBottom: '0.75rem', fontWeight: 600 }}>
+          We created your account. Please review and accept the Terms & Privacy to finish signing up.
+        </div>
+      )}
       <form onSubmit={handleSubmit}>
         <label style={{ fontSize: '0.8rem', marginBottom: '0.2rem', display: 'block' }}>Email</label>
         <input
           type="email"
           value={email}
           onChange={e => setEmail(e.target.value)}
+          disabled={!!pendingGoogleAuth}
           placeholder="Enter your email"
           style={{ marginBottom: '0.75rem', padding: '0.5rem', fontSize: '0.9rem' }}
         />
@@ -327,6 +393,7 @@ const Login = ({ onLogin, onClose, contextMessage }) => {
           type="password"
           value={password}
           onChange={e => setPassword(e.target.value)}
+          disabled={!!pendingGoogleAuth}
           placeholder="Enter your password"
           style={{ marginBottom: '0.75rem', padding: '0.5rem', fontSize: '0.9rem' }}
         />
@@ -337,13 +404,39 @@ const Login = ({ onLogin, onClose, contextMessage }) => {
               type="password"
               value={confirmPassword}
               onChange={e => setConfirmPassword(e.target.value)}
+              disabled={!!pendingGoogleAuth}
               placeholder="Confirm your password"
               style={{ marginBottom: '0.75rem', padding: '0.5rem', fontSize: '0.9rem' }}
             />
+            <label className="inline-checkbox">
+              <input
+                type="checkbox"
+                checked={acceptedPolicies}
+                onChange={(e) => setAcceptedPolicies(e.target.checked)}
+              />
+              <span>
+                I agree to the{' '}
+                <Link to="/terms" style={{ color: '#2563eb', fontWeight: 600 }}>Terms of Service</Link>{' '}
+                and{' '}
+                <Link to="/privacy" style={{ color: '#2563eb', fontWeight: 600 }}>Privacy Policy</Link>.
+              </span>
+            </label>
           </>
         )}
         {error && <div style={{ color: 'red', marginBottom: '0.75rem', fontSize: '0.85rem' }}>{error}</div>}
-        <button type="submit" style={{ width: '100%', padding: '0.6rem', fontSize: '0.9rem' }}>{mode === 'login' ? 'Login' : 'Sign Up'}</button>
+        <button
+          type="submit"
+          disabled={consentRequired}
+          style={{
+            width: '100%',
+            padding: '0.6rem',
+            fontSize: '0.9rem',
+            opacity: consentRequired ? 0.6 : 1,
+            cursor: consentRequired ? 'not-allowed' : 'pointer'
+          }}
+        >
+          {mode === 'login' ? 'Login' : 'Sign Up'}
+        </button>
       </form>
       <div style={{ textAlign: 'center', marginTop: '0.75rem', fontSize: '0.85rem' }}>
         {mode === 'login' ? (
