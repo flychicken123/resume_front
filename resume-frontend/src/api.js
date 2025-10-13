@@ -118,7 +118,8 @@ export async function generateExperienceAI(experience, jobDescription = '') {
     throw new Error(err.error || "AI experience optimization failed.");
   }
   const data = await res.json();
-  return data.optimizedExperience;
+  const payload = data && typeof data === "object" ? (data.data || data) : {};
+  return payload.optimizedExperience || "";
 }
 
 export async function generateEducationAI(education) {
@@ -165,7 +166,8 @@ export async function improveExperienceGrammarAI(experience) {
     throw new Error(err.error || "AI grammar improvement failed.");
   }
   const data = await res.json();
-  return data.improvedExperience;
+  const payload = data && typeof data === "object" ? (data.data || data) : {};
+  return payload.improvedExperience || "";
 }
 
 export async function optimizeProjectAI(projectData, jobDescription = '') {
