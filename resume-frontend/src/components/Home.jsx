@@ -18,6 +18,10 @@ import About from "./About";
 
 import Contact from "./Contact";
 
+import ProductOverview from "./ProductOverview";
+
+import TeamSection from "./TeamSection";
+
 import { setLastStep } from "../utils/exitTracking";
 
 import SEO from "./SEO";
@@ -139,6 +143,34 @@ const Home = () => {
             Job Match
           </a>
 
+          <a
+            href="#product"
+            className="home-nav-link"
+            onClick={(e) => {
+              e.preventDefault();
+
+              document
+                .getElementById("product")
+                ?.scrollIntoView({ behavior: "smooth" });
+            }}
+          >
+            Product
+          </a>
+
+          <a
+            href="#team"
+            className="home-nav-link"
+            onClick={(e) => {
+              e.preventDefault();
+
+              document
+                .getElementById("team")
+                ?.scrollIntoView({ behavior: "smooth" });
+            }}
+          >
+            Team
+          </a>
+
           {user && (
             <button
               className="home-nav-link"
@@ -257,11 +289,11 @@ const Home = () => {
               e.preventDefault();
 
               document
-                .getElementById("about")
+                .getElementById("about-what-we-are-building")
                 .scrollIntoView({ behavior: "smooth" });
             }}
           >
-            About
+            About Us
           </a>
 
           <a
@@ -375,6 +407,38 @@ const Home = () => {
               }}
             >
               Job Match
+            </a>
+
+            <a
+              href="#product"
+              className="mobile-nav-link"
+              onClick={(e) => {
+                e.preventDefault();
+
+                document
+                  .getElementById("product")
+                  ?.scrollIntoView({ behavior: "smooth" });
+
+                setShowMobileMenu(false);
+              }}
+            >
+              Product
+            </a>
+
+            <a
+              href="#team"
+              className="mobile-nav-link"
+              onClick={(e) => {
+                e.preventDefault();
+
+                document
+                  .getElementById("team")
+                  ?.scrollIntoView({ behavior: "smooth" });
+
+                setShowMobileMenu(false);
+              }}
+            >
+              Team
             </a>
 
             {user && (
@@ -507,13 +571,13 @@ const Home = () => {
                 e.preventDefault();
 
                 document
-                  .getElementById("about")
+                  .getElementById("about-what-we-are-building")
                   .scrollIntoView({ behavior: "smooth" });
 
                 setShowMobileMenu(false);
               }}
             >
-              About
+              About Us
             </a>
 
             <a
@@ -975,6 +1039,10 @@ const Home = () => {
           </div>
         </div>
       </div>
+
+      <ProductOverview />
+
+      <TeamSection />
 
       {/* Auth Modal */}
 
