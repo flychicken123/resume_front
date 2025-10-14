@@ -48,10 +48,26 @@ const Home = () => {
 
   const buttonRef = useRef(null);
 
-  const openBuilderFrom = (stepId) => {
+  const [pendingBuilderStep, setPendingBuilderStep] = useState(null);
+
+  const launchBuilderModal = (stepId) => {
     setLastStep(stepId);
 
     setShowIntegratedModal(true);
+  };
+
+  const openBuilderFrom = (stepId) => {
+    if (!user) {
+      setPendingBuilderStep(stepId);
+
+      setShowAuthModal(true);
+
+      return;
+    }
+
+    setPendingBuilderStep(null);
+
+    launchBuilderModal(stepId);
   };
 
   // Track user source when home page loads
@@ -1066,9 +1082,22 @@ const Home = () => {
             <Login
               onLogin={(email, token) => {
                 login(email, token);
+
                 setShowAuthModal(false);
+
+                if (pendingBuilderStep) {
+                  const stepToLaunch = pendingBuilderStep;
+
+                  setPendingBuilderStep(null);
+
+                  launchBuilderModal(stepToLaunch);
+                }
               }}
-              onClose={() => setShowAuthModal(false)}
+              onClose={() => {
+                setShowAuthModal(false);
+
+                setPendingBuilderStep(null);
+              }}
             />
           </div>
         </div>
