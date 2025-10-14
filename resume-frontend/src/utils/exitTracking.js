@@ -9,13 +9,30 @@ let lastStepAt = Date.now();
 let pageEnteredAt = Date.now();
 let sessionStart = Date.now();
 let eventSent = false;
+const STEP_HISTORY_LIMIT = 25;
+let stepHistory = [];
 
 const apiBaseUrl = typeof window !== 'undefined' ? getAPIBaseURL() : '';
+
+const recordStep = (stepLabel) => {
+  if (typeof stepLabel !== 'string' || !stepLabel.trim()) {
+    return;
+  }
+  const entry = {
+    step: stepLabel.trim(),
+    at: new Date().toISOString(),
+  };
+  stepHistory = [...stepHistory, entry].slice(-STEP_HISTORY_LIMIT);
+};
 
 const buildPayload = (reason = 'unload') => {
   const now = Date.now();
   const effectiveStep = lastStep || `page:${lastPagePath}`;
   const lastStepDelta = lastStep ? now - lastStepAt : null;
+  const recentSummary = stepHistory
+    .slice(-5)
+    .map((entry) => entry.step)
+    .join(' → ');
   return {
     page_path: lastPagePath,
     page_title: lastPageTitle,
@@ -28,6 +45,8 @@ const buildPayload = (reason = 'unload') => {
     last_step_delta_ms: lastStepDelta,
     referrer: typeof document !== 'undefined' ? document.referrer || '' : '',
     timestamp: new Date().toISOString(),
+    step_history: stepHistory,
+    action_summary: recentSummary,
   };
 };
 
@@ -67,6 +86,7 @@ export const setLastStep = (step) => {
   if (typeof step === 'string' && step.trim()) {
     lastStep = step.trim();
     lastStepAt = Date.now();
+    recordStep(lastStep);
   }
 };
 
@@ -80,6 +100,7 @@ export const setCurrentPage = (path, title = '') => {
   if (!lastStep || lastStep.startsWith('page:') || lastStep === `page:${previousPage}`) {
     lastStep = `page:${lastPagePath}`;
     lastStepAt = Date.now();
+    recordStep(lastStep);
   }
 };
 
@@ -93,6 +114,7 @@ export const initExitTracking = () => {
   window.addEventListener('pageshow', () => {
     eventSent = false;
     pageEnteredAt = Date.now();
+    recordStep(`page:${lastPagePath}`);
   });
 
   const handleBeforeUnload = () => {
@@ -113,11 +135,13 @@ export const initExitTracking = () => {
     if (document.visibilityState === 'visible') {
       eventSent = false;
       pageEnteredAt = Date.now();
+      recordStep(`page:${lastPagePath}`);
     }
   };
 
   window.addEventListener('beforeunload', handleBeforeUnload);
   window.addEventListener('pagehide', handlePageHide);
   document.addEventListener('visibilitychange', handleVisibilityChange);
-};
 
+  recordStep(`page:${lastPagePath}`);
+};
