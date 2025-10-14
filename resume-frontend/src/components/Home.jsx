@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 
 import "./Home.css";
 
@@ -42,12 +42,6 @@ const Home = () => {
 
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
-  const [usernameWidth, setUsernameWidth] = useState(100);
-
-  const usernameRef = useRef(null);
-
-  const buttonRef = useRef(null);
-
   const [pendingBuilderStep, setPendingBuilderStep] = useState(null);
 
   const launchBuilderModal = (stepId) => {
@@ -79,18 +73,6 @@ const Home = () => {
   }, []);
 
   // Calculate optimal spacing based on button width
-
-  useEffect(() => {
-    if (buttonRef.current && user) {
-      const buttonWidth = buttonRef.current.offsetWidth;
-
-      const minSpacing = 20; // Minimum spacing in pixels
-
-      const optimalSpacing = Math.max(buttonWidth + minSpacing, 100); // At least 100px or button width + 20px
-
-      setUsernameWidth(optimalSpacing);
-    }
-  }, [user]);
 
   const handleStartBuilding = () => {
     // Track referrer and builder start when user clicks the button
@@ -173,20 +155,6 @@ const Home = () => {
             Product
           </a>
 
-          <a
-            href="#team"
-            className="home-nav-link"
-            onClick={(e) => {
-              e.preventDefault();
-
-              document
-                .getElementById("team")
-                ?.scrollIntoView({ behavior: "smooth" });
-            }}
-          >
-            Team
-          </a>
-
           {user && (
             <button
               className="home-nav-link"
@@ -208,14 +176,6 @@ const Home = () => {
             style={{ textDecoration: "none" }}
           >
             Pricing
-          </Link>
-
-          <Link
-            to="/terms"
-            className="home-nav-link"
-            style={{ textDecoration: "none" }}
-          >
-            Terms & Privacy
           </Link>
 
           {isAdmin && (
@@ -299,20 +259,6 @@ const Home = () => {
           */}
 
           <a
-            href="#about"
-            className="home-nav-link"
-            onClick={(e) => {
-              e.preventDefault();
-
-              document
-                .getElementById("about-what-we-are-building")
-                .scrollIntoView({ behavior: "smooth" });
-            }}
-          >
-            About Us
-          </a>
-
-          <a
             href="#contact"
             className="home-nav-link"
             onClick={(e) => {
@@ -330,14 +276,11 @@ const Home = () => {
         <div className="home-navbar-right">
           {user ? (
             <span
-              ref={usernameRef}
               className="desktop-username"
               style={{
                 color: "#3b82f6",
 
                 fontWeight: 500,
-
-                marginRight: `${usernameWidth}px`,
               }}
             >
               {displayName}
@@ -345,7 +288,6 @@ const Home = () => {
           ) : null}
 
           <button
-            ref={buttonRef}
             className="home-auth-btn"
             onClick={() => {
               if (user) {
@@ -441,22 +383,6 @@ const Home = () => {
               Product
             </a>
 
-            <a
-              href="#team"
-              className="mobile-nav-link"
-              onClick={(e) => {
-                e.preventDefault();
-
-                document
-                  .getElementById("team")
-                  ?.scrollIntoView({ behavior: "smooth" });
-
-                setShowMobileMenu(false);
-              }}
-            >
-              Team
-            </a>
-
             {user && (
               <button
                 className="mobile-nav-link"
@@ -477,15 +403,6 @@ const Home = () => {
               style={{ textDecoration: "none" }}
             >
               Pricing
-            </Link>
-
-            <Link
-              to="/terms"
-              className="mobile-nav-link"
-              onClick={() => setShowMobileMenu(false)}
-              style={{ textDecoration: "none" }}
-            >
-              Terms & Privacy
             </Link>
 
             {isAdmin && (
@@ -579,22 +496,6 @@ const Home = () => {
 
 
             */}
-
-            <a
-              href="#about"
-              className="mobile-nav-link"
-              onClick={(e) => {
-                e.preventDefault();
-
-                document
-                  .getElementById("about-what-we-are-building")
-                  .scrollIntoView({ behavior: "smooth" });
-
-                setShowMobileMenu(false);
-              }}
-            >
-              About Us
-            </a>
 
             <a
               href="#contact"
@@ -1058,8 +959,6 @@ const Home = () => {
 
       <ProductOverview />
 
-      <TeamSection />
-
       {/* Auth Modal */}
 
       {showAuthModal && (
@@ -1119,6 +1018,8 @@ const Home = () => {
 
       <About />
 
+      <TeamSection />
+
       {/* Contact Section */}
 
       <Contact />
@@ -1133,16 +1034,34 @@ const Home = () => {
           fontSize: '0.95rem',
         }}
       >
-        <div style={{ maxWidth: '960px', margin: '0 auto' }}>
+        <div style={{ maxWidth: '960px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
           <span>© {new Date().getFullYear()} HiHired. All rights reserved.</span>
-          <span style={{ margin: '0 12px' }}>•</span>
-          <Link to="/terms" style={{ color: '#2563eb', fontWeight: 600 }}>
-            Terms of Service
-          </Link>
-          <span style={{ margin: '0 12px' }}>•</span>
-          <Link to="/privacy" style={{ color: '#2563eb', fontWeight: 600 }}>
-            Privacy Policy
-          </Link>
+          <nav className="footer-menu">
+            <a
+              href="#about"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById("about-what-we-are-building")?.scrollIntoView({ behavior: "smooth" });
+              }}
+            >
+              About Us
+            </a>
+            <a
+              href="#team"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById("team")?.scrollIntoView({ behavior: "smooth" });
+              }}
+            >
+              Team
+            </a>
+            <Link to="/terms">
+              Terms of Service
+            </Link>
+            <Link to="/privacy">
+              Privacy Policy
+            </Link>
+          </nav>
         </div>
       </footer>
     </div>
