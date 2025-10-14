@@ -5,6 +5,12 @@ import { useAuth } from '../context/AuthContext';
 import { useResume } from '../context/ResumeContext';
 import { useFeedback } from '../context/FeedbackContext';
 import { setLastStep } from '../utils/exitTracking';
+import {
+  createJobDescriptionEntry,
+  ensureJobDescriptionList,
+  combineJobDescriptions,
+  prepareJobDescriptionsForStorage,
+} from '../utils/jobDescriptions';
 import { TEMPLATE_SLUGS, DEFAULT_TEMPLATE_ID, normalizeTemplateId } from '../constants/templates';
 import Stepper from '../components/Stepper';
 import StepPersonal from '../components/StepPersonal';
@@ -577,7 +583,9 @@ function BuilderPage() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [jobDescription, setJobDescription] = useState('');
+  const [jobDescriptions, setJobDescriptions] = useState(() =>
+    ensureJobDescriptionList([])
+  );
   const [subscriptionData, setSubscriptionData] = useState(null);
   const [downloadNotice, setDownloadNotice] = useState(null);
   const [userRequestedImport, setUserRequestedImport] = useState(false);
@@ -728,18 +736,63 @@ function BuilderPage() {
     const hasExperience = Array.isArray(data.experiences) && data.experiences.some((exp) => exp && (exp.jobTitle || exp.company || exp.description));
     const hasEducation = Array.isArray(data.education) && data.education.some((edu) => edu && (edu.degree || edu.school || edu.field || edu.graduationYear));
     const hasProjects = Array.isArray(data.projects) && data.projects.some((proj) => proj && (proj.projectName || proj.description || proj.technologies));
-    const hasSummary = Boolean(data.summary);
-    return hasPersonal || hasExperience || hasEducation || hasProjects || hasSummary;
+  const hasSummary = Boolean(data.summary);
+  return hasPersonal || hasExperience || hasEducation || hasProjects || hasSummary;
   }, [data]);
 
+  const combinedJobDescription = useMemo(
+    () => combineJobDescriptions(jobDescriptions),
+    [jobDescriptions]
+  );
+
   
-  // Load job description from localStorage on component mount
+  // Load job descriptions from localStorage on component mount
   useEffect(() => {
-    const savedJobDesc = localStorage.getItem('jobDescription');
-    if (savedJobDesc) {
-      setJobDescription(savedJobDesc);
+    if (typeof window === 'undefined') {
+      return;
+    }
+    try {
+      const serializedList = window.localStorage.getItem('jobDescriptions');
+      if (serializedList) {
+        const parsed = JSON.parse(serializedList);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setJobDescriptions(ensureJobDescriptionList(parsed));
+          return;
+        }
+      }
+      const legacy = window.localStorage.getItem('jobDescription');
+      if (legacy && legacy.trim()) {
+        setJobDescriptions(
+          ensureJobDescriptionList([createJobDescriptionEntry({ text: legacy.trim() })])
+        );
+      }
+    } catch (err) {
+      console.error('Failed to load stored job descriptions', err);
     }
   }, []);
+
+  // Persist job descriptions and combined legacy string
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    try {
+      const prepared = prepareJobDescriptionsForStorage(jobDescriptions);
+      if (prepared.length > 0) {
+        window.localStorage.setItem('jobDescriptions', JSON.stringify(prepared));
+      } else {
+        window.localStorage.removeItem('jobDescriptions');
+      }
+      const legacyCombined = combinedJobDescription.trim();
+      if (legacyCombined) {
+        window.localStorage.setItem('jobDescription', legacyCombined);
+      } else {
+        window.localStorage.removeItem('jobDescription');
+      }
+    } catch (err) {
+      console.error('Failed to persist job descriptions', err);
+    }
+  }, [jobDescriptions, combinedJobDescription]);
 
   useEffect(() => {
     if (!user) {
@@ -805,7 +858,10 @@ function BuilderPage() {
   const topMatch = filteredJobMatches.length > 0 ? filteredJobMatches[0] : null;
   const secondaryMatches = filteredJobMatches.length > 1 ? filteredJobMatches.slice(1) : [];
   const topMatchKey = topMatch ? getMatchKey(topMatch) : '';
-  const topMatchHasDescription = topMatch ? Boolean(((topMatch.job_description || '').trim()) || jobDescription.trim()) : false;
+  const trimmedJobDescription = combinedJobDescription.trim();
+  const topMatchHasDescription = topMatch
+    ? Boolean(((topMatch.job_description || '').trim()) || trimmedJobDescription)
+    : false;
 
   useEffect(() => {
     if (step !== STEP_IDS.IMPORT || userRequestedImport) {
@@ -939,9 +995,9 @@ function BuilderPage() {
     const experienceSummary = summariseExperiences(data.experiences);
     const educationSummary = summariseEducation(data.education);
     const summaryText = typeof data.summary === 'string' ? data.summary : '';
-    const position = deriveTargetPosition(data, jobDescription);
+    const position = deriveTargetPosition(data, combinedJobDescription);
     const skills = collectResumeSkills(data);
-    const normalizedJobDescription = typeof jobDescription === 'string' ? jobDescription.trim() : '';
+    const normalizedJobDescription = trimmedJobDescription;
 
     return {
       position,
@@ -957,7 +1013,7 @@ function BuilderPage() {
       candidateJobLimit: 400,
       maxResults: 25,
     };
-  }, [data, jobDescription, jobMatchesLocation, autoLocation]);
+  }, [data, combinedJobDescription, trimmedJobDescription, jobMatchesLocation, autoLocation]);
 
   const fetchJobMatches = useCallback(async () => {
     if (!user) {
@@ -1001,7 +1057,7 @@ function BuilderPage() {
       return;
     }
 
-    const jobDescriptionSource = ((match.job_description || '').trim()) || jobDescription.trim();
+    const jobDescriptionSource = ((match.job_description || '').trim()) || trimmedJobDescription;
     if (!jobDescriptionSource) {
       setTailorError('This job does not include a description yet. Add a job description to use One-Click AI Resume.');
       return;
@@ -1115,7 +1171,7 @@ function BuilderPage() {
     } finally {
       setTailorActiveJobId(null);
     }
-  }, [data, jobDescription, updateData, user]);
+  }, [data, combinedJobDescription, updateData, user]);
   useEffect(() => {
     if (step !== STEP_IDS.JOB_MATCHES) {
       return;
@@ -2120,16 +2176,14 @@ function BuilderPage() {
     }
   };
 
-  // Handler for job description submission
-  const handleJobDescriptionChange = (description) => {
-    setJobDescription(description);
-    const trimmed = description.trim();
-    if (trimmed) {
-      localStorage.setItem('jobDescription', trimmed);
-    } else {
-      localStorage.removeItem('jobDescription');
-    }
-  };
+  // Handler for job description updates from steps
+  const handleJobDescriptionsChange = useCallback((next) => {
+    setJobDescriptions((prev) => {
+      const resolved = typeof next === 'function' ? next(prev) : next;
+      const ensured = ensureJobDescriptionList(resolved);
+      return ensured.length > 0 ? ensured : ensureJobDescriptionList([]);
+    });
+  }, []);
 
   const fetchCurrentSubscriptionSafe = async () => {
     try {
@@ -2273,16 +2327,13 @@ function BuilderPage() {
             </div>
             <div className="builder-content">
             {step === STEP_IDS.IMPORT && (
-              <StepImport
-                onSkip={handleImportComplete}
-                jobDescription={jobDescription}
-              />
+              <StepImport onSkip={handleImportComplete} />
             )}
             {step === STEP_IDS.PERSONAL && <StepPersonal />}
             {step === STEP_IDS.JOB_DESCRIPTION && (
               <StepJobDescription
-                jobDescription={jobDescription}
-                onJobDescriptionChange={handleJobDescriptionChange}
+                jobDescriptions={jobDescriptions}
+                onJobDescriptionsChange={handleJobDescriptionsChange}
               />
             )}
             {step === STEP_IDS.EXPERIENCE && <StepExperience />}
@@ -2755,7 +2806,7 @@ function BuilderPage() {
                     <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: '0.75rem' }}>
                       {secondaryMatches.map((match, index) => {
                         const matchKey = getMatchKey(match) || `match-${index}`;
-                        const canTailorMatch = Boolean(((match.job_description || '').trim()) || jobDescription.trim());
+                        const canTailorMatch = Boolean(((match.job_description || '').trim()) || trimmedJobDescription);
                         return (
                           <li
                             key={`${match.id || match.job_posting_id || index}`}

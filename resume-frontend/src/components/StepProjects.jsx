@@ -41,6 +41,19 @@ const StepProjects = () => {
     setData({ ...data, projects: [...data.projects, newProject] });
   };
 
+  const moveProject = (fromIndex, toIndex) => {
+    if (!Array.isArray(data.projects)) {
+      return;
+    }
+    if (toIndex < 0 || toIndex >= data.projects.length || fromIndex === toIndex) {
+      return;
+    }
+    const updated = [...data.projects];
+    const [moved] = updated.splice(fromIndex, 1);
+    updated.splice(toIndex, 0, moved);
+    setData({ ...data, projects: updated });
+  };
+
   const updateProject = (index, field, value) => {
     const updatedProjects = [...data.projects];
     updatedProjects[index] = { ...updatedProjects[index], [field]: value };
@@ -94,25 +107,63 @@ const StepProjects = () => {
       
       {data.projects && data.projects.map((project, index) => (
         <div key={index} style={{ marginBottom: '2rem', border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', gap: '0.75rem', flexWrap: 'wrap' }}>
             <h3 style={{ margin: 0, color: '#374151' }}>Project {index + 1}</h3>
-            {data.projects.length > 1 && (
-              <button 
-                type="button" 
-                onClick={() => removeProject(index)}
-                style={{
-                  background: '#fee2e2',
-                  color: '#dc2626',
-                  border: '1px solid #fecaca',
-                  borderRadius: '4px',
-                  padding: '0.25rem 0.5rem',
-                  fontSize: '0.75rem',
-                  cursor: 'pointer'
-                }}
-              >
-                Remove
-              </button>
-            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', gap: '0.25rem' }}>
+                <button
+                  type="button"
+                  onClick={() => moveProject(index, index - 1)}
+                  disabled={index === 0}
+                  style={{
+                    background: index === 0 ? '#e5e7eb' : '#f3f4f6',
+                    color: index === 0 ? '#9ca3af' : '#374151',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '4px',
+                    padding: '0.25rem 0.6rem',
+                    fontSize: '0.75rem',
+                    cursor: index === 0 ? 'not-allowed' : 'pointer'
+                  }}
+                  title="Move project up"
+                >
+                  ↑
+                </button>
+                <button
+                  type="button"
+                  onClick={() => moveProject(index, index + 1)}
+                  disabled={index === data.projects.length - 1}
+                  style={{
+                    background: index === data.projects.length - 1 ? '#e5e7eb' : '#f3f4f6',
+                    color: index === data.projects.length - 1 ? '#9ca3af' : '#374151',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '4px',
+                    padding: '0.25rem 0.6rem',
+                    fontSize: '0.75rem',
+                    cursor: index === data.projects.length - 1 ? 'not-allowed' : 'pointer'
+                  }}
+                  title="Move project down"
+                >
+                  ↓
+                </button>
+              </div>
+              {data.projects.length > 1 && (
+                <button 
+                  type="button" 
+                  onClick={() => removeProject(index)}
+                  style={{
+                    background: '#fee2e2',
+                    color: '#dc2626',
+                    border: '1px solid #fecaca',
+                    borderRadius: '4px',
+                    padding: '0.25rem 0.5rem',
+                    fontSize: '0.75rem',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Remove
+                </button>
+              )}
+            </div>
           </div>
           
           <div className="form-row">
