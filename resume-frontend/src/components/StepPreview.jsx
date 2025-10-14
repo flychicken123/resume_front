@@ -177,6 +177,20 @@ const isIndustryManager = normalizedFormat === TEMPLATE_SLUGS.EXECUTIVE_SERIF;
     if (!data.education || data.education.length === 0) return null;
 
     const dash = isIndustryManager ? ' – ' : ' - ';
+    const formatMonthYear = (month, year) => {
+      const safeMonth = toText(month);
+      const safeYear = toText(year);
+      if (safeMonth && safeYear) {
+        return `${safeMonth} ${safeYear}`;
+      }
+      if (safeYear) {
+        return safeYear;
+      }
+      if (safeMonth) {
+        return safeMonth;
+      }
+      return '';
+    };
 
     return data.education
       .map((edu, idx) => {
@@ -187,9 +201,15 @@ const isIndustryManager = normalizedFormat === TEMPLATE_SLUGS.EXECUTIVE_SERIF;
             .filter(Boolean)
             .join(' in ');
 
+          const startFormatted = formatMonthYear(edu.startMonth, edu.startYear);
+          const gradFormatted = formatMonthYear(edu.graduationMonth, edu.graduationYear);
           let dateRange = '';
-          if (edu.startYear && edu.graduationYear) {
-            dateRange = `${edu.startYear}${dash}${edu.graduationYear}`;
+          if (startFormatted && gradFormatted) {
+            dateRange = `${startFormatted}${dash}${gradFormatted}`;
+          } else if (gradFormatted) {
+            dateRange = gradFormatted;
+          } else if (startFormatted) {
+            dateRange = `${startFormatted}${dash}Present`;
           } else if (edu.graduationYear) {
             const gradYear = parseInt(edu.graduationYear, 10);
             dateRange = Number.isNaN(gradYear) ? toText(edu.graduationYear) : `${gradYear - 4}${dash}${gradYear}`;
@@ -231,9 +251,31 @@ const isIndustryManager = normalizedFormat === TEMPLATE_SLUGS.EXECUTIVE_SERIF;
             <div className="institution-header">
               {toText(edu.degree)} {edu.field && `in ${toText(edu.field)}`}
             </div>
-            <div className="education-details">
-              {toText(edu.school)} • {toText(edu.graduationYear)} {edu.gpa && `• GPA: ${toText(edu.gpa)}`} {edu.honors && `• ${toText(edu.honors)}`}
-            </div>
+            {(() => {
+              const startFormatted = formatMonthYear(edu.startMonth, edu.startYear);
+              const gradFormatted = formatMonthYear(edu.graduationMonth, edu.graduationYear);
+              let dateSegment = '';
+              if (startFormatted && gradFormatted) {
+                dateSegment = `${startFormatted}${dash}${gradFormatted}`;
+              } else if (gradFormatted) {
+                dateSegment = gradFormatted;
+              } else if (startFormatted) {
+                dateSegment = `${startFormatted}${dash}Present`;
+              } else if (edu.graduationYear) {
+                dateSegment = toText(edu.graduationYear);
+              }
+              const segments = [
+                toText(edu.school),
+                dateSegment,
+                edu.gpa ? `GPA: ${toText(edu.gpa)}` : '',
+                edu.honors ? toText(edu.honors) : ''
+              ].filter(Boolean);
+              return (
+                <div className="education-details">
+                  {segments.join(' • ')}
+                </div>
+              );
+            })()}
           </div>
         );
       })
@@ -440,6 +482,4 @@ const isIndustryManager = normalizedFormat === TEMPLATE_SLUGS.EXECUTIVE_SERIF;
 };
 
 export default StepPreview;
-
-
 
