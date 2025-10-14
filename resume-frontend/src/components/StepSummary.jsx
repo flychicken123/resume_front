@@ -65,9 +65,30 @@ const StepSummary = () => {
           const degree = edu.degree || '';
           const field = edu.field ? ` in ${edu.field}` : '';
           const school = edu.school ? ` at ${edu.school}` : '';
-          const years = edu.graduationYear || edu.startYear
-            ? ` (${[edu.startYear, edu.graduationYear].filter(Boolean).join(' - ')})`
-            : '';
+          const formatMonthYear = (month, year) => {
+            const safeMonth = (month || '').toString().trim();
+            const safeYear = (year || '').toString().trim();
+            if (safeMonth && safeYear) {
+              return `${safeMonth} ${safeYear}`;
+            }
+            if (safeYear) {
+              return safeYear;
+            }
+            if (safeMonth) {
+              return safeMonth;
+            }
+            return '';
+          };
+          const startFormatted = formatMonthYear(edu.startMonth, edu.startYear);
+          const gradFormatted = formatMonthYear(edu.graduationMonth, edu.graduationYear);
+          let years = '';
+          if (startFormatted && gradFormatted) {
+            years = ` (${startFormatted} - ${gradFormatted})`;
+          } else if (gradFormatted) {
+            years = ` (${gradFormatted})`;
+          } else if (startFormatted) {
+            years = ` (${startFormatted} - Present)`;
+          }
           return `${degree}${field}${school}${years}`.trim();
         })
         .filter(Boolean)
