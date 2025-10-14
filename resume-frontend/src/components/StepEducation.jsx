@@ -11,7 +11,9 @@ const StepEducation = () => {
         degree: '',
         school: '',
         field: '',
+        startMonth: '',
         startYear: '',
+        graduationMonth: '',
         graduationYear: '',
         gpa: '',
         honors: '',
@@ -27,7 +29,9 @@ const StepEducation = () => {
       degree: '',
       school: '',
       field: '',
+      startMonth: '',
       startYear: '',
+      graduationMonth: '',
       graduationYear: '',
       gpa: '',
       honors: '',
@@ -68,6 +72,22 @@ const StepEducation = () => {
     { value: 'Doctor of Medicine', label: 'Doctor of Medicine (MD)' },
     { value: 'Juris Doctor', label: 'Juris Doctor (JD)' },
     { value: 'Other', label: 'Other' }
+  ];
+
+  const monthOptions = [
+    { value: '', label: 'Select month' },
+    { value: 'January', label: 'January' },
+    { value: 'February', label: 'February' },
+    { value: 'March', label: 'March' },
+    { value: 'April', label: 'April' },
+    { value: 'May', label: 'May' },
+    { value: 'June', label: 'June' },
+    { value: 'July', label: 'July' },
+    { value: 'August', label: 'August' },
+    { value: 'September', label: 'September' },
+    { value: 'October', label: 'October' },
+    { value: 'November', label: 'November' },
+    { value: 'December', label: 'December' },
   ];
 
   return (
@@ -147,88 +167,138 @@ const StepEducation = () => {
               />
             </div>
 
-            {/* Field of Study */}
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#374151' }}>
-                Field of Study
-              </label>
-              <input
-                type="text"
-                value={edu.field || ''}
-                onChange={(e) => updateEducation(idx, 'field', e.target.value)}
-                placeholder="e.g., Computer Science"
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  fontSize: '0.95rem'
-                }}
-              />
+            {/* Field of Study / GPA */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', gridColumn: '1 / -1' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#374151' }}>
+                  Field of Study
+                </label>
+                <input
+                  type="text"
+                  value={edu.field || ''}
+                  onChange={(e) => updateEducation(idx, 'field', e.target.value)}
+                  placeholder="e.g., Computer Science"
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '0.95rem'
+                  }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#374151' }}>
+                  GPA (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={edu.gpa || ''}
+                  onChange={(e) => updateEducation(idx, 'gpa', e.target.value)}
+                  placeholder="e.g., 3.8/4.0"
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '0.95rem'
+                  }}
+                />
+              </div>
             </div>
 
-            {/* Start Year */}
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#374151' }}>
-                Start Year
-              </label>
-              <input
-                type="number"
-                value={edu.startYear || ''}
-                onChange={(e) => updateEducation(idx, 'startYear', e.target.value)}
-                placeholder="e.g., 2019"
-                min="1900"
-                max="2030"
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  fontSize: '0.95rem'
-                }}
-              />
+            {/* Start Month / Year */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', gridColumn: '1 / -1' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#374151' }}>
+                  Start Month (optional)
+                </label>
+                <select
+                  value={edu.startMonth || ''}
+                  onChange={(e) => updateEducation(idx, 'startMonth', e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '0.95rem',
+                    background: 'white'
+                  }}
+                >
+                  {monthOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#374151' }}>
+                  Start Year
+                </label>
+                <input
+                  type="number"
+                  value={edu.startYear || ''}
+                  onChange={(e) => updateEducation(idx, 'startYear', e.target.value)}
+                  placeholder="e.g., 2019"
+                  min="1900"
+                  max="2030"
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '0.95rem'
+                  }}
+                />
+              </div>
             </div>
 
-            {/* Graduation Year */}
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#374151' }}>
-                Graduation Year
-              </label>
-              <input
-                type="number"
-                value={edu.graduationYear || ''}
-                onChange={(e) => updateEducation(idx, 'graduationYear', e.target.value)}
-                placeholder="e.g., 2023"
-                min="1900"
-                max="2030"
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  fontSize: '0.95rem'
-                }}
-              />
-            </div>
-
-            {/* GPA */}
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#374151' }}>
-                GPA (Optional)
-              </label>
-              <input
-                type="text"
-                value={edu.gpa || ''}
-                onChange={(e) => updateEducation(idx, 'gpa', e.target.value)}
-                placeholder="e.g., 3.8/4.0"
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  fontSize: '0.95rem'
-                }}
-              />
+            {/* Graduation Month / Year */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', gridColumn: '1 / -1' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#374151' }}>
+                  Graduation Month (optional)
+                </label>
+                <select
+                  value={edu.graduationMonth || ''}
+                  onChange={(e) => updateEducation(idx, 'graduationMonth', e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '0.95rem',
+                    background: 'white'
+                  }}
+                >
+                  {monthOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#374151' }}>
+                  Graduation Year
+                </label>
+                <input
+                  type="number"
+                  value={edu.graduationYear || ''}
+                  onChange={(e) => updateEducation(idx, 'graduationYear', e.target.value)}
+                  placeholder="e.g., 2023"
+                  min="1900"
+                  max="2030"
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '0.95rem'
+                  }}
+                />
+              </div>
             </div>
 
             {/* Location */}
