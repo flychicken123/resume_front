@@ -1806,10 +1806,32 @@ const renderExperiences = (experiences, styles) => {
 const renderEducation = (education, styles) => {
   if (!education) return null;
   const isIndustryManager = selectedFormat === TEMPLATE_SLUGS.EXECUTIVE_SERIF;
+  const formatMonthYear = (month, year) => {
+    const safeMonth = toText(month);
+    const safeYear = toText(year);
+    if (safeMonth && safeYear) {
+      return `${safeMonth} ${safeYear}`;
+    }
+    if (safeYear) {
+      return safeYear;
+    }
+    if (safeMonth) {
+      return safeMonth;
+    }
+    return '';
+  };
   const normalizeRange = (edu) => {
     const dash = isIndustryManager ? ' – ' : ' - ';
-    if (edu.startYear && edu.graduationYear) {
-      return `${edu.startYear}${dash}${edu.graduationYear}`;
+    const startFormatted = formatMonthYear(edu.startMonth, edu.startYear);
+    const gradFormatted = formatMonthYear(edu.graduationMonth, edu.graduationYear);
+    if (startFormatted && gradFormatted) {
+      return `${startFormatted}${dash}${gradFormatted}`;
+    }
+    if (gradFormatted) {
+      return gradFormatted;
+    }
+    if (startFormatted) {
+      return `${startFormatted}${dash}Present`;
     }
     if (edu.graduationYear) {
       const gradYear = parseInt(edu.graduationYear, 10);
