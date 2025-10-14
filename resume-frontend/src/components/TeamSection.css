@@ -1,0 +1,184 @@
+.team-section {
+  padding: 80px 20px;
+  background: #ffffff;
+}
+
+.team-container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.team-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.team-header h2 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 16px;
+}
+
+.team-header p {
+  font-size: 1.05rem;
+  color: #475569;
+  line-height: 1.7;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+  margin-bottom: 44px;
+}
+
+.team-card {
+  background: #f8fafc;
+  border-radius: 18px;
+  padding: 26px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.team-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 22px 55px rgba(15, 23, 42, 0.14);
+}
+
+.team-avatar {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  color: #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.3rem;
+}
+
+.team-info h3 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+.team-role {
+  display: block;
+  color: #2563eb;
+  font-weight: 600;
+  margin: 6px 0 10px 0;
+}
+
+.team-summary {
+  color: #334155;
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.team-highlights {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  color: #475569;
+}
+
+.team-highlights li {
+  position: relative;
+  padding-left: 22px;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.team-highlights li::before {
+  content: "•";
+  position: absolute;
+  left: 8px;
+  top: 0;
+  color: #2563eb;
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.team-founder-contact {
+  background: #f1f5f9;
+  border: 1px solid #cbd5f5;
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin-bottom: 28px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+.team-founder-contact h3 {
+  margin: 0 0 8px 0;
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.team-founder-contact a {
+  color: #2563eb;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.team-founder-contact a:hover {
+  text-decoration: underline;
+}
+
+.team-supporting {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+  padding: 24px;
+  border: 1px dashed #cbd5f5;
+  border-radius: 18px;
+  background: rgba(226, 232, 240, 0.3);
+}
+
+.team-supporting-item {
+  padding: 12px 0;
+}
+
+.supporting-label {
+  display: block;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.supporting-role {
+  display: block;
+  font-size: 0.95rem;
+  color: #3b82f6;
+  margin: 2px 0 6px 0;
+}
+
+.team-supporting-item p {
+  margin: 0;
+  color: #475569;
+  line-height: 1.6;
+}
+
+@media (max-width: 600px) {
+  .team-section {
+    padding: 60px 16px;
+  }
+
+  .team-card {
+    flex-direction: column;
+    text-align: left;
+  }
+
+  .team-avatar {
+    margin-bottom: 12px;
+  }
+}

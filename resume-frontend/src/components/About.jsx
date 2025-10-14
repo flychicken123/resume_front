@@ -5,15 +5,20 @@ const About = () => {
   return (
     <div className="about-section" id="about">
       <div className="about-container">
-        <h2 className="about-title">About HiHired</h2>
+        <h2 className="about-title">About Us</h2>
         
         <div className="about-content">
           <div className="about-main">
-            <h3>🚀 Your Path to Career Success</h3>
+            <h3 id="about-what-we-are-building">🚀 What We're Building</h3>
             <p>
-              HiHired is your ultimate AI-powered resume builder designed to help you land your dream job. 
-              We understand that crafting the perfect resume can be overwhelming, which is why we've created 
-              an intelligent platform that makes the process simple, effective, and results-driven.
+              HiHired is a digital-native resume platform that blends AI writing assistance, job-matching intelligence,
+              and recruiter-approved templates so candidates can publish polished, ATS-ready resumes in minutes.
+            </p>
+
+            <h3>🌟 Your Path to Career Success</h3>
+            <p>
+              We know crafting the perfect resume can be overwhelming, which is why we've built an intuitive experience
+              that keeps job seekers in control while our AI handles the heavy lifting.
             </p>
             
             <h3>✨ What Makes Us Different</h3>
