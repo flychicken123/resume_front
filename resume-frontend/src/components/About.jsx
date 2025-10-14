@@ -7,6 +7,29 @@ const About = () => {
       <div className="about-container">
         <h2 className="about-title">About Us</h2>
         
+        <nav className="about-nav-menu">
+          <button
+            type="button"
+            onClick={() =>
+              document
+                .getElementById("team")
+                ?.scrollIntoView({ behavior: "smooth" })
+            }
+          >
+            Meet the Team
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              document
+                .getElementById("contact")
+                ?.scrollIntoView({ behavior: "smooth" })
+            }
+          >
+            Contact Us
+          </button>
+        </nav>
+
         <div className="about-content">
           <div className="about-main">
             <h3 id="about-what-we-are-building">🚀 What We're Building</h3>
