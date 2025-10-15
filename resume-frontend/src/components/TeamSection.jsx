@@ -7,6 +7,7 @@ const teamMembers = [
     role: "Founder & CEO",
     summary: "Builder and operator behind HiHired.",
     highlights: ["Former Tech Lead at TikTok", "Senior engineer at Twilio & eBay"],
+    linkedin: "https://www.linkedin.com/in/han-y-1448344b/",
   },
   {
     name: "Xuan Wu",
@@ -59,6 +60,17 @@ const TeamSection = () => {
                     <li key={item}>{item}</li>
                   ))}
                 </ul>
+                {member.linkedin ? (
+                  <div className="team-links">
+                    <a
+                      href={member.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      LinkedIn
+                    </a>
+                  </div>
+                ) : null}
               </div>
             </article>
           ))}
