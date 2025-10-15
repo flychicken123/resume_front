@@ -110,6 +110,20 @@
   line-height: 1;
 }
 
+.team-links {
+  margin-top: 12px;
+}
+
+.team-links a {
+  color: #2563eb;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.team-links a:hover {
+  text-decoration: underline;
+}
+
 .team-founder-contact {
   background: #f1f5f9;
   border: 1px solid #cbd5f5;
