@@ -14,6 +14,8 @@ const DEFAULT_QUESTIONS = {
   'widget': 'How can we improve your HiHired experience?',
 };
 
+const FEEDBACK_COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000;
+
 const getStoredUserEmail = () => {
   try {
     const rawUser = localStorage.getItem('resumeUser');
@@ -73,8 +75,9 @@ export const FeedbackProvider = ({ children }) => {
 
   const markPromptSeen = (scenario) => {
     if (typeof window === 'undefined') return;
+    const timestamp = Date.now();
     try {
-      sessionStorage.setItem(`feedback_prompt_${scenario}`, '1');
+      localStorage.setItem(`feedback_prompt_timestamp_${scenario}`, String(timestamp));
     } catch (err) {
       // ignore storage errors
     }
@@ -82,11 +85,21 @@ export const FeedbackProvider = ({ children }) => {
 
   const hasPromptBeenShown = (scenario) => {
     if (typeof window === 'undefined') return false;
+    const now = Date.now();
+
     try {
-      return sessionStorage.getItem(`feedback_prompt_${scenario}`) === '1';
+      const stored = localStorage.getItem(`feedback_prompt_timestamp_${scenario}`);
+      if (stored) {
+        const parsedTs = parseInt(stored, 10);
+        if (!Number.isNaN(parsedTs) && now - parsedTs < FEEDBACK_COOLDOWN_MS) {
+          return true;
+        }
+      }
     } catch (err) {
-      return false;
+      // ignore storage errors
     }
+
+    return false;
   };
 
   const triggerFeedbackPrompt = useCallback(

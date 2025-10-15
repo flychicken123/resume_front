@@ -5,7 +5,7 @@ import { AuthProvider } from './context/AuthContext';
 import { ResumeProvider } from './context/ResumeContext';
 import { FeedbackProvider } from './context/FeedbackContext';
 import Home from './components/Home';
-import { LoginPage, BuilderPage, AdminMembershipPage, TermsOfServicePage, PrivacyPolicyPage } from './pages';
+import { LoginPage, BuilderPage, AdminMembershipPage, TermsOfServicePage, PrivacyPolicyPage, MembershipPage } from './pages';
 import PricingPage from './components/PricingPage';
 import SubscriptionSuccess from './components/SubscriptionSuccess';
 import SubscriptionCancel from './components/SubscriptionCancel';
@@ -58,6 +58,7 @@ function App() {
               <Route path="/subscription/cancel" element={<SubscriptionCancel />} />
               <Route path="/terms" element={<TermsOfServicePage />} />
               <Route path="/privacy" element={<PrivacyPolicyPage />} />
+              <Route path="/account" element={<MembershipPage />} />
               {/* Hidden - Apply to Jobs feature
               <Route path="/apply" element={<JobApplicationPage />} />
               */}

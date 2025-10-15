@@ -496,3 +496,89 @@ export async function saveJobProfile(profileData) {
   return await res.json();
 }
 
+// Subscription & membership helpers
+export async function fetchSubscriptionOverview() {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/subscription/current`, {
+    method: 'GET',
+    headers: getAuthHeaders(),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error || 'Failed to load subscription details.');
+  }
+  return data;
+}
+
+export async function fetchUsageStats() {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/subscription/usage`, {
+    method: 'GET',
+    headers: getAuthHeaders(),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error || 'Failed to load usage details.');
+  }
+  return data;
+}
+
+export async function fetchAvailablePlans() {
+  const res = await fetch(`${API_BASE_URL}/api/plans`, {
+    method: 'GET',
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error || 'Failed to load plans.');
+  }
+  return Array.isArray(data?.plans) ? data.plans : [];
+}
+
+export async function cancelUserSubscription() {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/subscription/cancel`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error || 'Failed to cancel subscription.');
+  }
+  return data;
+}
+
+export async function changeUserSubscriptionPlan(planName) {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/subscription/change-plan`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ plan_name: planName }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error || 'Failed to change subscription plan.');
+  }
+  return data;
+}
+
+export async function createCustomerPortalSession() {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/subscription/portal`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error || 'Failed to create billing portal session.');
+  }
+  return data;
+}
+
+export async function createSubscriptionCheckoutSession(planName) {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/subscription/checkout`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ plan_name: planName }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error || 'Failed to start checkout session.');
+  }
+  return data;
+}
+

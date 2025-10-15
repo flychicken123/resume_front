@@ -59,9 +59,97 @@
   gap: 1rem;
 }
 
-.desktop-username {
-  color: #3b82f6;
+.nav-account-menu {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.nav-account-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.45rem 1.1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  background: rgba(59, 130, 246, 0.12);
+  color: #2563eb;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.nav-account-trigger:hover {
+  background: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 12px 26px rgba(37, 99, 235, 0.3);
+}
+
+.nav-account-trigger:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+}
+
+.nav-account-name {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nav-account-caret {
+  font-size: 0.8rem;
+  transition: transform 0.2s ease;
+}
+
+.nav-account-caret.open {
+  transform: rotate(180deg);
+}
+
+.nav-account-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 14px;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.16);
+  min-width: 210px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 1200;
+}
+
+.nav-account-item {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: none;
+  border: none;
+  color: #1f2937;
+  font-size: 0.95rem;
   font-weight: 500;
+  text-decoration: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.nav-account-item:hover {
+  background: rgba(59, 130, 246, 0.12);
+  color: #1d4ed8;
+}
+
+.nav-account-logout {
+  color: #b91c1c;
+}
+
+.nav-account-logout:hover {
+  background: rgba(248, 113, 113, 0.12);
+  color: #991b1b;
 }
 
 .nav-auth-btn {
@@ -181,10 +269,6 @@
     display: none;
   }
 
-  .desktop-username {
-    display: none;
-  }
-
   .mobile-menu-button {
     display: block;
   }
@@ -195,5 +279,10 @@
 
   .nav-auth-btn {
     display: none;
+  }
+
+  .nav-account-trigger {
+    padding: 0.45rem 1rem;
+    font-size: 0.85rem;
   }
 }
