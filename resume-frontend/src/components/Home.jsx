@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 import "./Home.css";
 
@@ -43,6 +43,8 @@ const Home = () => {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   const [pendingBuilderStep, setPendingBuilderStep] = useState(null);
+  const [showAccountMenu, setShowAccountMenu] = useState(false);
+  const accountMenuRef = useRef(null);
 
   const launchBuilderModal = (stepId) => {
     setLastStep(stepId);
@@ -83,6 +85,32 @@ const Home = () => {
 
     openBuilderFrom("home_builder_cta");
   };
+
+  const handleLogout = () => {
+    localStorage.removeItem("resumeUser");
+    localStorage.removeItem("resumeToken");
+    window.location.reload();
+  };
+
+  useEffect(() => {
+    if (!showAccountMenu) {
+      return;
+    }
+
+    const handleClickOutside = (event) => {
+      if (
+        accountMenuRef.current &&
+        !accountMenuRef.current.contains(event.target)
+      ) {
+        setShowAccountMenu(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showAccountMenu]);
 
   return (
     <div>
@@ -275,33 +303,61 @@ const Home = () => {
 
         <div className="home-navbar-right">
           {user ? (
-            <span
-              className="desktop-username"
-              style={{
-                color: "#3b82f6",
-
-                fontWeight: 500,
-              }}
-            >
-              {displayName}
-            </span>
-          ) : null}
-
-          <button
-            className="home-auth-btn"
-            onClick={() => {
-              if (user) {
-                localStorage.removeItem("resumeUser");
-
-                window.location.reload();
-              } else {
+            <div className="home-account-menu" ref={accountMenuRef}>
+              <button
+                type="button"
+                className="home-account-trigger"
+                aria-haspopup="true"
+                aria-expanded={showAccountMenu}
+                onClick={() => setShowAccountMenu((prev) => !prev)}
+              >
+                <span className="home-account-name">
+                  {displayName || "Account"}
+                </span>
+                <span
+                  className={`home-account-caret ${
+                    showAccountMenu ? "open" : ""
+                  }`}
+                  aria-hidden="true"
+                >
+                  ▾
+                </span>
+              </button>
+              {showAccountMenu && (
+                <div className="home-account-dropdown" role="menu">
+                  <Link
+                    to="/account"
+                    className="home-account-item"
+                    role="menuitem"
+                    onClick={() => setShowAccountMenu(false)}
+                  >
+                    Membership
+                  </Link>
+                  <button
+                    type="button"
+                    className="home-account-item home-account-logout"
+                    role="menuitem"
+                    onClick={() => {
+                      setShowAccountMenu(false);
+                      handleLogout();
+                    }}
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <button
+              className="home-auth-btn"
+              onClick={() => {
                 setShowAuthModal(true);
-              }
-            }}
-            style={{ flexShrink: 0 }}
-          >
-            {user ? "Logout" : "Login"}
-          </button>
+              }}
+              style={{ flexShrink: 0 }}
+            >
+              Login
+            </button>
+          )}
 
           {/* Mobile Menu Button */}
 
@@ -404,6 +460,16 @@ const Home = () => {
             >
               Pricing
             </Link>
+
+            {user && (
+              <Link
+                to="/account"
+                className="mobile-nav-link"
+                onClick={() => setShowMobileMenu(false)}
+              >
+                Membership
+              </Link>
+            )}
 
             {isAdmin && (
               <Link

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { setLastStep } from '../utils/exitTracking';
@@ -9,6 +9,8 @@ const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setS
   const { user, isAdmin } = useAuth();
   const displayName = typeof user === 'string' ? user : (user?.name || user?.email || '');
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showAccountMenu, setShowAccountMenu] = useState(false);
+  const accountMenuRef = useRef(null);
 
   const handleLogout = () => {
     localStorage.removeItem('resumeUser');
@@ -24,6 +26,23 @@ const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setS
       navigate('/builder');
     }
   };
+
+  useEffect(() => {
+    if (!showAccountMenu) {
+      return;
+    }
+
+    const handleClickOutside = (event) => {
+      if (accountMenuRef.current && !accountMenuRef.current.contains(event.target)) {
+        setShowAccountMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showAccountMenu]);
 
   return (
     <>
@@ -62,25 +81,61 @@ const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setS
         </div>
 
         <div className="nav-navbar-right">
-          {user && (
-            <span className="desktop-username">
-              {displayName}
-            </span>
+          {user ? (
+            <div className="nav-account-menu" ref={accountMenuRef}>
+              <button
+                type="button"
+                className="nav-account-trigger"
+                aria-haspopup="true"
+                aria-expanded={showAccountMenu}
+                onClick={() => setShowAccountMenu((prev) => !prev)}
+              >
+                <span className="nav-account-name">{displayName || 'Account'}</span>
+                <span
+                  className={`nav-account-caret ${showAccountMenu ? 'open' : ''}`}
+                  aria-hidden="true"
+                >
+                  ▾
+                </span>
+              </button>
+              {showAccountMenu && (
+                <div className="nav-account-dropdown" role="menu">
+                  <Link
+                    to="/account"
+                    className="nav-account-item"
+                    role="menuitem"
+                    onClick={() => setShowAccountMenu(false)}
+                  >
+                    Membership
+                  </Link>
+                  <button
+                    type="button"
+                    className="nav-account-item nav-account-logout"
+                    role="menuitem"
+                    onClick={() => {
+                      setShowAccountMenu(false);
+                      handleLogout();
+                    }}
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <button
+              className="nav-auth-btn"
+              onClick={() => {
+                if (setShowAuthModal) {
+                  setShowAuthModal(true);
+                } else {
+                  navigate('/login');
+                }
+              }}
+            >
+              Login
+            </button>
           )}
-          <button
-            className="nav-auth-btn"
-            onClick={() => {
-              if (user) {
-                handleLogout();
-              } else if (setShowAuthModal) {
-                setShowAuthModal(true);
-              } else {
-                navigate('/login');
-              }
-            }}
-          >
-            {user ? 'Logout' : 'Login'}
-          </button>
 
           {/* Mobile Menu Button */}
           <button
@@ -136,6 +191,15 @@ const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setS
             >
               Pricing
             </Link>
+            {user && (
+              <Link
+                to="/account"
+                className="mobile-nav-link"
+                onClick={() => setShowMobileMenu(false)}
+              >
+                Membership
+              </Link>
+            )}
             {isAdmin && (
               <Link
                 to="/admin/memberships"

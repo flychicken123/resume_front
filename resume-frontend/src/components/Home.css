@@ -458,10 +458,6 @@
   display: flex;
 }
 
-.desktop-username {
-  display: inline;
-}
-
 /* Mobile navbar improvements */
 @media (max-width: 900px) {
   .home-navbar {
@@ -474,10 +470,6 @@
   }
   
   .desktop-nav {
-    display: none !important;
-  }
-  
-  .desktop-username {
     display: none !important;
   }
   
@@ -572,13 +564,97 @@
   position: relative;
 }
 
-.home-navbar-right span {
-  white-space: nowrap;
+.home-account-menu {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.home-account-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.12);
+  border: 1px solid rgba(37, 99, 235, 0.3);
+  color: #2563eb;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.home-account-trigger:hover {
+  background: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.25);
+}
+
+.home-account-trigger:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+}
+
+.home-account-name {
+  max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 200px;
-  font-size: 0.9rem;
-  flex-shrink: 1;
+  white-space: nowrap;
+}
+
+.home-account-caret {
+  font-size: 0.8rem;
+  transition: transform 0.2s ease;
+}
+
+.home-account-caret.open {
+  transform: rotate(180deg);
+}
+
+.home-account-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 14px;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.18);
+  min-width: 220px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 250;
+}
+
+.home-account-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: none;
+  border: none;
+  color: #1f2937;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.home-account-item:hover {
+  background: rgba(37, 99, 235, 0.1);
+  color: #1d4ed8;
+}
+
+.home-account-logout {
+  color: #b91c1c;
+}
+
+.home-account-logout:hover {
+  background: rgba(248, 113, 113, 0.15);
+  color: #991b1b;
 }
 
 .home-navbar-right button {
@@ -588,9 +664,9 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .home-navbar-right span {
-    max-width: 120px;
-    font-size: 0.8rem;
+  .home-account-trigger {
+    padding: 6px 14px;
+    font-size: 0.85rem;
   }
   
   .home-navbar-right {
@@ -610,9 +686,9 @@
 }
 
 @media (max-width: 480px) {
-  .home-navbar-right span {
-    max-width: 80px;
-    font-size: 0.75rem;
+  .home-account-trigger {
+    padding: 6px 12px;
+    font-size: 0.8rem;
   }
   
   .home-navbar-right {
