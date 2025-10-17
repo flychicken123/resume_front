@@ -16,6 +16,7 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload, downloadNotice })
   const [pages, setPages] = useState([]);
   const [useConservativePaging, setUseConservativePaging] = useState(false);
   const isIndustryManagerFormat = (selectedFormat === TEMPLATE_SLUGS.EXECUTIVE_SERIF);
+  const isAttorneyFormat = (selectedFormat === TEMPLATE_SLUGS.ATTORNEY_TEMPLATE);
   // Reset paging heuristics whenever template changes so new format starts fresh
   useEffect(() => {
     setUseConservativePaging(false);
@@ -57,8 +58,33 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload, downloadNotice })
     // Get font size scale factor to adjust heights
     const fontScale = getFontSizeScaleFactor();
 const applyFormatAdjustment = (value, sectionKey = type) => {
-  if (!isIndustryManagerFormat) {
+  if (!isIndustryManagerFormat && !isAttorneyFormat) {
     return value;
+  }
+  if (isAttorneyFormat) {
+    const attorneyAdjustments = {
+      aggressive: {
+        header: { multiplier: 1.04, floor: 34 },
+        summary: { multiplier: 1.12, floor: 38 },
+        experience: { multiplier: 1.18, floor: 132 },
+        education: { multiplier: 1.1, floor: 44 },
+        projects: { multiplier: 1.18, floor: 92 },
+        skills: { multiplier: 1.12, floor: 48 },
+        default: { multiplier: 1.1, floor: 42 }
+      },
+      conservative: {
+        header: { multiplier: 1.1, floor: 40 },
+        summary: { multiplier: 1.22, floor: 44 },
+        experience: { multiplier: 1.32, floor: 158 },
+        education: { multiplier: 1.18, floor: 52 },
+        projects: { multiplier: 1.28, floor: 108 },
+        skills: { multiplier: 1.2, floor: 56 },
+        default: { multiplier: 1.18, floor: 50 }
+      }
+    };
+    const mode = useConservativePaging ? 'conservative' : 'aggressive';
+    const { multiplier, floor } = attorneyAdjustments[mode][sectionKey] || attorneyAdjustments[mode].default;
+    return Math.max(floor, value * multiplier);
   }
   const adjustmentSets = {
     // Keep aggressive mode close to measured height
@@ -502,7 +528,7 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
             // Calculate how many bullet points might fit
             const lineHeight = Math.round(aggressiveIndustry ? 10 * fontScale : 13 * fontScale); // Slightly more conservative
             const titleHeight = Math.round(16 * fontScale);
-            const sectionTitleHeight = Math.round(20 * fontScale); // "PROJECTS" title
+            const sectionTitleHeight = Math.round(24 * fontScale); // "PROJECTS" title
             const techHeight = project.technologies ? Math.round(12 * fontScale) : 0;
             const urlHeight = project.projectUrl ? Math.round(12 * fontScale) : 0;
             const baseHeight = titleHeight + sectionTitleHeight + techHeight + urlHeight + (aggressiveIndustry ? 14 : 30); // Padding for safety
@@ -640,7 +666,7 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
     // Summary section
     if (data.summary) {
       const summaryText = toText(data.summary);
-      const sectionTitleHeight = Math.round(20 * fontScale);
+      const sectionTitleHeight = Math.round(24 * fontScale);
       const summaryHeight = estimateSectionHeight(summaryText, 'summary') + sectionTitleHeight;
       allSections.push({
         type: 'summary',
@@ -652,7 +678,7 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
     }
     // Experience section
     if (data.experiences && data.experiences.length > 0) {
-      const sectionTitleHeight = Math.round(20 * fontScale); // Add height for section title
+      const sectionTitleHeight = Math.round(24 * fontScale); // Add height for section title
       const totalExpHeight = estimateSectionHeight(data.experiences, 'experience') + sectionTitleHeight;
       allSections.push({
         type: 'experience',
@@ -664,19 +690,21 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
     }
     // Projects section (comes before education for students)
     if (data.projects && data.projects.length > 0) {
-      const sectionTitleHeight = Math.round(20 * fontScale); // Add height for section title
-      const projectsHeight = estimateSectionHeight(data.projects, 'projects') + sectionTitleHeight;
-      allSections.push({
-        type: 'projects',
-        content: data.projects,
-        estimatedHeight: projectsHeight,
-        priority: 4,
-        canSplit: true  // Allow projects section to be split across pages
-      });
+      if (!isAttorneyFormat) {
+        const sectionTitleHeight = Math.round(24 * fontScale); // Add height for section title
+        const projectsHeight = estimateSectionHeight(data.projects, 'projects') + sectionTitleHeight;
+        allSections.push({
+          type: 'projects',
+          content: data.projects,
+          estimatedHeight: projectsHeight,
+          priority: 4,
+          canSplit: true  // Allow projects section to be split across pages
+        });
+      }
     }
     // Education section
     if (data.education) {
-      const sectionTitleHeight = Math.round(20 * fontScale); // Add height for section title
+      const sectionTitleHeight = Math.round(24 * fontScale); // Add height for section title
       const eduHeight = estimateSectionHeight(data.education, 'education') + sectionTitleHeight;
       allSections.push({
         type: 'education',
@@ -864,6 +892,109 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
     if (currentPage.length > 0) {
       newPages.push([...currentPage]);
     }
+    if (isAttorneyFormat) {
+      const getOrCreateContinuationPage = () => {
+        if (newPages.length >= 2) {
+          if (!Array.isArray(newPages[1])) {
+            newPages[1] = [];
+          }
+          return newPages[1];
+        }
+        const newPage = [];
+        newPages.push(newPage);
+        return newPage;
+      };
+      if (newPages.length) {
+        const firstPage = newPages[0];
+        const attorneyBuffer = useConservativePaging ? 132 : 156;
+        const attorneyLimit = Math.max(0, effectiveAvailableHeight - attorneyBuffer);
+        let firstHeight = sumEstimatedHeight(firstPage);
+        let guard = 0;
+        while (firstPage.length > 1 && firstHeight > attorneyLimit && guard < 20) {
+          guard += 1;
+          let candidateIndex = -1;
+          for (let idx = firstPage.length - 1; idx >= 1; idx -= 1) {
+            const section = firstPage[idx];
+            if (!section) continue;
+            const sectionType = section.type;
+            if (!sectionType || sectionType === 'header') {
+              continue;
+            }
+            if (sectionType === 'education' || sectionType === 'skills') {
+              continue;
+            }
+            candidateIndex = idx;
+            break;
+          }
+          if (candidateIndex === -1) {
+            candidateIndex = firstPage.length - 1;
+            if (candidateIndex <= 0) {
+              break;
+            }
+          }
+          const [moved] = firstPage.splice(candidateIndex, 1);
+          if (!moved) {
+            break;
+          }
+          const remainingCapacity = Math.max(0, attorneyLimit - sumEstimatedHeight(firstPage));
+          if (moved.canSplit) {
+            const splitAllowance = Math.max(0, remainingCapacity - getSectionPadding(moved.type));
+            if (splitAllowance > 60) {
+              const parts = splitLongContent(moved.content, moved.type, splitAllowance);
+              if (parts.length > 1) {
+                const firstPartHeight = estimateSectionHeight(parts[0], moved.type);
+                const previousSection = firstPage[candidateIndex - 1];
+                const suppressTitle = previousSection && previousSection.type === moved.type;
+                const firstPart = {
+                  ...moved,
+                  content: parts[0],
+                  estimatedHeight: firstPartHeight,
+                  isContinued: true,
+                  _suppressTitle: suppressTitle
+                };
+                firstPage.splice(candidateIndex, 0, firstPart);
+                const targetPage = getOrCreateContinuationPage();
+                for (let partIdx = parts.length - 1; partIdx >= 1; partIdx -= 1) {
+                  const remainderContent = parts[partIdx];
+                  const partHeight = estimateSectionHeight(remainderContent, moved.type);
+                  const isLast = partIdx === parts.length - 1;
+                  targetPage.unshift({
+                    ...moved,
+                    content: remainderContent,
+                    estimatedHeight: partHeight,
+                    isContinuation: true,
+                    isContinued: !isLast,
+                    _suppressTitle: false
+                  });
+                }
+                firstHeight = sumEstimatedHeight(firstPage);
+                continue;
+              }
+            }
+          }
+          const targetPage = getOrCreateContinuationPage();
+          targetPage.unshift(moved);
+          firstHeight = sumEstimatedHeight(firstPage);
+        }
+      }
+      for (let i = newPages.length - 1; i >= 0; i -= 1) {
+        if (!newPages[i] || newPages[i].length === 0) {
+          newPages.splice(i, 1);
+        }
+      }
+      if (newPages.length > 1 && newPages[0].length === 1 && newPages[0][0]?.type === 'header') {
+        newPages[1].unshift(newPages[0][0]);
+        newPages.shift();
+      }
+      if (DEBUG_PAGINATION) {
+        console.log('[Pagination] attorney page structure', newPages.map((pageSections, pageIdx) => ({
+          page: pageIdx + 1,
+          types: pageSections.map((section) => section.type),
+          totalEstimated: pageSections.reduce((acc, section) => acc + (section?.estimatedHeight || 0), 0),
+        })));
+      }
+      return newPages;
+    }
     if (newPages.length > 1) {
       const minUsefulHeight = effectiveAvailableHeight * (useConservativePaging ? 0.42 : 0.38);
       const mergeAllowance = Math.max(12, effectiveAvailableHeight * (useConservativePaging ? 0.2 : 0.25));
@@ -889,14 +1020,14 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
         const next = newPages[i + 1];
         if (!page || !next || next.length === 0) {
           if (DEBUG_PAGINATION) {
-            console.log('[Pagination] skip iteration – missing next page', { pageIndex: i, hasPage: Boolean(page), hasNext: Boolean(next), nextLength: next ? next.length : 0 });
+            console.log('[Pagination] skip iteration ? missing next page', { pageIndex: i, hasPage: Boolean(page), hasNext: Boolean(next), nextLength: next ? next.length : 0 });
           }
           continue;
         }
 
         const nextFirst = next[0];
         if (!nextFirst) {
-          if (DEBUG_PAGINATION) console.log('[Pagination] skip iteration – no leading section', { pageIndex: i });
+          if (DEBUG_PAGINATION) console.log('[Pagination] skip iteration ? no leading section', { pageIndex: i });
           continue;
         }
 
@@ -908,13 +1039,13 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
           console.log('[Pagination] available space check', { pageIndex: i, pageHeight, trailingPadding, adjustedPageHeight, available, effectiveAvailableHeight });
         }
         if (available < 8) {
-          if (DEBUG_PAGINATION) console.log('[Pagination] skip iteration – not enough space', { pageIndex: i, available });
+          if (DEBUG_PAGINATION) console.log('[Pagination] skip iteration ? not enough space', { pageIndex: i, available });
           continue;
         }
 
         const lastType = page.length ? page[page.length - 1].type : null;
         const sameTypeContinuation = Boolean(lastType && nextFirst.type === lastType);
-        const sectionTitleHeightPx = Math.round(20 * getFontSizeScaleFactor());
+        const sectionTitleHeightPx = Math.round(24 * getFontSizeScaleFactor());
         const baseEstimate = nextFirst.estimatedHeight;
         const adjustedEstimate = sameTypeContinuation ? Math.max(0, baseEstimate - sectionTitleHeightPx) : baseEstimate;
         const requiredHeight = addBuffer(adjustedEstimate, nextFirst.type);
@@ -1158,6 +1289,28 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
         totalEstimated: pageSections.reduce((acc, section) => acc + (section?.estimatedHeight || 0), 0),
       })));
     }
+    if (selectedFormat === TEMPLATE_SLUGS.ATTORNEY_TEMPLATE && newPages.length) {
+      const firstPage = newPages[0];
+      let firstHeight = sumEstimatedHeight(firstPage);
+      if (firstHeight > (effectiveAvailableHeight - 12)) {
+        if (DEBUG_PAGINATION) {
+          console.log('[Pagination] attorney template overflow detected, forcing additional page', {
+            firstHeight,
+            effectiveAvailableHeight,
+          });
+        }
+        if (newPages.length === 1) {
+          newPages.push([]);
+        }
+        while (firstPage.length > 1 && firstHeight > (effectiveAvailableHeight - 12)) {
+          const moved = firstPage.pop();
+          if (moved) {
+            newPages[1].unshift(moved);
+          }
+          firstHeight = sumEstimatedHeight(firstPage);
+        }
+      }
+    }
     // Safety: avoid header-only leading page
     if (newPages.length > 1 && newPages[0].length === 1 && newPages[0][0]?.type === 'header') {
       if (DEBUG_PAGINATION) {
@@ -1258,10 +1411,10 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
           sectionTitle: { 
             color: '#1f2937', 
             fontWeight: 'bold', 
-            fontSize: `${7 * scaleFactor}px`,  // Slightly larger than body text
-            marginBottom: `${2 * scaleFactor}px`, 
+            fontSize: `${8.4 * scaleFactor}px`,  // More prominent section headings
+            marginBottom: `${2.5 * scaleFactor}px`, 
             borderBottom: '1px solid #000', 
-            paddingBottom: `${1 * scaleFactor}px`, 
+            paddingBottom: `${1.5 * scaleFactor}px`, 
             textAlign: 'left'
           },
           company: { 
@@ -1291,7 +1444,7 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
         const gapWidth = 3.5 * scaleFactor;
         const indent = markerWidth + gapWidth;
         // Normalize typography to match the other templates
-        const sectionTitleFont = 7.0 * scaleFactor;
+        const sectionTitleFont = 8.2 * scaleFactor;
         const headerLineFont = 6.0 * scaleFactor;
         const bodyFont = 6.0 * scaleFactor;
         const bulletFont = 6.0 * scaleFactor;
@@ -1420,8 +1573,237 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
             wordBreak: 'break-word',
             overflowWrap: 'anywhere'
           },
-          skillMarkerChar: '▪',
+          skillMarkerChar: '•',
           item: { marginTop: `${3 * scaleFactor}px` }
+        };
+      }
+      case TEMPLATE_SLUGS.ATTORNEY_TEMPLATE: {
+        const palette = {
+          headerBg: '#DCC3AE',
+          sidebarBg: 'transparent',
+          accent: '#3C2E27',
+          body: '#443730',
+          highlight: '#B68A65',
+          divider: '#E5D1C0'
+        };
+        const contentGap = 4 * scaleFactor;
+        const headingGap = 5 * scaleFactor;
+        const contentIndent = 0;
+        return {
+          container: {
+            fontFamily: "'Georgia', 'Times New Roman', serif",
+            fontSize: `${5.4 * scaleFactor}px`,
+            lineHeight: '1.35',
+            padding: 0,
+            background: '#ffffff',
+            border: `1px solid ${palette.divider}`,
+            borderRadius: '6px',
+            overflow: 'visible',
+            color: palette.body
+          },
+          headerArea: {
+            background: palette.headerBg,
+            padding: `${12 * scaleFactor}px ${18 * scaleFactor}px`,
+            borderBottom: `5px solid ${palette.highlight}`
+          },
+          headerName: {
+            fontSize: `${11 * scaleFactor}px`,
+            fontWeight: 700,
+            letterSpacing: '2px',
+            textTransform: 'uppercase',
+            color: palette.accent
+          },
+          headerTitle: {
+            marginTop: `${3 * scaleFactor}px`,
+            fontSize: `${7.2 * scaleFactor}px`,
+            letterSpacing: '1.2px',
+            textTransform: 'uppercase',
+            color: palette.accent
+          },
+          columns: {
+            display: 'grid',
+            gridTemplateColumns: '35% 65%',
+            width: '100%',
+            minHeight: `${320 * scaleFactor}px`,
+            boxSizing: 'border-box'
+          },
+          sidebar: {
+            background: 'transparent',
+            color: palette.body,
+            padding: `${16 * scaleFactor}px ${14 * scaleFactor}px`,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: `${12 * scaleFactor}px`,
+            boxSizing: 'border-box',
+            minWidth: 0,
+            borderRight: `1px solid ${palette.divider}`
+          },
+          sidebarSection: {
+            display: 'flex',
+            flexDirection: 'column',
+            gap: `${4 * scaleFactor}px`
+          },
+          sidebarHeading: {
+            display: 'flex',
+            alignItems: 'center',
+            gap: `${headingGap}px`,
+            fontSize: `${6 * scaleFactor}px`,
+            fontWeight: 700,
+            letterSpacing: '1.2px',
+            textTransform: 'uppercase',
+            color: palette.accent
+          },
+          sidebarHeadingBullet: {
+            color: palette.highlight,
+            fontWeight: 700,
+            fontSize: `${6 * scaleFactor}px`,
+            lineHeight: 1
+          },
+          sidebarHeadingText: {
+            flex: 1
+          },
+          sidebarContent: {
+            paddingLeft: `${contentIndent}px`,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: `${4 * scaleFactor}px`
+          },
+          sidebarBody: {
+            fontSize: `${5.2 * scaleFactor}px`,
+            lineHeight: 1.6,
+            color: palette.body,
+            whiteSpace: 'pre-line',
+            wordBreak: 'break-word',
+            overflowWrap: 'anywhere'
+          },
+          sidebarList: {
+            listStyle: 'none',
+            margin: 0,
+            padding: 0,
+            display: 'grid',
+            gap: `${4 * scaleFactor}px`
+          },
+          sidebarListItem: {
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: `${6 * scaleFactor}px`,
+            fontSize: `${5.2 * scaleFactor}px`,
+            color: palette.body,
+            lineHeight: 1.5
+          },
+          contactIcon: {
+            color: palette.highlight,
+            fontWeight: 700,
+            fontSize: `${5.2 * scaleFactor}px`,
+            marginTop: `${0.4 * scaleFactor}px`
+          },
+          contactText: {
+            flex: 1,
+            wordBreak: 'break-word',
+            minWidth: 0
+          },
+          sidebarBullet: {
+            color: palette.highlight,
+            marginRight: `${3 * scaleFactor}px`,
+            fontWeight: 700
+          },
+          main: {
+            flex: 1,
+            padding: `${18 * scaleFactor}px ${20 * scaleFactor}px`,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: `${14 * scaleFactor}px`,
+            boxSizing: 'border-box',
+            minWidth: 0
+          },
+          mainSection: {
+            display: 'flex',
+            flexDirection: 'column',
+            gap: `${4 * scaleFactor}px`
+          },
+          mainHeading: {
+            display: 'flex',
+            alignItems: 'center',
+            gap: `${headingGap}px`,
+            borderBottom: `1px solid ${palette.divider}`,
+            paddingBottom: `${4 * scaleFactor}px`
+          },
+          mainHeadingBullet: {
+            color: palette.highlight,
+            fontWeight: 700,
+            fontSize: `${7.4 * scaleFactor}px`,
+            lineHeight: 1
+          },
+          mainHeadingText: {
+            fontSize: `${7.4 * scaleFactor}px`,
+            fontWeight: 700,
+            letterSpacing: '1.6px',
+            textTransform: 'uppercase',
+            color: palette.accent
+          },
+          mainContent: {
+            paddingLeft: `${contentIndent}px`,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: `${contentGap}px`
+          },
+          company: {
+            fontSize: `${5.6 * scaleFactor}px`,
+            fontWeight: 600,
+            color: palette.accent,
+            letterSpacing: '0.6px',
+            textTransform: 'uppercase',
+            marginBottom: `${1 * scaleFactor}px`
+          },
+          date: {
+            fontSize: `${5 * scaleFactor}px`,
+            color: palette.body,
+            fontStyle: 'italic',
+            marginBottom: `${1 * scaleFactor}px`
+          },
+          bullet: {
+            fontSize: `${5.2 * scaleFactor}px`,
+            color: palette.body,
+            marginLeft: 0,
+            marginBottom: `${contentGap}px`,
+            lineHeight: 1.5
+          },
+          item: {
+            marginTop: `${contentGap}px`
+          },
+          summary: {
+            fontSize: `${5.2 * scaleFactor}px`,
+            color: palette.body,
+            lineHeight: 1.6
+          },
+          skills: {
+            fontSize: `${5.2 * scaleFactor}px`,
+            color: palette.body,
+            lineHeight: 1.5
+          },
+          sectionTitle: {
+            fontSize: `${7.4 * scaleFactor}px`,
+            fontWeight: 700,
+            letterSpacing: '1.6px',
+            color: palette.accent,
+            borderBottom: `1px solid ${palette.divider}`,
+            paddingBottom: `${4 * scaleFactor}px`,
+            textTransform: 'uppercase'
+          },
+          skillMarkerChar: '•',
+          skillMarker: {
+            color: palette.highlight,
+            fontWeight: 700,
+            width: `${8 * scaleFactor}px`,
+            display: 'inline-flex',
+            justifyContent: 'center'
+          },
+          skillText: {
+            color: palette.body
+          },
+          skillsColumnSpacing: `${10 * scaleFactor}px`,
+          accentColor: palette.accent,
+          accentSecondary: palette.highlight
         };
       }
       case TEMPLATE_SLUGS.MODERN_CLEAN:
@@ -1458,12 +1840,12 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
           sectionTitle: { 
             color: '#3498db', 
             fontWeight: '600', 
-            fontSize: `${7 * scaleFactor}px`,  // Slightly larger than body text
-            marginBottom: `${2 * scaleFactor}px`, 
+            fontSize: `${8.6 * scaleFactor}px`,  // Larger section headings
+            marginBottom: `${2.5 * scaleFactor}px`, 
             textTransform: 'uppercase', 
             letterSpacing: '1px', 
             borderBottom: '1px solid #000', 
-            paddingBottom: `${1 * scaleFactor}px`, 
+            paddingBottom: `${1.5 * scaleFactor}px`, 
             textAlign: 'left'
           },
           company: { 
@@ -1674,6 +2056,7 @@ const parseSkills = (value) => {
 const renderExperiences = (experiences, styles) => {
   if (!experiences || experiences.length === 0) return null;
   const isIndustryManager = selectedFormat === TEMPLATE_SLUGS.EXECUTIVE_SERIF;
+  const isAttorneyTemplate = selectedFormat === TEMPLATE_SLUGS.ATTORNEY_TEMPLATE;
   const normalizeRange = (start, end, currentlyWorking) => {
     if (!start && !end) return '';
     const separator = isIndustryManager ? ' – ' : ' - ';
@@ -1705,9 +2088,15 @@ const renderExperiences = (experiences, styles) => {
         const headerText = isIndustryManager
           ? formatHeaderSegments([jobTitle, company, location, datePart], true)
           : jobTitle;
-        const secondaryLine = !isIndustryManager
+        const secondaryLine = (!isIndustryManager && !isAttorneyTemplate)
           ? formatHeaderSegments([company, location, datePart])
           : '';
+        const attorneyPrimary = isAttorneyTemplate
+          ? [jobTitle, datePart].filter(Boolean).join(' • ')
+          : null;
+        const attorneySecondary = isAttorneyTemplate
+          ? [company, location].filter(Boolean).join(' • ')
+          : null;
         const descriptionContent = descriptionLines.filter((line) => line.trim()).length > 0
           ? (
               <div style={{ marginTop: '2px' }}>
@@ -1719,8 +2108,11 @@ const renderExperiences = (experiences, styles) => {
           : null;
         const contentNode = (
           <>
-            <div style={styles.company}>{headerText}</div>
-            {!isIndustryManager && secondaryLine && (
+            <div style={styles.company}>{isAttorneyTemplate ? (attorneyPrimary || jobTitle) : headerText}</div>
+            {isAttorneyTemplate && attorneySecondary && (
+              <div style={styles.date}>{attorneySecondary}</div>
+            )}
+            {!isAttorneyTemplate && !isIndustryManager && secondaryLine && (
               <div style={styles.date}>{secondaryLine}</div>
             )}
             {descriptionContent}
@@ -1765,6 +2157,15 @@ const renderExperiences = (experiences, styles) => {
         const headerText = isIndustryManager
           ? formatHeaderSegments([jobTitle, companyName, locationLabel, dateRange], true)
           : formatHeaderSegments([jobTitle, companyName, locationLabel, dateRange]);
+        const secondaryLine = (!isIndustryManager && !isAttorneyTemplate)
+          ? formatHeaderSegments([companyName, locationLabel, dateRange])
+          : '';
+        const attorneyPrimary = isAttorneyTemplate
+          ? [jobTitle, dateRange].filter(Boolean).join(' • ')
+          : null;
+        const attorneySecondary = isAttorneyTemplate
+          ? [companyName, locationLabel].filter(Boolean).join(' • ')
+          : null;
         const descriptionContent = exp.description
           ? (
               <div style={{ marginTop: '2px' }}>
@@ -1774,12 +2175,6 @@ const renderExperiences = (experiences, styles) => {
               </div>
             )
           : null;
-        const contentNode = (
-          <>
-            <div style={styles.company}>{headerText}</div>
-            {descriptionContent}
-          </>
-        );
         if (isIndustryManager) {
           const headerBullet = styles.headerBulletChar || '●';
           const itemStyle = styles.item || { marginTop: '6px' };
@@ -1795,7 +2190,14 @@ const renderExperiences = (experiences, styles) => {
         }
         return (
           <div key={idx} style={styles.item}>
-            {contentNode}
+            <div style={styles.company}>{isAttorneyTemplate ? (attorneyPrimary || jobTitle) : headerText}</div>
+            {!isAttorneyTemplate && secondaryLine && (
+              <div style={styles.date}>{secondaryLine}</div>
+            )}
+            {isAttorneyTemplate && attorneySecondary && (
+              <div style={styles.date}>{attorneySecondary}</div>
+            )}
+            {descriptionContent}
           </div>
         );
       }
@@ -2017,7 +2419,10 @@ const renderEducation = (education, styles) => {
     );
   };
   // Render page content based on section type
-  const renderPageContent = (pageSections, styles) => {
+  const renderPageContent = (pageSections, styles, pageIndex) => {
+    if (isAttorneyFormat) {
+      return renderAttorneyPageContent(pageSections, pageIndex);
+    }
     return pageSections.map((section, idx) => {
       const prevType = idx > 0 ? pageSections[idx - 1]?.type : null;
       const showTitle = !section._suppressTitle && prevType !== section.type;
@@ -2055,16 +2460,7 @@ const renderEducation = (education, styles) => {
             </div>
           );
         case 'summary':
-          let summaryTitle = 'SUMMARY';
-          if (section.isContinuation && !section.isContinued) {
-            summaryTitle = 'SUMMARY (continued)';
-          } else if (section.isContinuation) {
-            summaryTitle = 'SUMMARY (continued)';
-          } else if (section.isContinued) {
-            summaryTitle = 'SUMMARY';
-          }
-          
-          return <div key={idx}>{renderSection(summaryTitle, renderSummaryContent(section.content, styles), styles, { showTitle })}</div>;
+          return <div key={idx}>{renderSection('SUMMARY', renderSummaryContent(section.content, styles), styles, { showTitle })}</div>;
         case 'experience':
           return <div key={idx}>{renderSection('EXPERIENCE', renderExperiences(section.content, styles), styles, { showTitle })}</div>;
         case 'education':
@@ -2081,6 +2477,226 @@ const renderEducation = (education, styles) => {
     });
   };
   const styles = getFormatStyles(selectedFormat || DEFAULT_TEMPLATE_ID, data.selectedFontSize || 'medium');
+  const deriveAttorneyLocation = () => {
+    const direct = toText(data.location);
+    if (direct) return direct;
+    if (Array.isArray(data.experiences)) {
+      const match = data.experiences.find((exp) => exp && (exp.city || exp.state));
+      if (match) {
+        const city = toText(match.city);
+        const state = toText(match.state);
+        if (city && state) return `${city}, ${state}`;
+        return city || state || '';
+      }
+    }
+    return '';
+  };
+
+  const formatAttorneyEducationDate = (edu) => {
+    const gradMonth = toText(edu.graduationMonth);
+    const gradYear = toText(edu.graduationYear);
+    if (gradMonth && gradYear) return `${gradMonth} ${gradYear}`;
+    if (gradYear) return gradYear;
+    if (toText(edu.startYear) && toText(edu.endYear)) {
+      return `${toText(edu.startYear)} – ${toText(edu.endYear)}`;
+    }
+    if (toText(edu.startDate) || toText(edu.endDate)) {
+      return [toText(edu.startDate), toText(edu.endDate)].filter(Boolean).join(' – ');
+    }
+    return '';
+  };
+
+  const buildAttorneySidebarData = () => {
+    const locationValue = deriveAttorneyLocation();
+    const contactEntries = [
+      data.email ? toText(data.email) : null,
+      data.phone ? toText(data.phone) : null,
+      locationValue || null
+    ].filter(Boolean);
+
+    const educationItems = Array.isArray(data.education)
+      ? data.education.filter((edu) =>
+          edu && (toText(edu.degree) || toText(edu.school) || toText(edu.field) || toText(edu.graduationYear) || toText(edu.honors))
+        )
+      : [];
+
+    const skillsList = parseSkills(data.skills);
+
+    return { contactEntries, educationItems, skillsList };
+  };
+
+const renderAttorneySummaryBlock = (summaryValue) => {
+  const summaryText = toText(summaryValue);
+  if (!summaryText) return null;
+  return (
+    <div style={styles.mainSection}>
+        <div style={styles.mainHeading}>
+          <span style={styles.mainHeadingBullet}>•</span>
+          <span style={styles.mainHeadingText}>Profile</span>
+        </div>
+        <div style={styles.mainContent}>
+          {renderSummaryContent(summaryText, styles)}
+        </div>
+    </div>
+  );
+};
+
+  const renderAttorneyExperienceBlock = (experiences, headingLabel) => {
+    if (!experiences || experiences.length === 0) return null;
+    return (
+      <div style={styles.mainSection}>
+        <div style={styles.mainHeading}>
+          <span style={styles.mainHeadingBullet}>•</span>
+          <span style={styles.mainHeadingText}>{headingLabel}</span>
+        </div>
+        <div style={styles.mainContent}>{renderExperiences(experiences, styles)}</div>
+      </div>
+    );
+  };
+
+  const renderAttorneySidebar = (contactEntries, educationItems, skillsList) => {
+    const fontScale = getFontSizeScaleFactor();
+    const educationBlockSpacing = `${6 * fontScale}px`;
+    return (
+      <aside style={styles.sidebar}>
+        {contactEntries.length > 0 && (
+          <div style={styles.sidebarSection}>
+            <div style={styles.sidebarHeading}>
+              <span style={styles.sidebarHeadingBullet}>•</span>
+              <span style={styles.sidebarHeadingText}>Contact</span>
+            </div>
+            <div style={styles.sidebarContent}>
+              <ul style={styles.sidebarList}>
+                {contactEntries.map((entry, idx) => (
+                  <li key={`contact-${idx}`} style={styles.sidebarListItem}>
+                    <span style={styles.sidebarBullet}>•</span>
+                    <span style={styles.contactText}>{entry}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
+        {educationItems.length > 0 && (
+          <div style={styles.sidebarSection}>
+            <div style={styles.sidebarHeading}>
+              <span style={styles.sidebarHeadingBullet}>•</span>
+              <span style={styles.sidebarHeadingText}>Education</span>
+            </div>
+            <div style={styles.sidebarContent}>
+              <div style={styles.sidebarBody}>
+                {educationItems.map((edu, idx) => {
+                  const degreeLine = [toText(edu.degree), toText(edu.field)].filter(Boolean).join(', ');
+                  const schoolLine = [toText(edu.school), toText(edu.location)].filter(Boolean).join(' • ');
+                  const dateLine = formatAttorneyEducationDate(edu);
+                  const honorsLine = toText(edu.honors);
+                  return (
+                    <div
+                      key={`edu-${idx}`}
+                      style={{ marginBottom: idx === educationItems.length - 1 ? 0 : educationBlockSpacing }}
+                    >
+                      {degreeLine && <div style={{ fontWeight: 600 }}>{degreeLine}</div>}
+                      {schoolLine && <div>{schoolLine}</div>}
+                      {dateLine && <div>{dateLine}</div>}
+                      {honorsLine && <div>{honorsLine}</div>}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+        {skillsList.length > 0 && (
+          <div style={styles.sidebarSection}>
+            <div style={styles.sidebarHeading}>
+              <span style={styles.sidebarHeadingBullet}>•</span>
+              <span style={styles.sidebarHeadingText}>Key Skills</span>
+            </div>
+            <div style={styles.sidebarContent}>
+              <ul style={styles.sidebarList}>
+                {skillsList.map((skill, idx) => (
+                  <li key={`skill-${idx}`} style={styles.sidebarListItem}>
+                    <span style={styles.sidebarBullet}>•</span>
+                    <span style={styles.contactText}>{skill}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
+      </aside>
+    );
+  };
+
+  const renderAttorneyTemplateContent = () => {
+    const name = toText(data.name) || 'Your Name';
+    const derivedPosition = toText(data.position);
+    const defaultTitle = derivedPosition || '';
+    const { contactEntries, educationItems, skillsList } = buildAttorneySidebarData();
+
+    const experiencesContent = data.experiences && data.experiences.length > 0
+      ? data.experiences
+      : [];
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100%' }}>
+        <div style={styles.headerArea}>
+          <div style={styles.headerName}>{name}</div>
+          {defaultTitle && <div style={styles.headerTitle}>{defaultTitle}</div>}
+        </div>
+        <div style={styles.columns}>
+          {renderAttorneySidebar(contactEntries, educationItems, skillsList)}
+          <main style={styles.main}>
+            {renderAttorneySummaryBlock(data.summary)}
+            {renderAttorneyExperienceBlock(experiencesContent, 'Experience')}
+          </main>
+        </div>
+      </div>
+    );
+  };
+
+  const flattenAttorneySectionItems = (input) => {
+    if (!input) return [];
+    if (Array.isArray(input)) {
+      return input.reduce((acc, item) => acc.concat(flattenAttorneySectionItems(item)), []);
+    }
+    return [input];
+  };
+
+  const renderAttorneyPageContent = (pageSections, pageIndex) => {
+    const headerSection = pageSections.find((section) => section.type === 'header');
+    const headerName = toText(headerSection?.content?.name) || toText(data.name) || 'Your Name';
+    const headerTitle = toText(data.position);
+
+    const summaryCombined = pageSections
+      .filter((section) => section.type === 'summary')
+      .map((section) => toText(section.content))
+      .filter(Boolean)
+      .join('\n\n');
+
+    const experienceItems = pageSections
+      .filter((section) => section.type === 'experience')
+      .reduce((acc, section) => acc.concat(flattenAttorneySectionItems(section.content)), []);
+
+    const { contactEntries, educationItems, skillsList } = buildAttorneySidebarData();
+    const sidebarNode = renderAttorneySidebar(contactEntries, educationItems, skillsList);
+
+    return [
+      <div key={`attorney-page-${pageIndex}`} style={{ display: 'flex', flexDirection: 'column', minHeight: '100%' }}>
+        <div style={styles.headerArea}>
+          <div style={styles.headerName}>{headerName}</div>
+          {headerTitle && <div style={styles.headerTitle}>{headerTitle}</div>}
+        </div>
+        <div style={styles.columns}>
+          {sidebarNode}
+          <main style={styles.main}>
+            {renderAttorneySummaryBlock(summaryCombined)}
+            {renderAttorneyExperienceBlock(experienceItems, 'Experience')}
+          </main>
+        </div>
+      </div>
+    ];
+  };
   const pageContainerStyle = {
     ...(styles?.container || {}),
     overflow: 'visible'
@@ -2154,51 +2770,55 @@ const renderEducation = (education, styles) => {
           style={pageContainerStyle}
         >
           {/* Resume Content */}
-          <div style={{ height: 'auto', overflow: 'visible' }}>
-            {/* Header - handle modern template's special container */}
-            {(selectedFormat === TEMPLATE_SLUGS.MODERN_CLEAN) ? (
-              <div style={styles.headerContainer}>
-                {data.name && (
-                  <div style={styles.header}>
-                    {toText(data.name)}
-                  </div>
-                )}
-                {(data.email || data.phone) && (
-                  <div style={styles.contact}>
-                    {[data.email, data.phone].map(toText).filter(Boolean).join(' • ')}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <>
-                {data.name && (
-                  <div style={styles.header}>
-                    {toText(data.name)}
-                  </div>
-                )}
-                {(data.email || data.phone) && (
-                  <div style={styles.contact}>
-                    {[data.email, data.phone].map(toText).filter(Boolean).join(' • ')}
-                  </div>
-                )}
-              </>
-            )}
-            {data.summary && (
-              renderSection('SUMMARY', renderSummaryContent(data.summary, styles), styles)
-            )}
-            {data.experiences && data.experiences.length > 0 && (
-              renderSection('EXPERIENCE', renderExperiences(data.experiences, styles), styles)
-            )}
-            {data.projects && data.projects.length > 0 && (
-              renderSection('PROJECTS', renderProjects(data.projects, styles), styles)
-            )}
-            {data.education && (
-              renderSection('EDUCATION', renderEducation(data.education, styles), styles)
-            )}
-            {singlePageSkills.length > 0 && (
-              renderSection('SKILLS', renderSkillsSection(singlePageSkills, styles), styles)
-            )}
-          </div>
+          {selectedFormat === TEMPLATE_SLUGS.ATTORNEY_TEMPLATE ? (
+            renderAttorneyTemplateContent()
+          ) : (
+            <div style={{ height: 'auto', overflow: 'visible' }}>
+              {/* Header - handle modern template's special container */}
+              {(selectedFormat === TEMPLATE_SLUGS.MODERN_CLEAN) ? (
+                <div style={styles.headerContainer}>
+                  {data.name && (
+                    <div style={styles.header}>
+                      {toText(data.name)}
+                    </div>
+                  )}
+                  {(data.email || data.phone) && (
+                    <div style={styles.contact}>
+                      {[data.email, data.phone].map(toText).filter(Boolean).join(' • ')}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <>
+                  {data.name && (
+                    <div style={styles.header}>
+                      {toText(data.name)}
+                    </div>
+                  )}
+                  {(data.email || data.phone) && (
+                    <div style={styles.contact}>
+                      {[data.email, data.phone].map(toText).filter(Boolean).join(' • ')}
+                    </div>
+                  )}
+                </>
+              )}
+              {data.summary && (
+                renderSection('SUMMARY', renderSummaryContent(data.summary, styles), styles)
+              )}
+              {data.experiences && data.experiences.length > 0 && (
+                renderSection('EXPERIENCE', renderExperiences(data.experiences, styles), styles)
+              )}
+              {data.projects && data.projects.length > 0 && (
+                renderSection('PROJECTS', renderProjects(data.projects, styles), styles)
+              )}
+              {data.education && (
+                renderSection('EDUCATION', renderEducation(data.education, styles), styles)
+              )}
+              {singlePageSkills.length > 0 && (
+                renderSection('SKILLS', renderSkillsSection(singlePageSkills, styles), styles)
+              )}
+            </div>
+          )}
         </div>
       )}
       {/* Multi-Page View - Dynamic Content Splitting */}
@@ -2208,7 +2828,7 @@ const renderEducation = (education, styles) => {
             <div key={pageIndex} className="page-wrapper" style={pageContainerStyle}>
               {/* Page Content - Rendered based on section types */}
               <div className="page-content">
-                {renderPageContent(pageSections, styles)}
+                {renderPageContent(pageSections, styles, pageIndex)}
               </div>
             </div>
           ))}
@@ -2218,3 +2838,9 @@ const renderEducation = (education, styles) => {
   );
 };
 export default LivePreview; 
+
+
+
+
+
+

@@ -31,6 +31,12 @@ const TemplateGallery = ({ onSelectTemplate, showAuthModal }) => {
       color: '#111827',
       popular: false,
     },
+    [TEMPLATE_SLUGS.ATTORNEY_TEMPLATE]: {
+      category: 'professional',
+      features: ['Legal Formatting', 'Courtroom Highlights', 'Bar Admissions Spotlight'],
+      color: '#0f172a',
+      popular: false,
+    },
   };
 
   const templates = TEMPLATE_OPTIONS.map((template) => {

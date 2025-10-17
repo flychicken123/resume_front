@@ -52,6 +52,7 @@ const StepPreview = ({ onDownload, hideActions = false, dataOverride }) => {
   
   const scale = fontSizeScaling[data.selectedFontSize || 'medium'] || 1.2;
 const isIndustryManager = normalizedFormat === TEMPLATE_SLUGS.EXECUTIVE_SERIF;
+const isAttorneyTemplate = normalizedFormat === TEMPLATE_SLUGS.ATTORNEY_TEMPLATE;
 
   
   // Helper function to scale font sizes (match LivePreview exactly)
@@ -82,6 +83,8 @@ const isIndustryManager = normalizedFormat === TEMPLATE_SLUGS.EXECUTIVE_SERIF;
         return 'preview modern-clean';
       case TEMPLATE_SLUGS.EXECUTIVE_SERIF:
         return 'preview executive-serif';
+      case TEMPLATE_SLUGS.ATTORNEY_TEMPLATE:
+        return 'preview attorney-template';
       default:
         return 'preview'; // classic-professional template
     }
@@ -344,10 +347,10 @@ const isIndustryManager = normalizedFormat === TEMPLATE_SLUGS.EXECUTIVE_SERIF;
   // Format projects data
   const formatProjects = () => {
     if (!data.projects || data.projects.length === 0) return null;
-    
+
     return data.projects.map((project, idx) => {
       if (!project.projectName) return null;
-      
+
       const node = (
         <div className="experience-item">
           <div className="institution-header">
@@ -387,12 +390,425 @@ const isIndustryManager = normalizedFormat === TEMPLATE_SLUGS.EXECUTIVE_SERIF;
       return node;
     }).filter(Boolean);
   };
+  const renderAttorneyPreview = () => {
+    const palette = {
+      headerBg: '#DCC3AE',
+      sidebarBg: 'transparent',
+      accent: '#3C2E27',
+      body: '#443730',
+      highlight: '#B68A65',
+      divider: '#E5D1C0'
+    };
+    const fontScale = scale;
+    const typeface = '"Georgia", "Times New Roman", serif';
+    const sectionSpacing = 10 * fontScale;
+    const headingGap = 5 * fontScale;
+    const contentIndent = 0;
+
+    const containerStyle = {
+      flex: 1,
+      display: 'flex',
+      flexDirection: 'column',
+      border: `1px solid ${palette.divider}`,
+      borderRadius: '6px',
+      background: '#ffffff',
+      fontFamily: typeface,
+      color: palette.body,
+      overflow: 'hidden',
+      boxShadow: '0 6px 16px rgba(79, 59, 41, 0.08)'
+    };
+    const headerStyle = {
+      background: palette.headerBg,
+      padding: `${12 * fontScale}px ${18 * fontScale}px`,
+      textAlign: 'center',
+      borderBottom: `5px solid ${palette.highlight}`
+    };
+    const headerNameStyle = {
+      fontSize: `${18 * fontScale}px`,
+      fontWeight: 700,
+      letterSpacing: '3px',
+      textTransform: 'uppercase',
+      color: palette.accent
+    };
+    const headerTitleStyle = {
+      marginTop: `${4 * fontScale}px`,
+      fontSize: `${10.8 * fontScale}px`,
+      letterSpacing: '1.6px',
+      textTransform: 'uppercase',
+      color: palette.accent
+    };
+    const columnsStyle = {
+      display: 'grid',
+      gridTemplateColumns: '35% 65%',
+      width: '100%',
+      minHeight: `${300 * fontScale}px`
+    };
+    const sidebarStyle = {
+      background: palette.sidebarBg,
+      padding: `${16 * fontScale}px ${14 * fontScale}px`,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: `${sectionSpacing}px`,
+      boxSizing: 'border-box',
+      minWidth: 0,
+      borderRight: `1px solid ${palette.divider}`
+    };
+    const sidebarSectionStyle = {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: `${4 * fontScale}px`
+    };
+    const sidebarHeadingStyle = {
+      display: 'flex',
+      alignItems: 'center',
+      gap: `${headingGap}px`,
+      fontSize: `${9 * fontScale}px`,
+      fontWeight: 700,
+      letterSpacing: '1.4px',
+      textTransform: 'uppercase',
+      color: palette.accent
+    };
+    const sidebarHeadingBulletStyle = {
+      color: palette.highlight,
+      fontWeight: 700,
+      fontSize: `${9 * fontScale}px`,
+      lineHeight: 1
+    };
+    const sidebarHeadingTextStyle = {
+      flex: 1
+    };
+    const sidebarContentStyle = {
+      paddingLeft: `${contentIndent}px`,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: `${4 * fontScale}px`
+    };
+    const sidebarBodyStyle = {
+      fontSize: `${8.2 * fontScale}px`,
+      lineHeight: 1.6,
+      color: palette.body,
+      whiteSpace: 'pre-line',
+      wordBreak: 'break-word',
+      overflowWrap: 'anywhere'
+    };
+    const listStyle = {
+      listStyle: 'none',
+      padding: 0,
+      margin: 0,
+      display: 'grid',
+      gap: `${4 * fontScale}px`
+    };
+    const listItemStyle = {
+      display: 'flex',
+      alignItems: 'flex-start',
+      gap: `${6 * fontScale}px`,
+      fontSize: `${8.2 * fontScale}px`,
+      color: palette.body,
+      lineHeight: 1.5
+    };
+    const listBulletStyle = {
+      color: palette.highlight,
+      fontWeight: 700,
+      fontSize: `${8.2 * fontScale}px`,
+      lineHeight: 1
+    };
+    const listTextStyle = {
+      flex: 1,
+      wordBreak: 'break-word'
+    };
+    const mainStyle = {
+      background: '#ffffff',
+      padding: `${18 * fontScale}px ${20 * fontScale}px`,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: `${12 * fontScale}px`,
+      boxSizing: 'border-box',
+      minWidth: 0
+    };
+    const mainSectionStyle = {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: `${6 * fontScale}px`
+    };
+    const mainHeadingStyle = {
+      display: 'flex',
+      alignItems: 'center',
+      gap: `${headingGap}px`,
+      borderBottom: `1px solid ${palette.divider}`,
+      paddingBottom: `${6 * fontScale}px`
+    };
+    const mainHeadingBulletStyle = {
+      color: palette.highlight,
+      fontWeight: 700,
+      fontSize: `${11 * fontScale}px`,
+      lineHeight: 1
+    };
+    const mainHeadingTextStyle = {
+      fontSize: `${11 * fontScale}px`,
+      fontWeight: 700,
+      letterSpacing: '2px',
+      textTransform: 'uppercase',
+      color: palette.accent
+    };
+    const mainContentStyle = {
+      paddingLeft: `${contentIndent}px`,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: `${6 * fontScale}px`
+    };
+    const experienceBlockStyle = {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: `${4 * fontScale}px`,
+      marginBottom: `${9 * fontScale}px`
+    };
+    const experienceHeaderRowStyle = {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'baseline',
+      gap: `${8 * fontScale}px`
+    };
+    const experienceRoleStyle = {
+      fontSize: `${9 * fontScale}px`,
+      fontWeight: 600,
+      letterSpacing: '1px',
+      textTransform: 'uppercase',
+      color: palette.accent
+    };
+    const experienceDateStyle = {
+      fontSize: `${8 * fontScale}px`,
+      color: palette.highlight,
+      whiteSpace: 'nowrap'
+    };
+    const experienceMetaStyle = {
+      fontSize: `${8 * fontScale}px`,
+      color: palette.body,
+      fontStyle: 'italic',
+      letterSpacing: '0.3px'
+    };
+    const bulletListStyle = {
+      margin: `${4 * fontScale}px 0 0 0`,
+      padding: 0,
+      color: palette.body,
+      fontSize: `${8 * fontScale}px`,
+      lineHeight: 1.5
+    };
+
+    const deriveLocation = () => {
+      const direct = toText(data.location);
+      if (direct) return direct;
+      if (Array.isArray(data.experiences)) {
+        const match = data.experiences.find((exp) => exp && (exp.city || exp.state));
+        if (match) {
+          const city = toText(match.city);
+          const state = toText(match.state);
+          if (city && state) return `${city}, ${state}`;
+          return city || state || '';
+        }
+      }
+      return '';
+    };
+
+    const formatDate = (value) => {
+      if (!value) return '';
+      const parsed = new Date(value);
+      if (!Number.isNaN(parsed.valueOf())) {
+        return parsed.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+      }
+      return toText(value);
+    };
+
+    const name = toText(data.name) || 'Your Name';
+    const role = toText(data.position);
+    const locationValue = deriveLocation();
+    const contactEntries = [
+      data.email ? toText(data.email) : null,
+      data.phone ? toText(data.phone) : null,
+      locationValue || null
+    ].filter(Boolean);
+    const summaryText = toText(data.summary);
+    const skillsList = parseSkills(data.skills);
+    const educationItems = Array.isArray(data.education)
+      ? data.education.filter((edu) =>
+          edu && (toText(edu.degree) || toText(edu.school) || toText(edu.field) || toText(edu.graduationYear)))
+      : [];
+    const experiences = Array.isArray(data.experiences)
+      ? data.experiences.filter((exp) => exp && (exp.jobTitle || exp.company || exp.description))
+      : [];
+    const renderExperience = (exp, idx) => {
+      const jobTitle = toText(exp.jobTitle) || 'Role';
+      const company = toText(exp.company);
+      const location = exp.remote ? 'Remote' : [toText(exp.city), toText(exp.state)].filter(Boolean).join(', ');
+      const start = formatDate(exp.startDate);
+      const end = exp.currentlyWorking ? 'Present' : formatDate(exp.endDate);
+      const range = [start, end].filter(Boolean).join(' – ');
+      const secondaryLine = [company, location].filter(Boolean).join(' • ');
+      return (
+        <div key={`exp-${idx}`} style={experienceBlockStyle}>
+          <div style={experienceHeaderRowStyle}>
+            <div style={experienceRoleStyle}>{jobTitle}</div>
+            {range && <div style={experienceDateStyle}>{range}</div>}
+          </div>
+          {secondaryLine && <div style={experienceMetaStyle}>{secondaryLine}</div>}
+          {exp.description && (
+            <ul style={bulletListStyle}>
+              {exp.description.split(/\r?\n/).filter((line) => line.trim()).map((line, lineIdx) => (
+                <li key={`exp-${idx}-line-${lineIdx}`}>{line.replace(/^[•▪-]+\s*/, '')}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      );
+    };
+
+    return (
+      <div className="preview-container" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={containerStyle}>
+          <div style={headerStyle}>
+            <div style={headerNameStyle}>{name}</div>
+            {role && <div style={headerTitleStyle}>{role}</div>}
+          </div>
+          <div style={columnsStyle}>
+            <aside style={sidebarStyle}>
+              {contactEntries.length > 0 && (
+                <div style={sidebarSectionStyle}>
+                  <div style={sidebarHeadingStyle}>
+                    <span style={sidebarHeadingBulletStyle}>•</span>
+                    <span style={sidebarHeadingTextStyle}>Contact</span>
+                  </div>
+                  <div style={sidebarContentStyle}>
+                    <ul style={listStyle}>
+                      {contactEntries.map((entry, idx) => (
+                        <li key={`contact-${idx}`} style={listItemStyle}>
+                          <span style={listBulletStyle}>•</span>
+                          <span style={listTextStyle}>{entry}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              )}
+              {educationItems.length > 0 && (
+                <div style={sidebarSectionStyle}>
+                  <div style={sidebarHeadingStyle}>
+                    <span style={sidebarHeadingBulletStyle}>•</span>
+                    <span style={sidebarHeadingTextStyle}>Education</span>
+                  </div>
+                  <div style={sidebarContentStyle}>
+                    <div style={sidebarBodyStyle}>
+                      {educationItems.map((edu, idx) => {
+                        const degreeLine = [toText(edu.degree), toText(edu.field)].filter(Boolean).join(', ');
+                        const schoolLine = [toText(edu.school), toText(edu.location)].filter(Boolean).join(' • ');
+                        const dateLine = formatDate(edu.graduationDate || edu.graduationYear) || toText(edu.graduationYear);
+                        const honorsLine = toText(edu.honors);
+                        return (
+                          <div
+                            key={`edu-${idx}`}
+                            style={{
+                              marginBottom: idx === educationItems.length - 1 ? 0 : `${8 * fontScale}px`
+                            }}
+                          >
+                            {degreeLine && <div style={{ fontWeight: 600 }}>{degreeLine}</div>}
+                            {schoolLine && <div>{schoolLine}</div>}
+                            {dateLine && <div>{dateLine}</div>}
+                            {honorsLine && <div>{honorsLine}</div>}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+              {skillsList.length > 0 && (
+                <div style={sidebarSectionStyle}>
+                  <div style={sidebarHeadingStyle}>
+                    <span style={sidebarHeadingBulletStyle}>•</span>
+                    <span style={sidebarHeadingTextStyle}>Key Skills</span>
+                  </div>
+                  <div style={sidebarContentStyle}>
+                    <ul style={listStyle}>
+                      {skillsList.map((skill, idx) => (
+                        <li key={`skill-${idx}`} style={listItemStyle}>
+                          <span style={listBulletStyle}>•</span>
+                          <span style={listTextStyle}>{skill}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              )}
+            </aside>
+            <main style={mainStyle}>
+              {summaryText && (
+                <div style={mainSectionStyle}>
+                  <div style={mainHeadingStyle}>
+                    <span style={mainHeadingBulletStyle}>•</span>
+                    <span style={mainHeadingTextStyle}>Profile</span>
+                  </div>
+                  <div style={mainContentStyle}>
+                    <div style={sidebarBodyStyle}>{summaryText}</div>
+                  </div>
+                </div>
+              )}
+              {experiences.length > 0 && (
+                <div style={mainSectionStyle}>
+                  <div style={mainHeadingStyle}>
+                    <span style={mainHeadingBulletStyle}>•</span>
+                    <span style={mainHeadingTextStyle}>Experience</span>
+                  </div>
+                  <div style={mainContentStyle}>
+                    {experiences.map(renderExperience)}
+                  </div>
+                </div>
+              )}
+            </main>
+          </div>
+          {!hideActions && (
+            <div style={{
+              textAlign: 'center',
+              padding: '1rem',
+              borderTop: `1px solid ${palette.divider}`
+            }}>
+              <button
+                onClick={onDownload}
+                style={{
+                  padding: '0.75rem 2rem',
+                  fontSize: '0.9rem',
+                  fontWeight: 600,
+                  backgroundColor: '#3b82f6',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.backgroundColor = '#2563eb';
+                  e.target.style.transform = 'translateY(-1px)';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.backgroundColor = '#3b82f6';
+                  e.target.style.transform = 'translateY(0)';
+                }}
+              >
+                Download Resume
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
   const summaryContent = data.summary ? <p>{toText(data.summary)}</p> : null;
   const experiencesContent = formatExperiences();
   const projectsContent = formatProjects();
   const educationContent = formatEducation();
 
   const skillsContent = formatSkills();
+  if (isAttorneyTemplate) {
+    return renderAttorneyPreview();
+  }
   return (
     <div className="preview-container" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
 
@@ -482,4 +898,15 @@ const isIndustryManager = normalizedFormat === TEMPLATE_SLUGS.EXECUTIVE_SERIF;
 };
 
 export default StepPreview;
+
+
+
+
+
+
+
+
+
+
+
 
