@@ -1639,6 +1639,8 @@ function BuilderPage() {
               return "'Georgia', serif";
             case TEMPLATE_SLUGS.MODERN_CLEAN:
               return "'Segoe UI', 'Tahoma', 'Geneva', 'Verdana', sans-serif";
+            case TEMPLATE_SLUGS.ATTORNEY_TEMPLATE:
+              return "'Book Antiqua', 'Georgia', serif";
             default:
               return "'Calibri', 'Arial', sans-serif";
           }
@@ -1651,6 +1653,8 @@ function BuilderPage() {
               return 1.2;
             case TEMPLATE_SLUGS.EXECUTIVE_SERIF:
               return 1.25;
+            case TEMPLATE_SLUGS.ATTORNEY_TEMPLATE:
+              return 1.3;
             default:
               return 1.2;
           }
