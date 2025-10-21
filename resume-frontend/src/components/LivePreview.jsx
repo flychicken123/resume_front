@@ -2144,11 +2144,11 @@ const renderExperiences = (experiences, styles) => {
         let endDate = '';
         if (exp.startDate) {
           const startDateObj = new Date(exp.startDate);
-          startDate = startDateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+          startDate = startDateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'short', timeZone: 'UTC' });
         }
         if (exp.endDate && !exp.currentlyWorking) {
           const endDateObj = new Date(exp.endDate);
-          endDate = endDateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+          endDate = endDateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'short', timeZone: 'UTC' });
         }
         const dateRange = normalizeRange(startDate, endDate, exp.currentlyWorking);
         const jobTitle = toText(exp.jobTitle) || 'Job Title';

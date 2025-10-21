@@ -138,6 +138,7 @@ const formatDateRange = (exp) => {
   const formatter = new Intl.DateTimeFormat('en-US', {
     month: 'short',
     year: 'numeric',
+    timeZone: 'UTC',
   });
 
   const start = coerceDate(exp.startDate);
