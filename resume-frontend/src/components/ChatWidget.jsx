@@ -13,12 +13,38 @@ const INITIAL_MESSAGES = [
 
 const FALLBACK_REPLY = "I’m having trouble reaching our AI right now. Please use the Help bubble or contact us at hihired.org/contact and we’ll help right away.";
 
+const generateSessionId = () => {
+  try {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+      return crypto.randomUUID();
+    }
+  } catch (err) {
+    // Ignore and fall back to timestamp-based id.
+  }
+  return `chat-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+};
+
+const readStoredUserEmail = () => {
+  if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') {
+    return '';
+  }
+  try {
+    const rawUser = window.localStorage.getItem('resumeUser');
+    if (!rawUser) return '';
+    const parsed = JSON.parse(rawUser);
+    return typeof parsed?.email === 'string' ? parsed.email : '';
+  } catch {
+    return '';
+  }
+};
+
 const ChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
   const [isLoading, setIsLoading] = useState(false);
   const apiBaseUrl = useMemo(() => getAPIBaseURL(), []);
+  const sessionId = useMemo(() => generateSessionId(), []);
 
   const toggleOpen = () => {
     const next = !isOpen;
@@ -48,10 +74,19 @@ const ChatWidget = () => {
       }));
 
     try {
+      const pagePath = typeof window !== 'undefined' ? window.location.pathname : '';
+      const userEmail = readStoredUserEmail();
+
       const response = await fetch(`${apiBaseUrl}/api/assistant/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: trimmed, history: historyPayload })
+        body: JSON.stringify({
+          message: trimmed,
+          history: historyPayload,
+          session_id: sessionId,
+          page_path: pagePath,
+          user_email: userEmail
+        })
       });
 
       if (!response.ok) {
