@@ -101,12 +101,12 @@ const isAttorneyTemplate = normalizedFormat === TEMPLATE_SLUGS.ATTORNEY_TEMPLATE
         if (!exp.jobTitle && !exp.company) return null;
 
         const startDate = exp.startDate
-          ? new Date(exp.startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+          ? new Date(exp.startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' })
           : '';
         const endDate = exp.currentlyWorking
           ? 'Present'
           : exp.endDate
-          ? new Date(exp.endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+          ? new Date(exp.endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' })
           : '';
         const dateRange = startDate || endDate
           ? (startDate ? `${startDate}${dash}${endDate || 'Present'}` : endDate)
@@ -612,8 +612,8 @@ const isAttorneyTemplate = normalizedFormat === TEMPLATE_SLUGS.ATTORNEY_TEMPLATE
     const formatDate = (value) => {
       if (!value) return '';
       const parsed = new Date(value);
-      if (!Number.isNaN(parsed.valueOf())) {
-        return parsed.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        if (!Number.isNaN(parsed.valueOf())) {
+          return parsed.toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
       }
       return toText(value);
     };
