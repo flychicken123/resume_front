@@ -1375,6 +1375,33 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
         }
       }
     }
+    if (newPages.length === 1) {
+      const firstPage = newPages[0];
+      const baseLimit = effectiveAvailableHeight - 2;
+      const aggressiveLimit = effectiveAvailableHeight + (effectiveAvailableHeight * 0.35);
+      let totalEstimate = sumEstimatedHeight(firstPage);
+      if (firstPage && firstPage.length > 1 && totalEstimate > aggressiveLimit) {
+        const fallbackPage = [];
+        while (firstPage.length > 1 && totalEstimate > baseLimit) {
+          const moved = firstPage.pop();
+          if (!moved) {
+            break;
+          }
+          fallbackPage.unshift(moved);
+          totalEstimate = sumEstimatedHeight(firstPage);
+        }
+        if (fallbackPage.length > 0) {
+          newPages.push(fallbackPage);
+          if (DEBUG_PAGINATION) {
+            console.log('[Pagination] fallback split triggered due to estimated overflow', {
+              totalEstimate,
+              baseLimit,
+              fallbackLength: fallbackPage.length,
+            });
+          }
+        }
+      }
+    }
     return newPages;
   };
   // Recalculate pages when data changes
