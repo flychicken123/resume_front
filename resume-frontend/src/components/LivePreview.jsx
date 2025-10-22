@@ -267,10 +267,13 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
     // Get font scale factor to adjust page capacity
     const fontScale = getFontSizeScaleFactor();
     // Adjust available height based on font size - keep conservative so we split earlier
-    const pageUtilization = fontScale <= 1.0 ? 0.96  :   // Small
+    const baseUtilization = fontScale <= 1.0 ? 0.96  :   // Small
                            fontScale <= 1.2 ? 0.94  :   // Medium (default)
                            fontScale <= 1.5 ? 0.92  :   // Large
                            0.90;                        // Extra-large
+    const pageUtilization = useConservativePaging
+      ? Math.min(baseUtilization + 0.03, 0.97)
+      : baseUtilization;
     let effectiveAvailableHeight = AVAILABLE_HEIGHT * pageUtilization;
     if (isIndustryManagerFormat && !useConservativePaging) {
       if (fontScale >= 1.5 && fontScale < 1.8) {
@@ -279,13 +282,17 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
         effectiveAvailableHeight = Math.min(effectiveAvailableHeight, AVAILABLE_HEIGHT * 0.88);
       }
     }
+    if (useConservativePaging) {
+      const conservativeLimit = AVAILABLE_HEIGHT - (isIndustryManagerFormat ? 28 : 72);
+      effectiveAvailableHeight = Math.min(effectiveAvailableHeight, conservativeLimit);
+    }
     if (isIndustryManagerFormat) {
       const marginByMode = useConservativePaging ? 20 : 12;
       const marginLimit = AVAILABLE_HEIGHT - marginByMode;
       const hardLimit = AVAILABLE_HEIGHT - Math.max(16, Math.floor(marginByMode * 0.75));
       effectiveAvailableHeight = Math.min(effectiveAvailableHeight, marginLimit, hardLimit);
     }
-    const basePageBuffer = useConservativePaging ? 24 : 20;
+    const basePageBuffer = useConservativePaging ? 14 : 20;
     const bufferedLimit = AVAILABLE_HEIGHT - basePageBuffer;
     effectiveAvailableHeight = Math.min(effectiveAvailableHeight, bufferedLimit);
     const hardPageLimit = AVAILABLE_HEIGHT - (useConservativePaging ? 40 : 34);
@@ -1256,10 +1263,12 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
       const secondPage = newPages[1];
       const firstPageTotal = firstPage.reduce((acc, section) => acc + (section?.estimatedHeight || 0), 0);
       const secondTotal = secondPage.reduce((acc, section) => acc + (section?.estimatedHeight || 0), 0);
-      const trailingAllowance = Math.max(60, getSectionPadding(firstPage[firstPage.length - 1]?.type || 'default')) +
-        Math.max(24, getSectionPadding(secondPage[0]?.type || 'default'));
-      const fitsOnOnePage = (firstPageTotal + secondTotal) <= (effectiveAvailableHeight + trailingAllowance);
+      const trailingAllowance = Math.max(32, getSectionPadding(firstPage[firstPage.length - 1]?.type || 'default')) +
+        Math.max(16, getSectionPadding(secondPage[0]?.type || 'default'));
+      const fitsOnOnePage = false;
       const secondTypes = secondPage.map((section) => section.type);
+      const canMergeTypes = secondTypes.length > 0 && secondTypes.every((type) => type === 'skills');
+      const safeToMerge = false;
       if (DEBUG_PAGINATION) {
         console.log('[Pagination] post-pass merge evaluation', {
           firstPageTypes: firstPage.map((section) => section.type),
@@ -1269,9 +1278,11 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
           effectiveAvailableHeight,
           trailingAllowance,
           fitsOnOnePage,
+          canMergeTypes,
+          safeToMerge,
         });
       }
-      if (fitsOnOnePage) {
+      if (fitsOnOnePage && safeToMerge) {
         if (DEBUG_PAGINATION) {
           console.log('[Pagination] force-merging trailing sections onto page 1');
         }
@@ -1319,6 +1330,50 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
       const headerSection = newPages[0][0];
       newPages[1].unshift(headerSection);
       newPages.shift();
+    }
+    if (newPages.length > 1) {
+      for (let i = 1; i < newPages.length; i++) {
+        const prevPage = newPages[i - 1];
+        const currentPageSections = newPages[i];
+        if (!prevPage || !currentPageSections || currentPageSections.length === 0) {
+          continue;
+        }
+        let slackIterations = 0;
+        while (currentPageSections.length > 0 && slackIterations < 5) {
+          const prevHeight = sumEstimatedHeight(prevPage);
+          const availableSpace = effectiveAvailableHeight - prevHeight;
+          if (availableSpace <= 28) {
+            break;
+          }
+          const candidate = currentPageSections[0];
+          if (!candidate) {
+            break;
+          }
+          const requiredSpace = addBuffer(candidate.estimatedHeight, candidate.type);
+          const maxSectionHeight = Math.max(48, effectiveAvailableHeight * (useConservativePaging ? 0.28 : 0.35));
+          if (requiredSpace <= availableSpace - 8 && candidate.estimatedHeight <= maxSectionHeight) {
+            if (DEBUG_PAGINATION) {
+              console.log('[Pagination] pulling section forward to reduce slack', {
+                fromPage: i + 1,
+                sectionType: candidate.type,
+                requiredSpace,
+                availableSpace,
+                effectiveAvailableHeight,
+              });
+            }
+            prevPage.push({ ...candidate, _suppressTitle: false });
+            currentPageSections.shift();
+            slackIterations++;
+            continue;
+          }
+          break;
+        }
+      }
+      for (let i = newPages.length - 1; i >= 0; i--) {
+        if (newPages[i] && newPages[i].length === 0) {
+          newPages.splice(i, 1);
+        }
+      }
     }
     return newPages;
   };
@@ -1813,7 +1868,7 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
             fontFamily: 'Segoe UI, sans-serif', 
             // Normalize body size to align with other templates
             fontSize: `${6 * scaleFactor}px`, 
-            lineHeight: '1.2',
+            lineHeight: '1.15',
             padding: '16px 16px 0 16px',
             background: 'white',
             border: '1px solid #e5e7eb',
@@ -1856,19 +1911,20 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
           bullet: { 
             color: '#374151', 
             fontSize: `${6 * scaleFactor}px`, 
-            marginLeft: `${4 * scaleFactor}px`, 
-            marginBottom: `${2 * scaleFactor}px`
+            marginLeft: `${3.5 * scaleFactor}px`, 
+            marginBottom: `${Math.max(2, 1.3 * scaleFactor)}px`
           },
           summary: { 
             color: '#374151', 
             fontSize: `${6 * scaleFactor}px`, 
-            marginBottom: `${4 * scaleFactor}px`
+            marginBottom: `${3 * scaleFactor}px`
           },
           skills: { 
             color: '#374151', 
-            fontSize: `${6 * scaleFactor}px`
+            fontSize: `${6 * scaleFactor}px`,
+            lineHeight: '1.35'
           },
-          item: { marginTop: `${3 * scaleFactor}px` }
+          item: { marginTop: `${Math.max(2, 2.4 * scaleFactor)}px` }
         };
       
              default:
