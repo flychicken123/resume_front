@@ -193,9 +193,9 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
       }
       case 'skills': {
         const skillsArray = parseSkills(content);
-        const lineHeight = Math.round(13 * fontScale);
-        const baseHeight = Math.max(lineHeight, Math.round(17 * fontScale));
-        const itemGap = Math.max(2, Math.round(2 * fontScale));
+        const lineHeight = Math.round(13.5 * fontScale);
+        const baseHeight = Math.max(lineHeight, Math.round(18 * fontScale));
+        const itemGap = Math.max(2, Math.round(2.2 * fontScale));
 
         if (!skillsArray || skillsArray.length === 0) {
           return applyFormatAdjustment(baseHeight, 'skills');
@@ -225,7 +225,7 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
           return applyFormatAdjustment(Math.max(baseHeight, estimated), 'skills');
         }
 
-        const perLineChars = Math.max(20, Math.round(140 / fontScale));
+        const perLineChars = Math.max(14, Math.round(110 / fontScale));
         let currentLineChars = 0;
         let lineCount = 1;
 
@@ -241,7 +241,8 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
           }
         });
 
-        const estimated = (lineCount * lineHeight) + ((lineCount - 1) * itemGap);
+        const wrapAllowance = Math.round(lineCount * lineHeight * 0.08);
+        const estimated = (lineCount * lineHeight) + ((lineCount - 1) * itemGap) + wrapAllowance;
         return applyFormatAdjustment(Math.max(baseHeight, estimated), 'skills');
       }
       default:
@@ -731,7 +732,7 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
           content: skillsText,
           estimatedHeight: skillsHeight,
           priority: 6,
-          canSplit: true
+          canSplit: false
         });
       }
     }
@@ -1351,7 +1352,9 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
           }
           const requiredSpace = addBuffer(candidate.estimatedHeight, candidate.type);
           const maxSectionHeight = Math.max(48, effectiveAvailableHeight * (useConservativePaging ? 0.28 : 0.35));
-          if (requiredSpace <= availableSpace - 8 && candidate.estimatedHeight <= maxSectionHeight) {
+          const canMoveSkills = candidate.type === 'skills' && requiredSpace <= availableSpace - 4;
+          const canMoveGeneric = candidate.type !== 'skills' && candidate.estimatedHeight <= maxSectionHeight;
+          if (requiredSpace <= availableSpace - 8 && (canMoveGeneric || canMoveSkills)) {
             if (DEBUG_PAGINATION) {
               console.log('[Pagination] pulling section forward to reduce slack', {
                 fromPage: i + 1,
@@ -1391,6 +1394,15 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
           totalEstimate = sumEstimatedHeight(firstPage);
         }
         if (fallbackPage.length > 0) {
+          if (fallbackPage[0]?.type === 'skills') {
+            while (firstPage.length > 0 && firstPage[firstPage.length - 1]?.type === 'skills') {
+              const movedSkill = firstPage.pop();
+              if (!movedSkill) {
+                break;
+              }
+              fallbackPage.unshift(movedSkill);
+            }
+          }
           newPages.push(fallbackPage);
           if (DEBUG_PAGINATION) {
             console.log('[Pagination] fallback split triggered due to estimated overflow', {
