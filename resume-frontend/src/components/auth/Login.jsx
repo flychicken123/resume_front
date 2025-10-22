@@ -12,32 +12,12 @@ const Login = ({ onLogin, onClose, contextMessage }) => {
   const [acceptedPolicies, setAcceptedPolicies] = useState(false);
   const [pendingGoogleAuth, setPendingGoogleAuth] = useState(null);
   const [marketingOptIn, setMarketingOptIn] = useState(true);
-  const [planPreference, setPlanPreference] = useState('free');
-
-  const planOptions = [
-    {
-      value: 'free',
-      label: 'Free Plan',
-      description: 'Build one resume per week for free.',
-    },
-    {
-      value: 'premium',
-      label: 'Premium Plan',
-      description: '30 resumes/month plus AI cover letters.',
-    },
-    {
-      value: 'ultimate',
-      label: 'Ultimate Plan',
-      description: 'High-volume resumes with agency support.',
-    },
-  ];
 
   useEffect(() => {
     setAcceptedPolicies(false);
     setError('');
     setPendingGoogleAuth(null);
     setMarketingOptIn(true);
-    setPlanPreference('free');
   }, [mode]);
 
   const needsConsent = mode === 'signup';
@@ -172,7 +152,7 @@ const Login = ({ onLogin, onClose, contextMessage }) => {
       if (mode === 'signup') {
         payload.name = email;
         payload.marketing_opt_in = marketingOptIn;
-        payload.plan_preference = planPreference;
+        payload.plan_preference = 'free';
       }
 
       console.log('Making request to:', `${API_BASE_URL}${endpoint}`);
@@ -446,32 +426,6 @@ const Login = ({ onLogin, onClose, contextMessage }) => {
                 Send me product updates, templates, and special offers.
               </span>
             </label>
-            <div style={{ marginBottom: '0.75rem' }}>
-              <div style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.35rem' }}>
-                Which plan interests you most?
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                {planOptions.map((option) => (
-                  <label
-                    key={option.value}
-                    style={{ display: 'flex', gap: '0.45rem', alignItems: 'flex-start', fontSize: '0.82rem', color: '#475569' }}
-                  >
-                    <input
-                      type="radio"
-                      name="signup-plan"
-                      value={option.value}
-                      checked={planPreference === option.value}
-                      onChange={(e) => setPlanPreference(e.target.value)}
-                      style={{ marginTop: '0.15rem', width: 'auto' }}
-                    />
-                    <span>
-                      <strong style={{ display: 'block', color: '#1f2937' }}>{option.label}</strong>
-                      <span style={{ color: '#6b7280' }}>{option.description}</span>
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </div>
             <label className="inline-checkbox">
               <input
                 type="checkbox"
