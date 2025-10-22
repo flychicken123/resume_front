@@ -38,6 +38,7 @@ const AdminMembershipPage = () => {
   const [jobError, setJobError] = useState("");
   const [jobMessage, setJobMessage] = useState("");
   const [jobPage, setJobPage] = useState(1);
+  const [emailExportMode, setEmailExportMode] = useState(null);
   const [jobTotalPages, setJobTotalPages] = useState(1);
   const [jobTotalCount, setJobTotalCount] = useState(0);
   const [jobStatusUpdating, setJobStatusUpdating] = useState({});
@@ -422,6 +423,42 @@ const AdminMembershipPage = () => {
     }
   };
 
+  const handleDownloadEmails = async (includeAll = false) => {
+    setEmailExportMode(includeAll ? "all" : "opted");
+    setError("");
+    try {
+      const params = new URLSearchParams({ format: "csv" });
+      if (includeAll) {
+        params.set("all", "true");
+      }
+      const response = await fetch(`${API_BASE_URL}/api/admin/users/emails?${params.toString()}`, {
+        headers: {
+          ...getAuthHeaders(),
+          Accept: "text/csv",
+        },
+      });
+      if (!response.ok) {
+        const text = await response.text().catch(() => "");
+        throw new Error(text || "Failed to export user emails");
+      }
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = includeAll ? "user-emails-all.csv" : "user-emails-opted-in.csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+      setMessage(includeAll ? "Downloaded all user emails." : "Downloaded subscribed user emails.");
+    } catch (err) {
+      console.error("Failed to export user emails", err);
+      setError(err.message || "Failed to export user emails");
+    } finally {
+      setEmailExportMode(null);
+    }
+  };
+
   const planOptions = useMemo(() => {
     if (!plans.length) {
       return [];
@@ -431,6 +468,23 @@ const AdminMembershipPage = () => {
       label: plan.display_name || plan.name,
     }));
   }, [plans]);
+
+  const formatPlanPreference = (value) => {
+    if (!value) {
+      return "-";
+    }
+    const normalized = String(value).toLowerCase();
+    switch (normalized) {
+      case "free":
+        return "Free";
+      case "premium":
+        return "Premium";
+      case "ultimate":
+        return "Ultimate";
+      default:
+        return value;
+    }
+  };
 
   const filteredUsers = useMemo(() => {
     if (!searchTerm.trim()) {
@@ -545,6 +599,40 @@ const AdminMembershipPage = () => {
             >
               {loadingData ? "Refreshing..." : "Refresh"}
             </button>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: "0.5rem" }}>
+              <button
+                type="button"
+                onClick={() => handleDownloadEmails(false)}
+                disabled={emailExportMode !== null}
+                style={{
+                  padding: "0.45rem 0.9rem",
+                  borderRadius: "6px",
+                  border: "1px solid #22c55e",
+                  background: emailExportMode === "opted" ? "#e5e7eb" : "#22c55e",
+                  color: emailExportMode === "opted" ? "#6b7280" : "#ffffff",
+                  cursor: emailExportMode ? "not-allowed" : "pointer",
+                  fontWeight: 500,
+                }}
+              >
+                {emailExportMode === "opted" ? "Preparing…" : "Download opted-in emails"}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDownloadEmails(true)}
+                disabled={emailExportMode !== null}
+                style={{
+                  padding: "0.45rem 0.9rem",
+                  borderRadius: "6px",
+                  border: "1px solid #0ea5e9",
+                  background: emailExportMode === "all" ? "#e5e7eb" : "#0ea5e9",
+                  color: emailExportMode === "all" ? "#6b7280" : "#ffffff",
+                  cursor: emailExportMode ? "not-allowed" : "pointer",
+                  fontWeight: 500,
+                }}
+              >
+                {emailExportMode === "all" ? "Preparing…" : "Download all emails"}
+              </button>
+            </div>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
             <input
@@ -578,6 +666,8 @@ const AdminMembershipPage = () => {
                   <th style={{ padding: "0.75rem", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "#6b7280" }}>Billing Status</th>
                   <th style={{ padding: "0.75rem", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "#6b7280" }}>Resume Limit</th>
                   <th style={{ padding: "0.75rem", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "#6b7280" }}>Current Period Ends</th>
+                  <th style={{ padding: "0.75rem", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "#6b7280" }}>Marketing Opt-In</th>
+                  <th style={{ padding: "0.75rem", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "#6b7280" }}>Plan Interest</th>
                   <th style={{ padding: "0.75rem", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "#6b7280" }}>Actions</th>
                 </tr>
               </thead>
@@ -639,6 +729,14 @@ const AdminMembershipPage = () => {
                       <td style={{ padding: "0.75rem", verticalAlign: "top" }}>
                         <div>{formatDate(entry.current_period_end)}</div>
                         <div style={{ fontSize: "0.75rem", color: "#6b7280" }}>Trial ends: {formatDate(entry.trial_end_date)}</div>
+                      </td>
+                      <td style={{ padding: "0.75rem", verticalAlign: "top" }}>
+                        <div style={{ fontWeight: 500, color: entry.marketing_opt_in ? "#047857" : "#6b7280" }}>
+                          {entry.marketing_opt_in ? "Opted in" : "No"}
+                        </div>
+                      </td>
+                      <td style={{ padding: "0.75rem", verticalAlign: "top" }}>
+                        <div>{formatPlanPreference(entry.signup_plan_preference)}</div>
                       </td>
                       <td style={{ padding: "0.75rem", verticalAlign: "top" }}>
                         <button
