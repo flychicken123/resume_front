@@ -2249,9 +2249,9 @@ const renderExperiences = (experiences, styles) => {
         const jobTitle = toText(exp.jobTitle) || 'Job Title';
         const companyName = toText(exp.company) || 'Company';
         const locationLabel = exp.remote ? 'Remote' : location;
-        const headerText = isIndustryManager
+        const headerPrimary = isIndustryManager
           ? formatHeaderSegments([jobTitle, companyName, locationLabel, dateRange], true)
-          : formatHeaderSegments([jobTitle, companyName, locationLabel, dateRange]);
+          : jobTitle;
         const secondaryLine = (!isIndustryManager && !isAttorneyTemplate)
           ? formatHeaderSegments([companyName, locationLabel, dateRange])
           : '';
@@ -2278,14 +2278,14 @@ const renderExperiences = (experiences, styles) => {
               key={idx}
               style={itemStyle}
             >
-              <div style={styles.company}>{`${headerBullet} ${headerText}`}</div>
+              <div style={styles.company}>{`${headerBullet} ${headerPrimary}`}</div>
               {descriptionContent}
             </div>
           );
         }
         return (
           <div key={idx} style={styles.item}>
-            <div style={styles.company}>{isAttorneyTemplate ? (attorneyPrimary || jobTitle) : headerText}</div>
+            <div style={styles.company}>{isAttorneyTemplate ? (attorneyPrimary || jobTitle) : headerPrimary}</div>
             {!isAttorneyTemplate && secondaryLine && (
               <div style={styles.date}>{secondaryLine}</div>
             )}
