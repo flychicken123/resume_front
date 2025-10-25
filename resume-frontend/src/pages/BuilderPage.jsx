@@ -29,7 +29,7 @@ import ImportResumeModal from '../components/ImportResumeModal';
 import UpgradeModal from '../components/UpgradeModal';
 import SubscriptionStatus from '../components/SubscriptionStatus';
 import SEO from '../components/SEO';
-import { trackResumeGeneration } from '../components/Analytics';
+import { trackResumeGeneration, trackBuilderLoaded, trackDownloadClicked } from '../components/Analytics';
 import { computeJobMatches, getJobMatches, generateExperienceAI, optimizeProjectAI, generateSummaryAI } from '../api';
 import './BuilderPage.css';
 
@@ -648,6 +648,10 @@ function BuilderPage() {
     POPULAR_LOCATION_VALUES.forEach(addOption);
     return options;
   }, [autoLocation, resumeLocationSuggestions, geocodedLocationHints]);
+
+  useEffect(() => {
+    trackBuilderLoaded('builder_page');
+  }, []);
 
 
   useEffect(() => {
@@ -1294,6 +1298,7 @@ function BuilderPage() {
         return;
       }
 
+      trackDownloadClicked(selectedFormat || 'default', { page: window.location.pathname });
       setDownloadNotice(null);
 
       // Track resume generation
