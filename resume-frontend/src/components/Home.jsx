@@ -26,7 +26,7 @@ import { setLastStep } from "../utils/exitTracking";
 
 import SEO from "./SEO";
 
-import { trackReferrer, trackBuilderStart } from "./Analytics";
+import { trackReferrer, trackBuilderStart, trackCTAClick } from "./Analytics";
 
 const Home = () => {
   const { user, login, isAdmin } = useAuth();
@@ -80,6 +80,7 @@ const Home = () => {
     // Track referrer and builder start when user clicks the button
 
     trackReferrer();
+    trackCTAClick("home_primary_cta", { page: window.location.pathname });
 
     trackBuilderStart("home_page_button");
 

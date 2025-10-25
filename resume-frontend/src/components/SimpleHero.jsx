@@ -1,15 +1,18 @@
 import React from 'react';
 import './SimpleHero.css';
 import { setLastStep } from '../utils/exitTracking';
+import { trackCTAClick } from './Analytics';
 
 const SimpleHero = ({ onImportClick, onCreateClick }) => {
   const handleImport = () => {
     setLastStep('clicked_import_from_hero');
+    trackCTAClick('hero_import_cta', { page: window.location.pathname });
     onImportClick?.();
   };
 
   const handleCreate = () => {
     setLastStep('clicked_create_from_hero');
+    trackCTAClick('hero_create_cta', { page: window.location.pathname });
     onCreateClick?.();
   };
 
