@@ -120,19 +120,22 @@ const isAttorneyTemplate = normalizedFormat === TEMPLATE_SLUGS.ATTORNEY_TEMPLATE
 
         const headerSegments = [
           toText(exp.jobTitle),
-          toText(exp.company),
           location,
-          dateRange
         ]
           .filter(Boolean)
           .map((segment) => segment.replace(/\s+-\s+/g, ' – '));
 
+        const metaSegments = [
+          toText(exp.company),
+          dateRange,
+        ].filter(Boolean).map((segment) => segment.replace(/\s+-\s+/g, ' – '));
+
         const headerText = isIndustryManager
-          ? headerSegments.join(' | ')
+          ? headerSegments.join(' • ')
           : `${toText(exp.jobTitle)} at ${toText(exp.company)}`;
 
         const secondaryLine = isIndustryManager
-          ? ''
+          ? metaSegments.join(' • ')
           : [location, dateRange].filter(Boolean).join(' • ');
 
         const descriptionContent = exp.description
@@ -151,7 +154,7 @@ const isAttorneyTemplate = normalizedFormat === TEMPLATE_SLUGS.ATTORNEY_TEMPLATE
         const node = (
           <>
             <div className="institution-header">{headerText}</div>
-            {!isIndustryManager && secondaryLine && (
+            {secondaryLine && (
               <div className="education-details">{secondaryLine}</div>
             )}
             {descriptionContent}
