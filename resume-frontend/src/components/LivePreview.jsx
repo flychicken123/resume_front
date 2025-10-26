@@ -40,7 +40,7 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload, downloadNotice })
   const contentRef = useRef(null);
   // Page dimensions in pixels (8.5" x 11" at 96 DPI)
   const PAGE_HEIGHT = 1056;
-  const CONTENT_MARGIN = 20; // Matches 20px padding so page height stays aligned
+  const CONTENT_MARGIN = 20; // Matches container padding for accurate estimates
   const AVAILABLE_HEIGHT = PAGE_HEIGHT - (CONTENT_MARGIN * 2);
   // Font size scale factors that match the rendering scale
   const getFontSizeScaleFactor = () => {
@@ -266,487 +266,107 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
   };
   const adjustSkillContentEstimate = (contentHeight, { includeHeader = false } = {}) => {
     const fontScale = getFontSizeScaleFactor();
-    if (!isIndustryManagerFormat) {
-      const headerAllowance = includeHeader ? Math.round(Math.max(20 * fontScale, 22)) : 0;
-      const multiplier = includeHeader ? 1.22 : 1.12;
-      const buffer = includeHeader ? Math.round(Math.max(12, 6 * fontScale)) : Math.round(Math.max(8, 4 * fontScale));
-      return Math.round((contentHeight + headerAllowance) * multiplier + buffer);
-    }
-    const headerAllowance = includeHeader ? Math.round(18 * fontScale) : 0;
-    const base = contentHeight + headerAllowance;
-    const multiplier = includeHeader ? 1.12 : 1.06;
-    const extra = includeHeader ? 12 : 6;
-    return Math.round(base * multiplier + extra);
+    const headerAllowance = includeHeader ? Math.round(12 * fontScale) : 0;
+    const buffer = includeHeader ? Math.round(Math.max(6, 3 * fontScale)) : Math.round(Math.max(4, 2 * fontScale));
+    return Math.round(contentHeight + headerAllowance + buffer);
   };
   // Split content into pages based on estimated heights
   const splitContentIntoPages = () => {
-    const newPages = [];
-    let currentPage = [];
-    let currentHeight = 0;
-    // Get font scale factor to adjust page capacity
     const fontScale = getFontSizeScaleFactor();
-    // Adjust available height based on font size - keep conservative so we split earlier
-    const baseUtilization = fontScale <= 1.0 ? 0.96  :   // Small
-                           fontScale <= 1.2 ? 0.94  :   // Medium (default)
-                           fontScale <= 1.5 ? 0.92  :   // Large
-                           0.90;                        // Extra-large
+    const baseUtilization = fontScale <= 1.0 ? 1.0 :
+                           fontScale <= 1.2 ? 0.99 :
+                           fontScale <= 1.5 ? 0.97 :
+                           0.94;
     const pageUtilization = useConservativePaging
-      ? Math.min(baseUtilization + 0.03, 0.97)
+      ? Math.min(baseUtilization, 0.96)
       : baseUtilization;
-    let effectiveAvailableHeight = AVAILABLE_HEIGHT * pageUtilization;
+    const basePageBuffer = useConservativePaging ? 32 : 24;
+    let effectiveAvailableHeight = Math.min(
+      AVAILABLE_HEIGHT * pageUtilization,
+      AVAILABLE_HEIGHT - basePageBuffer
+    );
+
     if (isIndustryManagerFormat && !useConservativePaging) {
-      if (fontScale >= 1.5 && fontScale < 1.8) {
-        effectiveAvailableHeight = Math.min(effectiveAvailableHeight, AVAILABLE_HEIGHT * 0.9);
-      } else if (fontScale >= 1.8) {
-        effectiveAvailableHeight = Math.min(effectiveAvailableHeight, AVAILABLE_HEIGHT * 0.88);
-      }
+      const marginLimit = AVAILABLE_HEIGHT - 18;
+      effectiveAvailableHeight = Math.min(effectiveAvailableHeight, marginLimit);
     }
-    if (useConservativePaging) {
-      const conservativeLimit = AVAILABLE_HEIGHT - (isIndustryManagerFormat ? 28 : 72);
-      effectiveAvailableHeight = Math.min(effectiveAvailableHeight, conservativeLimit);
-    }
-    if (isIndustryManagerFormat) {
-      const marginByMode = useConservativePaging ? 20 : 12;
-      const marginLimit = AVAILABLE_HEIGHT - marginByMode;
-      const hardLimit = AVAILABLE_HEIGHT - Math.max(16, Math.floor(marginByMode * 0.75));
-      effectiveAvailableHeight = Math.min(effectiveAvailableHeight, marginLimit, hardLimit);
-    }
-    const basePageBuffer = useConservativePaging ? 14 : 20;
-    const bufferedLimit = AVAILABLE_HEIGHT - basePageBuffer;
-    effectiveAvailableHeight = Math.min(effectiveAvailableHeight, bufferedLimit);
-    const hardPageLimit = AVAILABLE_HEIGHT - (useConservativePaging ? 40 : 34);
-    effectiveAvailableHeight = Math.min(effectiveAvailableHeight, hardPageLimit);
+
     const sectionPadding = {
-      header: useConservativePaging ? 12 : 16,
-      summary: useConservativePaging ? 16 : 22,
-      experience: useConservativePaging ? 18 : 26,
-      projects: useConservativePaging ? 18 : 24,
-      education: useConservativePaging ? 16 : 22,
-      skills: useConservativePaging ? 14 : 22,
-      default: useConservativePaging ? 12 : 18
+      header: useConservativePaging ? 10 : 12,
+      summary: useConservativePaging ? 12 : 16,
+      experience: useConservativePaging ? 14 : 18,
+      projects: useConservativePaging ? 14 : 18,
+      education: useConservativePaging ? 12 : 16,
+      skills: useConservativePaging ? 10 : 14,
+      default: useConservativePaging ? 10 : 14,
     };
+
     const getSectionPadding = (type) => sectionPadding[type] ?? sectionPadding.default;
-    const addBuffer = (height, type) => {
-      const safeHeight = Math.max(0, height || 0);
-      return safeHeight + getSectionPadding(type);
-    };
-    const sumEstimatedHeight = (sections) =>
-      sections.reduce((total, item) => total + addBuffer(item?.estimatedHeight || 0, item?.type), 0);
-    // Helper function to add section to current page
-    const addToCurrentPage = (section) => {
-      const newSection = { ...section };
-      if (currentHeight === 0) {
-        newSection._suppressTitle = false;
-        newSection._pageStart = true;
-      } else {
-        newSection._pageStart = false;
-      }
-      currentPage.push(newSection);
-      currentHeight += addBuffer(newSection.estimatedHeight, newSection.type);
-    };
-    // Helper function to start new page
-    const startNewPage = () => {
-      if (currentPage.length > 0) {
-        newPages.push([...currentPage]);
-      }
-      currentPage = [];
-      currentHeight = 0;
-    };
-    // Helper function to check if content can fit on current page
-    const canFitOnCurrentPage = (contentHeight, sectionType) => {
-      return (currentHeight + addBuffer(contentHeight, sectionType)) <= effectiveAvailableHeight;
-    };
-    // Helper function to split long content across pages
-    const splitLongContent = (content, type, maxHeight) => {
-      const fontScale = getFontSizeScaleFactor();
-      const aggressiveIndustry = isIndustryManagerFormat && !useConservativePaging;
-      
-      if (type === 'skills') {
-        // Split skills list across pages. Executive Serif uses 2-column grid,
-        // so height is the tallest column. We simulate packing items into
-        // columns and stop before exceeding maxHeight.
-        const items = parseSkills(content);
-        if (!items || items.length === 0) return [content];
-        const columnCount = isIndustryManagerFormat ? 2 : 1;
-        const perLine = Math.max(14, Math.round((isIndustryManagerFormat ? 72 : 200) / fontScale));
-        const lineHeight = Math.round(12 * fontScale);
-        const itemGap = Math.max(2, Math.round(2 * fontScale));
-        const rowGap = Math.max(4, Math.round(4 * fontScale));
-        const heightAllowance = Math.max(0, maxHeight - rowGap);
-        // Estimate height for a set of items laid out in columns
-        const estimateSetHeight = (arr) => {
-          if (arr.length === 0) return 0;
-          const colHeights = new Array(columnCount).fill(0);
-          for (const skill of arr) {
-            const clean = String(skill).trim();
-            const lines = Math.max(1, Math.ceil(clean.length / perLine));
-            const h = (lines * lineHeight) + itemGap;
-            // Greedy: place into shortest column
-            let idx = 0;
-            for (let i = 1; i < columnCount; i++) {
-              if (colHeights[i] < colHeights[idx]) idx = i;
-            }
-            if (colHeights[idx] > 0) {
-              colHeights[idx] += rowGap;
-            }
-            colHeights[idx] += h;
-          }
-          return Math.max(...colHeights);
-        };
-        const fitsWithinLimit = (arr) => estimateSetHeight(arr) <= heightAllowance;
-        const parts = [];
-        let current = [];
-        for (let i = 0; i < items.length; i++) {
-          const next = [...current, items[i]];
-          const heightWithNext = estimateSetHeight(next);
-          if (heightWithNext <= heightAllowance || current.length === 0) {
-            current = next;
-          } else {
-            parts.push(current);
-            current = [items[i]];
-          }
-        }
-        if (current.length) parts.push(current);
-        // Ensure each chunk stays within height limit by shifting overflow forward
-        for (let i = 0; i < parts.length; i++) {
-          while (!fitsWithinLimit(parts[i]) && parts[i].length > 1) {
-            const spill = parts[i].pop();
-            if (!parts[i + 1]) {
-              parts[i + 1] = [];
-            }
-            parts[i + 1].unshift(spill);
-          }
-        }
-        // Balance items between adjacent parts to reduce large gaps
-        if (parts.length > 1) {
-          for (let idx = parts.length - 1; idx > 0; idx--) {
-            const prev = parts[idx - 1];
-            const curr = parts[idx];
-            let moved = false;
-            while (curr.length > 0) {
-              const candidate = [...prev, curr[0]];
-              if (fitsWithinLimit(candidate)) {
-                prev.push(curr.shift());
-                moved = true;
-              } else {
-                break;
-              }
-            }
-            if (curr.length === 0) {
-              parts.splice(idx, 1);
-            } else if (!moved && prev.length > 1) {
-              // Try moving last item from prev to current if prev still too short
-              if (estimateSetHeight(prev) <= heightAllowance * 0.85) {
-                curr.unshift(prev.pop());
-                if (!fitsWithinLimit(curr)) {
-                  prev.push(curr.shift());
-                }
-              }
-            }
-          }
-        }
-        // Final safety pass in case balancing reintroduced overflow
-        for (let i = 0; i < parts.length; i++) {
-          while (!fitsWithinLimit(parts[i]) && parts[i].length > 1) {
-            const spill = parts[i].pop();
-            if (!parts[i + 1]) {
-              parts[i + 1] = [];
-            }
-            parts[i + 1].unshift(spill);
-          }
-        }
-        // Convert parts back to strings so downstream parsing still works
-        return parts.map(p => p.join(', '));
-      }
-      
-      if (type === 'summary') {
-        // Split summary more aggressively - try sentences first, then words if needed
-        let sentences = content.split('. ');
-        
-        // If there are very few sentences, split on other punctuation too
-        if (sentences.length <= 2) {
-          sentences = content.split(/[.!?;]\s+/);
-        }
-        
-        // If still very few parts, split on commas or by word count
-        if (sentences.length <= 2) {
-          const words = content.split(' ');
-          const wordsPerPart = Math.ceil(words.length / 3); // Force at least 3 parts
-          sentences = [];
-          for (let i = 0; i < words.length; i += wordsPerPart) {
-            sentences.push(words.slice(i, i + wordsPerPart).join(' '));
-          }
-        }
-        
-        const parts = [];
-        let currentPart = '';
-        
-        for (let i = 0; i < sentences.length; i++) {
-          const sentence = sentences[i];
-          const connector = currentPart ? '. ' : '';
-          const testPart = currentPart + connector + sentence;
-          const testHeight = estimateSectionHeight(testPart, type);
-          
-          // Very aggressive - allow up to 95% of max height before splitting
-          if (testHeight > maxHeight * 0.95 && currentPart) {
-            // Current part is full, start new part
-            parts.push(currentPart);
-            currentPart = sentence;
-          } else {
-            currentPart = testPart;
-          }
-        }
-        
-        if (currentPart) {
-          parts.push(currentPart);
-        }
-        
-        // Force at least 2 parts if content is long enough
-        if (parts.length === 1 && content.length > 200) {
-          const midPoint = Math.floor(content.length / 2);
-          const splitPoint = content.lastIndexOf(' ', midPoint);
-          if (splitPoint > 0) {
-            return [content.substring(0, splitPoint), content.substring(splitPoint + 1)];
-          }
-        }
-        
-        return parts;
-      }
-      
-      if (type === 'experience' && Array.isArray(content)) {
-        // Split experience array by individual jobs
-        const parts = [];
-        let currentPart = [];
-        let currentHeight = 0;
-        
-        for (const exp of content) {
-          const expHeight = estimateSectionHeight([exp], 'experience');
-          
-          // Check if adding this experience would exceed max height
-          // Use higher threshold to maximize space usage
-          const threshold = aggressiveIndustry ? 1.0 : 1.0; // Allow packing until hard limit
-          if (currentHeight + expHeight > maxHeight * threshold && currentPart.length > 0) {
-            // Current part is full, start new part
-            parts.push([...currentPart]);
-            currentPart = [exp];
-            currentHeight = expHeight;
-          } else {
-            // Add to current part
-            currentPart.push(exp);
-            currentHeight += expHeight;
-          }
-        }
-        
-        if (currentPart.length > 0) {
-          parts.push(currentPart);
-        }
-        
-        return parts.length > 1 ? parts : [content];
-      }
-      
-      if (type === 'projects' && Array.isArray(content)) {
-        // If we have very little space, don't try to split
-        const minProjectSpace = aggressiveIndustry ? 160 : 100;
-        if (maxHeight < minProjectSpace) {
-          return [content];
-        }
-        
-        // For a single large project with many bullet points, try to split the description
-        if (content.length === 1 && content[0].description) {
-          const project = content[0];
-          const lines = project.description.split('\n').filter(l => l.trim());
-          
-          // If we have many bullet points, try to split them
-          if (lines.length > 4) {
-            // Calculate how many bullet points might fit
-            const lineHeight = Math.round(aggressiveIndustry ? 10 * fontScale : 13 * fontScale); // Slightly more conservative
-            const titleHeight = Math.round(16 * fontScale);
-            const sectionTitleHeight = Math.round(24 * fontScale); // "PROJECTS" title
-            const techHeight = project.technologies ? Math.round(12 * fontScale) : 0;
-            const urlHeight = project.projectUrl ? Math.round(12 * fontScale) : 0;
-            const baseHeight = titleHeight + sectionTitleHeight + techHeight + urlHeight + (aggressiveIndustry ? 14 : 30); // Padding for safety
-            
-            const availableForBullets = maxHeight - baseHeight;
-            // Be more conservative - leave some buffer
-            const bulletsPerPage = Math.max(2, Math.floor(availableForBullets / lineHeight) - (aggressiveIndustry ? 0 : 2));
-            
-            if (bulletsPerPage >= 2 && bulletsPerPage < lines.length) {
-              // Split the bullet points
-              const firstPart = lines.slice(0, bulletsPerPage).join('\n');
-              const secondPart = lines.slice(bulletsPerPage).join('\n');
-              
-              return [
-                [{
-                  ...project,
-                  description: firstPart,
-                  // Keep tech and URL on first page
-                  _isSplit: true,
-                  _isFirstPart: true
-                }],
-                [{
-                  ...project,
-                  description: secondPart,
-                  projectName: null, // Don't show title on continuation
-                  // Don't repeat tech and URL on second page
-                  technologies: null,
-                  projectUrl: null,
-                  _isContinuation: true
-                }]
-              ];
-            }
-          }
-        }
-        
-        // Original splitting logic for multiple projects
-        const parts = [];
-        let currentPart = [];
-        let currentHeight = 0;
-        
-        // First check if even one project can fit
-        const firstProject = content[0];
-        let firstProjectHeight = Math.round(16 * fontScale);
-        
-        if (firstProject.description) {
-          const lines = firstProject.description.split('\n').filter(l => l.trim());
-          let totalLines = 0;
-          const descCharsPerLine = Math.round(150 / fontScale);
-          
-          for (const line of lines) {
-            const cleanLine = line.replace('•', '').trim();
-            const lineCount = Math.max(1, Math.ceil(cleanLine.length / descCharsPerLine));
-            totalLines += lineCount;
-          }
-          
-          firstProjectHeight += totalLines * Math.round(11 * fontScale);
-        }
-        if (firstProject.technologies) {
-          firstProjectHeight += Math.round(11 * fontScale);
-        }
-        if (firstProject.projectUrl) {
-          firstProjectHeight += Math.round(11 * fontScale);
-        }
-        
-        if (firstProjectHeight > maxHeight) {
-          // No projects can fit, don't split
-          return [content];
-        }
-        
-        for (const project of content) {
-          // Calculate individual project height
-          let projectHeight = Math.round(16 * fontScale); // Title (reduced)
-          if (project.description) {
-            const lines = project.description.split('\n').filter(l => l.trim());
-            let totalLines = lines.length;
-            const descCharsPerLine = Math.round(150 / fontScale); // More chars per line
-            for (const line of lines) {
-              const cleanLine = line.replace('•', '').trim();
-              if (cleanLine.length > descCharsPerLine) {
-                totalLines += Math.floor(cleanLine.length / descCharsPerLine);
-              }
-            }
-            projectHeight += totalLines * Math.round(11 * fontScale); // Reduced line height
-          }
-          if (project.technologies) {
-            projectHeight += Math.round(11 * fontScale);
-          }
-          if (project.projectUrl) {
-            projectHeight += Math.round(11 * fontScale);
-          }
-          
-          
-          // Check if adding this project would exceed max height
-          // Don't use threshold here - use actual maxHeight
-          if (currentHeight + projectHeight > maxHeight && currentPart.length > 0) {
-            // Current part is full, start new part
-            parts.push([...currentPart]);
-            currentPart = [project];
-            currentHeight = projectHeight;
-          } else if (currentHeight + projectHeight <= maxHeight) {
-            // Add to current part only if it actually fits
-            currentPart.push(project);
-            currentHeight += projectHeight;
-          } else if (currentPart.length === 0) {
-            // This project is too big to fit even alone, skip splitting
-            console.log(`Project too large to fit (${projectHeight}px > ${maxHeight}px)`);
-            return [content];
-          }
-        }
-        
-        if (currentPart.length > 0) {
-          parts.push(currentPart);
-        }
-        
-        // Only return parts if we actually managed to split something
-        return parts.length > 0 ? parts : [content];
-      }
-      
-      // For other types, return as is
-      return [content];
-    };
-    // Create all sections first
+
+    const addBuffer = (height, type) => Math.max(0, height || 0) + getSectionPadding(type);
+
+
     const allSections = [];
-    
-    // Header section
+
     if (data.name || data.email || data.phone) {
       const headerHeight = estimateSectionHeight(data.name, 'header');
       allSections.push({
         type: 'header',
         content: { name: data.name, email: data.email, phone: data.phone },
         estimatedHeight: headerHeight,
-        priority: 1 // Must be on first page
+        priority: 1,
       });
     }
-    // Summary section
+
     if (data.summary) {
       const summaryText = toText(data.summary);
-      const sectionTitleHeight = Math.round(24 * fontScale);
+      const sectionTitleHeight = Math.round(20 * fontScale);
       const summaryHeight = estimateSectionHeight(summaryText, 'summary') + sectionTitleHeight;
       allSections.push({
         type: 'summary',
         content: summaryText,
         estimatedHeight: summaryHeight,
         priority: 2,
-        canSplit: true
+        canSplit: true,
       });
     }
-    // Experience section
+
     if (data.experiences && data.experiences.length > 0) {
-      const sectionTitleHeight = Math.round(24 * fontScale); // Add height for section title
+      const sectionTitleHeight = Math.round(20 * fontScale);
       const totalExpHeight = estimateSectionHeight(data.experiences, 'experience') + sectionTitleHeight;
       allSections.push({
         type: 'experience',
         content: data.experiences,
         estimatedHeight: totalExpHeight,
         priority: 3,
-        canSplit: true  // Allow experience section to be split across pages
+        canSplit: true,
       });
     }
-    // Projects section (comes before education for students)
-    if (data.projects && data.projects.length > 0) {
-      if (!isAttorneyFormat) {
-        const sectionTitleHeight = Math.round(24 * fontScale); // Add height for section title
-        const projectsHeight = estimateSectionHeight(data.projects, 'projects') + sectionTitleHeight;
-        allSections.push({
-          type: 'projects',
-          content: data.projects,
-          estimatedHeight: projectsHeight,
-          priority: 4,
-          canSplit: true  // Allow projects section to be split across pages
-        });
-      }
+
+    if (data.projects && data.projects.length > 0 && !isAttorneyFormat) {
+      const sectionTitleHeight = Math.round(24 * fontScale);
+      const projectsHeight = estimateSectionHeight(data.projects, 'projects') + sectionTitleHeight;
+      allSections.push({
+        type: 'projects',
+        content: data.projects,
+        estimatedHeight: projectsHeight,
+        priority: 4,
+        canSplit: true,
+      });
     }
-    // Education section
+
     if (data.education) {
-      const sectionTitleHeight = Math.round(18 * fontScale); // Add height for section title
+      const sectionTitleHeight = Math.round(18 * fontScale);
       const eduHeight = estimateSectionHeight(data.education, 'education') + sectionTitleHeight;
       allSections.push({
         type: 'education',
         content: data.education,
         estimatedHeight: eduHeight,
-        priority: 5
+        priority: 5,
+        canSplit: isIndustryManagerFormat,
       });
     }
-    // Skills section
+
     if (data.skills) {
       const skillsText = toText(data.skills);
       if (skillsText) {
@@ -757,756 +377,58 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
           content: skillsText,
           estimatedHeight: skillsHeight,
           priority: 6,
-          canSplit: isIndustryManagerFormat
+          canSplit: isIndustryManagerFormat,
         });
       }
     }
-    // Now pack sections into pages aggressively
-    let sectionIndex = 0;
-    
-    
-    while (sectionIndex < allSections.length) {
-      const section = allSections[sectionIndex];
-      // Soft-fit allowance to avoid pushing small sections (like Education)
-      // to the next page when there is clearly visible space left.
-      const softAllowance = (() => {
-        // Be a bit more permissive for Executive Serif, but keep skills conservative so they move when overflowing.
-        if (isIndustryManagerFormat) {
-          if (useConservativePaging) {
-            return {
-              education: 44,
-              summary: 18,
-              experience: 14,
-              projects: 14,
-              skills: 8,
-              default: 10,
-            };
-          }
-          return {
-            education: 56,
-            summary: 20,
-            experience: 14,
-            projects: 14,
-            skills: 10,
-            default: 12,
-          };
-        }
-        if (useConservativePaging) {
-          return {
-            education: 28,
-            summary: 10,
-            experience: 8,
-            projects: 8,
-            skills: 24,
-            default: 6,
-          };
-        }
-        return {
-          education: 36,
-          summary: 12,
-          experience: 10,
-          projects: 10,
-          skills: 32,
-          default: 8,
-        };
-      })();
-      const requiredWithPadding = currentHeight + addBuffer(section.estimatedHeight, section.type);
-      const fitsNow = requiredWithPadding <= effectiveAvailableHeight;
-      const fitsWithSlack = !fitsNow && (requiredWithPadding <= (effectiveAvailableHeight + (softAllowance[section.type] ?? softAllowance.default ?? 0)));
-      if (fitsNow || (!section.canSplit && fitsWithSlack)) {
-        // Section fits completely on current page
-        addToCurrentPage(section);
-        sectionIndex++;
-      } else if (section.canSplit) {
-        // Section doesn't fit completely. Try to split to use remaining space
-        const remainingHeight = Math.max(0, effectiveAvailableHeight - currentHeight);
-        
-        
-        // Require at least some meaningful space before splitting
-        const minSpaceToSplit = (() => {
-          if (isIndustryManagerFormat) {
-            return section.type === 'skills'
-              ? (useConservativePaging ? 48 : 56)
-              : (useConservativePaging ? 85 : 65);
-          }
-          if (section.type === 'skills') {
-            return Math.max(80, Math.round(96 * (1 / Math.max(0.9, getFontSizeScaleFactor()))));
-          }
-          return 96;
-        })();
-        
-        const rawRemainingHeight = Math.max(0, remainingHeight - getSectionPadding(section.type));
-        const computePartHeight = (partContent, includeHeader = false) => {
-          let height = estimateSectionHeight(partContent, section.type);
-          if (section.type === 'skills') {
-            height = adjustSkillContentEstimate(height, { includeHeader });
-          }
-          return height;
-        };
-        if (rawRemainingHeight > minSpaceToSplit) {
-          const parts = splitLongContent(section.content, section.type, rawRemainingHeight);
-          
-          // Check if we actually got a meaningful split
-          // For projects, parts[0] should be an array of projects, not the full content
-          const gotMeaningfulSplit = parts.length > 1 || 
-            (section.type === 'projects' && Array.isArray(parts[0]) && parts[0].length < section.content.length);
-          
-          if (gotMeaningfulSplit) {
-            // We got split parts - add them even if just one part fits
-            
-            // Add first part to current page
-            const firstPartHeight = computePartHeight(parts[0], true);
-            addToCurrentPage({
-              ...section,
-              content: parts[0],
-              estimatedHeight: firstPartHeight,
-              isContinued: parts.length > 1
-            });
-            
-            // If there are more parts, add them to new pages
-            if (parts.length > 1) {
-              // Start new page for remaining parts
-              startNewPage();
-              
-              // Add remaining parts
-              for (let i = 1; i < parts.length; i++) {
-                const partHeight = computePartHeight(parts[i], false);
-                const isLast = i === parts.length - 1;
-                
-                if (canFitOnCurrentPage(partHeight, section.type)) {
-                  addToCurrentPage({
-                    ...section,
-                    content: parts[i],
-                    estimatedHeight: partHeight,
-                    isContinuation: true,
-                    isContinued: !isLast
-                  });
-                } else {
-                  startNewPage();
-                  addToCurrentPage({
-                    ...section,
-                    content: parts[i],
-                    estimatedHeight: partHeight,
-                    isContinuation: true,
-                    isContinued: !isLast
-                  });
-                }
-              }
-            }
-            
-            sectionIndex++;
-          } else {
-            // Can't split effectively on this page; try on a fresh page
-              startNewPage();
-              const fullPageAvailable = Math.max(0, effectiveAvailableHeight - getSectionPadding(section.type));
-              if (fullPageAvailable > minSpaceToSplit) {
-                const partsOnNew = splitLongContent(section.content, section.type, fullPageAvailable);
-                if (partsOnNew.length > 1) {
-                  const firstPartHeight = computePartHeight(partsOnNew[0], true);
-                  addToCurrentPage({ ...section, content: partsOnNew[0], estimatedHeight: firstPartHeight, isContinued: true });
-                  for (let i = 1; i < partsOnNew.length; i++) {
-                    const partHeight = computePartHeight(partsOnNew[i], false);
-                    if (!canFitOnCurrentPage(partHeight, section.type)) startNewPage();
-                    addToCurrentPage({ ...section, content: partsOnNew[i], estimatedHeight: partHeight, isContinuation: i > 0, isContinued: i < partsOnNew.length - 1 });
-                  }
-                  sectionIndex++;
-                } else {
-                addToCurrentPage(section);
-                sectionIndex++;
-              }
-            } else {
-              addToCurrentPage(section);
-              sectionIndex++;
-            }
-          }
-        } else {
-          // Not enough space to split meaningfully, move to new page
-          startNewPage();
-          const fullPageAvailable = Math.max(0, effectiveAvailableHeight - getSectionPadding(section.type));
-          if (fullPageAvailable > minSpaceToSplit) {
-            const partsOnNew = splitLongContent(section.content, section.type, fullPageAvailable);
-            if (partsOnNew.length > 1) {
-              const firstPartHeight = computePartHeight(partsOnNew[0], true);
-              addToCurrentPage({ ...section, content: partsOnNew[0], estimatedHeight: firstPartHeight, isContinued: true });
-              for (let i = 1; i < partsOnNew.length; i++) {
-                const partHeight = computePartHeight(partsOnNew[i], false);
-                if (!canFitOnCurrentPage(partHeight, section.type)) startNewPage();
-                addToCurrentPage({ ...section, content: partsOnNew[i], estimatedHeight: partHeight, isContinuation: i > 0, isContinued: i < partsOnNew.length - 1 });
-              }
-              sectionIndex++;
-            } else {
-              addToCurrentPage(section);
-              sectionIndex++;
-            }
-          } else {
-            addToCurrentPage(section);
-            sectionIndex++;
-          }
-        }
-      } else {
-        // Section doesn't fit, start new page
-        startNewPage();
-        
-        // Try to fit it on the new page
-        if (canFitOnCurrentPage(section.estimatedHeight, section.type)) {
-          addToCurrentPage(section);
-          sectionIndex++;
-        } else {
-          // Section is too large even for a new page, add it anyway
-          addToCurrentPage(section);
-          sectionIndex++;
-        }
-      }
-    }
-    // Add the last page if it has content
-    if (currentPage.length > 0) {
-      newPages.push([...currentPage]);
-    }
-    if (isAttorneyFormat) {
-      const getOrCreateContinuationPage = () => {
-        if (newPages.length >= 2) {
-          if (!Array.isArray(newPages[1])) {
-            newPages[1] = [];
-          }
-          return newPages[1];
-        }
-        const newPage = [];
-        newPages.push(newPage);
-        return newPage;
-      };
-      if (newPages.length) {
-        const firstPage = newPages[0];
-        const attorneyBuffer = useConservativePaging ? 132 : 156;
-        const attorneyLimit = Math.max(0, effectiveAvailableHeight - attorneyBuffer);
-        let firstHeight = sumEstimatedHeight(firstPage);
-        let guard = 0;
-        while (firstPage.length > 1 && firstHeight > attorneyLimit && guard < 20) {
-          guard += 1;
-          let candidateIndex = -1;
-          for (let idx = firstPage.length - 1; idx >= 1; idx -= 1) {
-            const section = firstPage[idx];
-            if (!section) continue;
-            const sectionType = section.type;
-            if (!sectionType || sectionType === 'header') {
-              continue;
-            }
-            if (sectionType === 'education' || sectionType === 'skills') {
-              continue;
-            }
-            candidateIndex = idx;
-            break;
-          }
-          if (candidateIndex === -1) {
-            candidateIndex = firstPage.length - 1;
-            if (candidateIndex <= 0) {
-              break;
-            }
-          }
-          const [moved] = firstPage.splice(candidateIndex, 1);
-          if (!moved) {
-            break;
-          }
-          const remainingCapacity = Math.max(0, attorneyLimit - sumEstimatedHeight(firstPage));
-          if (moved.canSplit) {
-            const splitAllowance = Math.max(0, remainingCapacity - getSectionPadding(moved.type));
-            if (splitAllowance > 60) {
-              const parts = splitLongContent(moved.content, moved.type, splitAllowance);
-              if (parts.length > 1) {
-                const firstPartHeight = estimateSectionHeight(parts[0], moved.type);
-                const previousSection = firstPage[candidateIndex - 1];
-                const suppressTitle = previousSection && previousSection.type === moved.type;
-                const firstPart = {
-                  ...moved,
-                  content: parts[0],
-                  estimatedHeight: firstPartHeight,
-                  isContinued: true,
-                  _suppressTitle: suppressTitle
-                };
-                firstPage.splice(candidateIndex, 0, firstPart);
-                const targetPage = getOrCreateContinuationPage();
-                for (let partIdx = parts.length - 1; partIdx >= 1; partIdx -= 1) {
-                  const remainderContent = parts[partIdx];
-                  const partHeight = estimateSectionHeight(remainderContent, moved.type);
-                  const isLast = partIdx === parts.length - 1;
-                  targetPage.unshift({
-                    ...moved,
-                    content: remainderContent,
-                    estimatedHeight: partHeight,
-                    isContinuation: true,
-                    isContinued: !isLast,
-                    _suppressTitle: false
-                  });
-                }
-                firstHeight = sumEstimatedHeight(firstPage);
-                continue;
-              }
-            }
-          }
-          const targetPage = getOrCreateContinuationPage();
-          targetPage.unshift(moved);
-          firstHeight = sumEstimatedHeight(firstPage);
-        }
-      }
-      for (let i = newPages.length - 1; i >= 0; i -= 1) {
-        if (!newPages[i] || newPages[i].length === 0) {
-          newPages.splice(i, 1);
-        }
-      }
-      if (newPages.length > 1 && newPages[0].length === 1 && newPages[0][0]?.type === 'header') {
-        newPages[1].unshift(newPages[0][0]);
-        newPages.shift();
-      }
-      if (DEBUG_PAGINATION) {
-        console.log('[Pagination] attorney page structure', newPages.map((pageSections, pageIdx) => ({
-          page: pageIdx + 1,
-          types: pageSections.map((section) => section.type),
-          totalEstimated: pageSections.reduce((acc, section) => acc + (section?.estimatedHeight || 0), 0),
-        })));
-      }
-      return newPages;
-    }
-    if (newPages.length > 1) {
-      const minUsefulHeight = effectiveAvailableHeight * (useConservativePaging ? 0.42 : 0.38);
-      const mergeAllowance = Math.max(12, effectiveAvailableHeight * (useConservativePaging ? 0.2 : 0.25));
-      const lastIndex = newPages.length - 1;
-      const lastPage = newPages[lastIndex];
-      const prevPage = newPages[lastIndex - 1];
-      const lastHeight = sumEstimatedHeight(lastPage);
-      const prevHeight = sumEstimatedHeight(prevPage);
-      if (lastHeight > 0 && lastHeight < minUsefulHeight && (prevHeight + lastHeight) <= (effectiveAvailableHeight + mergeAllowance)) {
-        const cleanedSections = lastPage.map((section) => ({
-          ...section,
-          isContinuation: false,
-          isContinued: false
-        }));
-        newPages[lastIndex - 1] = [...prevPage, ...cleanedSections];
-        newPages.pop();
-      }
-      // Rebalance: try to reclaim unused space by pulling the next page's leading
-      // section forward when it fits. This keeps ordering intact but avoids leaving
-      // small blocks (like SKILLS) stranded on a new page.
-      for (let i = 0; i < newPages.length - 1; i++) {
-        const page = newPages[i];
-        const next = newPages[i + 1];
-        if (!page || !next || next.length === 0) {
-          if (DEBUG_PAGINATION) {
-            console.log('[Pagination] skip iteration ? missing next page', { pageIndex: i, hasPage: Boolean(page), hasNext: Boolean(next), nextLength: next ? next.length : 0 });
-          }
-          continue;
-        }
 
-        const nextFirst = next[0];
-        if (!nextFirst) {
-          if (DEBUG_PAGINATION) console.log('[Pagination] skip iteration ? no leading section', { pageIndex: i });
-          continue;
-        }
+    const pages = [];
+    let currentPage = [];
+    let currentHeight = 0;
 
-        const pageHeight = sumEstimatedHeight(page);
-        const trailingPadding = page.length ? getSectionPadding(page[page.length - 1].type) : 0;
-        const adjustedPageHeight = Math.max(0, pageHeight - trailingPadding);
-        const available = effectiveAvailableHeight - adjustedPageHeight;
-        if (DEBUG_PAGINATION) {
-          console.log('[Pagination] available space check', { pageIndex: i, pageHeight, trailingPadding, adjustedPageHeight, available, effectiveAvailableHeight });
-        }
-        if (available < 8) {
-          if (DEBUG_PAGINATION) console.log('[Pagination] skip iteration ? not enough space', { pageIndex: i, available });
-          continue;
-        }
+    const pushPage = () => {
+      if (currentPage.length === 0) {
+        return;
+      }
+      const withMetadata = currentPage.map((section, index) => ({
+        ...section,
+        _pageStart: index === 0,
+        _suppressTitle: false,
+      }));
+      pages.push(withMetadata);
+      currentPage = [];
+      currentHeight = 0;
+    };
 
-        const lastType = page.length ? page[page.length - 1].type : null;
-        const sameTypeContinuation = Boolean(lastType && nextFirst.type === lastType);
-        const sectionTitleHeightPx = Math.round(24 * getFontSizeScaleFactor());
-        const baseEstimate = nextFirst.estimatedHeight;
-        const adjustedEstimate = sameTypeContinuation ? Math.max(0, baseEstimate - sectionTitleHeightPx) : baseEstimate;
-        const requiredHeight = addBuffer(adjustedEstimate, nextFirst.type);
+    allSections.forEach((section) => {
+      const bufferedHeight = addBuffer(section.estimatedHeight, section.type);
+      if (currentHeight > 0 && (currentHeight + bufferedHeight) > effectiveAvailableHeight) {
+        pushPage();
+      }
+      currentPage.push({ ...section });
+      currentHeight += bufferedHeight;
+    });
 
-        const softAllowance = nextFirst.type === 'education' ? (isIndustryManagerFormat ? 64 : 42)
-          : nextFirst.type === 'summary' ? 28
-          : nextFirst.type === 'skills' ? 40
-          : 24;
+    pushPage();
 
-        const fits = requiredHeight <= (available + softAllowance);
-
-        if (DEBUG_PAGINATION) {
-          console.log('[Pagination] considering pull-forward', { pageIndex: i, nextType: nextFirst.type, availableSpace: available, requiredHeight, softAllowance, sameTypeContinuation, canSplit: nextFirst.canSplit, effectiveAvailableHeight, adjustedPageHeight, currentPageHeight: sumEstimatedHeight(page) });
-        }
-
-        if (fits) {
-          page.push({ ...nextFirst, estimatedHeight: adjustedEstimate, _suppressTitle: sameTypeContinuation });
-          next.shift();
-          if (!sameTypeContinuation) {
-            page[page.length - 1]._suppressTitle = false;
-          }
-          if (next.length === 0) {
-            newPages.splice(i + 1, 1);
-          } else {
-            i = Math.max(-1, i - 2);
-          }
-          continue;
-        }
-
-        if (sameTypeContinuation && nextFirst.canSplit) {
-          const allowance = Math.max(0, available - getSectionPadding(nextFirst.type));
-          if (DEBUG_PAGINATION) {
-            console.log('[Pagination] considering split', { pageIndex: i, allowance, nextType: nextFirst.type });
-          }
-          if (allowance > 60) {
-            const parts = splitLongContent(nextFirst.content, nextFirst.type, allowance);
-            if (parts.length > 1) {
-              const firstPartHeight = estimateSectionHeight(parts[0], nextFirst.type);
-              page.push({ ...nextFirst, content: parts[0], estimatedHeight: firstPartHeight, isContinued: true, _suppressTitle: true });
-              const remainder = parts.slice(1);
-              next.shift();
-              for (let r = remainder.length - 1; r >= 0; r--) {
-                const partHeight = estimateSectionHeight(remainder[r], nextFirst.type);
-                const needsTitle = (r === 0);
-                const adjPartHeight = needsTitle ? (partHeight + sectionTitleHeightPx) : partHeight;
-                next.unshift({ ...nextFirst, content: remainder[r], estimatedHeight: adjPartHeight, isContinuation: true, isContinued: r < remainder.length - 1 });
-              }
-            }
-          }
-        }
-
-        if (next.length === 0) {
-          if (DEBUG_PAGINATION) console.log('[Pagination] removed empty trailing page', { removedIndex: i + 1 });
-          newPages.splice(i + 1, 1);
-        }
-      }
-    }
-    // If the last page only contains skills and would fit on the previous page, pull it back.
-    for (let i = 0; i < newPages.length - 1; i += 1) {
-      const page = newPages[i];
-      const next = newPages[i + 1];
-      if (!page || !next || next.length !== 1) continue;
-      const section = next[0];
-      if (!section || section.type !== 'skills' || section.isContinuation) continue;
-      const pageHeight = sumEstimatedHeight(page);
-      const sectionHeight = addBuffer(section.estimatedHeight, section.type);
-      const trailingPadding = page.length ? getSectionPadding(page[page.length - 1].type) : 0;
-      const adjustedPageHeight = Math.max(0, pageHeight - trailingPadding);
-      const baseTolerance = Math.max(32, getSectionPadding(section.type));
-      const dynamicSlack = Math.max(baseTolerance, Math.round(effectiveAvailableHeight * 0.12));
-      if ((adjustedPageHeight + sectionHeight) <= (effectiveAvailableHeight + baseTolerance + dynamicSlack)) {
-        if (DEBUG_PAGINATION) {
-          console.log('[Pagination] pulling skills forward', {
-            pageIndex: i,
-            nextLength: next.length,
-            adjustedPageHeight,
-            rawPageHeight: pageHeight,
-            sectionHeight,
-            baseTolerance,
-            dynamicSlack,
-            effectiveAvailableHeight,
-            trailingPadding,
-          });
-        }
-        page.push({ ...section, _suppressTitle: false });
-        newPages.splice(i + 1, 1);
-        i = Math.max(-1, i - 2);
-      }
-    }
-    // Pull education forward when whitespace remains on the current page.
-    for (let i = 0; i < newPages.length - 1; i += 1) {
-      const page = newPages[i];
-      const next = newPages[i + 1];
-      if (!page || !next || next.length === 0) continue;
-      const section = next[0];
-      if (!section || section.type !== 'education' || section.isContinuation) continue;
-      const pageHeight = sumEstimatedHeight(page);
-      const sectionHeight = addBuffer(section.estimatedHeight, section.type);
-      const trailingPadding = page.length ? getSectionPadding(page[page.length - 1].type) : 0;
-      const adjustedPageHeight = Math.max(0, pageHeight - trailingPadding);
-      const baseTolerance = Math.max(24, getSectionPadding(section.type));
-      const dynamicSlack = Math.max(baseTolerance, Math.round(effectiveAvailableHeight * 0.18));
-      const totalTolerance = baseTolerance + dynamicSlack;
-      const physicalLimit = AVAILABLE_HEIGHT - 12;
-      if ((adjustedPageHeight + sectionHeight) <= Math.min(effectiveAvailableHeight + totalTolerance, physicalLimit)) {
-        if (DEBUG_PAGINATION) {
-          console.log('[Pagination] pulling education forward', {
-            pageIndex: i,
-            nextLength: next.length,
-            adjustedPageHeight,
-            sectionHeight,
-            baseTolerance,
-            dynamicSlack,
-            totalTolerance,
-            effectiveAvailableHeight,
-            trailingPadding
-          });
-        }
-        page.push({ ...section, _suppressTitle: false });
-        next.shift();
-        if (next.length === 0) {
-          newPages.splice(i + 1, 1);
-        }
-        i = Math.max(-1, i - 2);
-      }
-    }
-    // Generic pull forward: try to reclaim space across page boundaries for any section.
-    for (let i = 0; i < newPages.length - 1; i += 1) {
-      const page = newPages[i];
-      const next = newPages[i + 1];
-      if (!page || !next || next.length === 0) {
-        continue;
-      }
-      const section = next[0];
-      if (!section || section.isContinuation) {
-        continue;
-      }
-      const pageHeight = sumEstimatedHeight(page);
-      const trailingPadding = page.length ? getSectionPadding(page[page.length - 1].type) : 0;
-      const adjustedPageHeight = Math.max(0, pageHeight - trailingPadding);
-      const sectionHeight = addBuffer(section.estimatedHeight, section.type);
-      const tolerance = Math.max(24, getSectionPadding(section.type));
-      if ((adjustedPageHeight + sectionHeight) <= (effectiveAvailableHeight + tolerance)) {
-        if (DEBUG_PAGINATION) {
-          console.log('[Pagination] general pull-forward', {
-            pageIndex: i,
-            sectionType: section.type,
-            adjustedPageHeight,
-            sectionHeight,
-            tolerance,
-            effectiveAvailableHeight,
-          });
-        }
-        page.push({ ...section, _suppressTitle: false });
-        next.shift();
-        if (next.length === 0) {
-          newPages.splice(i + 1, 1);
-        }
-        i = Math.max(-1, i - 2);
-      }
-    }
-    // Ensure header pages are not left empty
-    for (let i = 0; i < newPages.length - 1; i += 1) {
-      const page = newPages[i];
-      const next = newPages[i + 1];
-      if (!page || page.length !== 1 || page[0].type !== 'header' || !next || next.length === 0) {
-        continue;
-      }
-      const candidate = next[0];
-      const pageHeight = sumEstimatedHeight(page);
-      const candidateHeight = addBuffer(candidate.estimatedHeight, candidate.type);
-      if ((pageHeight + candidateHeight) <= (effectiveAvailableHeight + getSectionPadding(candidate.type))) {
-        if (DEBUG_PAGINATION) {
-          console.log('[Pagination] header-only page fix, pulling section forward', {
-            sectionType: candidate.type,
-            pageIndex: i,
-            pageHeight,
-            candidateHeight,
-            effectiveAvailableHeight,
-          });
-        }
-        page.push({ ...candidate, _suppressTitle: false });
-        next.shift();
-        if (next.length === 0) {
-          newPages.splice(i + 1, 1);
-        }
-      }
-    }
-    // Final safety pass: ensure no page exceeds available height.
-    // If a page still overflows due to estimation error, move/split the
-    // last section forward until it fits.
-    for (let i = 0; i < newPages.length; i++) {
-      let safetyGuard = 0;
-      while (safetyGuard < 20) {
-        const pageEstimate = sumEstimatedHeight(newPages[i]);
-        if (pageEstimate <= (effectiveAvailableHeight - 4)) {
-          break;
-        }
-        const page = newPages[i];
-        if (!page || page.length === 0) {
-          break;
-        }
-        const last = page[page.length - 1];
-        if (last && !last.isContinuation && last.type === 'skills') {
-          const slackAllowance = effectiveAvailableHeight + 60;
-          if (pageEstimate <= slackAllowance) {
-            break;
-          }
-        }
-        safetyGuard++;
-        const popped = page.pop();
-        const current = sumEstimatedHeight(page);
-        const allowance = Math.max(0, effectiveAvailableHeight - current - getSectionPadding(popped.type));
-        if (popped && popped.canSplit && allowance > 40) {
-          const parts = splitLongContent(popped.content, popped.type, allowance);
-          if (parts.length > 1) {
-            const firstPartHeight = estimateSectionHeight(parts[0], popped.type);
-            page.push({ ...popped, content: parts[0], estimatedHeight: firstPartHeight, isContinued: true });
-            if (i + 1 >= newPages.length) newPages.push([]);
-            const remainder = parts.slice(1);
-            for (let k = 0; k < remainder.length; k++) {
-              const partHeight = estimateSectionHeight(remainder[k], popped.type);
-              newPages[i + 1].unshift({ ...popped, content: remainder[k], estimatedHeight: partHeight, isContinuation: true, isContinued: k < remainder.length - 1 });
-            }
-            continue;
-          }
-        }
-        if (i + 1 >= newPages.length) newPages.push([]);
-        newPages[i + 1].unshift(popped);
-      }
-    }
-    if (newPages.length === 2) {
-      const firstPage = newPages[0];
-      const secondPage = newPages[1];
-      const firstPageTotal = firstPage.reduce((acc, section) => acc + (section?.estimatedHeight || 0), 0);
-      const secondTotal = secondPage.reduce((acc, section) => acc + (section?.estimatedHeight || 0), 0);
-      const trailingAllowance = Math.max(32, getSectionPadding(firstPage[firstPage.length - 1]?.type || 'default')) +
-        Math.max(16, getSectionPadding(secondPage[0]?.type || 'default'));
-      const combinedEstimate = firstPageTotal + secondTotal + trailingAllowance;
-      const mergeSlack = Math.max(80, Math.round(effectiveAvailableHeight * 0.14));
-      const fitsOnOnePage = combinedEstimate <= (effectiveAvailableHeight + mergeSlack);
-      const secondTypes = secondPage.map((section) => section.type);
-      const canMergeTypes = secondTypes.length > 0 && secondTypes.every((type) => type === 'skills');
-      const safeToMerge = canMergeTypes && secondPage.every((section) => !section.isContinuation);
-      if (DEBUG_PAGINATION) {
-        console.log('[Pagination] post-pass merge evaluation', {
-          firstPageTypes: firstPage.map((section) => section.type),
-          secondTypes,
-          firstPageTotal,
-          secondTotal,
-          combinedEstimate,
-          effectiveAvailableHeight,
-          trailingAllowance,
-          mergeSlack,
-          fitsOnOnePage,
-          canMergeTypes,
-          safeToMerge,
-        });
-      }
-      if (fitsOnOnePage && safeToMerge) {
-        if (DEBUG_PAGINATION) {
-          console.log('[Pagination] force-merging trailing sections onto page 1');
-        }
-        secondPage.forEach((section) => {
-          firstPage.push({ ...section, _suppressTitle: false });
-        });
-        newPages.splice(1, 1);
-      }
-    }
-    if (DEBUG_PAGINATION) {
-      console.log('[Pagination] final page structure', newPages.map((pageSections, pageIdx) => ({
-        page: pageIdx + 1,
-        types: pageSections.map((section) => section.type),
-        heights: pageSections.map((section) => section.estimatedHeight),
-        totalEstimated: pageSections.reduce((acc, section) => acc + (section?.estimatedHeight || 0), 0),
-      })));
-    }
-    if (selectedFormat === TEMPLATE_SLUGS.ATTORNEY_TEMPLATE && newPages.length) {
-      const firstPage = newPages[0];
-      let firstHeight = sumEstimatedHeight(firstPage);
-      if (firstHeight > (effectiveAvailableHeight - 12)) {
-        if (DEBUG_PAGINATION) {
-          console.log('[Pagination] attorney template overflow detected, forcing additional page', {
-            firstHeight,
-            effectiveAvailableHeight,
-          });
-        }
-        if (newPages.length === 1) {
-          newPages.push([]);
-        }
-        while (firstPage.length > 1 && firstHeight > (effectiveAvailableHeight - 12)) {
-          const moved = firstPage.pop();
-          if (moved) {
-            newPages[1].unshift(moved);
-          }
-          firstHeight = sumEstimatedHeight(firstPage);
-        }
-      }
-    }
-    // Safety: avoid header-only leading page
-    if (newPages.length > 1 && newPages[0].length === 1 && newPages[0][0]?.type === 'header') {
+    if (pages.length > 1 && pages[0].length === 1 && pages[0][0]?.type === 'header') {
       if (DEBUG_PAGINATION) {
         console.log('[Pagination] collapsing header-only first page');
       }
-      const headerSection = newPages[0][0];
-      newPages[1].unshift(headerSection);
-      newPages.shift();
+      const [headerSection] = pages[0];
+      pages[1].unshift({ ...headerSection, _pageStart: true, _suppressTitle: false });
+      pages.shift();
     }
-    if (newPages.length > 1) {
-      for (let i = 1; i < newPages.length; i++) {
-        const prevPage = newPages[i - 1];
-        const currentPageSections = newPages[i];
-        if (!prevPage || !currentPageSections || currentPageSections.length === 0) {
-          continue;
-        }
-        let slackIterations = 0;
-        while (currentPageSections.length > 0 && slackIterations < 5) {
-          const prevHeight = sumEstimatedHeight(prevPage);
-          const availableSpace = effectiveAvailableHeight - prevHeight;
-          if (availableSpace <= 28) {
-            break;
-          }
-          const candidate = currentPageSections[0];
-          if (!candidate) {
-            break;
-          }
-          const requiredSpace = addBuffer(candidate.estimatedHeight, candidate.type);
-          const maxSectionHeight = Math.max(48, effectiveAvailableHeight * (useConservativePaging ? 0.28 : 0.35));
-          const canMoveSkills = candidate.type === 'skills' && requiredSpace <= availableSpace - 4;
-          const canMoveGeneric = candidate.type !== 'skills' && candidate.estimatedHeight <= maxSectionHeight;
-          if (requiredSpace <= availableSpace - 8 && (canMoveGeneric || canMoveSkills)) {
-            if (DEBUG_PAGINATION) {
-              console.log('[Pagination] pulling section forward to reduce slack', {
-                fromPage: i + 1,
-                sectionType: candidate.type,
-                requiredSpace,
-                availableSpace,
-                effectiveAvailableHeight,
-              });
-            }
-            prevPage.push({ ...candidate, _suppressTitle: false });
-            currentPageSections.shift();
-            slackIterations++;
-            continue;
-          }
-          break;
-        }
-      }
-      for (let i = newPages.length - 1; i >= 0; i--) {
-        if (newPages[i] && newPages[i].length === 0) {
-          newPages.splice(i, 1);
-        }
-      }
+
+    if (DEBUG_PAGINATION) {
+      console.log('[Pagination] final page layout', pages.map((pageSections, pageIdx) => ({
+        page: pageIdx + 1,
+        types: pageSections.map((section) => section.type),
+        totalEstimated: pageSections.reduce((acc, section) => acc + (section?.estimatedHeight || 0), 0),
+      })));
     }
-    if (newPages.length === 1) {
-      const firstPage = newPages[0];
-      const baseLimit = effectiveAvailableHeight - 2;
-      const aggressiveLimit = effectiveAvailableHeight + (effectiveAvailableHeight * 0.35);
-      let totalEstimate = sumEstimatedHeight(firstPage);
-      if (firstPage && firstPage.length > 1 && totalEstimate > aggressiveLimit) {
-        const fallbackPage = [];
-        while (firstPage.length > 1 && totalEstimate > baseLimit) {
-          const moved = firstPage.pop();
-          if (!moved) {
-            break;
-          }
-          fallbackPage.unshift(moved);
-          totalEstimate = sumEstimatedHeight(firstPage);
-        }
-        if (fallbackPage.length > 0) {
-          if (fallbackPage[0]?.type === 'skills') {
-            while (firstPage.length > 0 && firstPage[firstPage.length - 1]?.type === 'skills') {
-              const movedSkill = firstPage.pop();
-              if (!movedSkill) {
-                break;
-              }
-              fallbackPage.unshift(movedSkill);
-            }
-          }
-          newPages.push(fallbackPage);
-          if (DEBUG_PAGINATION) {
-            console.log('[Pagination] fallback split triggered due to estimated overflow', {
-              totalEstimate,
-              baseLimit,
-              fallbackLength: fallbackPage.length,
-            });
-          }
-        }
-      }
-    }
-    return newPages;
+
+    return pages;
   };
   // Recalculate pages when data changes
   useEffect(() => {
@@ -2862,7 +1784,7 @@ const renderEducation = (education, styles) => {
     return pageSections.map((section, idx) => {
       const prevType = idx > 0 ? pageSections[idx - 1]?.type : null;
       const isPageStart = section._pageStart === true;
-      const showTitle = !section._suppressTitle && (prevType !== section.type || (section.isContinuation && isPageStart));
+      const showTitle = !section._suppressTitle && (isPageStart || prevType !== section.type);
       switch (section.type) {
         case 'header':
           return (
@@ -2897,23 +1819,23 @@ const renderEducation = (education, styles) => {
             </div>
           );
         case 'summary':
-          return <div key={idx}>{renderSection('SUMMARY', renderSummaryContent(section.content, styles), styles, { showTitle, isContinuation: section.isContinuation })}</div>;
+          return <div key={idx}>{renderSection('SUMMARY', renderSummaryContent(section.content, styles), styles, { showTitle })}</div>;
         case 'experience':
-          return <div key={idx}>{renderSection('EXPERIENCE', renderExperiences(section.content, styles), styles, { showTitle, isContinuation: section.isContinuation })}</div>;
+          return <div key={idx}>{renderSection('EXPERIENCE', renderExperiences(section.content, styles), styles, { showTitle })}</div>;
         case 'education':
-          return <div key={idx}>{renderSection('EDUCATION', renderEducation(section.content, styles), styles, { showTitle, isContinuation: section.isContinuation })}</div>;
+          return <div key={idx}>{renderSection('EDUCATION', renderEducation(section.content, styles), styles, { showTitle })}</div>;
         case 'projects':
-          return <div key={idx}>{renderSection('PROJECTS', renderProjects(section.content, styles), styles, { showTitle, isContinuation: section.isContinuation })}</div>;
+          return <div key={idx}>{renderSection('PROJECTS', renderProjects(section.content, styles), styles, { showTitle })}</div>;
         case 'skills': {
           const skills = parseSkills(section.content);
-          const inlineOnly = selectedFormat !== TEMPLATE_SLUGS.EXECUTIVE_SERIF || section.isContinuation;
+          const inlineOnly = selectedFormat !== TEMPLATE_SLUGS.EXECUTIVE_SERIF;
           return (
             <div key={idx}>
               {renderSection(
-                section.isContinuation ? 'SKILLS' : 'SKILLS',
+                'SKILLS',
                 renderSkillsSection(skills, styles, { inlineOnly }),
                 styles,
-                { showTitle, isContinuation: section.isContinuation }
+                { showTitle }
               )}
             </div>
           );
