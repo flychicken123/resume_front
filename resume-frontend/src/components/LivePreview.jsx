@@ -328,6 +328,7 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
         estimatedHeight: summaryHeight,
         priority: 2,
         canSplit: true,
+        titleHeight: sectionTitleHeight,
       });
     }
 
@@ -340,6 +341,7 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
         estimatedHeight: totalExpHeight,
         priority: 3,
         canSplit: true,
+        titleHeight: sectionTitleHeight,
       });
     }
 
@@ -355,7 +357,7 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
       });
     }
 
-    if (data.education) {
+    if (!isAttorneyFormat && data.education) {
       const sectionTitleHeight = Math.round(18 * fontScale);
       const eduHeight = estimateSectionHeight(data.education, 'education') + sectionTitleHeight;
       allSections.push({
@@ -367,7 +369,7 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
       });
     }
 
-    if (data.skills) {
+    if (!isAttorneyFormat && data.skills) {
       const skillsText = toText(data.skills);
       if (skillsText) {
         const rawSkillsHeight = estimateSectionHeight(skillsText, 'skills');
@@ -400,6 +402,9 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
       currentHeight = 0;
     };
 
+    const sumEstimatedHeight = (sections = []) =>
+      sections.reduce((total, item) => total + addBuffer(item?.estimatedHeight || 0, item?.type), 0);
+
     allSections.forEach((section) => {
       const bufferedHeight = addBuffer(section.estimatedHeight, section.type);
       if (currentHeight > 0 && (currentHeight + bufferedHeight) > effectiveAvailableHeight) {
@@ -410,6 +415,328 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
     });
 
     pushPage();
+
+    if (isAttorneyFormat && pages.length > 0) {
+      const attorneyBaseBuffer = useConservativePaging ? 156 : 132;
+      const attorneyLimit = Math.max(
+        0,
+        effectiveAvailableHeight - Math.round(attorneyBaseBuffer * fontScale)
+      );
+      const ensurePage = (index) => {
+        while (pages.length <= index) {
+          pages.push([]);
+        }
+        return pages[index];
+      };
+      const splitAttorneySummaryContent = (summaryText, maxContentHeight, titleHeight) => {
+        const cleaned = toText(summaryText).trim();
+        if (!cleaned) {
+          return [];
+        }
+        if (!Number.isFinite(maxContentHeight) || maxContentHeight <= 0) {
+          return [cleaned];
+        }
+        const paragraphTokens = cleaned.split(/\n+/).map((item) => item.trim()).filter(Boolean);
+        const fallbackTokens = cleaned.split(/(?<=[.!?])\s+(?=[A-Z])/).map((item) => item.trim()).filter(Boolean);
+        const tokens = paragraphTokens.length > 1 ? paragraphTokens : (fallbackTokens.length ? fallbackTokens : [cleaned]);
+        const parts = [];
+        let current = '';
+        const pushCurrent = () => {
+          const trimmed = current.trim();
+          if (trimmed) {
+            parts.push(trimmed);
+          }
+          current = '';
+        };
+        tokens.forEach((token, index) => {
+          if (!token) {
+            return;
+          }
+          const candidate = current ? `${current} ${token}` : token;
+          const estimated = estimateSectionHeight(candidate, 'summary');
+          if (estimated + titleHeight <= maxContentHeight || !current) {
+            current = candidate;
+          } else {
+            pushCurrent();
+            current = token;
+          }
+          if (index === tokens.length - 1) {
+            pushCurrent();
+          }
+        });
+        if (parts.length <= 1) {
+          const totalHeight = estimateSectionHeight(cleaned, 'summary') + titleHeight;
+          const requiredParts = Math.max(1, Math.ceil(totalHeight / maxContentHeight));
+          if (requiredParts > 1) {
+            const approxChunk = Math.max(1, Math.ceil(cleaned.length / requiredParts));
+            const chunked = [];
+            for (let idx = 0; idx < cleaned.length; idx += approxChunk) {
+              const slice = cleaned.slice(idx, idx + approxChunk).trim();
+              if (slice) {
+                chunked.push(slice);
+              }
+            }
+            return chunked.length ? chunked : [cleaned];
+          }
+        }
+        return parts;
+      };
+      const firstPage = pages[0];
+      let firstHeight = sumEstimatedHeight(firstPage);
+      let guard = 0;
+      while (firstPage.length > 1 && firstHeight > attorneyLimit && guard < 10) {
+        guard += 1;
+        let candidateIndex = -1;
+        for (let idx = firstPage.length - 1; idx >= 0; idx -= 1) {
+          const sectionType = firstPage[idx]?.type;
+          if (!sectionType || sectionType === 'header') {
+            continue;
+          }
+          if (sectionType === 'summary' && firstPage.length <= 2) {
+            continue;
+          }
+          candidateIndex = idx;
+          break;
+        }
+        if (candidateIndex === -1) {
+          break;
+        }
+        const [movedSection] = firstPage.splice(candidateIndex, 1);
+        const targetPage = ensurePage(1);
+        targetPage.unshift({ ...movedSection, _pageStart: false });
+        firstHeight = sumEstimatedHeight(firstPage);
+      }
+      if (firstPage.length > 1 && firstHeight > attorneyLimit) {
+        const summaryIndex = firstPage.findIndex((section) => section?.type === 'summary');
+        if (summaryIndex !== -1) {
+          const summarySection = firstPage[summaryIndex];
+          const headerSection = firstPage.find((section) => section?.type === 'header');
+          const headerContribution = headerSection ? addBuffer(headerSection.estimatedHeight, headerSection.type) : 0;
+          const summaryPadding = getSectionPadding('summary');
+          const titleHeight = summarySection.titleHeight ?? Math.round(20 * fontScale);
+          const availableForSummary = Math.max(0, attorneyLimit - headerContribution);
+          const maxContentHeight = Math.max(
+            0,
+            availableForSummary - summaryPadding - titleHeight
+          );
+          if (maxContentHeight <= 0) {
+            const [movedSummary] = firstPage.splice(summaryIndex, 1);
+            const targetPage = ensurePage(1);
+            targetPage.unshift({ ...movedSummary, _pageStart: false });
+            firstHeight = sumEstimatedHeight(firstPage);
+          } else {
+            const summaryParts = splitAttorneySummaryContent(summarySection.content, maxContentHeight, titleHeight);
+            if (summaryParts.length > 1) {
+              const firstPart = summaryParts.shift();
+              const baseSummary = { ...summarySection };
+              summarySection.content = firstPart;
+              summarySection.estimatedHeight = estimateSectionHeight(firstPart, 'summary') + titleHeight;
+              summarySection.isContinued = true;
+              const targetPage = ensurePage(1);
+              const continuationSections = summaryParts.map((part, idx) => {
+                const isLast = idx === summaryParts.length - 1;
+                return {
+                  ...baseSummary,
+                  content: part,
+                  estimatedHeight: estimateSectionHeight(part, 'summary') + titleHeight,
+                  isContinuation: true,
+                  isContinued: !isLast || Boolean(baseSummary.isContinued),
+                  _pageStart: false,
+                };
+              });
+              for (let idx = continuationSections.length - 1; idx >= 0; idx -= 1) {
+                targetPage.unshift(continuationSections[idx]);
+              }
+              firstHeight = sumEstimatedHeight(firstPage);
+            }
+          }
+        }
+      }
+      firstHeight = sumEstimatedHeight(firstPage);
+
+      const attorneyExperienceGap = Math.round(8 * fontScale);
+      const estimateAttorneyExperienceEntryHeight = (experience) => {
+        if (!experience || typeof experience !== 'object') {
+          return Math.round(32 * fontScale);
+        }
+        let height = Math.round(32 * fontScale);
+        let descLines = 0;
+        const description = toText(experience.description);
+        if (description) {
+          const rawLines = String(description).split(/\n+/).filter((line) => line.trim());
+          const linesToProcess = rawLines.length ? rawLines : [String(description)];
+          const descCharsPerLine = Math.max(32, Math.round(92 / fontScale));
+          const lineHeightPx = Math.round(16 * fontScale);
+          for (const rawLine of linesToProcess) {
+            const cleanLine = rawLine.replace(/[•\u2022-]+/g, '').trim();
+            const effectiveLength = cleanLine.length || rawLine.trim().length || 1;
+            descLines += Math.max(1, Math.ceil(effectiveLength / Math.max(1, descCharsPerLine)));
+          }
+          height += descLines * lineHeightPx;
+          if (rawLines.length > 1) {
+            height += Math.round(Math.min(6, 2 * fontScale));
+          }
+          if (descLines > 2) {
+            height += Math.round(Math.max(4, (descLines - 2) * 1.5 * fontScale));
+          }
+        }
+        if (Array.isArray(experience.highlights) && experience.highlights.length > 0) {
+          const highlightLines = experience.highlights.filter(Boolean).length;
+          if (highlightLines > 0) {
+            const highlightLineHeight = Math.round(12 * fontScale);
+            height += highlightLines * highlightLineHeight;
+          }
+        }
+        return height;
+      };
+
+      const computeAttorneyExperienceGroupHeight = (items = []) => {
+        if (!items || items.length === 0) {
+          return 0;
+        }
+        return items.reduce((total, item, index) => {
+          const gap = index === 0 ? 0 : attorneyExperienceGap;
+          return total + gap + estimateAttorneyExperienceEntryHeight(item);
+        }, 0);
+      };
+
+      const fitAttorneyExperienceGroupWithin = (items = [], maxEstimatedHeight = 0, titleHeight = 0) => {
+        if (!items || items.length === 0) {
+          return null;
+        }
+        if (maxEstimatedHeight <= titleHeight) {
+          return null;
+        }
+        const group = [];
+        let consumed = titleHeight;
+        let contentHeight = 0;
+        for (let idx = 0; idx < items.length; idx += 1) {
+          const entryHeight = estimateAttorneyExperienceEntryHeight(items[idx]);
+          const gap = group.length === 0 ? 0 : attorneyExperienceGap;
+          if ((consumed + gap + entryHeight) > maxEstimatedHeight) {
+            break;
+          }
+          group.push(items[idx]);
+          consumed += gap + entryHeight;
+          contentHeight += gap + entryHeight;
+        }
+        if (group.length === 0) {
+          return null;
+        }
+        const remainder = items.slice(group.length);
+        const remainderContentHeight = computeAttorneyExperienceGroupHeight(remainder);
+        return {
+          group,
+          remainder,
+          estimatedHeight: titleHeight + contentHeight,
+          remainderContentHeight,
+        };
+      };
+
+      const firstPageHasExperience = firstPage.some((section) => section?.type === 'experience');
+      if (!firstPageHasExperience) {
+        let experienceTemplateSection = null;
+        const experienceEntries = [];
+
+        pages.forEach((page) => {
+          for (let idx = 0; idx < page.length; idx += 1) {
+            const section = page[idx];
+            if (section?.type === 'experience') {
+              if (!experienceTemplateSection) {
+                experienceTemplateSection = { ...section, content: Array.isArray(section.content) ? [...section.content] : [] };
+              }
+              const sectionExperiences = Array.isArray(section.content) ? section.content : [];
+              experienceEntries.push(...sectionExperiences);
+              page.splice(idx, 1);
+              idx -= 1;
+            }
+          }
+        });
+
+        if (experienceEntries.length > 0) {
+          const experienceTitleHeight = experienceTemplateSection?.titleHeight ?? Math.round(20 * fontScale);
+          const experiencePadding = getSectionPadding('experience');
+          const baseExperienceSection = experienceTemplateSection
+            ? { ...experienceTemplateSection, content: [] }
+            : { type: 'experience', titleHeight: experienceTitleHeight, canSplit: true, content: [] };
+
+          let remainingExperiences = experienceEntries;
+
+          const usedHeight = sumEstimatedHeight(firstPage);
+          const maxAdditional = Math.max(0, attorneyLimit - usedHeight);
+          const maxEstimatedHeightFirst = Math.max(0, maxAdditional - experiencePadding);
+          const firstFit = fitAttorneyExperienceGroupWithin(remainingExperiences, maxEstimatedHeightFirst, experienceTitleHeight);
+
+          if (firstFit && firstFit.group.length > 0) {
+            const { group, remainder, estimatedHeight } = firstFit;
+            const firstExperienceSection = {
+              ...baseExperienceSection,
+              content: [...group],
+              estimatedHeight,
+              isContinuation: false,
+              _suppressTitle: false,
+              titleHeight: experienceTitleHeight,
+            };
+            const insertAfterSummary = firstPage.findIndex((section) => section.type === 'summary');
+            const insertIndex = insertAfterSummary === -1 ? firstPage.length : insertAfterSummary + 1;
+            firstPage.splice(insertIndex, 0, firstExperienceSection);
+            remainingExperiences = remainder;
+          }
+
+          let continuationPageIndex = 1;
+          while (remainingExperiences.length > 0) {
+            const targetPage = ensurePage(continuationPageIndex);
+            const used = sumEstimatedHeight(targetPage);
+            const maxAdditionalForPage = Math.max(0, attorneyLimit - used);
+            let maxEstimatedForPage = Math.max(0, maxAdditionalForPage - experiencePadding);
+
+            if (maxEstimatedForPage <= experienceTitleHeight) {
+              if (used > 0) {
+                continuationPageIndex += 1;
+                continue;
+              }
+              maxEstimatedForPage = Math.max(experienceTitleHeight + 1, attorneyLimit - experiencePadding);
+            }
+
+            const fitResult = fitAttorneyExperienceGroupWithin(
+              remainingExperiences,
+              maxEstimatedForPage,
+              experienceTitleHeight
+            ) || {
+              group: [remainingExperiences[0]],
+              remainder: remainingExperiences.slice(1),
+              estimatedHeight: experienceTitleHeight + computeAttorneyExperienceGroupHeight([remainingExperiences[0]]),
+            };
+
+            const continuationSection = {
+              ...baseExperienceSection,
+              content: [...fitResult.group],
+              estimatedHeight: fitResult.estimatedHeight,
+              isContinuation: true,
+              _suppressTitle: false,
+              titleHeight: experienceTitleHeight,
+            };
+
+            targetPage.push(continuationSection);
+            remainingExperiences = fitResult.remainder;
+            continuationPageIndex += 1;
+          }
+        }
+
+        firstHeight = sumEstimatedHeight(firstPage);
+      }
+
+      for (let pageIndex = pages.length - 1; pageIndex >= 0; pageIndex -= 1) {
+        if (!pages[pageIndex] || pages[pageIndex].length === 0) {
+          pages.splice(pageIndex, 1);
+        }
+      }
+      pages.forEach((page) => {
+        page.forEach((section, index) => {
+          section._pageStart = index === 0;
+        });
+      });
+    }
 
     if (pages.length > 1 && pages[0].length === 1 && pages[0][0]?.type === 'header') {
       if (DEBUG_PAGINATION) {
@@ -1894,33 +2221,117 @@ const renderEducation = (education, styles) => {
     return { contactEntries, educationItems, skillsList };
   };
 
-  const splitAttorneySkillsForPages = (skillsList = [], {
-    contactCount = 0,
-    educationCount = 0,
-    fontScale = 1.2,
-  } = {}) => {
+  const splitAttorneySkillsForPages = (
+    skillsList = [],
+    {
+      contactCount = 0,
+      educationCount = 0,
+      educationItems = [],
+      fontScale = 1.2,
+    } = {}
+  ) => {
     if (!skillsList || skillsList.length === 0) {
       return [];
     }
     const safeFontScale = Math.max(0.9, fontScale || 1.0);
-    const baseFirstLimit = Math.max(4, Math.floor(11 / safeFontScale));
+    const previewScale = 2 * safeFontScale;
+    const headerReservePx = Math.round(160 * previewScale / 2);
+    const rawSidebarAvailablePx = Math.max(0, AVAILABLE_HEIGHT - headerReservePx);
+    const sidebarAvailablePx = Math.max(0, rawSidebarAvailablePx - Math.round(36 * previewScale / 2));
+    const headingHeightPx = Math.round(6 * previewScale * 1.25);
+    const sectionSpacingPx = Math.round(8 * previewScale);
+    const bodyLineHeightPx = Math.round(5.2 * previewScale * 1.5);
+    const contactLineGapPx = Math.round(3.5 * previewScale);
+    const skillGapPx = Math.round(3.5 * previewScale);
+    const educationEntryGapPx = Math.round(4.5 * previewScale);
+    const safetyBufferPx = Math.round(18 * previewScale / 2);
+    const estimateEducationEntryHeight = (edu) => {
+      if (!edu || typeof edu !== 'object') {
+        return Math.round(bodyLineHeightPx * 1.4);
+      }
+      let lines = 2;
+      if (toText(edu.field)) lines += 1;
+      if (toText(edu.graduationYear)) lines += 1;
+      if (toText(edu.honors)) lines += 1;
+      const entryHeight = (lines * bodyLineHeightPx) + Math.round(2 * previewScale);
+      return entryHeight;
+    };
+    const estimateSidebarHeight = (skillCount) => {
+      let total = safetyBufferPx;
+      if (contactCount > 0) {
+        const contactHeight =
+          headingHeightPx +
+          (contactCount * bodyLineHeightPx) +
+          Math.max(0, contactCount - 1) * contactLineGapPx;
+        total += contactHeight + sectionSpacingPx;
+      }
+      if (educationCount > 0) {
+        const educationHeight =
+          headingHeightPx +
+          educationItems.slice(0, educationCount).reduce(
+            (acc, edu, idx) =>
+              acc +
+              estimateEducationEntryHeight(edu) +
+              (idx === educationCount - 1 ? 0 : educationEntryGapPx),
+            0
+          );
+        total += educationHeight + sectionSpacingPx;
+      }
+      if (skillCount > 0) {
+        const skillsHeight =
+          headingHeightPx +
+          (skillCount * bodyLineHeightPx) +
+          Math.max(0, skillCount - 1) * skillGapPx;
+        total += skillsHeight;
+      }
+      return total;
+    };
+
+    // Allow a generous number of skills on the first page. Increase the baseline so most
+    // lists stay together unless they are truly long, then gradually reduce capacity
+    // when the sidebar already has dense sections (extra contact or education entries).
+    const baseFirstLimit = Math.max(8, Math.ceil(22 / safeFontScale));
     let adjustedFirstLimit = baseFirstLimit;
     if (educationCount > 1) {
-      adjustedFirstLimit -= Math.ceil((educationCount - 1) * 0.85);
+      adjustedFirstLimit -= Math.ceil((educationCount - 1) * 0.6);
     }
     if (contactCount > 2) {
-      adjustedFirstLimit -= Math.ceil((contactCount - 2) * 0.5);
+      adjustedFirstLimit -= Math.ceil((contactCount - 2) * 0.45);
     }
-    adjustedFirstLimit = Math.max(3, Math.min(baseFirstLimit, adjustedFirstLimit));
-    const subsequentLimit = Math.max(adjustedFirstLimit + 2, Math.floor(14 / safeFontScale));
-    const remainingSkills = [...skillsList];
-    const slices = [];
-    const firstSlice = remainingSkills.splice(0, adjustedFirstLimit);
-    slices.push(firstSlice);
-    while (remainingSkills.length > 0) {
-      slices.push(remainingSkills.splice(0, subsequentLimit));
+    adjustedFirstLimit = Math.max(6, adjustedFirstLimit);
+    const totalSkills = skillsList.length;
+    if (totalSkills <= adjustedFirstLimit) {
+      return [skillsList];
     }
-    return slices;
+    let firstSliceCount = Math.min(adjustedFirstLimit, totalSkills);
+    while (firstSliceCount > 0 && estimateSidebarHeight(firstSliceCount) > sidebarAvailablePx) {
+      firstSliceCount -= 1;
+    }
+    if (firstSliceCount <= 0) {
+      firstSliceCount = Math.max(4, Math.floor(totalSkills / 2));
+    }
+    let firstEstimate = estimateSidebarHeight(firstSliceCount);
+    if (firstEstimate > sidebarAvailablePx) {
+      while (firstSliceCount > 4 && firstEstimate > sidebarAvailablePx) {
+        firstSliceCount -= 1;
+        firstEstimate = estimateSidebarHeight(firstSliceCount);
+      }
+    }
+    const marginPx = sidebarAvailablePx - firstEstimate;
+    if (firstSliceCount > 5 && marginPx >= 0 && marginPx < Math.round(bodyLineHeightPx * 0.6)) {
+      firstSliceCount -= 1;
+      firstEstimate = estimateSidebarHeight(firstSliceCount);
+    }
+    if (firstSliceCount <= 0) {
+      firstSliceCount = Math.max(3, Math.ceil(totalSkills / 2));
+    }
+    if (firstSliceCount >= totalSkills) {
+      return [skillsList];
+    }
+    // Keep the remainder in a single chunk so the continuation always appears together.
+    const firstSlice = skillsList.slice(0, firstSliceCount);
+    const remaining = skillsList.slice(firstSliceCount);
+    return [firstSlice, remaining];
   };
 
 const renderAttorneySummaryBlock = (summaryValue) => {
@@ -2093,6 +2504,7 @@ const renderAttorneySummaryBlock = (summaryValue) => {
     const skillSlices = splitAttorneySkillsForPages(skillsList, {
       contactCount: contactEntries.length,
       educationCount: educationItems.length,
+      educationItems,
       fontScale: getFontSizeScaleFactor(),
     });
     const skillsForPage = skillSlices[pageIndex] || [];
