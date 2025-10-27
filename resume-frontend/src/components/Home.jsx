@@ -2,13 +2,12 @@ import React, { useState, useEffect, useRef } from "react";
 
 import "./Home.css";
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../context/AuthContext";
 
 import Login from "./auth/Login";
 
-import IntegratedBuilderStart from "./IntegratedBuilderStart";
 
 import ResumeHistory from "./ResumeHistory";
 
@@ -35,35 +34,16 @@ const Home = () => {
     typeof user === "string" ? user : user?.name || user?.email || "";
 
   const [showAuthModal, setShowAuthModal] = useState(false);
-
-  const [showIntegratedModal, setShowIntegratedModal] = useState(false);
-
   const [showResumeHistory, setShowResumeHistory] = useState(false);
-
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-
-  const [pendingBuilderStep, setPendingBuilderStep] = useState(null);
   const [showAccountMenu, setShowAccountMenu] = useState(false);
   const accountMenuRef = useRef(null);
 
-  const launchBuilderModal = (stepId) => {
-    setLastStep(stepId);
-
-    setShowIntegratedModal(true);
-  };
+  const navigate = useNavigate();
 
   const openBuilderFrom = (stepId) => {
-    if (!user) {
-      setPendingBuilderStep(stepId);
-
-      setShowAuthModal(true);
-
-      return;
-    }
-
-    setPendingBuilderStep(null);
-
-    launchBuilderModal(stepId);
+    setLastStep(stepId);
+    navigate("/builder");
   };
 
   // Track user source when home page loads
@@ -680,23 +660,20 @@ const Home = () => {
             </h1>
 
             <p className="hero-subtitle">
-              Job Match pairs our AI builder with role-specific tailoring
-              that keeps your real experience front and center. Paste a
-              description and instantly surface recruiter-ready language that
-              reflects what you already bring to the table.
+              Start tailoring your resume in under 60 seconds. Paste any job description and our AI keeps your real accomplishments front and center—no login needed until you&apos;re ready to save or download.
             </p>
 
             <div className="hero-features">
               <div className="hero-feature">
-                <span>🎯 Highlights your proven achievements for each job</span>
+                <span>🎯 Built around your proven experience—no filler</span>
               </div>
 
               <div className="hero-feature">
-                <span>🧠 AI suggestions backed by hiring data</span>
+                <span>⚡ Launch instantly, no signup required to begin</span>
               </div>
 
               <div className="hero-feature">
-                <span>📈 Instant ATS keyword insights</span>
+                <span>📈 Instant ATS keyword and recruiter insights</span>
               </div>
             </div>
 
@@ -706,8 +683,8 @@ const Home = () => {
                 onClick={handleStartBuilding}
               >
                 {user
-                  ? "📝 Continue with Job Match"
-                  : "🚀 Try Job Match - Free!"}
+                  ? "📝 Continue in the Builder"
+                  : "🚀 Start My Resume — No Login Needed"}
               </button>
             </div>
           </div>
@@ -1045,35 +1022,19 @@ const Home = () => {
           }}
         >
           <div style={{ position: "relative" }}>
-            <Login
-              onLogin={(email, token) => {
-                login(email, token);
+              <Login
+                onLogin={(email, token) => {
+                  login(email, token);
 
-                setShowAuthModal(false);
-
-                if (pendingBuilderStep) {
-                  const stepToLaunch = pendingBuilderStep;
-
-                  setPendingBuilderStep(null);
-
-                  launchBuilderModal(stepToLaunch);
-                }
-              }}
-              onClose={() => {
-                setShowAuthModal(false);
-
-                setPendingBuilderStep(null);
-              }}
-            />
+                  setShowAuthModal(false);
+                }}
+                onClose={() => {
+                  setShowAuthModal(false);
+                }}
+              />
+            </div>
           </div>
-        </div>
-      )}
-
-      {/* Integrated Builder Start Modal */}
-
-      {showIntegratedModal && (
-        <IntegratedBuilderStart onClose={() => setShowIntegratedModal(false)} />
-      )}
+        )}
 
       {/* Resume History Modal */}
 
