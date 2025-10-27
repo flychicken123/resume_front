@@ -1,7 +1,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet";
-import { Navigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getAPIBaseURL } from "../api";
 import SEO from "../components/SEO";
@@ -566,8 +566,28 @@ const AdminMembershipPage = () => {
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
-      <div style={{ padding: "2rem", maxWidth: "1200px", margin: "0 auto" }}>
-        <h1 style={{ fontSize: "1.75rem", fontWeight: 700, marginBottom: "1.5rem" }}>Membership Management</h1>
+        <div style={{ padding: "2rem", maxWidth: "1200px", margin: "0 auto" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", flexWrap: "wrap", marginBottom: "1.5rem" }}>
+          <h1 style={{ fontSize: "1.75rem", fontWeight: 700, margin: 0 }}>Membership Management</h1>
+          <Link
+            to="/admin/analytics"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              padding: "0.65rem 1rem",
+              borderRadius: "10px",
+              border: "1px solid #2563eb",
+              color: "#ffffff",
+              background: "#2563eb",
+              fontWeight: 600,
+              textDecoration: "none",
+              boxShadow: "0 6px 14px rgba(37, 99, 235, 0.18)",
+            }}
+          >
+            View Exit Analytics
+          </Link>
+        </div>
 
         {error && (
           <div style={{ background: "#fee2e2", border: "1px solid #fca5a5", color: "#b91c1c", padding: "0.75rem 1rem", borderRadius: "8px", marginBottom: "1rem" }}>
