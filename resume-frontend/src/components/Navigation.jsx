@@ -72,9 +72,14 @@ const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setS
             Pricing
           </Link>
           {isAdmin && (
-            <Link to="/admin/memberships" className="nav-link">
-              Admin
-            </Link>
+            <>
+              <Link to="/admin/analytics" className="nav-link">
+                Analytics
+              </Link>
+              <Link to="/admin/memberships" className="nav-link">
+                Admin
+              </Link>
+            </>
           )}
           <Link to="/#about" className="nav-link">About</Link>
           <Link to="/#contact" className="nav-link">Contact</Link>
@@ -201,13 +206,22 @@ const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setS
               </Link>
             )}
             {isAdmin && (
-              <Link
-                to="/admin/memberships"
-                className="mobile-nav-link"
-                onClick={() => setShowMobileMenu(false)}
-              >
-                Admin
-              </Link>
+              <>
+                <Link
+                  to="/admin/analytics"
+                  className="mobile-nav-link"
+                  onClick={() => setShowMobileMenu(false)}
+                >
+                  Analytics
+                </Link>
+                <Link
+                  to="/admin/memberships"
+                  className="mobile-nav-link"
+                  onClick={() => setShowMobileMenu(false)}
+                >
+                  Admin
+                </Link>
+              </>
             )}
             <Link
               to="/#about"
