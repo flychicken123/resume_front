@@ -3,6 +3,8 @@ import './SimpleHero.css';
 import { setLastStep } from '../utils/exitTracking';
 import { trackCTAClick } from './Analytics';
 
+const resumePreviewSrc = '/templates/modern.png';
+
 const SimpleHero = ({ onImportClick, onCreateClick }) => {
   const handleImport = () => {
     setLastStep('clicked_import_from_hero');
@@ -20,121 +22,89 @@ const SimpleHero = ({ onImportClick, onCreateClick }) => {
     <div className="simple-hero">
       <div className="hero-container">
         <div className="hero-left">
+          <span className="hero-eyebrow">Launch your resume in minutes</span>
           <h1 className="hero-headline">
-            Free AI Resume Builder - 100% Free Forever
+            Build an ATS-ready resume with AI guidance
           </h1>
-          
+
           <p className="hero-description">
-            Build your perfect resume for free with AI assistance. No signup required, no hidden fees. 
-            Get professional templates, AI-powered writing help, and instant PDF downloads - all 100% free. 
-            Join thousands creating winning resumes in minutes!
+            Start for free and polish every section with smart suggestions.
+            Upgrade only if you need unlimited downloads, advanced formatting,
+            or premium cover letters.
           </p>
-          
+
+          <div className="hero-trust-note">
+            <span className="hero-trust-icon" aria-hidden="true">✅</span>
+            No credit card required to begin - export once you're happy.
+          </div>
+
           <div className="hero-buttons">
-            <button className="btn-import" onClick={handleImport}>
-              Import your resume
-            </button>
             <button className="btn-create" onClick={handleCreate}>
               Create my resume
             </button>
+            <button className="btn-import" onClick={handleImport}>
+              Import my resume
+            </button>
           </div>
-          
+
+          <div className="hero-quick-stats">
+            <div className="hero-stat">
+              <strong>3 steps</strong>
+              <span>Profile · Experience · Polish</span>
+            </div>
+            <div className="hero-stat">
+              <strong>&lt;5 min</strong>
+              <span>Average time to first draft</span>
+            </div>
+            <div className="hero-stat">
+              <strong>ATS safe</strong>
+              <span>Templates recruiters trust</span>
+            </div>
+          </div>
+
           <div className="ai-feature">
-            <div className="ai-icon">✏️</div>
+            <div className="ai-icon" aria-hidden="true">✨</div>
             <div className="ai-content">
-              <h3>Let AI do the work!</h3>
+              <h3>AI suggestions, your voice</h3>
               <p>
-                Describe your role in a few words, and we'll generate tailored 
-                content for your work experience section.
+                Get tailored bullet ideas, keyword checks, and instant rewrites
+                while you edit. Accept, tweak, or skip — you stay in control.
               </p>
               <button className="btn-try-ai" onClick={handleCreate}>
-                Get Started →
+                Try the builder ->
               </button>
             </div>
           </div>
         </div>
-        
+
         <div className="hero-right">
           <div className="resume-preview">
-            <div className="resume-placeholder">
-              <div className="resume-header">
-                <div className="resume-name">SARAH JOHNSON</div>
-                <div className="resume-contact">
-                  <span>📍 New York, NY</span>
-                  <span>📞 (555) 123-4567</span>
-                  <span>✉️ sarah.j@email.com</span>
-                </div>
-              </div>
-              
-              <div className="resume-section">
-                <h3>EXPERIENCE</h3>
-                <div className="job-entry">
-                  <div className="job-header">
-                    <strong>Senior Marketing Manager</strong>
-                    <span className="job-date">2022 - Present</span>
-                  </div>
-                  <em>TechCorp Inc.</em>
-                  <ul>
-                    <li>Manage digital marketing campaigns with $500K+ annual budget</li>
-                    <li>Increased lead generation by 45% through targeted strategies</li>
-                    <li>Lead team of 5 marketing specialists and coordinate with sales</li>
-                  </ul>
-                </div>
-                
-                <div className="job-entry">
-                  <div className="job-header">
-                    <strong>Marketing Manager</strong>
-                    <span className="job-date">2021 - 2022</span>
-                  </div>
-                  <em>StartupXYZ</em>
-                  <ul>
-                    <li>Developed and executed comprehensive marketing strategies</li>
-                    <li>Launched 10+ successful product campaigns</li>
-                    <li>Built brand presence from 0 to 50K social media followers</li>
-                  </ul>
-                </div>
-                
-                <div className="job-entry">
-                  <div className="job-header">
-                    <strong>Marketing Specialist</strong>
-                    <span className="job-date">2019 - 2021</span>
-                  </div>
-                  <em>Digital Agency</em>
-                  <ul>
-                    <li>Created content for social media and email campaigns</li>
-                    <li>Analyzed campaign metrics and improved ROI by 30%</li>
-                    <li>Managed client accounts and delivered monthly reports</li>
-                  </ul>
-                </div>
-              </div>
-              
-              <div className="resume-section">
-                <h3>EDUCATION</h3>
-                <div className="education-entry">
-                  <strong>Bachelor of Business Administration</strong>
-                  <em>NYU Stern School of Business - 2019</em>
-                </div>
-              </div>
-              
-              <div className="resume-section">
-                <h3>SKILLS</h3>
-                <div className="skills-list">
-                  Google Analytics • SEO/SEM • Social Media Marketing • Adobe Creative Suite • 
-                  HubSpot • Salesforce • Content Strategy • Data Analysis
-                </div>
-              </div>
+            <img
+              src={resumePreviewSrc}
+              alt="HiHired live resume preview"
+              className="hero-preview-image"
+            />
+            <div className="hero-preview-badge">
+              <span role="img" aria-hidden="true">⚡</span>
+              Live preview updates as you type
             </div>
-            
-            <div className="resume-badges">
-              <div className="badge-lightning">⚡</div>
-              <div className="badge-text">
-                <strong>Build Your Resume Fast</strong>
+            <div className="hero-preview-steps" aria-hidden="true">
+              <div className="preview-step">
+                <span className="preview-step-number">1</span>
+                <span className="preview-step-text">Choose a template</span>
+              </div>
+              <div className="preview-step">
+                <span className="preview-step-number">2</span>
+                <span className="preview-step-text">Let AI draft your story</span>
+              </div>
+              <div className="preview-step">
+                <span className="preview-step-number">3</span>
+                <span className="preview-step-text">Download &amp; share instantly</span>
               </div>
             </div>
           </div>
         </div>
       </div>
-      
     </div>
   );
 };

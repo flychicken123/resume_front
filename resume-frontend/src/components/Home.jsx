@@ -34,6 +34,8 @@ const Home = () => {
     typeof user === "string" ? user : user?.name || user?.email || "";
 
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [pendingBuilderStep, setPendingBuilderStep] = useState(null);
+  const [authContextMessage, setAuthContextMessage] = useState("");
   const [showResumeHistory, setShowResumeHistory] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showAccountMenu, setShowAccountMenu] = useState(false);
@@ -42,16 +44,35 @@ const Home = () => {
   const navigate = useNavigate();
 
   const openBuilderFrom = (stepId) => {
-    setLastStep(stepId);
-    navigate("/builder");
+    if (user) {
+      setLastStep(stepId);
+      navigate("/builder");
+      return;
+    }
+
+    setPendingBuilderStep(stepId);
+    setAuthContextMessage("Sign in to build your resume.");
+    setShowAuthModal(true);
+  };
+
+  const handleAuthSuccess = (userData, token) => {
+    login(userData, token);
+    setShowAuthModal(false);
+
+    if (pendingBuilderStep) {
+      const step = pendingBuilderStep;
+      setPendingBuilderStep(null);
+      setLastStep(step);
+      navigate("/builder");
+    }
+
+    setAuthContextMessage("");
   };
 
   // Track user source when home page loads
 
   useEffect(() => {
     trackReferrer();
-
-    trackBuilderStart("home_page_load");
   }, []);
 
   // Calculate optimal spacing based on button width
@@ -65,6 +86,13 @@ const Home = () => {
     trackBuilderStart("home_page_button");
 
     openBuilderFrom("home_builder_cta");
+  };
+
+  const handleNavbarStart = () => {
+    trackReferrer();
+    trackCTAClick("home_nav_primary_cta", { page: window.location.pathname });
+    trackBuilderStart("home_nav_primary_cta");
+    openBuilderFrom("home_nav_primary_cta");
   };
 
   const handleLogout = () => {
@@ -123,19 +151,6 @@ const Home = () => {
             Home
           </button>
 
-          <button
-            className="home-nav-link"
-            onClick={() => openBuilderFrom("home_nav_builder_cta")}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              font: "inherit",
-            }}
-          >
-            Builder
-          </button>
-
           <a
             href="#job-match"
             className="home-nav-link"
@@ -147,7 +162,7 @@ const Home = () => {
                 ?.scrollIntoView({ behavior: "smooth" });
             }}
           >
-            Job Match
+            How It Works
           </a>
 
           <a
@@ -161,38 +176,8 @@ const Home = () => {
                 ?.scrollIntoView({ behavior: "smooth" });
             }}
           >
-            Product
+            Features
           </a>
-
-          {user && (
-            <button
-              className="home-nav-link"
-              onClick={() => setShowResumeHistory(true)}
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                font: "inherit",
-              }}
-            >
-              Resume History
-            </button>
-          )}
-
-          <Link
-            to="/pricing"
-            className="home-nav-link"
-            style={{ textDecoration: "none" }}
-          >
-            Pricing
-          </Link>
-
-          {isAdmin && (
-            <Link to="/admin/memberships" className="home-nav-link">
-              Admin
-            </Link>
-          )}
-
           {/* Hidden - Apply to Jobs feature
 
 
@@ -283,6 +268,14 @@ const Home = () => {
         </div>
 
         <div className="home-navbar-right">
+          <button
+            className="home-start-btn"
+            onClick={handleNavbarStart}
+            type="button"
+          >
+            Start Free
+          </button>
+
           {user ? (
             <div className="home-account-menu" ref={accountMenuRef}>
               <button
@@ -306,6 +299,17 @@ const Home = () => {
               </button>
               {showAccountMenu && (
                 <div className="home-account-dropdown" role="menu">
+                  <button
+                    type="button"
+                    className="home-account-item"
+                    role="menuitem"
+                    onClick={() => {
+                      setShowAccountMenu(false);
+                      setShowResumeHistory(true);
+                    }}
+                  >
+                    Resume History
+                  </button>
                   <Link
                     to="/account"
                     className="home-account-item"
@@ -314,6 +318,16 @@ const Home = () => {
                   >
                     Membership
                   </Link>
+                  {isAdmin && (
+                    <Link
+                      to="/admin/memberships"
+                      className="home-account-item"
+                      role="menuitem"
+                      onClick={() => setShowAccountMenu(false)}
+                    >
+                      Admin
+                    </Link>
+                  )}
                   <button
                     type="button"
                     className="home-account-item home-account-logout"
@@ -332,6 +346,8 @@ const Home = () => {
             <button
               className="home-auth-btn"
               onClick={() => {
+                setAuthContextMessage("");
+                setPendingBuilderStep(null);
                 setShowAuthModal(true);
               }}
               style={{ flexShrink: 0 }}
@@ -367,6 +383,16 @@ const Home = () => {
         >
           <div className="mobile-menu" onClick={(e) => e.stopPropagation()}>
             <button
+              className="mobile-nav-cta"
+              onClick={() => {
+                handleNavbarStart();
+                setShowMobileMenu(false);
+              }}
+            >
+              Start Free
+            </button>
+
+            <button
               className="mobile-nav-link"
               onClick={() => {
                 window.scrollTo({ top: 0, behavior: "smooth" });
@@ -375,17 +401,6 @@ const Home = () => {
               }}
             >
               Home
-            </button>
-
-            <button
-              className="mobile-nav-link"
-              onClick={() => {
-                setShowMobileMenu(false);
-
-                openBuilderFrom("home_mobile_builder_cta");
-              }}
-            >
-              Builder
             </button>
 
             <a
@@ -401,7 +416,7 @@ const Home = () => {
                 setShowMobileMenu(false);
               }}
             >
-              Job Match
+              How It Works
             </a>
 
             <a
@@ -417,30 +432,8 @@ const Home = () => {
                 setShowMobileMenu(false);
               }}
             >
-              Product
+              Features
             </a>
-
-            {user && (
-              <button
-                className="mobile-nav-link"
-                onClick={() => {
-                  setShowResumeHistory(true);
-
-                  setShowMobileMenu(false);
-                }}
-              >
-                Resume History
-              </button>
-            )}
-
-            <Link
-              to="/pricing"
-              className="mobile-nav-link"
-              onClick={() => setShowMobileMenu(false)}
-              style={{ textDecoration: "none" }}
-            >
-              Pricing
-            </Link>
 
             {user && (
               <Link
@@ -449,16 +442,6 @@ const Home = () => {
                 onClick={() => setShowMobileMenu(false)}
               >
                 Membership
-              </Link>
-            )}
-
-            {isAdmin && (
-              <Link
-                to="/admin/memberships"
-                className="mobile-nav-link"
-                onClick={() => setShowMobileMenu(false)}
-              >
-                Admin
               </Link>
             )}
 
@@ -636,6 +619,43 @@ const Home = () => {
             </div>
           </div>
 
+          <div className="home-resume-flow">
+            <div className="home-resume-steps">
+              <h3>Build a tailored resume in four steps</h3>
+              <ol>
+                <li>
+                  <span className="home-resume-step-title">Kick off instantly</span>
+                  Sign in, then import your current resume or start from a clean template with your details.
+                </li>
+                <li>
+                  <span className="home-resume-step-title">Paste the job description</span>
+                  Our AI maps the role&apos;s must-have skills to your real experience without inventing facts.
+                </li>
+                <li>
+                  <span className="home-resume-step-title">Refine with guided edits</span>
+                  Approve suggested bullet points, quantify wins, and keep your voice polished for recruiters.
+                </li>
+                <li>
+                  <span className="home-resume-step-title">Match fresh roles</span>
+                  Turn on Job Match to see which new company openings fit your resume before you apply.
+                </li>
+              </ol>
+            </div>
+
+            <div className="home-job-refresh">
+              <h3>Daily job matches from real companies</h3>
+              <p>
+                We refresh hiring feeds every morning so you see live roles from teams that are actively hiring—not recycled
+                zombie listings like you&apos;ll find on LinkedIn.
+              </p>
+              <ul>
+                <li>Compare your resume against today&apos;s openings with instant match scores.</li>
+                <li>Spot skill gaps the moment a new posting lands so you can update before applying.</li>
+                <li>Track only verified roles sourced directly from company career pages.</li>
+              </ul>
+            </div>
+          </div>
+
           <div className="home-jobdesc-ctaWrap">
             <button
               className="home-btn primary home-jobdesc-cta"
@@ -660,7 +680,7 @@ const Home = () => {
             </h1>
 
             <p className="hero-subtitle">
-              Start tailoring your resume in under 60 seconds. Paste any job description and our AI keeps your real accomplishments front and center—no login needed until you&apos;re ready to save or download.
+              Sign in and start tailoring your resume in under 60 seconds. Paste any job description and our AI keeps your real accomplishments front and center.
             </p>
 
             <div className="hero-features">
@@ -669,7 +689,7 @@ const Home = () => {
               </div>
 
               <div className="hero-feature">
-                <span>⚡ Launch instantly, no signup required to begin</span>
+                <span>⚡ Jump in right after a quick sign-in</span>
               </div>
 
               <div className="hero-feature">
@@ -684,7 +704,7 @@ const Home = () => {
               >
                 {user
                   ? "📝 Continue in the Builder"
-                  : "🚀 Start My Resume — No Login Needed"}
+                  : "🚀 Sign In & Start My Resume"}
               </button>
             </div>
           </div>
@@ -1023,13 +1043,12 @@ const Home = () => {
         >
           <div style={{ position: "relative" }}>
               <Login
-                onLogin={(email, token) => {
-                  login(email, token);
-
-                  setShowAuthModal(false);
-                }}
+                contextMessage={authContextMessage}
+                onLogin={handleAuthSuccess}
                 onClose={() => {
                   setShowAuthModal(false);
+                  setPendingBuilderStep(null);
+                  setAuthContextMessage("");
                 }}
               />
             </div>
