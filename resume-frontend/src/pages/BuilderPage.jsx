@@ -604,7 +604,7 @@ function BuilderPage() {
   const [tailorActiveJobId, setTailorActiveJobId] = useState(null);
   const [tailorNotice, setTailorNotice] = useState(null);
   const [tailorError, setTailorError] = useState(null);
-  const { user, logout } = useAuth();
+  const { user, logout, loading } = useAuth();
   const { triggerFeedbackPrompt, scheduleFollowUp } = useFeedback();
   const { data, updateData } = useResume();
   const displayName = typeof user === 'string' ? user : (user?.name || user?.email || '');
@@ -652,6 +652,17 @@ function BuilderPage() {
   useEffect(() => {
     trackBuilderLoaded('builder_page');
   }, []);
+
+  useEffect(() => {
+    if (loading) {
+      return;
+    }
+    if (!user) {
+      setShowAuthModal(true);
+    } else {
+      setShowAuthModal(false);
+    }
+  }, [user, loading]);
 
 
   useEffect(() => {
@@ -1046,6 +1057,12 @@ function BuilderPage() {
       setJobMatchesLoading(false);
     }
   }, [user, buildMatchPayload]);
+
+  const handleAuthModalClose = useCallback(() => {
+    if (user) {
+      setShowAuthModal(false);
+    }
+  }, [user]);
 
   const handleAutoTailorResume = useCallback(async (match) => {
     if (!match) {
@@ -3121,7 +3138,12 @@ function BuilderPage() {
       )}
 
              {/* Modals */}
-       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
+      {showAuthModal && (
+        <AuthModal
+          onClose={handleAuthModalClose}
+          contextMessage="Sign in to build your resume."
+        />
+      )}
        {showImportModal && <ImportResumeModal onClose={() => setShowImportModal(false)} />}
        {showUpgradeModal && (() => {
          console.log('Rendering UpgradeModal, showUpgradeModal=', showUpgradeModal, 'data=', subscriptionData);
