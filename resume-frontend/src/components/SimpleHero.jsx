@@ -6,7 +6,7 @@ import TRUSTED_COMPANIES from '../constants/trustedCompanies';
 
 const resumePreviewSrc = '/templates/modern.png';
 
-const SimpleHero = ({ onImportClick, onCreateClick }) => {
+const SimpleHero = ({ onImportClick, onCreateClick, onJobsClick }) => {
   const handleImport = () => {
     setLastStep('clicked_import_from_hero');
     trackCTAClick('hero_import_cta', { page: window.location.pathname });
@@ -19,6 +19,12 @@ const SimpleHero = ({ onImportClick, onCreateClick }) => {
     onCreateClick?.();
   };
 
+  const handleBrowseJobs = () => {
+    setLastStep('clicked_jobs_from_hero');
+    trackCTAClick('hero_jobs_cta', { page: window.location.pathname });
+    onJobsClick?.();
+  };
+
   return (
     <div className="simple-hero">
       <div className="hero-container">
@@ -29,9 +35,9 @@ const SimpleHero = ({ onImportClick, onCreateClick }) => {
           </h1>
 
           <p className="hero-description">
-            Start for free and polish every section with smart suggestions.
-            Upgrade only if you need unlimited downloads, advanced formatting,
-            or premium cover letters.
+            Start for free, polish every section with smart suggestions, and see how your resume
+            scores against real openings. Upgrade only if you need unlimited downloads, advanced
+            formatting, or premium cover letters.
           </p>
 
           <div className="hero-trusted">
@@ -60,6 +66,9 @@ const SimpleHero = ({ onImportClick, onCreateClick }) => {
             <button className="btn-import" onClick={handleImport}>
               Import my resume
             </button>
+            <button type="button" className="btn-jobs" onClick={handleBrowseJobs}>
+              Browse jobs
+            </button>
           </div>
 
           <div className="hero-quick-stats">
@@ -74,6 +83,10 @@ const SimpleHero = ({ onImportClick, onCreateClick }) => {
             <div className="hero-stat">
               <strong>ATS safe</strong>
               <span>Templates recruiters trust</span>
+            </div>
+            <div className="hero-stat">
+              <strong>Daily jobs</strong>
+              <span>Fresh matches every morning</span>
             </div>
           </div>
 

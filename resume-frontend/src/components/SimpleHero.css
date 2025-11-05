@@ -122,6 +122,7 @@
 .hero-buttons {
   display: flex;
   gap: 20px;
+  flex-wrap: wrap;
   margin-bottom: 40px;
 }
 
@@ -180,6 +181,29 @@
 
 .btn-create:hover {
   background: #2563eb;
+  transform: translateY(-2px);
+}
+
+.btn-jobs {
+  padding: 16px 32px;
+  font-size: 18px;
+  font-weight: 700;
+  background: rgba(15, 23, 42, 0.06);
+  color: #1e293b;
+  border: 1px solid rgba(15, 23, 42, 0.15);
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-jobs:hover {
+  background: rgba(37, 99, 235, 0.12);
+  border-color: rgba(37, 99, 235, 0.35);
+  color: #1d4ed8;
   transform: translateY(-2px);
 }
 
@@ -574,6 +598,10 @@
 
   .hero-buttons {
     flex-direction: column;
+    width: 100%;
+  }
+
+  .btn-jobs {
     width: 100%;
   }
 

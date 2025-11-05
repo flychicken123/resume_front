@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useResume } from '../context/ResumeContext';
 import { useFeedback } from '../context/FeedbackContext';
 import { setLastStep } from '../utils/exitTracking';
+import { BUILDER_TARGET_STEP_KEY, BUILDER_TARGET_JOB_MATCHES } from '../constants/builder';
 import {
   createJobDescriptionEntry,
   ensureJobDescriptionList,
@@ -604,6 +605,45 @@ function BuilderPage() {
   const [tailorActiveJobId, setTailorActiveJobId] = useState(null);
   const [tailorNotice, setTailorNotice] = useState(null);
   const [tailorError, setTailorError] = useState(null);
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const currentUrl = new URL(window.location.href);
+    const storedTarget = window.localStorage.getItem(BUILDER_TARGET_STEP_KEY);
+    const hash = currentUrl.hash;
+    const viewParam = currentUrl.searchParams.get('view');
+    let shouldNavigateToJobs = false;
+    let urlUpdated = false;
+
+    if (storedTarget === BUILDER_TARGET_JOB_MATCHES) {
+      shouldNavigateToJobs = true;
+      window.localStorage.removeItem(BUILDER_TARGET_STEP_KEY);
+    }
+
+    if (hash === '#jobs' || hash === '#job-matches') {
+      shouldNavigateToJobs = true;
+      currentUrl.hash = '';
+      urlUpdated = true;
+    }
+
+    if (viewParam === 'jobs') {
+      shouldNavigateToJobs = true;
+      currentUrl.searchParams.delete('view');
+      urlUpdated = true;
+    }
+
+    if (shouldNavigateToJobs) {
+      setNavigateToJobMatchesPending(true);
+    }
+
+    if (urlUpdated) {
+      const searchString = currentUrl.searchParams.toString();
+      const cleanedUrl = `${currentUrl.pathname}${searchString ? `?${searchString}` : ''}${currentUrl.hash}`;
+      window.history.replaceState({}, document.title, cleanedUrl);
+    }
+  }, []);
   const { user, logout, loading } = useAuth();
   const { triggerFeedbackPrompt, scheduleFollowUp } = useFeedback();
   const { data, updateData } = useResume();
