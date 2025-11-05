@@ -617,11 +617,6 @@ const Home = () => {
       {/* Simple Hero Section with Resume */}
 
       <SimpleHero
-        onImportClick={() => {
-          trackBuilderStart("import_resume");
-
-          openBuilderFrom("home_import_cta");
-        }}
         onCreateClick={() => {
           trackBuilderStart("create_resume");
 
