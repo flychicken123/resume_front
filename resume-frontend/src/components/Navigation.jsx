@@ -60,6 +60,9 @@ const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setS
           >
             Builder
           </button>
+          <Link to="/jobs" className="nav-link">
+            Jobs
+          </Link>
           <Link to="/#job-match" className="nav-link">
             Job Match
           </Link>
@@ -173,6 +176,13 @@ const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setS
             >
               Builder
             </button>
+            <Link
+              to="/jobs"
+              className="mobile-nav-link"
+              onClick={() => setShowMobileMenu(false)}
+            >
+              Jobs
+            </Link>
             <Link
               to="/#job-match"
               className="mobile-nav-link"
