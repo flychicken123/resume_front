@@ -1,0 +1,180 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+
+.jobs-page {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  padding: 96px 24px 120px;
+  max-width: 1100px;
+  margin: 0 auto;
+  color: #0f172a;
+}
+
+.jobs-hero {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1));
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 32px;
+  padding: 48px;
+  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.08);
+  margin-bottom: 72px;
+}
+
+.jobs-hero-content {
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.jobs-hero-pill {
+  align-self: flex-start;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.12);
+  color: #1d4ed8;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 13px;
+}
+
+.jobs-hero h1 {
+  font-size: 48px;
+  line-height: 1.1;
+  font-weight: 800;
+  margin: 0;
+}
+
+.jobs-hero p {
+  font-size: 18px;
+  line-height: 1.6;
+  margin: 0;
+  color: #1f2937;
+}
+
+.jobs-hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.jobs-cta {
+  padding: 16px 32px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 20px 40px rgba(79, 70, 229, 0.25);
+}
+
+.jobs-cta:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 24px 52px rgba(79, 70, 229, 0.35);
+}
+
+.jobs-hero-note {
+  font-size: 15px;
+  color: #475569;
+}
+
+.jobs-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+  margin-bottom: 88px;
+}
+
+.jobs-step-card {
+  padding: 28px;
+  border-radius: 24px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: #fff;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.jobs-step-icon {
+  font-size: 28px;
+}
+
+.jobs-step-card h3 {
+  font-size: 20px;
+  margin: 0;
+  color: #1f2937;
+}
+
+.jobs-step-card p {
+  margin: 0;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.jobs-footer-cta {
+  text-align: center;
+  padding: 72px 48px;
+  border-radius: 32px;
+  background: linear-gradient(135deg, rgba(147, 51, 234, 0.08), rgba(14, 165, 233, 0.08));
+  border: 1px solid rgba(79, 70, 229, 0.18);
+  box-shadow: 0 24px 64px rgba(14, 165, 233, 0.15);
+}
+
+.jobs-footer-cta h2 {
+  font-size: 36px;
+  margin-bottom: 16px;
+  color: #0f172a;
+}
+
+.jobs-footer-cta p {
+  font-size: 18px;
+  margin: 0 0 32px;
+  color: #334155;
+}
+
+.jobs-footer-button {
+  padding: 18px 34px;
+  border-radius: 999px;
+  border: none;
+  background: #1d4ed8;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 22px 46px rgba(37, 99, 235, 0.35);
+}
+
+.jobs-footer-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 28px 56px rgba(37, 99, 235, 0.4);
+}
+
+@media (max-width: 768px) {
+  .jobs-page {
+    padding: 72px 16px 96px;
+  }
+
+  .jobs-hero {
+    padding: 36px 24px;
+  }
+
+  .jobs-hero h1 {
+    font-size: 36px;
+  }
+
+  .jobs-footer-cta {
+    padding: 56px 24px;
+  }
+
+  .jobs-footer-cta h2 {
+    font-size: 28px;
+  }
+
+  .jobs-footer-cta p {
+    font-size: 16px;
+  }
+}

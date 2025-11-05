@@ -2,6 +2,7 @@ import React from 'react';
 import './SimpleHero.css';
 import { setLastStep } from '../utils/exitTracking';
 import { trackCTAClick } from './Analytics';
+import TRUSTED_COMPANIES from '../constants/trustedCompanies';
 
 const resumePreviewSrc = '/templates/modern.png';
 
@@ -33,9 +34,23 @@ const SimpleHero = ({ onImportClick, onCreateClick }) => {
             or premium cover letters.
           </p>
 
-          <div className="hero-trust-note">
-            <span className="hero-trust-icon" aria-hidden="true">✅</span>
-            No credit card required to begin - export once you're happy.
+          <div className="hero-trusted">
+            <span className="hero-trusted-heading">
+              Trusted by professionals hired at
+            </span>
+            <div className="hero-company-logos" role="list">
+              {TRUSTED_COMPANIES.map(({ name, logo }) => (
+                <span key={name} className="hero-company-logo" role="listitem">
+                  <img src={logo} alt={`${name} logo`} loading="lazy" />
+                  <span className="hero-company-name">{name}</span>
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="hero-job-match-note">
+            <span className="hero-job-match-icon" aria-hidden="true">💼</span>
+            Match your resume to live job openings without leaving HiHired.
           </div>
 
           <div className="hero-buttons">

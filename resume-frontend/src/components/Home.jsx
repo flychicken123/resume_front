@@ -26,6 +26,28 @@ import { setLastStep } from "../utils/exitTracking";
 import SEO from "./SEO";
 
 import { trackReferrer, trackBuilderStart, trackCTAClick } from "./Analytics";
+import TRUSTED_COMPANIES from "../constants/trustedCompanies";
+
+const HERO_FEATURES = [
+  {
+    icon: "⚡",
+    title: "Tailored in seconds",
+    description:
+      "Paste any job description and get role-specific bullet points instantly.",
+  },
+  {
+    icon: "🧠",
+    title: "Keeps your voice",
+    description:
+      "AI suggestions build on your real experience—never fabricated accomplishments.",
+  },
+  {
+    icon: "📊",
+    title: "ATS proof",
+    description:
+      "Export polished PDFs with keyword coverage and recruiter-ready formatting.",
+  },
+];
 
 const Home = () => {
   const { user, login, isAdmin } = useAuth();
@@ -665,7 +687,6 @@ const Home = () => {
             >
               🚀 Try Job Match
             </button>
-            <span className="home-jobdesc-cta-note">No credit card required · instant resume tailoring</span>
           </div>
         </div>
       </div>
@@ -673,53 +694,81 @@ const Home = () => {
       <div className="home-hero">
         <div className="home-hero-content">
           <div className="hero-main-content">
-            <div className="hero-badge">✨ New: Job Match</div>
+            <div className="hero-badge">✨ New for 2025: AI Job Match + Resume Rewrite</div>
 
             <h1 className="hero-title">
-              📝 Build Job-Matched Resumes That Land Interviews
+              Build an ATS-proof resume recruiters trust
             </h1>
 
             <p className="hero-subtitle">
-              Sign in and start tailoring your resume in under 60 seconds. Paste any job description and our AI keeps your real accomplishments front and center.
+              Paste any job description, get tailored bullet points in seconds, and download a polished PDF our users have used to land offers at teams like Google, Netflix, and Microsoft.
             </p>
 
+            <div className="home-trusted home-trusted-inline">
+              <div className="home-trusted-heading">
+                <span className="home-trusted-title">
+                  Our users get hired at companies like
+                </span>
+                <span className="home-trusted-rating">
+                  <span className="home-trusted-rating-score">4.9/5</span> satisfaction · 50k+ resumes built
+                </span>
+              </div>
+
+              <div className="home-trusted-logos" role="list">
+                {TRUSTED_COMPANIES.map(({ name, logo }) => (
+                  <span key={name} className="home-trusted-logo" role="listitem">
+                    <img
+                      src={logo}
+                      alt={`${name} logo`}
+                      loading="lazy"
+                      onError={(event) => {
+                        event.currentTarget.style.display = "none";
+                      }}
+                    />
+                    <span className="home-trusted-logo-label">{name}</span>
+                  </span>
+                ))}
+              </div>
+
+              <p className="home-trusted-note">
+                *Logos reflect companies where HiHired users reported receiving offers.
+              </p>
+            </div>
+
             <div className="hero-features">
-              <div className="hero-feature">
-                <span>🎯 Built around your proven experience—no filler</span>
-              </div>
-
-              <div className="hero-feature">
-                <span>⚡ Jump in right after a quick sign-in</span>
-              </div>
-
-              <div className="hero-feature">
-                <span>📈 Instant ATS keyword and recruiter insights</span>
-              </div>
+              {HERO_FEATURES.map(({ icon, title, description }) => (
+                <div key={title} className="hero-feature">
+                  <span className="hero-feature-icon" aria-hidden="true">
+                    {icon}
+                  </span>
+                  <span className="hero-feature-text">
+                    <strong>{title}.</strong> {description}
+                  </span>
+                </div>
+              ))}
             </div>
 
             <div className="home-cta-buttons">
               <button
                 className="home-btn primary"
                 onClick={handleStartBuilding}
+                type="button"
               >
                 {user
                   ? "📝 Continue in the Builder"
                   : "🚀 Sign In & Start My Resume"}
               </button>
-            </div>
-          </div>
-
-          <div className="home-trusted">
-            <span>🌟 Trusted by job seekers worldwide</span>
-
-            <div className="home-logos">
-              <span>🎓 Students</span>
-
-              <span>💼 Professionals</span>
-
-              <span>🔄 Career Changers</span>
-
-              <span>🌟 Recent Grads</span>
+              <button
+                className="home-btn secondary"
+                type="button"
+                onClick={() =>
+                  document
+                    .getElementById("product")
+                    ?.scrollIntoView({ behavior: "smooth" })
+                }
+              >
+                Explore Templates
+              </button>
             </div>
           </div>
         </div>
