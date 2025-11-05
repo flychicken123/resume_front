@@ -6,13 +6,7 @@ import TRUSTED_COMPANIES from '../constants/trustedCompanies';
 
 const resumePreviewSrc = '/templates/modern.png';
 
-const SimpleHero = ({ onImportClick, onCreateClick, onJobsClick }) => {
-  const handleImport = () => {
-    setLastStep('clicked_import_from_hero');
-    trackCTAClick('hero_import_cta', { page: window.location.pathname });
-    onImportClick?.();
-  };
-
+const SimpleHero = ({ onCreateClick, onJobsClick }) => {
   const handleCreate = () => {
     setLastStep('clicked_create_from_hero');
     trackCTAClick('hero_create_cta', { page: window.location.pathname });
@@ -62,9 +56,6 @@ const SimpleHero = ({ onImportClick, onCreateClick, onJobsClick }) => {
           <div className="hero-buttons">
             <button className="btn-create" onClick={handleCreate}>
               Create my resume
-            </button>
-            <button className="btn-import" onClick={handleImport}>
-              Import my resume
             </button>
             <button type="button" className="btn-jobs" onClick={handleBrowseJobs}>
               Browse jobs
