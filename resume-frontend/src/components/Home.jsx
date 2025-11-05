@@ -27,6 +27,7 @@ import SEO from "./SEO";
 
 import { trackReferrer, trackBuilderStart, trackCTAClick } from "./Analytics";
 import TRUSTED_COMPANIES from "../constants/trustedCompanies";
+import { BUILDER_TARGET_STEP_KEY, BUILDER_TARGET_JOB_MATCHES } from "../constants/builder";
 
 const HERO_FEATURES = [
   {
@@ -65,7 +66,21 @@ const Home = () => {
 
   const navigate = useNavigate();
 
-  const openBuilderFrom = (stepId) => {
+  const setBuilderTargetStep = (targetStep) => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    if (targetStep) {
+      window.localStorage.setItem(BUILDER_TARGET_STEP_KEY, targetStep);
+    } else {
+      window.localStorage.removeItem(BUILDER_TARGET_STEP_KEY);
+    }
+  };
+
+  const openBuilderFrom = (stepId, options = {}) => {
+    const { targetStep } = options;
+    setBuilderTargetStep(targetStep);
+
     if (user) {
       setLastStep(stepId);
       navigate("/builder");
@@ -115,6 +130,13 @@ const Home = () => {
     trackCTAClick("home_nav_primary_cta", { page: window.location.pathname });
     trackBuilderStart("home_nav_primary_cta");
     openBuilderFrom("home_nav_primary_cta");
+  };
+
+  const handleNavbarJobs = () => {
+    trackReferrer();
+    trackCTAClick("home_nav_jobs_cta", { page: window.location.pathname });
+    trackBuilderStart("home_nav_jobs_cta");
+    openBuilderFrom("home_nav_jobs_cta", { targetStep: BUILDER_TARGET_JOB_MATCHES });
   };
 
   const handleLogout = () => {
@@ -171,6 +193,20 @@ const Home = () => {
             }}
           >
             Home
+          </button>
+
+          <button
+            type="button"
+            className="home-nav-link"
+            onClick={handleNavbarJobs}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              font: "inherit",
+            }}
+          >
+            Jobs
           </button>
 
           <a
@@ -425,6 +461,16 @@ const Home = () => {
               Home
             </button>
 
+            <button
+              className="mobile-nav-link"
+              onClick={() => {
+                handleNavbarJobs();
+                setShowMobileMenu(false);
+              }}
+            >
+              Jobs
+            </button>
+
             <a
               href="#job-match"
               className="mobile-nav-link"
@@ -580,6 +626,10 @@ const Home = () => {
           trackBuilderStart("create_resume");
 
           openBuilderFrom("home_create_cta");
+        }}
+        onJobsClick={() => {
+          trackBuilderStart("home_jobs_cta");
+          openBuilderFrom("home_jobs_cta", { targetStep: BUILDER_TARGET_JOB_MATCHES });
         }}
       />
 

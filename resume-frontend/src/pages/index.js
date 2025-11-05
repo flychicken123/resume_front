@@ -5,4 +5,3 @@ export { default as AdminExitAnalyticsPage } from './AdminExitAnalyticsPage';
 export { default as TermsOfServicePage } from './TermsOfService';
 export { default as PrivacyPolicyPage } from './PrivacyPolicy';
 export { default as MembershipPage } from './MembershipPage';
-export { default as JobsPage } from './JobsPage';

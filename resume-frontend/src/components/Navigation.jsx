@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { setLastStep } from '../utils/exitTracking';
 import './Navigation.css';
+import { BUILDER_TARGET_STEP_KEY, BUILDER_TARGET_JOB_MATCHES } from '../constants/builder';
 
 const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setShowIntegratedModal }) => {
   const navigate = useNavigate();
@@ -18,12 +19,24 @@ const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setS
     window.location.href = '/';
   };
 
-  const openBuilder = (source) => {
+  const openBuilder = (source, options = {}) => {
+    const { targetStep } = options;
     setLastStep(source);
+    if (typeof window !== 'undefined') {
+      if (targetStep) {
+        window.localStorage.setItem(BUILDER_TARGET_STEP_KEY, targetStep);
+      } else {
+        window.localStorage.removeItem(BUILDER_TARGET_STEP_KEY);
+      }
+    }
     if (setShowIntegratedModal) {
       setShowIntegratedModal(true);
     } else {
-      navigate('/builder');
+      if (targetStep === BUILDER_TARGET_JOB_MATCHES) {
+        navigate('/builder?view=jobs');
+      } else {
+        navigate('/builder');
+      }
     }
   };
 
@@ -55,14 +68,18 @@ const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setS
         <div className="nav-navbar-center desktop-nav">
           <Link to="/" className="nav-link">Home</Link>
           <button
+            type="button"
+            className="nav-link nav-button"
+            onClick={() => openBuilder('nav_jobs_cta', { targetStep: BUILDER_TARGET_JOB_MATCHES })}
+          >
+            Jobs
+          </button>
+          <button
             className="nav-link nav-button"
             onClick={() => openBuilder('nav_builder_cta')}
           >
             Builder
           </button>
-          <Link to="/jobs" className="nav-link">
-            Jobs
-          </Link>
           <Link to="/#job-match" className="nav-link">
             Job Match
           </Link>
@@ -169,6 +186,16 @@ const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setS
             </Link>
             <button
               className="mobile-nav-link"
+              type="button"
+              onClick={() => {
+                setShowMobileMenu(false);
+                openBuilder('nav_mobile_jobs_cta', { targetStep: BUILDER_TARGET_JOB_MATCHES });
+              }}
+            >
+              Jobs
+            </button>
+            <button
+              className="mobile-nav-link"
               onClick={() => {
                 setShowMobileMenu(false);
                 openBuilder('nav_mobile_builder_cta');
@@ -176,13 +203,6 @@ const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setS
             >
               Builder
             </button>
-            <Link
-              to="/jobs"
-              className="mobile-nav-link"
-              onClick={() => setShowMobileMenu(false)}
-            >
-              Jobs
-            </Link>
             <Link
               to="/#job-match"
               className="mobile-nav-link"
