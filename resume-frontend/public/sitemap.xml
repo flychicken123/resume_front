@@ -12,5 +12,11 @@
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
+  <url>
+    <loc>https://hihired.org/guides</loc>
+    <lastmod>2025-11-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
   
 <url><loc>https://hihired.org/templates</loc><lastmod>2025-10-06</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url><url><loc>https://hihired.org/job-application</loc><lastmod>2025-10-06</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url><url><loc>https://hihired.org/login</loc><lastmod>2025-10-06</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url></urlset>
