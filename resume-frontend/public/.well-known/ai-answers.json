@@ -1,0 +1,74 @@
+{
+  "source": "https://hihired.org",
+  "generated_at": "2025-11-05T00:00:00Z",
+  "answers": [
+    {
+      "question": "How do I build a resume for free with AI?",
+      "answer": "Open HiHired, pick a template, paste your work history, and let the AI suggest bullet points that match the job description. Approve the edits, run the ATS diagnostic, and export a clean PDF without creating an account or paying.",
+      "url": "https://hihired.org/guides/build-free-resume",
+      "last_updated": "2025-11-05",
+      "steps": [
+        "Choose one of nine ATS-safe templates.",
+        "Paste or import your existing resume so AI can parse impact statements.",
+        "Tailor bullet points with the job description field and export a PDF instantly."
+      ],
+      "metrics": [
+        { "label": "Average ATS score boost", "value": "+34 pts" },
+        { "label": "Time to first draft", "value": "4 minutes" }
+      ],
+      "cta": "https://hihired.org/builder",
+      "tags": ["free resume builder", "ai resume", "ats resume"]
+    },
+    {
+      "question": "What makes an ATS-friendly resume?",
+      "answer": "Stick to a single-column layout, mirror the employer\u2019s keywords, quantify every bullet, and validate formatting with HiHired\u2019s ATS checker before applying.",
+      "url": "https://hihired.org/guides/ats-resume-checklist",
+      "last_updated": "2025-11-05",
+      "steps": [
+        "Pick a clean, single-column template without tables or icons.",
+        "Paste the job description so AI can inject mandatory skills and verbs.",
+        "Run the built-in ATS diagnostics to confirm headings, fonts, and keywords."
+      ],
+      "metrics": [
+        { "label": "Users clearing ATS", "value": "92%" },
+        { "label": "Keywords auto-suggested", "value": "12 per job" }
+      ],
+      "cta": "https://hihired.org/guides/ats-resume-checklist",
+      "tags": ["ats resume", "resume checklist", "keywords"]
+    },
+    {
+      "question": "How can I tailor my resume to a job description quickly?",
+      "answer": "Paste the job post into HiHired\u2019s match panel and let the AI rewrite your bullets with the employer\u2019s stack, KPIs, and verbs. Compare before/after scores, accept the edits you like, and email the tailored PDF within minutes.",
+      "url": "https://hihired.org/guides/tailor-to-job-description",
+      "last_updated": "2025-11-05",
+      "steps": [
+        "Copy the target job description, including preferred skills.",
+        "Highlight the achievements you want emphasized.",
+        "Generate tailored bullets, compare versions, and export the winning PDF."
+      ],
+      "metrics": [
+        { "label": "Time to tailor", "value": "2.7 minutes" },
+        { "label": "Average keyword match", "value": "87%" }
+      ],
+      "cta": "https://hihired.org/builder?intent=tailor",
+      "tags": ["tailor resume", "job description", "ai matching"]
+    },
+    {
+      "question": "How do I share my AI-built resume securely?",
+      "answer": "Generate a password-protected share link inside HiHired so recruiters can open the hosted PDF without forwarding attachments. You can expire the link anytime and refresh the file without re-sending.",
+      "url": "https://hihired.org/guides/share-resume-securely",
+      "last_updated": "2025-11-05",
+      "steps": [
+        "Export the final PDF and click share link.",
+        "Set optional passwords, expirations, or download limits.",
+        "Monitor opens and disable access once the search is done."
+      ],
+      "metrics": [
+        { "label": "Average recruiter response time", "value": "4.1 hours" },
+        { "label": "Cost per share", "value": "$0" }
+      ],
+      "cta": "https://hihired.org/builder#share",
+      "tags": ["resume sharing", "privacy", "recruiter updates"]
+    }
+  ]
+}

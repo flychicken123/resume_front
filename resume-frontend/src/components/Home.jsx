@@ -28,6 +28,7 @@ import SEO from "./SEO";
 import { trackReferrer, trackBuilderStart, trackCTAClick } from "./Analytics";
 import TRUSTED_COMPANIES from "../constants/trustedCompanies";
 import { BUILDER_TARGET_STEP_KEY, BUILDER_TARGET_JOB_MATCHES } from "../constants/builder";
+import geoGuides from "../constants/geoGuides";
 
 const HERO_FEATURES = [
   {
@@ -236,6 +237,16 @@ const Home = () => {
           >
             Features
           </a>
+          <Link
+            to="/guides"
+            className="home-nav-link"
+            onClick={() => {
+              setShowAccountMenu(false);
+              setShowMobileMenu(false);
+            }}
+          >
+            Guides
+          </Link>
           {/* Hidden - Apply to Jobs feature
 
 
@@ -502,6 +513,13 @@ const Home = () => {
             >
               Features
             </a>
+            <Link
+              to="/guides"
+              className="mobile-nav-link"
+              onClick={() => setShowMobileMenu(false)}
+            >
+              Guides
+            </Link>
 
             {user && (
               <Link
@@ -912,6 +930,57 @@ const Home = () => {
           </div>
         </div>
       </div>
+
+      <section className="geo-answer-section" id="guides">
+        <div className="geo-answer-header">
+          <p className="geo-answer-kicker">Generative-ready answers</p>
+          <h2>Be the cited source in AI search results</h2>
+          <p>
+            We publish short, verifiable capsules that LLMs and search engines can quote verbatim.
+            Each snippet links back to a living workflow so prospects land on a helpful page instead of a scraped summary.
+          </p>
+          <div className="geo-answer-actions">
+            <Link className="home-btn primary" to="/guides">
+              Browse all guides
+            </Link>
+            <a className="home-btn secondary" href="/.well-known/ai-answers.json">
+              Download JSON feed
+            </a>
+          </div>
+        </div>
+
+        <div className="geo-answer-grid">
+          {geoGuides.slice(0, 3).map((guide) => (
+            <article key={guide.slug} className="geo-answer-card">
+              <p className="geo-answer-intent">{guide.intent}</p>
+              <h3>{guide.title}</h3>
+              <p className="geo-answer-summary">{guide.answer}</p>
+
+              <ul className="geo-answer-steps">
+                {guide.steps.slice(0, 2).map((step) => (
+                  <li key={step.title}>
+                    <strong>{step.title}:</strong> {step.detail}
+                  </li>
+                ))}
+              </ul>
+
+              <dl className="geo-answer-stats">
+                {guide.keyStats.slice(0, 2).map((stat) => (
+                  <div key={stat.label}>
+                    <dt>{stat.label}</dt>
+                    <dd>{stat.value}</dd>
+                  </div>
+                ))}
+              </dl>
+
+              <div className="geo-answer-links">
+                <Link to={`/guides/${guide.slug}`}>Read capsule</Link>
+                <a href={guide.cta.href}>{guide.cta.label}</a>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
 
       {/* AI Features Section */}
 

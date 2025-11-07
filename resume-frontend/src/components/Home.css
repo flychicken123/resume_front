@@ -366,6 +366,135 @@
   border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 
+.geo-answer-section {
+  max-width: 1100px;
+  margin: 80px auto;
+  padding: 60px 32px;
+  background: #f8fafc;
+  border-radius: 32px;
+  border: 1px solid #e2e8f0;
+}
+
+.geo-answer-header {
+  text-align: center;
+  max-width: 780px;
+  margin: 0 auto 48px;
+}
+
+.geo-answer-kicker {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #6366f1;
+}
+
+.geo-answer-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.geo-answer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+}
+
+.geo-answer-card {
+  background: #fff;
+  border-radius: 24px;
+  padding: 24px;
+  border: 1px solid #e0e7ff;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+}
+
+.geo-answer-intent {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.geo-answer-summary {
+  font-size: 0.95rem;
+  color: #0f172a;
+}
+
+.geo-answer-steps {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.geo-answer-steps li {
+  font-size: 0.9rem;
+  color: #0f172a;
+}
+
+.geo-answer-stats {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+.geo-answer-stats div {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.geo-answer-stats dt {
+  font-size: 0.75rem;
+  color: #475569;
+  margin: 0;
+}
+
+.geo-answer-stats dd {
+  margin: 0;
+  font-weight: 700;
+  color: #111827;
+}
+
+.geo-answer-links {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-weight: 600;
+}
+
+.geo-answer-links a {
+  color: #4f46e5;
+  text-decoration: none;
+}
+
+.geo-answer-links a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+  .geo-answer-section {
+    padding: 40px 18px;
+  }
+
+  .geo-answer-links {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
 .benefit-highlight {
   display: flex;
   align-items: center;
