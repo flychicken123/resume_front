@@ -11,11 +11,13 @@ const Login = ({ onLogin, onClose, contextMessage }) => {
   const [mode, setMode] = useState('login'); // 'login' or 'signup'
   const [acceptedPolicies, setAcceptedPolicies] = useState(false);
   const [pendingGoogleAuth, setPendingGoogleAuth] = useState(null);
+  const [marketingOptIn, setMarketingOptIn] = useState(true);
 
   useEffect(() => {
     setAcceptedPolicies(false);
     setError('');
     setPendingGoogleAuth(null);
+    setMarketingOptIn(true);
   }, [mode]);
 
   const needsConsent = mode === 'signup';
@@ -143,19 +145,25 @@ const Login = ({ onLogin, onClose, contextMessage }) => {
       };
       
       const API_BASE_URL = getApiUrl();
+      const payload = {
+        email: email,
+        password: password,
+      };
+      if (mode === 'signup') {
+        payload.name = email;
+        payload.marketing_opt_in = marketingOptIn;
+        payload.plan_preference = 'free';
+      }
+
       console.log('Making request to:', `${API_BASE_URL}${endpoint}`);
-      console.log('Request body:', { email: email, password: password });
-      
+      console.log('Request body:', payload);
+
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          email: email,
-          password: password,
-          name: email  // Use email as name
-        }),
+        body: JSON.stringify(payload),
       });
       
       console.log('Response status:', response.status);
@@ -408,6 +416,16 @@ const Login = ({ onLogin, onClose, contextMessage }) => {
               placeholder="Confirm your password"
               style={{ marginBottom: '0.75rem', padding: '0.5rem', fontSize: '0.9rem' }}
             />
+            <label className="inline-checkbox" style={{ marginBottom: '0.6rem' }}>
+              <input
+                type="checkbox"
+                checked={marketingOptIn}
+                onChange={(e) => setMarketingOptIn(e.target.checked)}
+              />
+              <span>
+                Send me product updates, templates, and special offers.
+              </span>
+            </label>
             <label className="inline-checkbox">
               <input
                 type="checkbox"

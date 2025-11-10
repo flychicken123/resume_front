@@ -2,6 +2,7 @@ export const TEMPLATE_SLUGS = {
   CLASSIC_PROFESSIONAL: 'classic-professional',
   MODERN_CLEAN: 'modern-clean',
   EXECUTIVE_SERIF: 'executive-serif',
+  ATTORNEY_TEMPLATE: 'attorney-template',
 };
 
 export const DEFAULT_TEMPLATE_ID = TEMPLATE_SLUGS.CLASSIC_PROFESSIONAL;
@@ -37,6 +38,12 @@ export const TEMPLATE_OPTIONS = [
     name: 'Executive Serif',
     description: 'Executive style with refined serif typography, great for leadership roles',
     image: '/templates/executive.svg',
+  },
+  {
+    id: TEMPLATE_SLUGS.ATTORNEY_TEMPLATE,
+    name: 'Attorney Professional',
+    description: 'Polished legal layout showcasing case results, bar admissions, and courtroom expertise',
+    image: '/templates/executive.png',
   },
 ];
 

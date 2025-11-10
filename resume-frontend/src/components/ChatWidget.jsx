@@ -149,6 +149,31 @@ const DOWNLOAD_KEYWORDS = [
   'resume pdf',
 ];
 
+const generateSessionId = () => {
+  try {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+      return crypto.randomUUID();
+    }
+  } catch (err) {
+    // Ignore and fall back to timestamp-based id.
+  }
+  return `chat-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+};
+
+const readStoredUserEmail = () => {
+  if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') {
+    return '';
+  }
+  try {
+    const rawUser = window.localStorage.getItem('resumeUser');
+    if (!rawUser) return '';
+    const parsed = JSON.parse(rawUser);
+    return typeof parsed?.email === 'string' ? parsed.email : '';
+  } catch {
+    return '';
+  }
+};
+
 const ChatWidget = () => {
   const { user, token } = useAuth();
   const { data: resumeData, setData: updateResume } = useResume();
@@ -247,6 +272,7 @@ const ChatWidget = () => {
       handleSubmit(event);
     }
   };
+  const sessionId = useMemo(() => generateSessionId(), []);
 
   const toggleOpen = () => {
     const next = !isOpen;
@@ -920,6 +946,9 @@ const buildSectionResponse = (sectionKey) => {
     }));
 
     try {
+      const pagePath = typeof window !== 'undefined' ? window.location.pathname : '';
+      const userEmail = readStoredUserEmail();
+
       const response = await fetch(`${apiBaseUrl}/api/assistant/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -928,6 +957,10 @@ const buildSectionResponse = (sectionKey) => {
           history: historyPayload,
           user_email: user?.email || '',
         }),
+          session_id: sessionId,
+          page_path: pagePath,
+          user_email: userEmail
+        })
       });
 
       if (!response.ok) {

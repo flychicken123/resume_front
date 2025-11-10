@@ -2,13 +2,12 @@ import React, { useState, useEffect, useRef } from "react";
 
 import "./Home.css";
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../context/AuthContext";
 
 import Login from "./auth/Login";
 
-import IntegratedBuilderStart from "./IntegratedBuilderStart";
 
 import ResumeHistory from "./ResumeHistory";
 
@@ -26,7 +25,31 @@ import { setLastStep } from "../utils/exitTracking";
 
 import SEO from "./SEO";
 
-import { trackReferrer, trackBuilderStart } from "./Analytics";
+import { trackReferrer, trackBuilderStart, trackCTAClick } from "./Analytics";
+import TRUSTED_COMPANIES from "../constants/trustedCompanies";
+import { BUILDER_TARGET_STEP_KEY, BUILDER_TARGET_JOB_MATCHES } from "../constants/builder";
+import geoGuides from "../constants/geoGuides";
+
+const HERO_FEATURES = [
+  {
+    icon: "⚡",
+    title: "Tailored in seconds",
+    description:
+      "Paste any job description and get role-specific bullet points instantly.",
+  },
+  {
+    icon: "🧠",
+    title: "Keeps your voice",
+    description:
+      "AI suggestions build on your real experience—never fabricated accomplishments.",
+  },
+  {
+    icon: "📊",
+    title: "ATS proof",
+    description:
+      "Export polished PDFs with keyword coverage and recruiter-ready formatting.",
+  },
+];
 
 const Home = () => {
   const { user, login, isAdmin } = useAuth();
@@ -35,56 +58,113 @@ const Home = () => {
     typeof user === "string" ? user : user?.name || user?.email || "";
 
   const [showAuthModal, setShowAuthModal] = useState(false);
-
-  const [showIntegratedModal, setShowIntegratedModal] = useState(false);
-
+  const [pendingBuilderStep, setPendingBuilderStep] = useState(null);
+  const [authContextMessage, setAuthContextMessage] = useState("");
   const [showResumeHistory, setShowResumeHistory] = useState(false);
-
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showAccountMenu, setShowAccountMenu] = useState(false);
+  const accountMenuRef = useRef(null);
 
-  const [usernameWidth, setUsernameWidth] = useState(100);
+  const navigate = useNavigate();
 
-  const usernameRef = useRef(null);
+  const setBuilderTargetStep = (targetStep) => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    if (targetStep) {
+      window.localStorage.setItem(BUILDER_TARGET_STEP_KEY, targetStep);
+    } else {
+      window.localStorage.removeItem(BUILDER_TARGET_STEP_KEY);
+    }
+  };
 
-  const buttonRef = useRef(null);
+  const openBuilderFrom = (stepId, options = {}) => {
+    const { targetStep } = options;
+    setBuilderTargetStep(targetStep);
 
-  const openBuilderFrom = (stepId) => {
-    setLastStep(stepId);
+    if (user) {
+      setLastStep(stepId);
+      navigate("/builder");
+      return;
+    }
 
-    setShowIntegratedModal(true);
+    setPendingBuilderStep(stepId);
+    setAuthContextMessage("Sign in to build your resume.");
+    setShowAuthModal(true);
+  };
+
+  const handleAuthSuccess = (userData, token) => {
+    login(userData, token);
+    setShowAuthModal(false);
+
+    if (pendingBuilderStep) {
+      const step = pendingBuilderStep;
+      setPendingBuilderStep(null);
+      setLastStep(step);
+      navigate("/builder");
+    }
+
+    setAuthContextMessage("");
   };
 
   // Track user source when home page loads
 
   useEffect(() => {
     trackReferrer();
-
-    trackBuilderStart("home_page_load");
   }, []);
 
   // Calculate optimal spacing based on button width
-
-  useEffect(() => {
-    if (buttonRef.current && user) {
-      const buttonWidth = buttonRef.current.offsetWidth;
-
-      const minSpacing = 20; // Minimum spacing in pixels
-
-      const optimalSpacing = Math.max(buttonWidth + minSpacing, 100); // At least 100px or button width + 20px
-
-      setUsernameWidth(optimalSpacing);
-    }
-  }, [user]);
 
   const handleStartBuilding = () => {
     // Track referrer and builder start when user clicks the button
 
     trackReferrer();
+    trackCTAClick("home_primary_cta", { page: window.location.pathname });
 
     trackBuilderStart("home_page_button");
 
     openBuilderFrom("home_builder_cta");
   };
+
+  const handleNavbarStart = () => {
+    trackReferrer();
+    trackCTAClick("home_nav_primary_cta", { page: window.location.pathname });
+    trackBuilderStart("home_nav_primary_cta");
+    openBuilderFrom("home_nav_primary_cta");
+  };
+
+  const handleNavbarJobs = () => {
+    trackReferrer();
+    trackCTAClick("home_nav_jobs_cta", { page: window.location.pathname });
+    trackBuilderStart("home_nav_jobs_cta");
+    openBuilderFrom("home_nav_jobs_cta", { targetStep: BUILDER_TARGET_JOB_MATCHES });
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("resumeUser");
+    localStorage.removeItem("resumeToken");
+    window.location.reload();
+  };
+
+  useEffect(() => {
+    if (!showAccountMenu) {
+      return;
+    }
+
+    const handleClickOutside = (event) => {
+      if (
+        accountMenuRef.current &&
+        !accountMenuRef.current.contains(event.target)
+      ) {
+        setShowAccountMenu(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showAccountMenu]);
 
   return (
     <div>
@@ -117,8 +197,9 @@ const Home = () => {
           </button>
 
           <button
+            type="button"
             className="home-nav-link"
-            onClick={() => openBuilderFrom("home_nav_builder_cta")}
+            onClick={handleNavbarJobs}
             style={{
               background: "none",
               border: "none",
@@ -126,7 +207,7 @@ const Home = () => {
               font: "inherit",
             }}
           >
-            Builder
+            Jobs
           </button>
 
           <a
@@ -140,7 +221,7 @@ const Home = () => {
                 ?.scrollIntoView({ behavior: "smooth" });
             }}
           >
-            Job Match
+            How It Works
           </a>
 
           <a
@@ -154,60 +235,18 @@ const Home = () => {
                 ?.scrollIntoView({ behavior: "smooth" });
             }}
           >
-            Product
+            Features
           </a>
-
-          <a
-            href="#team"
+          <Link
+            to="/guides"
             className="home-nav-link"
-            onClick={(e) => {
-              e.preventDefault();
-
-              document
-                .getElementById("team")
-                ?.scrollIntoView({ behavior: "smooth" });
+            onClick={() => {
+              setShowAccountMenu(false);
+              setShowMobileMenu(false);
             }}
           >
-            Team
-          </a>
-
-          {user && (
-            <button
-              className="home-nav-link"
-              onClick={() => setShowResumeHistory(true)}
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                font: "inherit",
-              }}
-            >
-              Resume History
-            </button>
-          )}
-
-          <Link
-            to="/pricing"
-            className="home-nav-link"
-            style={{ textDecoration: "none" }}
-          >
-            Pricing
+            Guides
           </Link>
-
-          <Link
-            to="/terms"
-            className="home-nav-link"
-            style={{ textDecoration: "none" }}
-          >
-            Terms & Privacy
-          </Link>
-
-          {isAdmin && (
-            <Link to="/admin/memberships" className="home-nav-link">
-              Admin
-            </Link>
-          )}
-
           {/* Hidden - Apply to Jobs feature
 
 
@@ -283,20 +322,6 @@ const Home = () => {
           */}
 
           <a
-            href="#about"
-            className="home-nav-link"
-            onClick={(e) => {
-              e.preventDefault();
-
-              document
-                .getElementById("about-what-we-are-building")
-                .scrollIntoView({ behavior: "smooth" });
-            }}
-          >
-            About Us
-          </a>
-
-          <a
             href="#contact"
             className="home-nav-link"
             onClick={(e) => {
@@ -312,38 +337,93 @@ const Home = () => {
         </div>
 
         <div className="home-navbar-right">
-          {user ? (
-            <span
-              ref={usernameRef}
-              className="desktop-username"
-              style={{
-                color: "#3b82f6",
-
-                fontWeight: 500,
-
-                marginRight: `${usernameWidth}px`,
-              }}
-            >
-              {displayName}
-            </span>
-          ) : null}
-
           <button
-            ref={buttonRef}
-            className="home-auth-btn"
-            onClick={() => {
-              if (user) {
-                localStorage.removeItem("resumeUser");
-
-                window.location.reload();
-              } else {
-                setShowAuthModal(true);
-              }
-            }}
-            style={{ flexShrink: 0 }}
+            className="home-start-btn"
+            onClick={handleNavbarStart}
+            type="button"
           >
-            {user ? "Logout" : "Login"}
+            Start Free
           </button>
+
+          {user ? (
+            <div className="home-account-menu" ref={accountMenuRef}>
+              <button
+                type="button"
+                className="home-account-trigger"
+                aria-haspopup="true"
+                aria-expanded={showAccountMenu}
+                onClick={() => setShowAccountMenu((prev) => !prev)}
+              >
+                <span className="home-account-name">
+                  {displayName || "Account"}
+                </span>
+                <span
+                  className={`home-account-caret ${
+                    showAccountMenu ? "open" : ""
+                  }`}
+                  aria-hidden="true"
+                >
+                  ▾
+                </span>
+              </button>
+              {showAccountMenu && (
+                <div className="home-account-dropdown" role="menu">
+                  <button
+                    type="button"
+                    className="home-account-item"
+                    role="menuitem"
+                    onClick={() => {
+                      setShowAccountMenu(false);
+                      setShowResumeHistory(true);
+                    }}
+                  >
+                    Resume History
+                  </button>
+                  <Link
+                    to="/account"
+                    className="home-account-item"
+                    role="menuitem"
+                    onClick={() => setShowAccountMenu(false)}
+                  >
+                    Membership
+                  </Link>
+                  {isAdmin && (
+                    <Link
+                      to="/admin/memberships"
+                      className="home-account-item"
+                      role="menuitem"
+                      onClick={() => setShowAccountMenu(false)}
+                    >
+                      Admin
+                    </Link>
+                  )}
+                  <button
+                    type="button"
+                    className="home-account-item home-account-logout"
+                    role="menuitem"
+                    onClick={() => {
+                      setShowAccountMenu(false);
+                      handleLogout();
+                    }}
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <button
+              className="home-auth-btn"
+              onClick={() => {
+                setAuthContextMessage("");
+                setPendingBuilderStep(null);
+                setShowAuthModal(true);
+              }}
+              style={{ flexShrink: 0 }}
+            >
+              Login
+            </button>
+          )}
 
           {/* Mobile Menu Button */}
 
@@ -372,6 +452,16 @@ const Home = () => {
         >
           <div className="mobile-menu" onClick={(e) => e.stopPropagation()}>
             <button
+              className="mobile-nav-cta"
+              onClick={() => {
+                handleNavbarStart();
+                setShowMobileMenu(false);
+              }}
+            >
+              Start Free
+            </button>
+
+            <button
               className="mobile-nav-link"
               onClick={() => {
                 window.scrollTo({ top: 0, behavior: "smooth" });
@@ -385,12 +475,11 @@ const Home = () => {
             <button
               className="mobile-nav-link"
               onClick={() => {
+                handleNavbarJobs();
                 setShowMobileMenu(false);
-
-                openBuilderFrom("home_mobile_builder_cta");
               }}
             >
-              Builder
+              Jobs
             </button>
 
             <a
@@ -406,7 +495,7 @@ const Home = () => {
                 setShowMobileMenu(false);
               }}
             >
-              Job Match
+              How It Works
             </a>
 
             <a
@@ -422,63 +511,23 @@ const Home = () => {
                 setShowMobileMenu(false);
               }}
             >
-              Product
+              Features
             </a>
-
-            <a
-              href="#team"
+            <Link
+              to="/guides"
               className="mobile-nav-link"
-              onClick={(e) => {
-                e.preventDefault();
-
-                document
-                  .getElementById("team")
-                  ?.scrollIntoView({ behavior: "smooth" });
-
-                setShowMobileMenu(false);
-              }}
+              onClick={() => setShowMobileMenu(false)}
             >
-              Team
-            </a>
+              Guides
+            </Link>
 
             {user && (
-              <button
-                className="mobile-nav-link"
-                onClick={() => {
-                  setShowResumeHistory(true);
-
-                  setShowMobileMenu(false);
-                }}
-              >
-                Resume History
-              </button>
-            )}
-
-            <Link
-              to="/pricing"
-              className="mobile-nav-link"
-              onClick={() => setShowMobileMenu(false)}
-              style={{ textDecoration: "none" }}
-            >
-              Pricing
-            </Link>
-
-            <Link
-              to="/terms"
-              className="mobile-nav-link"
-              onClick={() => setShowMobileMenu(false)}
-              style={{ textDecoration: "none" }}
-            >
-              Terms & Privacy
-            </Link>
-
-            {isAdmin && (
               <Link
-                to="/admin/memberships"
+                to="/account"
                 className="mobile-nav-link"
                 onClick={() => setShowMobileMenu(false)}
               >
-                Admin
+                Membership
               </Link>
             )}
 
@@ -565,22 +614,6 @@ const Home = () => {
             */}
 
             <a
-              href="#about"
-              className="mobile-nav-link"
-              onClick={(e) => {
-                e.preventDefault();
-
-                document
-                  .getElementById("about-what-we-are-building")
-                  .scrollIntoView({ behavior: "smooth" });
-
-                setShowMobileMenu(false);
-              }}
-            >
-              About Us
-            </a>
-
-            <a
               href="#contact"
               className="mobile-nav-link"
               onClick={(e) => {
@@ -602,15 +635,14 @@ const Home = () => {
       {/* Simple Hero Section with Resume */}
 
       <SimpleHero
-        onImportClick={() => {
-          trackBuilderStart("import_resume");
-
-          openBuilderFrom("home_import_cta");
-        }}
         onCreateClick={() => {
           trackBuilderStart("create_resume");
 
           openBuilderFrom("home_create_cta");
+        }}
+        onJobsClick={() => {
+          trackBuilderStart("home_jobs_cta");
+          openBuilderFrom("home_jobs_cta", { targetStep: BUILDER_TARGET_JOB_MATCHES });
         }}
       />
 
@@ -672,6 +704,43 @@ const Home = () => {
             </div>
           </div>
 
+          <div className="home-resume-flow">
+            <div className="home-resume-steps">
+              <h3>Build a tailored resume in four steps</h3>
+              <ol>
+                <li>
+                  <span className="home-resume-step-title">Kick off instantly</span>
+                  Sign in, then import your current resume or start from a clean template with your details.
+                </li>
+                <li>
+                  <span className="home-resume-step-title">Paste the job description</span>
+                  Our AI maps the role&apos;s must-have skills to your real experience without inventing facts.
+                </li>
+                <li>
+                  <span className="home-resume-step-title">Refine with guided edits</span>
+                  Approve suggested bullet points, quantify wins, and keep your voice polished for recruiters.
+                </li>
+                <li>
+                  <span className="home-resume-step-title">Match fresh roles</span>
+                  Turn on Job Match to see which new company openings fit your resume before you apply.
+                </li>
+              </ol>
+            </div>
+
+            <div className="home-job-refresh">
+              <h3>Daily job matches from real companies</h3>
+              <p>
+                We refresh hiring feeds every morning so you see live roles from teams that are actively hiring—not recycled
+                zombie listings like you&apos;ll find on LinkedIn.
+              </p>
+              <ul>
+                <li>Compare your resume against today&apos;s openings with instant match scores.</li>
+                <li>Spot skill gaps the moment a new posting lands so you can update before applying.</li>
+                <li>Track only verified roles sourced directly from company career pages.</li>
+              </ul>
+            </div>
+          </div>
+
           <div className="home-jobdesc-ctaWrap">
             <button
               className="home-btn primary home-jobdesc-cta"
@@ -681,7 +750,6 @@ const Home = () => {
             >
               🚀 Try Job Match
             </button>
-            <span className="home-jobdesc-cta-note">No credit card required · instant resume tailoring</span>
           </div>
         </div>
       </div>
@@ -689,56 +757,81 @@ const Home = () => {
       <div className="home-hero">
         <div className="home-hero-content">
           <div className="hero-main-content">
-            <div className="hero-badge">✨ New: Job Match</div>
+            <div className="hero-badge">✨ New for 2025: AI Job Match + Resume Rewrite</div>
 
             <h1 className="hero-title">
-              📝 Build Job-Matched Resumes That Land Interviews
+              Build an ATS-proof resume recruiters trust
             </h1>
 
             <p className="hero-subtitle">
-              Job Match pairs our AI builder with role-specific tailoring
-              that keeps your real experience front and center. Paste a
-              description and instantly surface recruiter-ready language that
-              reflects what you already bring to the table.
+              Paste any job description, get tailored bullet points in seconds, and download a polished PDF our users have used to land offers at teams like Google, Netflix, and Microsoft.
             </p>
 
+            <div className="home-trusted home-trusted-inline">
+              <div className="home-trusted-heading">
+                <span className="home-trusted-title">
+                  Our users get hired at companies like
+                </span>
+                <span className="home-trusted-rating">
+                  <span className="home-trusted-rating-score">4.9/5</span> satisfaction · 50k+ resumes built
+                </span>
+              </div>
+
+              <div className="home-trusted-logos" role="list">
+                {TRUSTED_COMPANIES.map(({ name, logo }) => (
+                  <span key={name} className="home-trusted-logo" role="listitem">
+                    <img
+                      src={logo}
+                      alt={`${name} logo`}
+                      loading="lazy"
+                      onError={(event) => {
+                        event.currentTarget.style.display = "none";
+                      }}
+                    />
+                    <span className="home-trusted-logo-label">{name}</span>
+                  </span>
+                ))}
+              </div>
+
+              <p className="home-trusted-note">
+                *Logos reflect companies where HiHired users reported receiving offers.
+              </p>
+            </div>
+
             <div className="hero-features">
-              <div className="hero-feature">
-                <span>🎯 Highlights your proven achievements for each job</span>
-              </div>
-
-              <div className="hero-feature">
-                <span>🧠 AI suggestions backed by hiring data</span>
-              </div>
-
-              <div className="hero-feature">
-                <span>📈 Instant ATS keyword insights</span>
-              </div>
+              {HERO_FEATURES.map(({ icon, title, description }) => (
+                <div key={title} className="hero-feature">
+                  <span className="hero-feature-icon" aria-hidden="true">
+                    {icon}
+                  </span>
+                  <span className="hero-feature-text">
+                    <strong>{title}.</strong> {description}
+                  </span>
+                </div>
+              ))}
             </div>
 
             <div className="home-cta-buttons">
               <button
                 className="home-btn primary"
                 onClick={handleStartBuilding}
+                type="button"
               >
                 {user
-                  ? "📝 Continue with Job Match"
-                  : "🚀 Try Job Match - Free!"}
+                  ? "📝 Continue in the Builder"
+                  : "🚀 Sign In & Start My Resume"}
               </button>
-            </div>
-          </div>
-
-          <div className="home-trusted">
-            <span>🌟 Trusted by job seekers worldwide</span>
-
-            <div className="home-logos">
-              <span>🎓 Students</span>
-
-              <span>💼 Professionals</span>
-
-              <span>🔄 Career Changers</span>
-
-              <span>🌟 Recent Grads</span>
+              <button
+                className="home-btn secondary"
+                type="button"
+                onClick={() =>
+                  document
+                    .getElementById("product")
+                    ?.scrollIntoView({ behavior: "smooth" })
+                }
+              >
+                Explore Templates
+              </button>
             </div>
           </div>
         </div>
@@ -837,6 +930,57 @@ const Home = () => {
           </div>
         </div>
       </div>
+
+      <section className="geo-answer-section" id="guides">
+        <div className="geo-answer-header">
+          <p className="geo-answer-kicker">Generative-ready answers</p>
+          <h2>Be the cited source in AI search results</h2>
+          <p>
+            We publish short, verifiable capsules that LLMs and search engines can quote verbatim.
+            Each snippet links back to a living workflow so prospects land on a helpful page instead of a scraped summary.
+          </p>
+          <div className="geo-answer-actions">
+            <Link className="home-btn primary" to="/guides">
+              Browse all guides
+            </Link>
+            <a className="home-btn secondary" href="/.well-known/ai-answers.json">
+              Download JSON feed
+            </a>
+          </div>
+        </div>
+
+        <div className="geo-answer-grid">
+          {geoGuides.slice(0, 3).map((guide) => (
+            <article key={guide.slug} className="geo-answer-card">
+              <p className="geo-answer-intent">{guide.intent}</p>
+              <h3>{guide.title}</h3>
+              <p className="geo-answer-summary">{guide.answer}</p>
+
+              <ul className="geo-answer-steps">
+                {guide.steps.slice(0, 2).map((step) => (
+                  <li key={step.title}>
+                    <strong>{step.title}:</strong> {step.detail}
+                  </li>
+                ))}
+              </ul>
+
+              <dl className="geo-answer-stats">
+                {guide.keyStats.slice(0, 2).map((stat) => (
+                  <div key={stat.label}>
+                    <dt>{stat.label}</dt>
+                    <dd>{stat.value}</dd>
+                  </div>
+                ))}
+              </dl>
+
+              <div className="geo-answer-links">
+                <Link to={`/guides/${guide.slug}`}>Read capsule</Link>
+                <a href={guide.cta.href}>{guide.cta.label}</a>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
 
       {/* AI Features Section */}
 
@@ -1042,8 +1186,6 @@ const Home = () => {
 
       <ProductOverview />
 
-      <TeamSection />
-
       {/* Auth Modal */}
 
       {showAuthModal && (
@@ -1063,22 +1205,18 @@ const Home = () => {
           }}
         >
           <div style={{ position: "relative" }}>
-            <Login
-              onLogin={(email, token) => {
-                login(email, token);
-                setShowAuthModal(false);
-              }}
-              onClose={() => setShowAuthModal(false)}
-            />
+              <Login
+                contextMessage={authContextMessage}
+                onLogin={handleAuthSuccess}
+                onClose={() => {
+                  setShowAuthModal(false);
+                  setPendingBuilderStep(null);
+                  setAuthContextMessage("");
+                }}
+              />
+            </div>
           </div>
-        </div>
-      )}
-
-      {/* Integrated Builder Start Modal */}
-
-      {showIntegratedModal && (
-        <IntegratedBuilderStart onClose={() => setShowIntegratedModal(false)} />
-      )}
+        )}
 
       {/* Resume History Modal */}
 
@@ -1089,6 +1227,8 @@ const Home = () => {
       {/* About Section */}
 
       <About />
+
+      <TeamSection />
 
       {/* Contact Section */}
 
@@ -1104,16 +1244,34 @@ const Home = () => {
           fontSize: '0.95rem',
         }}
       >
-        <div style={{ maxWidth: '960px', margin: '0 auto' }}>
+        <div style={{ maxWidth: '960px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
           <span>© {new Date().getFullYear()} HiHired. All rights reserved.</span>
-          <span style={{ margin: '0 12px' }}>•</span>
-          <Link to="/terms" style={{ color: '#2563eb', fontWeight: 600 }}>
-            Terms of Service
-          </Link>
-          <span style={{ margin: '0 12px' }}>•</span>
-          <Link to="/privacy" style={{ color: '#2563eb', fontWeight: 600 }}>
-            Privacy Policy
-          </Link>
+          <nav className="footer-menu">
+            <a
+              href="#about"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById("about-what-we-are-building")?.scrollIntoView({ behavior: "smooth" });
+              }}
+            >
+              About Us
+            </a>
+            <a
+              href="#team"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById("team")?.scrollIntoView({ behavior: "smooth" });
+              }}
+            >
+              Team
+            </a>
+            <Link to="/terms">
+              Terms of Service
+            </Link>
+            <Link to="/privacy">
+              Privacy Policy
+            </Link>
+          </nav>
         </div>
       </footer>
     </div>

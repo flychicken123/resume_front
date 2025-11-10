@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useResume } from '../context/ResumeContext';
 import { useFeedback } from '../context/FeedbackContext';
 import { setLastStep } from '../utils/exitTracking';
+import { BUILDER_TARGET_STEP_KEY, BUILDER_TARGET_JOB_MATCHES } from '../constants/builder';
 import {
   createJobDescriptionEntry,
   ensureJobDescriptionList,
@@ -29,7 +30,7 @@ import ImportResumeModal from '../components/ImportResumeModal';
 import UpgradeModal from '../components/UpgradeModal';
 import SubscriptionStatus from '../components/SubscriptionStatus';
 import SEO from '../components/SEO';
-import { trackResumeGeneration } from '../components/Analytics';
+import { trackResumeGeneration, trackBuilderLoaded, trackDownloadClicked } from '../components/Analytics';
 import { computeJobMatches, getJobMatches, generateExperienceAI, optimizeProjectAI, generateSummaryAI } from '../api';
 import './BuilderPage.css';
 
@@ -605,6 +606,51 @@ function BuilderPage() {
   const [tailorNotice, setTailorNotice] = useState(null);
   const [tailorError, setTailorError] = useState(null);
   const { user, logout } = useAuth();
+  const [isResumeGenerating, setIsResumeGenerating] = useState(false);
+  const [navigateToJobMatchesPending, setNavigateToJobMatchesPending] = useState(false);
+  const [tailorActiveJobId, setTailorActiveJobId] = useState(null);
+  const [tailorNotice, setTailorNotice] = useState(null);
+  const [tailorError, setTailorError] = useState(null);
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const currentUrl = new URL(window.location.href);
+    const storedTarget = window.localStorage.getItem(BUILDER_TARGET_STEP_KEY);
+    const hash = currentUrl.hash;
+    const viewParam = currentUrl.searchParams.get('view');
+    let shouldNavigateToJobs = false;
+    let urlUpdated = false;
+
+    if (storedTarget === BUILDER_TARGET_JOB_MATCHES) {
+      shouldNavigateToJobs = true;
+      window.localStorage.removeItem(BUILDER_TARGET_STEP_KEY);
+    }
+
+    if (hash === '#jobs' || hash === '#job-matches') {
+      shouldNavigateToJobs = true;
+      currentUrl.hash = '';
+      urlUpdated = true;
+    }
+
+    if (viewParam === 'jobs') {
+      shouldNavigateToJobs = true;
+      currentUrl.searchParams.delete('view');
+      urlUpdated = true;
+    }
+
+    if (shouldNavigateToJobs) {
+      setNavigateToJobMatchesPending(true);
+    }
+
+    if (urlUpdated) {
+      const searchString = currentUrl.searchParams.toString();
+      const cleanedUrl = `${currentUrl.pathname}${searchString ? `?${searchString}` : ''}${currentUrl.hash}`;
+      window.history.replaceState({}, document.title, cleanedUrl);
+    }
+  }, []);
+  const { user, logout, loading } = useAuth();
   const { triggerFeedbackPrompt, scheduleFollowUp } = useFeedback();
   const { data, updateData } = useResume();
   const displayName = typeof user === 'string' ? user : (user?.name || user?.email || '');
@@ -659,6 +705,21 @@ function BuilderPage() {
     POPULAR_LOCATION_VALUES.forEach(addOption);
     return options;
   }, [autoLocation, resumeLocationSuggestions, geocodedLocationHints]);
+
+  useEffect(() => {
+    trackBuilderLoaded('builder_page');
+  }, []);
+
+  useEffect(() => {
+    if (loading) {
+      return;
+    }
+    if (!user) {
+      setShowAuthModal(true);
+    } else {
+      setShowAuthModal(false);
+    }
+  }, [user, loading]);
 
 
   useEffect(() => {
@@ -1054,6 +1115,12 @@ function BuilderPage() {
     }
   }, [user, buildMatchPayload]);
 
+  const handleAuthModalClose = useCallback(() => {
+    if (user) {
+      setShowAuthModal(false);
+    }
+  }, [user]);
+
   const handleAutoTailorResume = useCallback(async (match) => {
     if (!match) {
       setTailorError('Unable to run One-Click AI Resume: job details are missing.');
@@ -1305,6 +1372,7 @@ function BuilderPage() {
         return;
       }
 
+      trackDownloadClicked(selectedFormat || 'default', { page: window.location.pathname });
       setDownloadNotice(null);
 
       // Track resume generation
@@ -1650,6 +1718,8 @@ function BuilderPage() {
               return "'Georgia', serif";
             case TEMPLATE_SLUGS.MODERN_CLEAN:
               return "'Segoe UI', 'Tahoma', 'Geneva', 'Verdana', sans-serif";
+            case TEMPLATE_SLUGS.ATTORNEY_TEMPLATE:
+              return "'Book Antiqua', 'Georgia', serif";
             default:
               return "'Calibri', 'Arial', sans-serif";
           }
@@ -1662,6 +1732,8 @@ function BuilderPage() {
               return 1.2;
             case TEMPLATE_SLUGS.EXECUTIVE_SERIF:
               return 1.25;
+            case TEMPLATE_SLUGS.ATTORNEY_TEMPLATE:
+              return 1.3;
             default:
               return 1.2;
           }
@@ -3123,7 +3195,12 @@ function BuilderPage() {
       )}
 
              {/* Modals */}
-       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
+      {showAuthModal && (
+        <AuthModal
+          onClose={handleAuthModalClose}
+          contextMessage="Sign in to build your resume."
+        />
+      )}
        {showImportModal && <ImportResumeModal onClose={() => setShowImportModal(false)} />}
        {showUpgradeModal && (() => {
          console.log('Rendering UpgradeModal, showUpgradeModal=', showUpgradeModal, 'data=', subscriptionData);

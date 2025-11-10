@@ -35,13 +35,23 @@ export const trackPageView = (path) => {
 };
 
 // Track custom events
-export const trackEvent = (action, category, label, value) => {
+export const trackEvent = (action, category, label, value, additionalParams = {}) => {
   if (typeof window !== 'undefined' && window.gtag && !isLocalhost()) {
-    window.gtag('event', action, {
+    const eventParams = {
       event_category: category,
       event_label: label,
-      value: value,
-    });
+    };
+    if (typeof value === 'number') {
+      eventParams.value = value;
+    }
+    if (additionalParams && typeof additionalParams === 'object') {
+      Object.entries(additionalParams).forEach(([key, paramValue]) => {
+        if (paramValue !== undefined) {
+          eventParams[key] = paramValue;
+        }
+      });
+    }
+    window.gtag('event', action, eventParams);
   }
 };
 
@@ -73,6 +83,22 @@ export const trackGoogleUserRegistration = () => {
 // Track AI feature usage
 export const trackAIFeatureUsage = (featureName) => {
   trackEvent('ai_feature_used', 'engagement', featureName, 1);
+};
+
+export const trackCTAClick = (ctaId, metadata = {}) => {
+  trackEvent('cta_click', 'funnel', ctaId, 1, metadata);
+};
+
+export const trackBuilderLoaded = (context = 'builder') => {
+  trackEvent('builder_loaded', 'funnel', context, 1, { page: window.location.pathname });
+};
+
+export const trackTemplateSelectedEvent = (templateId, metadata = {}) => {
+  trackEvent('template_selected', 'funnel', templateId, 1, metadata);
+};
+
+export const trackDownloadClicked = (templateId = 'resume', metadata = {}) => {
+  trackEvent('download_clicked', 'funnel', templateId, 1, metadata);
 };
 
 // Track form completion steps

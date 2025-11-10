@@ -211,10 +211,70 @@ const buildExecutiveData = () => ({
   ],
 });
 
+const buildAttorneyData = () => ({
+  name: 'Attorney Template · Morgan Blake, Esq.',
+  email: 'm.blake@blakeandrosslaw.com',
+  phone: '(312) 555-0142',
+  summary:
+    'Trial-tested litigator with 12+ years of experience navigating complex commercial disputes, regulatory inquiries, and high-stakes negotiations. Trusted by general counsel to assess risk, craft winning case strategies, and deliver pragmatic business outcomes.',
+  selectedFormat: TEMPLATE_SLUGS.ATTORNEY_TEMPLATE,
+  selectedFontSize: 'medium',
+  experiences: [
+    {
+      jobTitle: 'Senior Litigation Associate',
+      company: 'Blake & Ross LLP',
+      city: 'Chicago',
+      state: 'IL',
+      startDate: '2018-03-01',
+      currentlyWorking: true,
+      description: [
+        'First-chaired 7 bench trials and second-chaired 3 federal jury trials with favorable verdicts exceeding $45M.',
+        'Led multi-district litigation strategy that reduced class exposure by 62% while preserving supplier relationships.',
+        'Built eDiscovery playbook that cut external vendor costs by 28% and accelerated production timelines.',
+      ].map((line) => `• ${line}`).join('\n'),
+    },
+    {
+      jobTitle: 'Litigation Associate',
+      company: 'Northbridge Law Group',
+      city: 'New York',
+      state: 'NY',
+      startDate: '2013-09-01',
+      endDate: '2018-02-01',
+      description: [
+        'Managed class-action defense docket spanning securities, privacy, and consumer protection matters.',
+        'Drafted dispositive motions and appellate briefs yielding five precedent-setting rulings for Fortune 500 clients.',
+      ].map((line) => `• ${line}`).join('\n'),
+    },
+  ],
+  education: [
+    {
+      degree: 'J.D.',
+      field: 'Law',
+      school: 'Northwestern Pritzker School of Law',
+      city: 'Chicago',
+      state: 'IL',
+      graduationYear: '2013',
+      honors: 'Cum Laude · Managing Editor, Law & Policy Journal',
+    },
+    {
+      degree: 'B.A.',
+      field: 'Political Science',
+      school: 'Emory University',
+      city: 'Atlanta',
+      state: 'GA',
+      graduationYear: '2009',
+      honors: 'Phi Beta Kappa',
+    },
+  ],
+  skills:
+    'Litigation Strategy, Trial Advocacy, Regulatory Investigations, Appellate Briefing, Client Counseling, Legal Research & Writing',
+});
+
 const SAMPLE_DATA_FACTORIES = {
   [TEMPLATE_SLUGS.CLASSIC_PROFESSIONAL]: buildClassicData,
   [TEMPLATE_SLUGS.MODERN_CLEAN]: buildModernData,
   [TEMPLATE_SLUGS.EXECUTIVE_SERIF]: buildExecutiveData,
+  [TEMPLATE_SLUGS.ATTORNEY_TEMPLATE]: buildAttorneyData,
 };
 
 const TemplateThumbnail = ({ templateId, width = 220 }) => {
