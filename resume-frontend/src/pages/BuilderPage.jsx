@@ -605,6 +605,12 @@ function BuilderPage() {
   const [tailorActiveJobId, setTailorActiveJobId] = useState(null);
   const [tailorNotice, setTailorNotice] = useState(null);
   const [tailorError, setTailorError] = useState(null);
+  const { user, logout } = useAuth();
+  const [isResumeGenerating, setIsResumeGenerating] = useState(false);
+  const [navigateToJobMatchesPending, setNavigateToJobMatchesPending] = useState(false);
+  const [tailorActiveJobId, setTailorActiveJobId] = useState(null);
+  const [tailorNotice, setTailorNotice] = useState(null);
+  const [tailorError, setTailorError] = useState(null);
   useEffect(() => {
     if (typeof window === 'undefined') {
       return;
@@ -663,6 +669,17 @@ function BuilderPage() {
       })
       .slice(0, 6);
   }, [data, autoLocation]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    const flag = window.localStorage.getItem('chatJobMatchesRedirect');
+    if (flag === '1') {
+      window.localStorage.removeItem('chatJobMatchesRedirect');
+      setNavigateToJobMatchesPending(true);
+    }
+  }, []);
 
   const locationSuggestionOptions = useMemo(() => {
     const seen = new Set();
