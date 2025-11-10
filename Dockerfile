@@ -18,7 +18,10 @@ COPY resume-frontend/ .
 # Build the React app with environment variables
 ARG REACT_APP_API_URL
 ENV REACT_APP_API_URL=$REACT_APP_API_URL
-RUN npm run build
+RUN npm run build --loglevel verbose \
+    || (echo "npm build failed; dumping npm-debug.log (if any)" \
+        && if [ -f npm-debug.log ]; then cat npm-debug.log; fi \
+        && exit 1)
 
 # Install serve to run the built app
 RUN npm install -g serve
