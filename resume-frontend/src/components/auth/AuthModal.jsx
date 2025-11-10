@@ -11,8 +11,8 @@ const AuthModal = ({ onClose, contextMessage }) => {
     }
   };
 
-  const handleLogin = (email, token) => {
-    login(email, token);
+  const handleLogin = (userData, token) => {
+    login(userData, token);
     handleClose();
   };
 

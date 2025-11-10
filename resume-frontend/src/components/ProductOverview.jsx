@@ -47,7 +47,7 @@ const ProductOverview = () => {
     <section className="product-section" id="product">
       <div className="product-container">
         <div className="product-header">
-          <h2>What We&apos;re Building</h2>
+          <h2>What We're Building</h2>
           <p>
             HiHired is a digital-native platform helping job seekers create
             interview-winning resumes in minutes. Our core product is live in

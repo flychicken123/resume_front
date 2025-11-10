@@ -5,7 +5,7 @@ import { AuthProvider } from './context/AuthContext';
 import { ResumeProvider } from './context/ResumeContext';
 import { FeedbackProvider } from './context/FeedbackContext';
 import Home from './components/Home';
-import { LoginPage, BuilderPage, AdminMembershipPage, TermsOfServicePage, PrivacyPolicyPage } from './pages';
+import { LoginPage, BuilderPage, AdminMembershipPage, AdminExitAnalyticsPage, TermsOfServicePage, PrivacyPolicyPage, MembershipPage, GuidesPage, GuideDetailPage } from './pages';
 import PricingPage from './components/PricingPage';
 import SubscriptionSuccess from './components/SubscriptionSuccess';
 import SubscriptionCancel from './components/SubscriptionCancel';
@@ -53,11 +53,15 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/builder" element={<BuilderPage />} />
               <Route path="/pricing" element={<PricingPage />} />
+              <Route path="/admin/analytics" element={<AdminExitAnalyticsPage />} />
               <Route path="/admin/memberships" element={<AdminMembershipPage />} />
               <Route path="/subscription/success" element={<SubscriptionSuccess />} />
               <Route path="/subscription/cancel" element={<SubscriptionCancel />} />
               <Route path="/terms" element={<TermsOfServicePage />} />
               <Route path="/privacy" element={<PrivacyPolicyPage />} />
+              <Route path="/account" element={<MembershipPage />} />
+              <Route path="/guides" element={<GuidesPage />} />
+              <Route path="/guides/:slug" element={<GuideDetailPage />} />
               {/* Hidden - Apply to Jobs feature
               <Route path="/apply" element={<JobApplicationPage />} />
               */}

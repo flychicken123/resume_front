@@ -138,6 +138,7 @@ const formatDateRange = (exp) => {
   const formatter = new Intl.DateTimeFormat('en-US', {
     month: 'short',
     year: 'numeric',
+    timeZone: 'UTC',
   });
 
   const start = coerceDate(exp.startDate);
@@ -165,9 +166,14 @@ const StepExperience = () => {
   const { data, setData } = useResume();
   const [loadingIndex, setLoadingIndex] = useState(null);
   const [aiMode, setAiMode] = useState({});
+  const [bulkLoading, setBulkLoading] = useState(false);
   const location = useLocation();
 
   const experiences = Array.isArray(data?.experiences) ? data.experiences : [];
+  const hasExperienceDescriptions = experiences.some(
+    (exp) => exp && (exp.description || '').trim()
+  );
+  const bulkButtonDisabled = bulkLoading || loadingIndex !== null || !hasExperienceDescriptions;
 
   const updateExperiences = useCallback((updater) => {
     setData((prev) => {
@@ -288,6 +294,29 @@ const StepExperience = () => {
     }
   };
 
+  const checkAllWithAI = async () => {
+    if (!hasExperienceDescriptions || bulkLoading) {
+      if (!hasExperienceDescriptions) {
+        alert('Add descriptions to your experiences before running an AI check.');
+      }
+      return;
+    }
+
+    try {
+      setBulkLoading(true);
+      for (let idx = 0; idx < experiences.length; idx += 1) {
+        const experience = experiences[idx];
+        if (!experience || !(experience.description || '').trim()) {
+          continue;
+        }
+        await checkWithAI(idx);
+      }
+    } finally {
+      setBulkLoading(false);
+      setLoadingIndex(null);
+    }
+  };
+
   return (
     <div>
       <h2>Work Experience</h2>
@@ -307,6 +336,42 @@ const StepExperience = () => {
           <p style={{ margin: 0, color: '#0369a1', fontSize: '0.9rem' }}>
             🎯 <strong>AI Optimization Available:</strong> Use the "Check with AI" button to optimize your experiences based on the job description.
           </p>
+        </div>
+      )}
+
+      {experiences.length > 0 && (
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            marginBottom: '1.25rem',
+          }}
+        >
+          <button
+            onClick={checkAllWithAI}
+            disabled={bulkButtonDisabled}
+            style={{
+              background: bulkButtonDisabled ? '#bfdbfe' : '#2563eb',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              padding: '0.75rem 1.5rem',
+              fontSize: '0.9rem',
+              cursor: bulkButtonDisabled ? 'not-allowed' : 'pointer',
+              opacity: bulkButtonDisabled ? 0.6 : 1,
+              boxShadow: bulkButtonDisabled ? 'none' : '0 12px 30px rgba(37, 99, 235, 0.25)',
+              transition: 'background 0.2s ease, opacity 0.2s ease',
+            }}
+            title={
+              !hasExperienceDescriptions
+                ? 'Add descriptions to your experiences first.'
+                : loadingIndex !== null
+                ? 'Finish the current AI check before running all.'
+                : undefined
+            }
+          >
+            {bulkLoading ? 'Checking all experiences...' : '✨ Check all experiences with AI'}
+          </button>
         </div>
       )}
 
@@ -648,7 +713,7 @@ const StepExperience = () => {
             <div style={{ marginTop: '1rem' }}>
               <button
                 onClick={() => checkWithAI(idx)}
-                disabled={loadingIndex === idx || !(exp.description || '').trim()}
+                disabled={bulkLoading || loadingIndex === idx || !(exp.description || '').trim()}
                 style={{
                   background: aiMode[idx] ? '#10b981' : '#3b82f6',
                   color: 'white',
@@ -656,10 +721,19 @@ const StepExperience = () => {
                   borderRadius: '6px',
                   padding: '0.5rem 1rem',
                   fontSize: '0.875rem',
-                  cursor: loadingIndex === idx || !(exp.description || '').trim() ? 'not-allowed' : 'pointer',
-                  opacity: loadingIndex === idx || !(exp.description || '').trim() ? 0.5 : 1,
+                  cursor:
+                    bulkLoading || loadingIndex === idx || !(exp.description || '').trim()
+                      ? 'not-allowed'
+                      : 'pointer',
+                  opacity: bulkLoading || loadingIndex === idx || !(exp.description || '').trim() ? 0.5 : 1,
                 }}
-                title={getJobDescription() ? 'Optimize experience for the job posting' : 'Improve grammar and professionalism'}
+                title={
+                  bulkLoading
+                    ? 'Bulk AI check in progress'
+                    : getJobDescription()
+                    ? 'Optimize experience for the job posting'
+                    : 'Improve grammar and professionalism'
+                }
               >
                 {loadingIndex === idx ? 'Checking...' : aiMode[idx] ? '✓ AI Enhanced' : '✨ Check with AI'}
               </button>

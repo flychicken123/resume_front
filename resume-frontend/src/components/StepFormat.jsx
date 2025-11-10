@@ -1,7 +1,7 @@
 import React from 'react';
 import { useResume } from '../context/ResumeContext';
 import { TEMPLATE_OPTIONS, normalizeTemplateId } from '../constants/templates';
-import { trackReferrer, trackBuilderStart } from './Analytics';
+import { trackReferrer, trackBuilderStart, trackTemplateSelectedEvent } from './Analytics';
 import TemplateThumbnail from './TemplateThumbnail';
 import './StepFormat.css';
 
@@ -26,6 +26,7 @@ const StepFormat = ({ onNext }) => {
   const handleFormatSelect = (formatId) => {
     const normalizedFormat = normalizeTemplateId(formatId);
     setData(prevData => ({ ...prevData, selectedFormat: normalizedFormat }));
+    trackTemplateSelectedEvent(normalizedFormat, { page: window.location.pathname, source: 'format_step' });
   };
 
   const handleFontSizeSelect = (fontSizeId) => {

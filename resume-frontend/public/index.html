@@ -116,6 +116,138 @@
   }
   </script>
   
+  <!-- Structured Data for Generative Answers -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "Build a free AI resume with HiHired",
+    "description": "Follow five AI-assisted steps to publish a recruiter-ready resume without paying or creating an account.",
+    "image": "https://hihired.org/og-image.jpg",
+    "totalTime": "PT10M",
+    "estimatedCost": {
+      "@type": "MonetaryAmount",
+      "currency": "USD",
+      "value": "0"
+    },
+    "supply": [
+      { "@type": "HowToSupply", "name": "Existing resume or work history" },
+      { "@type": "HowToSupply", "name": "Target job description keywords" }
+    ],
+    "tool": [
+      { "@type": "HowToTool", "name": "HiHired AI Resume Builder" }
+    ],
+    "step": [
+      {
+        "@type": "HowToStep",
+        "position": 1,
+        "name": "Choose an ATS-friendly template",
+        "text": "Pick one of the nine recruiter-approved layouts to set the structure.",
+        "url": "https://hihired.org/#templates"
+      },
+      {
+        "@type": "HowToStep",
+        "position": 2,
+        "name": "Drop in your experience",
+        "text": "Paste bullet points or upload a resume so HiHired can parse job titles, dates, and metrics.",
+        "url": "https://hihired.org/#builder"
+      },
+      {
+        "@type": "HowToStep",
+        "position": 3,
+        "name": "Let AI tailor the copy",
+        "text": "Select the target role or job description to receive keyword-rich bullet drafts.",
+        "url": "https://hihired.org/#ai-writer"
+      },
+      {
+        "@type": "HowToStep",
+        "position": 4,
+        "name": "Run the ATS and readability checks",
+        "text": "Use the free diagnostics to confirm scoring, action verbs, and quantified impact.",
+        "url": "https://hihired.org/#diagnostics"
+      },
+      {
+        "@type": "HowToStep",
+        "position": 5,
+        "name": "Download and share instantly",
+        "text": "Export the resume as PDF or share a secure link with recruiters—no signup and no watermark.",
+        "url": "https://hihired.org/#download"
+      }
+    ]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "HiHired AI Resume Builder",
+    "image": "https://hihired.org/og-image.jpg",
+    "description": "Create ATS-optimized resumes with guided AI prompts, recruiter templates, diagnostics, and instant PDF export—all for free.",
+    "brand": {
+      "@type": "Brand",
+      "name": "HiHired"
+    },
+    "audience": {
+      "@type": "Audience",
+      "audienceType": "Job seekers, students, and career switchers"
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock",
+      "url": "https://hihired.org/"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "ratingCount": "1250"
+    },
+    "review": [
+      {
+        "@type": "Review",
+        "reviewRating": { "@type": "Rating", "ratingValue": "5" },
+        "author": { "@type": "Person", "name": "Camila R." },
+        "datePublished": "2025-10-02",
+        "reviewBody": "HiHired's AI bullet suggestions boosted my resume score from 62 to 92 in a single session."
+      },
+      {
+        "@type": "Review",
+        "reviewRating": { "@type": "Rating", "ratingValue": "5" },
+        "author": { "@type": "Person", "name": "Marcus H." },
+        "datePublished": "2025-09-18",
+        "reviewBody": "Loved the instant PDF export—submitted three tailored resumes and received two interviews within a week."
+      }
+    ]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://hihired.org/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Guides",
+        "item": "https://hihired.org/guides"
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": "Free AI Resume Builder",
+        "item": "https://hihired.org/builder"
+      }
+    ]
+  }
+  </script>
+  
   <!-- Service Worker Registration -->
   <script>
     if ('serviceWorker' in navigator) {

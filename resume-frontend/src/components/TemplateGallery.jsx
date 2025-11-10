@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './TemplateGallery.css';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { trackBuilderStart } from './Analytics';
+import { trackBuilderStart, trackTemplateSelectedEvent, trackCTAClick } from './Analytics';
 import { normalizeTemplateId, TEMPLATE_SLUGS, TEMPLATE_OPTIONS } from '../constants/templates';
 import TemplateThumbnail from './TemplateThumbnail';
 
@@ -29,6 +29,12 @@ const TemplateGallery = ({ onSelectTemplate, showAuthModal }) => {
       category: 'executive',
       features: ['Serif Typography', 'Leadership Focus', 'Refined Layout'],
       color: '#111827',
+      popular: false,
+    },
+    [TEMPLATE_SLUGS.ATTORNEY_TEMPLATE]: {
+      category: 'professional',
+      features: ['Legal Formatting', 'Courtroom Highlights', 'Bar Admissions Spotlight'],
+      color: '#0f172a',
       popular: false,
     },
   };
@@ -62,6 +68,7 @@ const TemplateGallery = ({ onSelectTemplate, showAuthModal }) => {
   const handleTemplateSelect = (template) => {
     const normalizedId = normalizeTemplateId(template.id);
     trackBuilderStart('template_selected', { templateId: normalizedId });
+    trackTemplateSelectedEvent(normalizedId, { page: window.location.pathname });
     
     if (!user) {
       showAuthModal(true);
@@ -163,7 +170,10 @@ const TemplateGallery = ({ onSelectTemplate, showAuthModal }) => {
           <p>You can always change your template later</p>
           <button 
             className="cta-button"
-            onClick={() => handleTemplateSelect(templates.find(t => t.id === TEMPLATE_SLUGS.MODERN_CLEAN))}
+            onClick={() => {
+              trackCTAClick('template_gallery_popular_cta', { page: window.location.pathname });
+              handleTemplateSelect(templates.find(t => t.id === TEMPLATE_SLUGS.MODERN_CLEAN));
+            }}
           >
             Get Started with Modern Professional →
           </button>
