@@ -955,12 +955,10 @@ const buildSectionResponse = (sectionKey) => {
         body: JSON.stringify({
           message: trimmed,
           history: historyPayload,
-          user_email: user?.email || '',
-        }),
           session_id: sessionId,
           page_path: pagePath,
-          user_email: userEmail
-        })
+          user_email: user?.email || userEmail || '',
+        }),
       });
 
       if (!response.ok) {
