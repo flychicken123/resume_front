@@ -105,6 +105,72 @@ const detectSectionUpdateIntent = (text = '') => {
 const sanitizeFreeformInput = (value = '') =>
   value.replace(/^[:\s-]+/, '').trim();
 
+const includesAll = (value, keywords = []) => {
+  if (!value) return false;
+  return keywords.every((term) => value.includes(term));
+};
+
+const START_NEW_SESSION_KEYWORDS = [
+  'start over',
+  'restart',
+  'restart chat',
+  'restart session',
+  'new session',
+  'new chat',
+  'reset chat',
+  'reset conversation',
+  'clear chat',
+  'fresh start',
+];
+
+const QUIT_FLOW_KEYWORDS = [
+  'quit step',
+  'quit the step',
+  'cancel step',
+  'stop step',
+  'exit step',
+  'end step',
+  'stop walkthrough',
+  'stop the walkthrough',
+  'stop the flow',
+  'cancel flow',
+  'quit flow',
+  'exit flow',
+  'end flow',
+  'stop this flow',
+  'never mind',
+  'nevermind',
+  'forget it',
+  'do this later',
+];
+
+const hasStartNewSessionIntent = (text = '') => {
+  if (!text) return false;
+  const normalized = text.toLowerCase();
+  if (START_NEW_SESSION_KEYWORDS.some((phrase) => normalized.includes(phrase))) {
+    return true;
+  }
+  return (
+    includesAll(normalized, ['start', 'new', 'session']) ||
+    includesAll(normalized, ['start', 'new', 'chat']) ||
+    includesAll(normalized, ['begin', 'new', 'session'])
+  );
+};
+
+const hasQuitFlowIntent = (text = '') => {
+  if (!text) return false;
+  const normalized = text.toLowerCase();
+  if (QUIT_FLOW_KEYWORDS.some((phrase) => normalized.includes(phrase))) {
+    return true;
+  }
+  const cancelWords = ['stop', 'cancel', 'quit', 'exit', 'end'];
+  const flowTargets = ['step', 'flow', 'walkthrough', 'process', 'session'];
+  return (
+    cancelWords.some((word) => normalized.includes(word)) &&
+    flowTargets.some((word) => normalized.includes(word))
+  );
+};
+
 const createEmptyExperience = () => ({
   jobTitle: '',
   company: '',
@@ -380,7 +446,13 @@ const ChatWidget = () => {
       data: { ...DEFAULT_RESUME_FLOW_STATE.data, jobDescription: initialRequest || '' },
     });
     appendBotMessage(
-      'It sounds like you want to create a resume right here in chat. Want me to walk you through it? (yes/no)'
+      'It sounds like you want to create a resume right here in chat. Want me to walk you through it?',
+      {
+        buttons: [
+          { label: 'Yes', value: 'yes' },
+          { label: 'No', value: 'no' },
+        ],
+      }
     );
     setLastStep('chat_resume_flow_offer');
   };
@@ -876,6 +948,7 @@ const buildSectionResponse = (sectionKey) => {
     if (!trimmed || isLoading) {
       return;
     }
+    const normalized = trimmed.toLowerCase();
 
     const userMessage = { sender: 'user', text: trimmed };
     setLastStep('chat_question_submitted');
@@ -885,6 +958,26 @@ const buildSectionResponse = (sectionKey) => {
       setInput('');
     }
     setIsLoading(true);
+
+    if (hasStartNewSessionIntent(normalized)) {
+      handleStartNewSession();
+      appendBotMessage('Starting a fresh session. Let me know whenever you need help again.');
+      setIsLoading(false);
+      return;
+    }
+
+    if (hasQuitFlowIntent(normalized)) {
+      if (resumeFlowState.active) {
+        setResumeFlowState(DEFAULT_RESUME_FLOW_STATE);
+        setAwaitingJobMatchAnswer(false);
+        appendBotMessage('All good - I have stopped the guided resume walkthrough. Just say "build my resume" when you want to continue.');
+        setLastStep('chat_resume_flow_cancelled');
+      } else {
+        appendBotMessage('There is no guided resume step running right now. Say "build my resume" if you would like to start one.');
+      }
+      setIsLoading(false);
+      return;
+    }
 
     if (awaitingJobMatchAnswer) {
       const lower = trimmed.toLowerCase();
