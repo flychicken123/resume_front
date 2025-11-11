@@ -5,12 +5,22 @@ import { setLastStep } from '../utils/exitTracking';
 import { useAuth } from '../context/AuthContext';
 import { useResume } from '../context/ResumeContext';
 import { TEMPLATE_OPTIONS } from '../constants/templates';
+import { BUILDER_TARGET_STEP_KEY, BUILDER_TARGET_TEMPLATE } from '../constants/builder';
 import { useNavigate } from 'react-router-dom';
 
 const INITIAL_MESSAGES = [
   {
     sender: 'bot',
     text: "Hey! I'm the HiHired assistant. Ask me anything about building resumes or using our AI tools.",
+  },
+  {
+    sender: 'bot',
+    text: 'Here are some quick actions to get started:',
+    buttons: [
+      { label: 'Build Resume', value: 'build resume' },
+      { label: 'Download Resume', value: 'download resume' },
+      { label: 'Job Matches', value: 'job matches' },
+    ],
   },
 ];
 
@@ -364,6 +374,24 @@ const ChatWidget = () => {
     setLastStep('chat_session_restart');
   };
 
+  const jumpToTemplateSection = React.useCallback(() => {
+    const isBrowser = typeof window !== 'undefined';
+    if (isBrowser) {
+      try {
+        window.localStorage.setItem(BUILDER_TARGET_STEP_KEY, BUILDER_TARGET_TEMPLATE);
+      } catch (error) {
+        console.error('Failed to store template target step', error);
+      }
+      if (window.location.pathname.includes('/builder')) {
+        window.dispatchEvent(new Event('builder:jump-template'));
+        setLastStep('chat_template_section_jump');
+        return;
+      }
+    }
+    navigate('/builder#template-format');
+    setLastStep('chat_template_section_jump');
+  }, [navigate]);
+
   const ensureAuthenticatedForFlow = () => {
     if (user && token) {
       return true;
@@ -380,7 +408,12 @@ const ChatWidget = () => {
     switch (stage) {
       case 'template':
         appendBotMessage(
-          `Great! Which resume template should we use? Reply with the name or number:\n${TEMPLATE_PROMPT}`
+          `Great! Which resume template should we use? Reply with the name or number:\n${TEMPLATE_PROMPT}\nNeed a visual? Jump straight to the Template & Format section below.`,
+          {
+            buttons: [
+              { label: 'Jump to Template & Format', action: 'jump_template_section', variant: 'highlight' },
+            ],
+          }
         );
         break;
       case 'personal':
@@ -1071,6 +1104,19 @@ const buildSectionResponse = (sectionKey) => {
     }
   };
 
+  const handleMessageButtonClick = (btn) => {
+    if (!btn) {
+      return;
+    }
+    if (btn.action === 'jump_template_section') {
+      jumpToTemplateSection();
+      return;
+    }
+    if (btn.value) {
+      handleSubmit(null, btn.value);
+    }
+  };
+
   const isSendDisabled = isLoading || input.trim() === '';
 
   return (
@@ -1125,20 +1171,22 @@ const buildSectionResponse = (sectionKey) => {
                 )}
                 {Array.isArray(message.buttons) && message.buttons.length > 0 && (
                   <div className="chat-button-row">
-                    {message.buttons.map((btn, idx) => (
-                      <button
-                        key={`${message.sender}-${index}-btn-${idx}`}
-                        type="button"
-                        className="chat-button"
-                        onClick={() => {
-                          if (btn.value) {
-                            handleSubmit(null, btn.value);
-                          }
-                        }}
-                      >
-                        {btn.label}
-                      </button>
-                    ))}
+                    {message.buttons.map((btn, idx) => {
+                      const buttonClasses = ['chat-button'];
+                      if (btn.variant) {
+                        buttonClasses.push(`chat-button--${btn.variant}`);
+                      }
+                      return (
+                        <button
+                          key={`${message.sender}-${index}-btn-${idx}`}
+                          type="button"
+                          className={buttonClasses.join(' ')}
+                          onClick={() => handleMessageButtonClick(btn)}
+                        >
+                          {btn.label}
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
               </div>

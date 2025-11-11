@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useResume } from '../context/ResumeContext';
 import { useFeedback } from '../context/FeedbackContext';
 import { setLastStep } from '../utils/exitTracking';
-import { BUILDER_TARGET_STEP_KEY, BUILDER_TARGET_JOB_MATCHES } from '../constants/builder';
+import { BUILDER_TARGET_STEP_KEY, BUILDER_TARGET_JOB_MATCHES, BUILDER_TARGET_TEMPLATE } from '../constants/builder';
 import {
   createJobDescriptionEntry,
   ensureJobDescriptionList,
@@ -552,6 +552,8 @@ const POPULAR_LOCATION_GROUPS = [
 ];
 const POPULAR_LOCATION_VALUES = POPULAR_LOCATION_GROUPS.flatMap((group) => group.options);
 
+const TEMPLATE_SECTION_HASHES = new Set(['#template', '#format', '#template-format']);
+
 const steps = [
   "Import Resume",
   "Template & Format",
@@ -605,6 +607,18 @@ function BuilderPage() {
   const [tailorActiveJobId, setTailorActiveJobId] = useState(null);
   const [tailorNotice, setTailorNotice] = useState(null);
   const [tailorError, setTailorError] = useState(null);
+  const focusTemplateStep = useCallback(() => {
+    setStep(STEP_IDS.FORMAT);
+    if (typeof window !== 'undefined') {
+      window.requestAnimationFrame(() => {
+        const builderSection = document.querySelector('.builder-main-section');
+        if (builderSection) {
+          builderSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    }
+  }, []);
+
   useEffect(() => {
     if (typeof window === 'undefined') {
       return;
@@ -615,15 +629,25 @@ function BuilderPage() {
     const hash = currentUrl.hash;
     const viewParam = currentUrl.searchParams.get('view');
     let shouldNavigateToJobs = false;
+    let targetStep = null;
     let urlUpdated = false;
 
     if (storedTarget === BUILDER_TARGET_JOB_MATCHES) {
       shouldNavigateToJobs = true;
       window.localStorage.removeItem(BUILDER_TARGET_STEP_KEY);
+    } else if (storedTarget === BUILDER_TARGET_TEMPLATE) {
+      targetStep = STEP_IDS.FORMAT;
+      window.localStorage.removeItem(BUILDER_TARGET_STEP_KEY);
     }
 
     if (hash === '#jobs' || hash === '#job-matches') {
       shouldNavigateToJobs = true;
+      currentUrl.hash = '';
+      urlUpdated = true;
+    }
+
+    if (TEMPLATE_SECTION_HASHES.has(hash)) {
+      targetStep = STEP_IDS.FORMAT;
       currentUrl.hash = '';
       urlUpdated = true;
     }
@@ -634,8 +658,20 @@ function BuilderPage() {
       urlUpdated = true;
     }
 
+    if (viewParam === 'template' || viewParam === 'format') {
+      targetStep = STEP_IDS.FORMAT;
+      currentUrl.searchParams.delete('view');
+      urlUpdated = true;
+    }
+
     if (shouldNavigateToJobs) {
       setNavigateToJobMatchesPending(true);
+    }
+
+    if (targetStep === STEP_IDS.FORMAT) {
+      focusTemplateStep();
+    } else if (targetStep) {
+      setStep(targetStep);
     }
 
     if (urlUpdated) {
@@ -643,7 +679,33 @@ function BuilderPage() {
       const cleanedUrl = `${currentUrl.pathname}${searchString ? `?${searchString}` : ''}${currentUrl.hash}`;
       window.history.replaceState({}, document.title, cleanedUrl);
     }
-  }, []);
+  }, [focusTemplateStep]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return undefined;
+    }
+
+    const handleHashChange = () => {
+      const { hash } = window.location;
+      if (TEMPLATE_SECTION_HASHES.has(hash.toLowerCase())) {
+        focusTemplateStep();
+        const cleaned = `${window.location.pathname}${window.location.search}`;
+        window.history.replaceState({}, document.title, cleaned);
+      }
+    };
+
+    const handleTemplateJump = () => {
+      focusTemplateStep();
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    window.addEventListener('builder:jump-template', handleTemplateJump);
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+      window.removeEventListener('builder:jump-template', handleTemplateJump);
+    };
+  }, [focusTemplateStep]);
   const { user, logout, loading } = useAuth();
   const { triggerFeedbackPrompt, scheduleFollowUp } = useFeedback();
   const { data, updateData } = useResume();
