@@ -605,12 +605,6 @@ function BuilderPage() {
   const [tailorActiveJobId, setTailorActiveJobId] = useState(null);
   const [tailorNotice, setTailorNotice] = useState(null);
   const [tailorError, setTailorError] = useState(null);
-  const { user, logout } = useAuth();
-  const [isResumeGenerating, setIsResumeGenerating] = useState(false);
-  const [navigateToJobMatchesPending, setNavigateToJobMatchesPending] = useState(false);
-  const [tailorActiveJobId, setTailorActiveJobId] = useState(null);
-  const [tailorNotice, setTailorNotice] = useState(null);
-  const [tailorError, setTailorError] = useState(null);
   useEffect(() => {
     if (typeof window === 'undefined') {
       return;
@@ -3082,93 +3076,93 @@ function BuilderPage() {
               )}
             </div>
           </div>
-          </div>
-          )}
         </div>
+      </div>
 
-        {/* Right Side - Live Resume Preview */}
-          <div style={{ 
-            flex: 1, 
-            background: 'white', 
-            borderLeft: '1px solid #e5e7eb',
-            display: 'flex',
-            flexDirection: 'column',
-            minHeight: '100vh',
-            overflow: 'auto'
-          }}>
-            <div style={{
-              padding: '1rem',
-              borderBottom: '1px solid #e5e7eb',
-              background: '#f9fafb',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}>
-              <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#374151' }}>Live Resume Preview</h2>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                {user ? (
-                  <span style={{ color: '#3b82f6', fontWeight: 500, fontSize: '0.9rem' }}>{displayName}</span>
-                ) : null}
-                <button
-                  onClick={handleAuthButton}
-                  style={{
-                    padding: '0.5rem 1rem',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '4px',
-                    background: 'white',
-                    color: '#3b82f6',
-                    cursor: 'pointer',
-                    fontSize: '0.875rem',
-                    fontWeight: 500
-                  }}
-                >
-                  {user ? 'Logout' : 'Login / Signup'}
-                </button>
-                <button
-                  onClick={toggleFullscreen}
-                  className="fullscreen-button"
-                  title={`${isFullscreen ? 'Exit' : 'Enter'} fullscreen mode (F11)`}
-                  style={{
-                    padding: '0.5rem 1rem',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '4px',
-                    background: 'white',
-                    color: '#374151',
-                    cursor: 'pointer',
-                    fontSize: '0.875rem'
-                  }}
-                >
-                  {isFullscreen ? 'Exit Full Screen' : 'Open Full Screen'}
-                </button>
-              </div>
-            </div>
-            <div 
-              id="resume-preview-container"
-              style={{ 
-                flex: 1, 
-                overflow: 'visible', 
-                padding: '1rem',
+      {/* Right Side - Live Resume Preview */}
+      <div style={{ 
+        flex: 1, 
+        background: 'white', 
+        borderLeft: '1px solid #e5e7eb',
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '100vh',
+        overflow: 'auto'
+      }}>
+        <div style={{
+          padding: '1rem',
+          borderBottom: '1px solid #e5e7eb',
+          background: '#f9fafb',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#374151' }}>Live Resume Preview</h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            {user ? (
+              <span style={{ color: '#3b82f6', fontWeight: 500, fontSize: '0.9rem' }}>{displayName}</span>
+            ) : null}
+            <button
+              onClick={handleAuthButton}
+              style={{
+                padding: '0.5rem 1rem',
+                border: '1px solid #d1d5db',
+                borderRadius: '4px',
                 background: 'white',
-                display: 'flex',
-                flexDirection: 'column'
+                color: '#3b82f6',
+                cursor: 'pointer',
+                fontSize: '0.875rem',
+                fontWeight: 500
               }}
             >
-                              {step !== STEP_IDS.COVER_LETTER && <LivePreview onDownload={handleViewResume} downloadNotice={downloadNotice} />}
-                              {step === STEP_IDS.COVER_LETTER && (
-                                <div style={{
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  height: '100%',
-                                  color: '#6b7280',
-                                  fontSize: '1.1rem'
-                                }}>
-                                  Resume preview not available for Cover Letter
-                                </div>
-                              )}
-            </div>
+              {user ? 'Logout' : 'Login / Signup'}
+            </button>
+            <button
+              onClick={toggleFullscreen}
+              className="fullscreen-button"
+              title={`${isFullscreen ? 'Exit' : 'Enter'} fullscreen mode (F11)`}
+              style={{
+                padding: '0.5rem 1rem',
+                border: '1px solid #d1d5db',
+                borderRadius: '4px',
+                background: 'white',
+                color: '#374151',
+                cursor: 'pointer',
+                fontSize: '0.875rem'
+              }}
+            >
+              {isFullscreen ? 'Exit Full Screen' : 'Open Full Screen'}
+            </button>
           </div>
-        )}
+        </div>
+        <div 
+          id="resume-preview-container"
+          style={{ 
+            flex: 1, 
+            overflow: 'visible', 
+            padding: '1rem',
+            background: 'white',
+            display: 'flex',
+            flexDirection: 'column'
+          }}
+        >
+          {step !== STEP_IDS.COVER_LETTER && (
+            <LivePreview onDownload={handleViewResume} downloadNotice={downloadNotice} />
+          )}
+          {step === STEP_IDS.COVER_LETTER && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
+              color: '#6b7280',
+              fontSize: '1.1rem'
+            }}>
+              Resume preview not available for Cover Letter
+            </div>
+          )}
+        </div>
+      </div>
       </div>
 
       {isResumeGenerating && (
