@@ -120,6 +120,20 @@ const includesAll = (value, keywords = []) => {
   return keywords.every((term) => value.includes(term));
 };
 
+const hasInterviewProcessIntent = (text = '') => {
+  if (!text) return false;
+  const normalized = text.toLowerCase();
+  if (!normalized.includes('interview')) {
+    return false;
+  }
+  const intentHints = ['process', 'how', 'difficult', 'tips', 'looks like', 'expect'];
+  const companyHints = ['google', 'meta', 'amazon', 'microsoft', 'apple', 'sde', 'engineer', 'interview'];
+  return (
+    intentHints.some((hint) => normalized.includes(hint)) ||
+    companyHints.some((hint) => normalized.includes(hint))
+  );
+};
+
 const START_NEW_SESSION_KEYWORDS = [
   'start over',
   'restart',
@@ -1044,6 +1058,15 @@ const buildSectionResponse = (sectionKey) => {
         setResumeFlowState,
       });
       appendBotMessage(result.message);
+      setIsLoading(false);
+      return;
+    }
+
+    if (hasInterviewProcessIntent(trimmed)) {
+      appendBotMessage(
+        "Great question! We're building an upcoming feature that shares interview insights for specific companies. Stay tuned—it's on our roadmap!"
+      );
+      setLastStep('chat_interview_future_feature');
       setIsLoading(false);
       return;
     }
