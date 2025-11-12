@@ -607,6 +607,7 @@ function BuilderPage() {
   const [tailorActiveJobId, setTailorActiveJobId] = useState(null);
   const [tailorNotice, setTailorNotice] = useState(null);
   const [tailorError, setTailorError] = useState(null);
+  const [hoveredMatchKey, setHoveredMatchKey] = useState(null);
   const focusTemplateStep = useCallback(() => {
     setStep(STEP_IDS.FORMAT);
     if (typeof window !== 'undefined') {
@@ -959,6 +960,68 @@ function BuilderPage() {
   }, [user, autoLocation]);
 
   const effectiveLocation = (jobMatchesLocation && jobMatchesLocation.trim()) || autoLocation || '';
+  const buildJobFitReasons = useCallback(
+    (match) => {
+      if (!match || typeof match !== 'object') {
+        return [];
+      }
+      const reasons = [];
+      if (typeof match.match_score === 'number' && match.match_score >= 0) {
+        reasons.push(`High AI match score of ${match.match_score.toFixed(1)} indicates a strong skills overlap.`);
+      }
+      if (match.job_department) {
+        reasons.push(`Team focuses on ${match.job_department}, similar to roles you've highlighted.`);
+      }
+      if (match.job_remote_type) {
+        reasons.push(`Supports ${match.job_remote_type.toLowerCase()} work — matching your flexibility preferences.`);
+      }
+      if (match.job_location && effectiveLocation) {
+        reasons.push(
+          `Located in ${match.job_location}, close to your preferred location (${effectiveLocation}).`
+        );
+      }
+      if (match.company_name) {
+        reasons.push(`${match.company_name} is hiring for ${match.job_title || 'this role'} right now.`);
+      }
+      if (!reasons.length) {
+        reasons.push('This role aligns with the experience and skills saved in your resume.');
+      }
+      return reasons.slice(0, 3);
+    },
+    [effectiveLocation]
+  );
+  const MatchReasonPopover = ({ reasons }) => {
+    if (!Array.isArray(reasons) || reasons.length === 0) {
+      return null;
+    }
+    return (
+      <div
+        style={{
+          position: 'absolute',
+          top: '-12px',
+          right: '-12px',
+          width: '260px',
+          background: '#ffffff',
+          border: '1px solid #e2e8f0',
+          boxShadow: '0 15px 35px rgba(15, 23, 42, 0.25)',
+          borderRadius: '14px',
+          padding: '0.85rem 1rem',
+          zIndex: 40,
+        }}
+      >
+        <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.35rem' }}>
+          Why it's a fit
+        </div>
+        <ul style={{ margin: 0, paddingLeft: '1rem', color: '#0f172a', fontSize: '0.85rem', lineHeight: 1.45 }}>
+          {reasons.map((reason, idx) => (
+            <li key={`reason-${idx}`} style={{ marginBottom: '0.25rem' }}>
+              {reason}
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  };
   const isUSPreferredLocation = useMemo(() => isLikelyUSLocation(effectiveLocation), [effectiveLocation]);
   const filteredJobMatches = useMemo(() => {
     if (!Array.isArray(jobMatches)) {
@@ -2881,8 +2944,14 @@ function BuilderPage() {
                         display: 'flex',
                         flexDirection: 'column',
                         gap: '0.5rem',
+                        position: 'relative',
                       }}
+                      onMouseEnter={() => setHoveredMatchKey(topMatchKey)}
+                      onMouseLeave={() => setHoveredMatchKey(null)}
                     >
+                      {hoveredMatchKey === topMatchKey && (
+                        <MatchReasonPopover reasons={buildJobFitReasons(topMatch)} />
+                      )}
                       <span style={{ fontSize: '0.75rem', color: '#0ea5e9', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Top match</span>
                       <h4 style={{ margin: 0, fontSize: '1.1rem', color: '#0f172a' }}>{topMatch.job_title || 'Role'}</h4>
                       <div style={{ color: '#1e293b', fontSize: '0.9rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
@@ -2957,8 +3026,14 @@ function BuilderPage() {
                               display: 'flex',
                               flexDirection: 'column',
                               gap: '0.4rem',
+                              position: 'relative',
                             }}
+                            onMouseEnter={() => setHoveredMatchKey(matchKey)}
+                            onMouseLeave={() => setHoveredMatchKey(null)}
                           >
+                            {hoveredMatchKey === matchKey && (
+                              <MatchReasonPopover reasons={buildJobFitReasons(match)} />
+                            )}
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '0.5rem' }}>
                               <strong style={{ color: '#1e293b', fontSize: '0.95rem' }}>{match.job_title || 'Role'}</strong>
                               {typeof match.match_score === 'number' && (
