@@ -13,7 +13,7 @@
 
 .chat-intro-tooltip {
   position: absolute;
-  left: 86px;
+  left: -280px;
   bottom: 16px;
   background: #0f172a;
   color: #fff;
@@ -32,7 +32,7 @@
 .chat-intro-tooltip::after {
   content: '';
   position: absolute;
-  left: -9px;
+  right: -9px;
   bottom: 18px;
   width: 18px;
   height: 18px;
