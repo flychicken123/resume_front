@@ -315,6 +315,22 @@ export async function uploadResumeHistoryPdf(file) {
   return data;
 }
 
+export async function fetchJobCount(keyword) {
+  const params = new URLSearchParams();
+  if (keyword) {
+    params.set('keyword', keyword);
+  }
+  const res = await fetchWithAuth(`${API_BASE_URL}/analysis/job-count?${params.toString()}`, {
+    method: 'GET',
+    headers: getAuthHeaders(),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error || 'Failed to fetch job count.');
+  }
+  return data;
+}
+
 export async function fetchResumeHistoryList() {
   const res = await fetchWithAuth(`${API_BASE_URL}/api/resume/history`, {
     method: 'GET',
