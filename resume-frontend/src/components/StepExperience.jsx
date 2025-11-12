@@ -698,7 +698,7 @@ const StepExperience = () => {
                 rows="4"
                 value={exp.description}
                 onChange={(e) => handleChange(idx, 'description', e.target.value)}
-                placeholder="Describe your responsibilities, achievements, and key contributions..."
+                placeholder="Jot down bullet ideas or keywords (e.g., 'increased API speed 30%', 'led 4 engineers')—AI will turn them into polished entries."
                 style={{
                   width: '100%',
                   padding: '0.75rem',
