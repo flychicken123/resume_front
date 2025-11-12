@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../context/AuthContext';
 import { useResumeHistory } from '../hooks/useResumeHistory';
 import './ResumeHistory.css';
 
-const ResumeHistory = ({ onClose }) => {
+const ResumeHistory = ({ onClose, onSelectResume, importingResumeId }) => {
   const { user } = useAuth();
   const {
     history,
@@ -93,14 +94,16 @@ const ResumeHistory = ({ onClose }) => {
     );
   }
 
-  return (
+  const isSelectionMode = typeof onSelectResume === 'function';
+
+  const modalBody = (
     <div className="resume-history-modal">
       <div className="resume-history-content">
         <div className="resume-history-header">
           <h2>Resume History</h2>
           <button className="close-button" onClick={onClose}>×</button>
         </div>
-        
+
         <div className="resume-history-body">
           {loading ? (
             <div className="loading">Loading resume history...</div>
@@ -155,6 +158,15 @@ const ResumeHistory = ({ onClose }) => {
                   <div className="history-item-actions">
                     {editingId !== item.id && (
                       <>
+                        {isSelectionMode && (
+                          <button
+                            className="import-button"
+                            onClick={() => onSelectResume(item)}
+                            disabled={importingResumeId === item.id}
+                          >
+                            {importingResumeId === item.id ? 'Importing…' : 'Use in Builder'}
+                          </button>
+                        )}
                         <button
                           className="rename-button"
                           onClick={() => handleRename(item)}
@@ -184,6 +196,12 @@ const ResumeHistory = ({ onClose }) => {
       </div>
     </div>
   );
+
+  if (typeof document === 'undefined') {
+    return null;
+  }
+
+  return createPortal(modalBody, document.body);
 };
 
 export default ResumeHistory;
