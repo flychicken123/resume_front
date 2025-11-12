@@ -1,30 +1,84 @@
 .chat-widget {
   position: fixed;
-  bottom: 24px;
-  right: 24px;
   z-index: 9999;
   font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif;
 }
 
-.chat-toggle {
-  background: linear-gradient(135deg, #667eea, #764ba2);
+.chat-toggle-wrapper {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+}
+
+.chat-intro-tooltip {
+  position: absolute;
+  left: 86px;
+  bottom: 16px;
+  background: #0f172a;
   color: #fff;
+  padding: 12px 14px;
+  border-radius: 14px;
+  box-shadow: 0 18px 38px rgba(15, 23, 42, 0.25);
+  max-width: 230px;
+  font-size: 0.9rem;
+  line-height: 1.35;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  animation: chatTooltipFade 0.25s ease;
+}
+
+.chat-intro-tooltip::after {
+  content: '';
+  position: absolute;
+  left: -9px;
+  bottom: 18px;
+  width: 18px;
+  height: 18px;
+  background: #0f172a;
+  transform: rotate(45deg);
+  box-shadow: 0 18px 38px rgba(15, 23, 42, 0.15);
+}
+
+.chat-intro-tooltip__text {
+  flex: 1;
+}
+
+.chat-intro-tooltip__close {
+  background: transparent;
+  border: none;
+  color: #c7d2fe;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.chat-intro-tooltip__close:hover {
+  color: #fff;
+}
+
+.chat-toggle {
+  background: radial-gradient(circle at 35% 25%, #ffffff, #dbeafe);
+  color: #1f2937;
   border: none;
   border-radius: 999px;
+  width: 72px;
+  height: 72px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 18px;
-  font-size: 1rem;
-  font-weight: 600;
+  justify-content: center;
   cursor: pointer;
-  box-shadow: 0 10px 25px rgba(118, 75, 162, 0.35);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 14px 35px rgba(59, 130, 246, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  padding: 0;
 }
 
 .chat-toggle:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 14px 30px rgba(118, 75, 162, 0.4);
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 18px 38px rgba(59, 130, 246, 0.45);
+  filter: saturate(1.1);
 }
 
 .chat-toggle-label {
@@ -186,6 +240,10 @@
   background: #1d4ed8;
 }
 
+.chat-toggle svg {
+  width: 44px;
+  height: 44px;
+}
 
 .chat-message.bot.typing {
   font-style: italic;
@@ -196,6 +254,17 @@
 .chat-input input:disabled {
   background: #f1f5f9;
   cursor: not-allowed;
+}
+
+@keyframes chatTooltipFade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .chat-input button:disabled {

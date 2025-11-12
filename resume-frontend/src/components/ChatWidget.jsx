@@ -179,6 +179,13 @@ const JOB_MATCH_TRIGGERS = [
   'ai job matches',
 ];
 
+const CLOSED_WIDGET_SIZE = { width: 90, height: 90 };
+const CHAT_PANEL_SIZE = {
+  regular: { width: 420, height: 520 },
+  large: { width: 620, height: 640 },
+};
+const VIEWPORT_PADDING = 12;
+
 const hasStartNewSessionIntent = (text = '') => {
   if (!text) return false;
   const normalized = text.toLowerCase();
@@ -313,8 +320,113 @@ const ChatWidget = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [resumeFlowState, setResumeFlowState] = useState(DEFAULT_RESUME_FLOW_STATE);
   const [awaitingJobMatchAnswer, setAwaitingJobMatchAnswer] = useState(false);
+  const [showIntroTooltip, setShowIntroTooltip] = useState(true);
+  const [launcherPosition, setLauncherPosition] = useState({ top: 24, left: 24 });
   const apiBaseUrl = useMemo(() => getAPIBaseURL(), []);
   const inputRef = React.useRef(null);
+  const launcherPositionRef = React.useRef(launcherPosition);
+  const dragStateRef = React.useRef(null);
+  const clickSuppressedRef = React.useRef(false);
+
+const clampLauncherPosition = useCallback(
+    (pos, overrides = {}) => {
+      if (typeof window === 'undefined') {
+        return pos;
+      }
+      const openState = overrides.open ?? isOpen;
+      const largeState = overrides.large ?? isLarge;
+      const size = openState
+        ? largeState
+          ? CHAT_PANEL_SIZE.large
+          : CHAT_PANEL_SIZE.regular
+        : CLOSED_WIDGET_SIZE;
+      const maxLeft = Math.max(window.innerWidth - size.width - VIEWPORT_PADDING, VIEWPORT_PADDING);
+      const maxTop = Math.max(window.innerHeight - size.height - VIEWPORT_PADDING, VIEWPORT_PADDING);
+      return {
+        top: Math.min(Math.max(pos.top ?? VIEWPORT_PADDING, VIEWPORT_PADDING), maxTop),
+        left: Math.min(Math.max(pos.left ?? VIEWPORT_PADDING, VIEWPORT_PADDING), maxLeft),
+      };
+    },
+    [isOpen, isLarge]
+  );
+
+  const saveLauncherPosition = useCallback(
+    (pos, overrides = {}) => {
+      const next = clampLauncherPosition(pos, overrides);
+      setLauncherPosition(next);
+      if (typeof window !== 'undefined') {
+        try {
+          window.localStorage.setItem('chatLauncherPosition', JSON.stringify(next));
+        } catch (error) {
+          console.warn('Failed to persist chat button position', error);
+        }
+      }
+    },
+    [clampLauncherPosition]
+  );
+
+  React.useEffect(() => {
+    launcherPositionRef.current = launcherPosition;
+  }, [launcherPosition]);
+
+  React.useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    const defaultTop = Math.max(
+      (window.innerHeight - CLOSED_WIDGET_SIZE.height) / 2,
+      VIEWPORT_PADDING
+    );
+    const defaultLeft = Math.max(
+      window.innerWidth - CLOSED_WIDGET_SIZE.width - VIEWPORT_PADDING,
+      VIEWPORT_PADDING
+    );
+    let next = {
+      top: defaultTop,
+      left: defaultLeft,
+    };
+    try {
+      const stored = window.localStorage.getItem('chatLauncherPosition');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (typeof parsed?.top === 'number' && typeof parsed?.left === 'number') {
+          next = parsed;
+        }
+      }
+    } catch (error) {
+      console.warn('Unable to read stored chat position', error);
+    }
+    saveLauncherPosition(next, { open: false });
+  }, [saveLauncherPosition]);
+
+  React.useEffect(() => {
+    if (typeof window === 'undefined') {
+      return undefined;
+    }
+    const handleResize = () => {
+      setLauncherPosition((prev) => clampLauncherPosition(prev, { open: isOpen, large: isLarge }));
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [clampLauncherPosition, isOpen, isLarge]);
+
+  React.useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    setLauncherPosition((prev) => {
+      const next = clampLauncherPosition(prev, { open: isOpen, large: isLarge });
+      if (next.top === prev.top && next.left === prev.left) {
+        return prev;
+      }
+      try {
+        window.localStorage.setItem('chatLauncherPosition', JSON.stringify(next));
+      } catch (error) {
+        console.warn('Failed to persist clamped chat position', error);
+      }
+      return next;
+    });
+  }, [clampLauncherPosition, isOpen, isLarge]);
 
   const resetChatState = React.useCallback((options = {}) => {
     const { keepOpen = false } = options;
@@ -337,6 +449,10 @@ const ChatWidget = () => {
   const appendBotMessage = (text, extras = {}) => {
     setMessages((prev) => [...prev, { sender: 'bot', text, ...extras }]);
   };
+
+  const dismissIntroTooltip = React.useCallback(() => {
+    setShowIntroTooltip(false);
+  }, []);
 
   React.useEffect(() => {
     try {
@@ -404,18 +520,28 @@ const ChatWidget = () => {
   const toggleOpen = () => {
     const next = !isOpen;
     setIsOpen(next);
+    setLauncherPosition((prev) => clampLauncherPosition(prev, { open: next }));
     setLastStep(next ? 'chat_opened' : 'chat_closed');
     if (!next) {
       setAwaitingJobMatchAnswer(false);
+      setShowIntroTooltip(true);
+    } else {
+      dismissIntroTooltip();
     }
   };
 
   const toggleSize = () => {
-    setIsLarge((prev) => !prev);
+    setIsLarge((prev) => {
+      const next = !prev;
+      setLauncherPosition((pos) => clampLauncherPosition(pos, { open: isOpen, large: next }));
+      return next;
+    });
   };
 
   const minimizeChat = () => {
     setIsOpen(false);
+    setLauncherPosition((prev) => clampLauncherPosition(prev, { open: false }));
+    setShowIntroTooltip(true);
     setLastStep('chat_closed');
   };
 
@@ -424,6 +550,127 @@ const ChatWidget = () => {
     setIsOpen(true);
     setLastStep('chat_session_restart');
   };
+
+  const handleLauncherPointerMove = useCallback(
+    (event) => {
+      const dragState = dragStateRef.current;
+      if (!dragState) {
+        return;
+      }
+      const deltaX = event.clientX - dragState.startX;
+      const deltaY = event.clientY - dragState.startY;
+      if (!dragState.moved && Math.abs(deltaX) + Math.abs(deltaY) > 4) {
+        dragState.moved = true;
+        clickSuppressedRef.current = true;
+      }
+      if (!dragState.moved) {
+        return;
+      }
+      saveLauncherPosition(
+        {
+          top: dragState.startTop + deltaY,
+          left: dragState.startLeft + deltaX,
+        },
+        { open: isOpen, large: isLarge }
+      );
+    },
+    [saveLauncherPosition, isOpen, isLarge]
+  );
+
+  const handleLauncherPointerUp = useCallback(() => {
+    const dragged = Boolean(dragStateRef.current?.moved);
+    dragStateRef.current = null;
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('pointermove', handleLauncherPointerMove);
+      window.removeEventListener('pointerup', handleLauncherPointerUp);
+      window.removeEventListener('pointercancel', handleLauncherPointerUp);
+    }
+    if (dragged) {
+      setTimeout(() => {
+        clickSuppressedRef.current = false;
+      }, 0);
+    }
+  }, [handleLauncherPointerMove]);
+
+  const handleLauncherPointerDown = useCallback(
+    (event) => {
+      if (event.button !== 0) {
+        return;
+      }
+      event.preventDefault();
+      const current = launcherPositionRef.current || { top: 24, left: 24 };
+      dragStateRef.current = {
+        startX: event.clientX,
+        startY: event.clientY,
+        startTop: current.top,
+        startLeft: current.left,
+        moved: false,
+      };
+      clickSuppressedRef.current = false;
+      if (typeof window !== 'undefined') {
+        window.addEventListener('pointermove', handleLauncherPointerMove);
+        window.addEventListener('pointerup', handleLauncherPointerUp);
+        window.addEventListener('pointercancel', handleLauncherPointerUp);
+      }
+    },
+    [handleLauncherPointerMove, handleLauncherPointerUp]
+  );
+
+  const handleDialogHeaderPointerDown = useCallback(
+    (event) => {
+      if (!(event.target instanceof Element)) {
+        return;
+      }
+      if (event.target.closest('.chat-header-actions')) {
+        return;
+      }
+      handleLauncherPointerDown(event);
+    },
+    [handleLauncherPointerDown]
+  );
+
+  React.useEffect(() => {
+    if (typeof window === 'undefined') {
+      return undefined;
+    }
+    return () => {
+      window.removeEventListener('pointermove', handleLauncherPointerMove);
+      window.removeEventListener('pointerup', handleLauncherPointerUp);
+      window.removeEventListener('pointercancel', handleLauncherPointerUp);
+    };
+  }, [handleLauncherPointerMove, handleLauncherPointerUp]);
+
+  const handleLauncherClick = useCallback(
+    (event) => {
+      if (clickSuppressedRef.current) {
+        event.preventDefault();
+        event.stopPropagation();
+        clickSuppressedRef.current = false;
+        return;
+      }
+      toggleOpen();
+    },
+    [toggleOpen]
+  );
+
+  const handleLauncherKeyDown = useCallback(
+    (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        toggleOpen();
+      }
+    },
+    [toggleOpen]
+  );
+
+  const widgetStyle = useMemo(
+    () => ({
+      position: 'fixed',
+      top: `${launcherPosition.top}px`,
+      left: `${launcherPosition.left}px`,
+    }),
+    [launcherPosition]
+  );
 
   const buildResumeSummaryInput = useCallback(() => {
     if (!resumeData) {
@@ -1357,14 +1604,14 @@ const buildSectionResponse = (sectionKey) => {
   const isSendDisabled = isLoading || input.trim() === '';
 
   return (
-    <div className="chat-widget">
+    <div className="chat-widget" style={widgetStyle}>
       {isOpen && (
         <div
           className={`chat-panel${isLarge ? ' chat-panel--large' : ''}`}
           role="dialog"
           aria-label="HiHired chat assistant"
         >
-          <div className="chat-header">
+          <div className="chat-header" onPointerDown={handleDialogHeaderPointerDown}>
             <span className="chat-title">HiHired Assistant</span>
             <div className="chat-header-actions">
               <button
@@ -1448,20 +1695,56 @@ const buildSectionResponse = (sectionKey) => {
         </div>
       )}
 
-      <button
-        type="button"
-        className="chat-toggle"
-        onClick={toggleOpen}
-        aria-label={isOpen ? 'Hide chat assistant' : 'Show chat assistant'}
-      >
-        <span role="img" aria-hidden="true">
-          💬
-        </span>
-        <span className="chat-toggle-label">Chat</span>
-      </button>
+      <div className="chat-toggle-wrapper">
+        {showIntroTooltip && (
+          <div className="chat-intro-tooltip" role="status" aria-live="polite">
+            <div className="chat-intro-tooltip__text">
+              I’m your AI job searching companion. Click to chat!
+            </div>
+            <button
+              type="button"
+              className="chat-intro-tooltip__close"
+              onClick={dismissIntroTooltip}
+              aria-label="Dismiss chat helper message"
+            >
+              &times;
+            </button>
+          </div>
+        )}
+        <button
+          type="button"
+          className="chat-toggle"
+          onPointerDown={handleLauncherPointerDown}
+          onClick={handleLauncherClick}
+          onKeyDown={handleLauncherKeyDown}
+          aria-label={isOpen ? 'Hide chat assistant' : 'Chat with HiHired bot'}
+          title="Chat with our AI companion"
+        >
+          <RobotIcon />
+        </button>
+      </div>
     </div>
   );
 };
+
+const RobotIcon = () => (
+  <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="presentation" aria-hidden="true">
+    <defs>
+      <linearGradient id="botFace" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#fffafc" />
+        <stop offset="100%" stopColor="#e0f2ff" />
+      </linearGradient>
+    </defs>
+    <rect x="20" y="30" width="80" height="70" rx="18" fill="url(#botFace)" stroke="#93c5fd" strokeWidth="4" />
+    <circle cx="60" cy="12" r="6" fill="#3b82f6" />
+    <line x1="60" y1="18" x2="60" y2="30" stroke="#3b82f6" strokeWidth="4" strokeLinecap="round" />
+    <circle cx="45" cy="65" r="8" fill="#1f2937" />
+    <circle cx="75" cy="65" r="8" fill="#1f2937" />
+    <rect x="40" y="82" width="40" height="10" rx="5" fill="#38bdf8" />
+    <circle cx="20" cy="55" r="6" fill="#93c5fd" />
+    <circle cx="100" cy="55" r="6" fill="#93c5fd" />
+  </svg>
+);
 
 const buildDownloadPayload = (data, jobDescription, html) => ({
   name: data.name || '',
