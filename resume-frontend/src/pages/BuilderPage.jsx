@@ -270,6 +270,37 @@ const extractJobDescriptionHighlight = (description) => {
   return normalized;
 };
 
+const humanizeKeyword = (keyword) => {
+  if (typeof keyword !== 'string') {
+    return '';
+  }
+  return keyword
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .join(' ');
+};
+
+const parseDislikeKeywords = (raw) => {
+  if (typeof raw !== 'string') {
+    return [];
+  }
+  const seen = new Set();
+  const keywords = [];
+  raw
+    .split(/[,;]+/)
+    .map((token) => token.trim().toLowerCase())
+    .filter(Boolean)
+    .forEach((token) => {
+      if (token.length < 2 || seen.has(token)) {
+        return;
+      }
+      seen.add(token);
+      keywords.push(token);
+    });
+  return keywords.slice(0, 20);
+};
+
 const formatListForSentence = (items) => {
   if (!Array.isArray(items) || items.length === 0) {
     return '';
@@ -741,6 +772,7 @@ function BuilderPage() {
   const [jobMatchesLoading, setJobMatchesLoading] = useState(false);
   const [jobMatchesError, setJobMatchesError] = useState(null);
   const [jobMatchesLocation, setJobMatchesLocation] = useState('');
+  const [jobDislikeInput, setJobDislikeInput] = useState('');
   const [geocodedLocationHints, setGeocodedLocationHints] = useState([]);
   const [isGeocodingLocation, setIsGeocodingLocation] = useState(false);
   const [isResolvingCurrentLocation, setIsResolvingCurrentLocation] = useState(false);
@@ -1016,6 +1048,16 @@ function BuilderPage() {
   const combinedJobDescription = useMemo(
     () => combineJobDescriptions(jobDescriptions),
     [jobDescriptions]
+  );
+
+  const jobDislikeKeywords = useMemo(
+    () => parseDislikeKeywords(jobDislikeInput),
+    [jobDislikeInput]
+  );
+
+  const jobDislikeLabels = useMemo(
+    () => jobDislikeKeywords.map((keyword) => humanizeKeyword(keyword)).filter(Boolean),
+    [jobDislikeKeywords]
   );
 
   const targetPosition = useMemo(
@@ -1335,14 +1377,44 @@ function BuilderPage() {
     );
   };
   const isUSPreferredLocation = useMemo(() => isLikelyUSLocation(effectiveLocation), [effectiveLocation]);
-  const filteredJobMatches = useMemo(() => {
+  const keywordFilteredMatches = useMemo(() => {
     if (!Array.isArray(jobMatches)) {
       return [];
     }
-    if (!isUSPreferredLocation) {
+    if (!jobDislikeKeywords.length) {
       return jobMatches;
     }
     return jobMatches.filter((match) => {
+      if (!match || typeof match !== 'object') {
+        return true;
+      }
+      const haystack = [
+        match.job_title,
+        match.job_description,
+        match.job_department,
+        match.job_location,
+        match.job_remote_type,
+        match.job_employment_type,
+        match.company_name,
+      ]
+        .map((value) => (typeof value === 'string' ? value.toLowerCase() : ''))
+        .filter(Boolean)
+        .join(' ');
+      if (!haystack) {
+        return true;
+      }
+      return !jobDislikeKeywords.some((keyword) => haystack.includes(keyword));
+    });
+  }, [jobMatches, jobDislikeKeywords]);
+
+  const filteredJobMatches = useMemo(() => {
+    if (!Array.isArray(keywordFilteredMatches)) {
+      return [];
+    }
+    if (!isUSPreferredLocation) {
+      return keywordFilteredMatches;
+    }
+    return keywordFilteredMatches.filter((match) => {
       if (!match) {
         return false;
       }
@@ -1356,8 +1428,25 @@ function BuilderPage() {
       }
       return false;
     });
-  }, [jobMatches, isUSPreferredLocation]);
+  }, [keywordFilteredMatches, isUSPreferredLocation]);
+
+  const keywordFilteredCount = Math.max(jobMatches.length - keywordFilteredMatches.length, 0);
+  const locationFilteredCount = Math.max(keywordFilteredMatches.length - filteredJobMatches.length, 0);
   const filteredOutCount = Math.max(jobMatches.length - filteredJobMatches.length, 0);
+
+  const filterSummaryText = useMemo(() => {
+    const parts = [];
+    if (locationFilteredCount > 0) {
+      parts.push(`${locationFilteredCount} non-US listing${locationFilteredCount === 1 ? '' : 's'}`);
+    }
+    if (keywordFilteredCount > 0) {
+      parts.push(`${keywordFilteredCount} keyword match${keywordFilteredCount === 1 ? '' : 'es'}`);
+    }
+    if (!parts.length) {
+      return '.';
+    }
+    return ` — filtered ${parts.join(' and ')}.`;
+  }, [locationFilteredCount, keywordFilteredCount]);
   const topMatch = filteredJobMatches.length > 0 ? filteredJobMatches[0] : null;
   const secondaryMatches = filteredJobMatches.length > 1 ? filteredJobMatches.slice(1) : [];
   const topMatchKey = topMatch ? getMatchKey(topMatch) : '';
@@ -1421,6 +1510,14 @@ function BuilderPage() {
     setGeocodedLocationHints([]);
     setGeocoderError(null);
     geocoderLastQueryRef.current = 'remote (us)';
+  };
+
+  const handleDislikeInputChange = (value) => {
+    setJobDislikeInput(value);
+  };
+
+  const handleClearDislikeInput = () => {
+    setJobDislikeInput('');
   };
 
   const handleSelectLocationSuggestion = (value) => {
@@ -2868,9 +2965,7 @@ function BuilderPage() {
                       {isUSPreferredLocation && user && (
                         <span style={{ fontSize: '0.75rem', color: '#0f172a' }}>
                           Showing US-based roles only
-                          {filteredOutCount > 0
-                            ? ` — filtered ${filteredOutCount} non-US listing${filteredOutCount === 1 ? '' : 's'}.`
-                            : '.'}
+                          {filterSummaryText}
                         </span>
                       )}
                     </div>
@@ -3212,6 +3307,70 @@ function BuilderPage() {
                       </div>
 
                     )}
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '0.75rem' }}>
+                      <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#1e293b' }}>
+                        "I don't want" filters
+                      </label>
+                      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                        <input
+                          type="text"
+                          value={jobDislikeInput}
+                          onChange={(e) => handleDislikeInputChange(e.target.value)}
+                          placeholder="e.g., SRE; Seattle; night shift"
+                          style={{
+                            flex: '1 1 260px',
+                            minWidth: '200px',
+                            padding: '0.5rem 0.75rem',
+                            borderRadius: '8px',
+                            border: '1px solid #fbbf24',
+                            fontSize: '0.9rem',
+                            background: '#fffbea',
+                          }}
+                        />
+                        {!!jobDislikeInput.trim() && (
+                          <button
+                            type="button"
+                            onClick={handleClearDislikeInput}
+                            style={{
+                              padding: '0.4rem 0.85rem',
+                              borderRadius: '999px',
+                              border: '1px solid #fed7aa',
+                              background: '#fff7ed',
+                              color: '#9a3412',
+                              fontWeight: 600,
+                              fontSize: '0.8rem',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            Clear
+                          </button>
+                        )}
+                      </div>
+                      <span style={{ fontSize: '0.75rem', color: '#92400e' }}>
+                        Separate multiple keywords with commas or semicolons. We'll hide jobs mentioning any of them.
+                      </span>
+                      {jobDislikeLabels.length > 0 && (
+                        <div
+                          style={{
+                            background: '#fef9c3',
+                            border: '1px solid #fde047',
+                            borderRadius: '10px',
+                            padding: '0.55rem 0.75rem',
+                            color: '#854d0e',
+                            fontSize: '0.78rem',
+                            lineHeight: 1.4,
+                          }}
+                        >
+                          Filtering out {formatListForSentence(jobDislikeLabels)}.
+                          {keywordFilteredCount > 0 && jobMatches.length > 0 && (
+                            <span style={{ marginLeft: '0.25rem' }}>
+                              Hidden {keywordFilteredCount} listing{keywordFilteredCount === 1 ? '' : 's'} so far.
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
 
                   </div>
 
