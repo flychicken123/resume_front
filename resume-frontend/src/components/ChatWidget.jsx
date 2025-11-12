@@ -1,11 +1,11 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import './ChatWidget.css';
-import { getAPIBaseURL, generateSummaryAI, fetchResumeHistoryList, fetchJobCount } from '../api';
+import { getAPIBaseURL, generateSummaryAI, fetchResumeHistoryList, fetchJobCount, computeJobMatches } from '../api';
 import { setLastStep } from '../utils/exitTracking';
 import { useAuth } from '../context/AuthContext';
 import { useResume } from '../context/ResumeContext';
 import { TEMPLATE_OPTIONS } from '../constants/templates';
-import { BUILDER_TARGET_STEP_KEY, BUILDER_TARGET_TEMPLATE } from '../constants/builder';
+import { BUILDER_TARGET_STEP_KEY, BUILDER_TARGET_TEMPLATE, BUILDER_TARGET_JOB_MATCHES } from '../constants/builder';
 import { useNavigate } from 'react-router-dom';
 
 const INITIAL_MESSAGES = [
@@ -169,6 +169,16 @@ const QUIT_FLOW_KEYWORDS = [
   'do this later',
 ];
 
+const JOB_MATCH_TRIGGERS = [
+  'job match',
+  'job matches',
+  'matching jobs',
+  'see job matches',
+  'show job matches',
+  'open job matches',
+  'ai job matches',
+];
+
 const hasStartNewSessionIntent = (text = '') => {
   if (!text) return false;
   const normalized = text.toLowerCase();
@@ -204,6 +214,12 @@ const hasBackgroundAnalysisIntent = (text = '') => {
     normalized.includes('analyze my background') ||
     normalized.includes('background analysis')
   );
+};
+
+const isJobMatchShortcutIntent = (text = '') => {
+  if (!text) return false;
+  const normalized = text.toLowerCase();
+  return JOB_MATCH_TRIGGERS.some((phrase) => normalized.includes(phrase));
 };
 
 const hasSoftwareEngineerJobCountIntent = (text = '') => {
@@ -501,6 +517,84 @@ const ChatWidget = () => {
     navigate('/builder#template-format');
     setLastStep('chat_template_section_jump');
   }, [navigate]);
+
+  const redirectToJobMatchesSection = () => {
+    const isBrowser = typeof window !== 'undefined';
+    if (isBrowser) {
+      try {
+        window.localStorage.setItem(BUILDER_TARGET_STEP_KEY, BUILDER_TARGET_JOB_MATCHES);
+      } catch (error) {
+        console.error('Failed to store job matches redirect flag', error);
+      }
+      if (window.location.pathname.includes('/builder')) {
+        window.dispatchEvent(new CustomEvent('builder:focus-job-matches'));
+      }
+    }
+    navigate('/builder#job-matches');
+  };
+
+  const handleJobMatchesShortcut = async () => {
+    setIsLoading(true);
+    setAwaitingJobMatchAnswer(false);
+    setLastStep('chat_jobmatch_shortcut_start');
+
+    if (!user || !token) {
+      appendBotMessage('Please log in so I can look up your resume history and job matches.');
+      setLastStep('chat_jobmatch_shortcut_login_required');
+      setIsLoading(false);
+      return;
+    }
+
+    appendBotMessage('Let me pull your latest resume so I can look for matching jobs...');
+
+    try {
+      const historyResponse = await fetchResumeHistoryList();
+      const historyEntries = Array.isArray(historyResponse?.history) ? historyResponse.history : [];
+      if (!historyEntries.length) {
+        appendBotMessage('I could not find any generated resumes yet. Please build or import one first, then ask me again.');
+        setLastStep('chat_jobmatch_shortcut_no_history');
+        return;
+      }
+
+      const latestResume = historyEntries[0];
+      if (latestResume?.resume_name) {
+        appendBotMessage(`Using "${latestResume.resume_name}" to run AI job matches.`);
+      }
+
+      if (!resumeData) {
+        appendBotMessage('I still need your resume details from the builder before I can run matches. Please reload the builder and try again.');
+        setLastStep('chat_jobmatch_shortcut_missing_data');
+        return;
+      }
+
+      const storedJobDescription = (resumeFlowState?.data?.jobDescription || getStoredJobDescription() || '').trim();
+      const payload = buildJobMatchPayloadForChat(resumeData, storedJobDescription);
+      if (!payload) {
+        appendBotMessage('Add your summary, experience, education, or skills before requesting job matches.');
+        setLastStep('chat_jobmatch_shortcut_insufficient_resume');
+        return;
+      }
+
+      try {
+        await computeJobMatches(payload);
+      } catch (error) {
+        console.error('Failed to compute job matches via chat', error);
+        appendBotMessage("I couldn't run the AI matching right now. Please try again later or open the Job Matches tab inside the builder.");
+        setLastStep('chat_jobmatch_shortcut_compute_error');
+        return;
+      }
+
+      appendBotMessage('All set! Opening your Job Matches now.');
+      redirectToJobMatchesSection();
+      setLastStep('chat_jobmatch_shortcut_success');
+    } catch (error) {
+      console.error('Job match shortcut failed', error);
+      appendBotMessage("I couldn't reach your resume history right now. Please try again in a moment.");
+      setLastStep('chat_jobmatch_shortcut_error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const ensureAuthenticatedForFlow = () => {
     if (user && token) {
@@ -1101,7 +1195,7 @@ const buildSectionResponse = (sectionKey) => {
     }
   };
 
-  const handleSubmit = async (event, overrideText = null, displayOverride = null) => {
+  const handleSubmit = async (event, overrideText = null, displayOverride = null, options = {}) => {
     if (event && typeof event.preventDefault === 'function') {
       event.preventDefault();
     }
@@ -1112,6 +1206,7 @@ const buildSectionResponse = (sectionKey) => {
       return;
     }
     const normalized = trimmed.toLowerCase();
+    const intent = options?.intent || null;
 
     const userMessage = { sender: 'user', text: displayText };
     setLastStep('chat_question_submitted');
@@ -1139,6 +1234,11 @@ const buildSectionResponse = (sectionKey) => {
         appendBotMessage('There is no guided resume step running right now. Say "build my resume" if you would like to start one.');
       }
       setIsLoading(false);
+      return;
+    }
+
+    if (intent === 'jobMatches' || isJobMatchShortcutIntent(trimmed)) {
+      await handleJobMatchesShortcut();
       return;
     }
 
@@ -1245,6 +1345,11 @@ const buildSectionResponse = (sectionKey) => {
       return;
     }
     if (btn.value) {
+      const normalizedValue = btn.value.toLowerCase();
+      if (normalizedValue.includes('job match')) {
+        handleSubmit(null, btn.value, btn.label || btn.value, { intent: 'jobMatches' });
+        return;
+      }
       handleSubmit(null, btn.value, btn.label || btn.value);
     }
   };
@@ -1375,6 +1480,263 @@ const buildDownloadPayload = (data, jobDescription, html) => ({
   engine: 'chromium-strict',
   htmlContent: html,
 });
+
+const normalizeSkillTokens = (skills) => {
+  if (Array.isArray(skills)) {
+    return skills.map((skill) => (skill || '').trim()).filter(Boolean);
+  }
+  if (typeof skills === 'string') {
+    return skills
+      .split(/[,\n;|]/)
+      .map((skill) => skill.trim())
+      .filter(Boolean);
+  }
+  return [];
+};
+
+const collectSkillsFromResume = (resumeData) => {
+  if (!resumeData || typeof resumeData !== 'object') {
+    return [];
+  }
+  const skillSet = new Set();
+  normalizeSkillTokens(resumeData.skills).forEach((skill) => skillSet.add(skill));
+
+  const projects = Array.isArray(resumeData.projects) ? resumeData.projects : [];
+  projects.forEach((project) => {
+    if (!project || typeof project !== 'object') {
+      return;
+    }
+    normalizeSkillTokens(project.technologies).forEach((skill) => skillSet.add(skill));
+    normalizeSkillTokens(project.skills).forEach((skill) => skillSet.add(skill));
+  });
+
+  const experiences = Array.isArray(resumeData.experiences) ? resumeData.experiences : [];
+  experiences.forEach((exp) => {
+    if (!exp || typeof exp !== 'object') {
+      return;
+    }
+    normalizeSkillTokens(exp.skills).forEach((skill) => skillSet.add(skill));
+    normalizeSkillTokens(exp.tools).forEach((skill) => skillSet.add(skill));
+  });
+
+  return Array.from(skillSet).slice(0, 60);
+};
+
+const summarizeExperiencesForMatches = (experiences = []) =>
+  (Array.isArray(experiences) ? experiences : [])
+    .filter((exp) => exp && (exp.jobTitle || exp.company || exp.description))
+    .map((exp) => {
+      const header = [exp.jobTitle, exp.company].filter(Boolean).join(' at ');
+      const desc = typeof exp.description === 'string' ? exp.description.replace(/\s+/g, ' ').trim() : '';
+      if (header && desc) {
+        return `${header}: ${desc}`;
+      }
+      return header || desc;
+    })
+    .filter(Boolean)
+    .join('\n\n');
+
+const summarizeEducationForMatches = (education = []) =>
+  (Array.isArray(education) ? education : [])
+    .filter((ed) => ed && (ed.degree || ed.school || ed.field || ed.graduationYear))
+    .map((ed) => {
+      const credential = [ed.degree, ed.field].filter(Boolean).join(' in ');
+      const school = ed.school || '';
+      const year = ed.graduationYear || ed.graduationMonth || '';
+      return [credential, school, year].filter(Boolean).join(', ');
+    })
+    .filter(Boolean)
+    .join('\n');
+
+const JOB_TITLE_KEYWORDS = [
+  'engineer',
+  'developer',
+  'manager',
+  'designer',
+  'scientist',
+  'analyst',
+  'consultant',
+  'architect',
+  'specialist',
+  'lead',
+  'director',
+  'strategist',
+  'administrator',
+  'coordinator',
+  'marketer',
+  'technician',
+  'researcher',
+  'product manager',
+  'product designer',
+  'product owner',
+  'project manager',
+  'program manager',
+  'software',
+  'frontend',
+  'backend',
+  'full stack',
+  'devops',
+  'security',
+  'marketing manager',
+  'sales manager',
+  'recruiter',
+  'data engineer',
+  'data scientist',
+  'data analyst',
+  'operations manager',
+];
+
+const looksLikeJobTitle = (value) => {
+  if (!value || typeof value !== 'string') {
+    return false;
+  }
+  const lower = value.toLowerCase();
+  return JOB_TITLE_KEYWORDS.some((keyword) => lower.includes(keyword));
+};
+
+const deriveTargetPosition = (resumeData, jobDescription = '') => {
+  if (!resumeData || typeof resumeData !== 'object') {
+    return '';
+  }
+
+  const directFields = ['position', 'desiredRole', 'role', 'headline', 'title'];
+  for (const field of directFields) {
+    const value = resumeData[field];
+    if (typeof value === 'string' && value.trim()) {
+      return value.trim();
+    }
+  }
+
+  const experiences = Array.isArray(resumeData.experiences) ? resumeData.experiences.filter(Boolean) : [];
+  for (let i = experiences.length - 1; i >= 0; i -= 1) {
+    const exp = experiences[i];
+    if (exp && typeof exp.jobTitle === 'string' && exp.jobTitle.trim()) {
+      return exp.jobTitle.trim();
+    }
+  }
+
+  if (typeof resumeData.summary === 'string' && resumeData.summary.trim()) {
+    const summary = resumeData.summary.trim();
+    const summaryLower = summary.toLowerCase();
+    const cleaned = summary.replace(/[|•·].*$/, '').replace(/-.*/, '').replace(/,.*/, '');
+    if (looksLikeJobTitle(cleaned) && cleaned.split(/\s+/).length <= 6) {
+      return cleaned;
+    }
+    const keywordMatch = JOB_TITLE_KEYWORDS
+      .map((keyword) => ({ keyword, index: summaryLower.indexOf(keyword) }))
+      .filter((entry) => entry.index >= 0)
+      .sort((a, b) => a.index - b.index)[0];
+    if (keywordMatch) {
+      const { index, keyword } = keywordMatch;
+      const sliceStart = summary.lastIndexOf(' ', Math.max(0, index - 35));
+      const sliceEnd = summary.indexOf(' ', index + keyword.length);
+      const candidate = summary
+        .slice(sliceStart >= 0 ? sliceStart : 0, sliceEnd >= 0 ? sliceEnd : summary.length)
+        .replace(/[|•·].*$/, '')
+        .trim();
+      if (looksLikeJobTitle(candidate) && candidate.split(/\s+/).length <= 6) {
+        return candidate;
+      }
+    }
+  }
+
+  if (typeof jobDescription === 'string' && jobDescription.trim()) {
+    const lines = jobDescription
+      .split(/\n+/)
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0 && line.length <= 60);
+    for (const line of lines) {
+      if (/^role:/i.test(line)) {
+        const after = line.replace(/^role:\s*/i, '');
+        if (after && looksLikeJobTitle(after)) {
+          return after;
+        }
+      }
+      const stripped = line.replace(/[:\-–].*$/, '').trim();
+      if (looksLikeJobTitle(stripped) && stripped.split(/\s+/).length <= 6) {
+        return stripped;
+      }
+    }
+  }
+
+  return '';
+};
+
+const combineLocationParts = (...parts) =>
+  parts
+    .map((part) => (typeof part === 'string' ? part.trim() : ''))
+    .filter(Boolean)
+    .join(', ');
+
+const deriveResumeLocation = (resumeData = {}) => {
+  const scanRecords = (records = []) => {
+    for (let i = records.length - 1; i >= 0; i -= 1) {
+      const entry = records[i];
+      if (!entry || typeof entry !== 'object') {
+        continue;
+      }
+      if (typeof entry.location === 'string' && entry.location.trim()) {
+        return entry.location.trim();
+      }
+      const combined = combineLocationParts(entry.city, entry.state || entry.region, entry.country);
+      if (combined) {
+        return combined;
+      }
+    }
+    return '';
+  };
+
+  const experienceLocation = scanRecords(Array.isArray(resumeData.experiences) ? resumeData.experiences : []);
+  if (experienceLocation) {
+    return experienceLocation;
+  }
+
+  const educationLocation = scanRecords(Array.isArray(resumeData.education) ? resumeData.education : []);
+  if (educationLocation) {
+    return educationLocation;
+  }
+
+  const fallback = combineLocationParts(resumeData.city, resumeData.state, resumeData.country);
+  if (fallback) {
+    return fallback;
+  }
+
+  if (typeof resumeData.location === 'string' && resumeData.location.trim()) {
+    return resumeData.location.trim();
+  }
+
+  return '';
+};
+
+const buildJobMatchPayloadForChat = (resumeData, jobDescription = '') => {
+  if (!resumeData || typeof resumeData !== 'object') {
+    return null;
+  }
+
+  const summaryText = typeof resumeData.summary === 'string' ? resumeData.summary.trim() : '';
+  const experienceSummary = summarizeExperiencesForMatches(resumeData.experiences);
+  const educationSummary = summarizeEducationForMatches(resumeData.education);
+  const skills = collectSkillsFromResume(resumeData);
+
+  if (!summaryText && !experienceSummary && !educationSummary && skills.length === 0) {
+    return null;
+  }
+
+  return {
+    position: deriveTargetPosition(resumeData, jobDescription),
+    name: resumeData.name || '',
+    email: resumeData.email || '',
+    summary: summaryText,
+    experience: experienceSummary,
+    education: educationSummary,
+    jobDescription: jobDescription || '',
+    location: deriveResumeLocation(resumeData),
+    skills,
+    htmlContent: '',
+    candidateJobLimit: 400,
+    maxResults: 25,
+  };
+};
 
 const matchTemplateChoice = (text) => {
   if (!text) return null;
