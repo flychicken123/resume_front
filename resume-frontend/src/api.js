@@ -315,6 +315,18 @@ export async function uploadResumeHistoryPdf(file) {
   return data;
 }
 
+export async function fetchResumeHistoryList() {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/resume/history`, {
+    method: 'GET',
+    headers: getAuthHeaders(),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error || 'Failed to fetch resume history.');
+  }
+  return data;
+}
+
 // Job Application API functions
 export async function submitJobApplication(applicationData) {
   const res = await fetchWithAuth(`${API_BASE_URL}/api/job/apply`, {
