@@ -501,7 +501,16 @@ const StepExperience = () => {
                   }}
                 />
               </div>
+            </div>
 
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                gap: '1rem',
+                marginBottom: '1rem',
+              }}
+            >
               <div style={{ minWidth: '220px' }}>
                 <label
                   style={{
