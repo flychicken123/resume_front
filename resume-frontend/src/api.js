@@ -320,7 +320,7 @@ export async function fetchJobCount(keyword) {
   if (keyword) {
     params.set('keyword', keyword);
   }
-  const res = await fetchWithAuth(`${API_BASE_URL}/analysis/job-count?${params.toString()}`, {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/analysis/job-count?${params.toString()}`, {
     method: 'GET',
     headers: getAuthHeaders(),
   });
