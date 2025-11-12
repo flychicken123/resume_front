@@ -182,6 +182,150 @@ const extractResumeLocations = (resumeData) => {
   return ordered.slice(0, 8);
 };
 
+const decodeHtmlEntities = (value) => {
+  if (typeof value !== 'string') {
+    return '';
+  }
+  const htmlEntityMap = {
+    '&nbsp;': ' ',
+    '&#160;': ' ',
+    '&amp;': '&',
+    '&quot;': '"',
+    '&#34;': '"',
+    '&apos;': "'",
+    '&#39;': "'",
+    '&lt;': '<',
+    '&#60;': '<',
+    '&gt;': '>',
+    '&#62;': '>',
+  };
+  let decoded = value.replace(/&[a-zA-Z#0-9]+;/g, (entity) => {
+    const lower = entity.toLowerCase();
+    if (htmlEntityMap[lower]) {
+      return htmlEntityMap[lower];
+    }
+    if (/^&#x[0-9a-f]+;$/i.test(entity)) {
+      const hex = entity.slice(3, -1);
+      const codePoint = parseInt(hex, 16);
+      if (!Number.isNaN(codePoint)) {
+        return String.fromCharCode(codePoint);
+      }
+    }
+    if (/^&#\d+;$/i.test(entity)) {
+      const num = entity.slice(2, -1);
+      const codePoint = parseInt(num, 10);
+      if (!Number.isNaN(codePoint)) {
+        return String.fromCharCode(codePoint);
+      }
+    }
+    return entity;
+  });
+  return decoded;
+};
+
+const convertHTMLToPlainText = (value) => {
+  if (typeof value !== 'string') {
+    return '';
+  }
+  const decoded = decodeHtmlEntities(value);
+  const blockTagPattern = /<\/?(p|div|section|article|li|ul|ol|br|h[1-6])[^>]*>/gi;
+  let text = decoded.replace(blockTagPattern, '\n');
+  text = text.replace(/<[^>]+>/g, ' ');
+  return text
+    .replace(/\u00a0/g, ' ')
+    .replace(/\r/g, '\n')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n[ \t]+/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .replace(/[ \t]{2,}/g, ' ')
+    .trim();
+};
+
+const extractJobDescriptionHighlight = (description) => {
+  const plainText = convertHTMLToPlainText(description);
+  if (!plainText) {
+    return '';
+  }
+  const normalized = plainText.replace(/\r/g, ' ').replace(/\s+/g, ' ').trim();
+  if (!normalized) {
+    return '';
+  }
+  const lineCandidates = plainText
+    .split(/\r?\n+/)
+    .map((line) => line.replace(/^[\-\*\u2022]\s*/, '').trim())
+    .filter((line) => line.length >= 40 && line.length <= 220);
+  if (lineCandidates.length > 0) {
+    return lineCandidates[0];
+  }
+  const sentences = normalized.match(/[^.!?]+[.!?]?/g) || [];
+  for (const sentence of sentences) {
+    const trimmed = sentence.trim();
+    if (trimmed.length >= 40 && trimmed.length <= 220) {
+      return trimmed;
+    }
+  }
+  if (normalized.length > 220) {
+    return `${normalized.slice(0, 217).trim()}...`;
+  }
+  return normalized;
+};
+
+const formatListForSentence = (items) => {
+  if (!Array.isArray(items) || items.length === 0) {
+    return '';
+  }
+  if (items.length === 1) {
+    return items[0];
+  }
+  if (items.length === 2) {
+    return `${items[0]} and ${items[1]}`;
+  }
+  const head = items.slice(0, -1).join(', ');
+  return `${head}, and ${items[items.length - 1]}`;
+};
+
+const extractLatestExperienceInfo = (resumeData) => {
+  if (!resumeData || typeof resumeData !== 'object') {
+    return null;
+  }
+  const experiences = Array.isArray(resumeData.experiences) ? resumeData.experiences.filter(Boolean) : [];
+  for (let i = experiences.length - 1; i >= 0; i -= 1) {
+    const exp = experiences[i];
+    if (!exp) {
+      continue;
+    }
+    const title = typeof exp.jobTitle === 'string' ? exp.jobTitle.trim() : '';
+    const company = typeof exp.company === 'string' ? exp.company.trim() : '';
+    const summary = typeof exp.description === 'string' ? exp.description.trim() : '';
+    if (title || company || summary) {
+      return { title, company, summary };
+    }
+  }
+  return null;
+};
+
+const extractQuantifiedSnippet = (text) => {
+  if (typeof text !== 'string') {
+    return '';
+  }
+  const normalized = text.replace(/\r/g, ' ').replace(/\s+/g, ' ').trim();
+  if (!normalized) {
+    return '';
+  }
+  const sentences = normalized.match(/[^.!?]+[.!?]?/g) || [];
+  for (const sentence of sentences) {
+    const trimmed = sentence.trim();
+    if (trimmed.length >= 40 && trimmed.length <= 200 && /\d/.test(trimmed)) {
+      return trimmed;
+    }
+  }
+  if (/\d/.test(normalized)) {
+    const slice = normalized.slice(0, 200).trim();
+    return slice.endsWith('.') ? slice : `${slice}...`;
+  }
+  return '';
+};
+
 const NOMINATIM_ENDPOINT = 'https://nominatim.openstreetmap.org/search';
 const NOMINATIM_REVERSE_ENDPOINT = 'https://nominatim.openstreetmap.org/reverse';
 const NOMINATIM_MAX_RESULTS = 6;
@@ -874,6 +1018,25 @@ function BuilderPage() {
     [jobDescriptions]
   );
 
+  const targetPosition = useMemo(
+    () => deriveTargetPosition(data, combinedJobDescription),
+    [data, combinedJobDescription]
+  );
+
+  const resumeSkills = useMemo(() => collectResumeSkills(data), [data]);
+
+  const latestRoleInfo = useMemo(() => extractLatestExperienceInfo(data), [data]);
+
+  const quantifiedSummary = useMemo(() => {
+    const summaryText = typeof data?.summary === 'string' ? data.summary : '';
+    return extractQuantifiedSnippet(summaryText);
+  }, [data]);
+
+  const latestImpactSnippet = useMemo(
+    () => extractQuantifiedSnippet((latestRoleInfo && latestRoleInfo.summary) || ''),
+    [latestRoleInfo]
+  );
+
   
   // Load job descriptions from localStorage on component mount
   useEffect(() => {
@@ -966,29 +1129,138 @@ function BuilderPage() {
         return [];
       }
       const reasons = [];
-      if (typeof match.match_score === 'number' && match.match_score >= 0) {
-        reasons.push(`High AI match score of ${match.match_score.toFixed(1)} indicates a strong skills overlap.`);
-      }
-      if (match.job_department) {
-        reasons.push(`Team focuses on ${match.job_department}, similar to roles you've highlighted.`);
-      }
-      if (match.job_remote_type) {
-        reasons.push(`Supports ${match.job_remote_type.toLowerCase()} work — matching your flexibility preferences.`);
-      }
-      if (match.job_location && effectiveLocation) {
+      const score = typeof match.match_score === 'number' ? match.match_score : null;
+      const jobDepartment = typeof match.job_department === 'string' ? match.job_department.trim() : '';
+      const jobRemoteType = typeof match.job_remote_type === 'string' ? match.job_remote_type.trim() : '';
+      const jobLocation = typeof match.job_location === 'string' ? match.job_location.trim() : '';
+      const companyName = typeof match.company_name === 'string' ? match.company_name.trim() : '';
+      const jobTitle = typeof match.job_title === 'string' ? match.job_title.trim() : '';
+      const employmentType = typeof match.job_employment_type === 'string' ? match.job_employment_type.trim() : '';
+      const jobHighlight = extractJobDescriptionHighlight(match.job_description);
+      const jobTextLower = typeof match.job_description === 'string' ? match.job_description.toLowerCase() : '';
+      const normalizedResumeSkills = Array.isArray(resumeSkills)
+        ? resumeSkills
+            .map((skill) => (typeof skill === 'string' ? skill.trim() : ''))
+            .filter((skill) => Boolean(skill))
+        : [];
+      const skillHits = jobTextLower
+        ? normalizedResumeSkills.filter((skill) => jobTextLower.includes(skill.toLowerCase())).slice(0, 3)
+        : [];
+      const fallbackSkills = normalizedResumeSkills.slice(0, 3);
+
+      const formatLabel = (value) =>
+        value
+          .split(/[\s_]+/)
+          .filter(Boolean)
+          .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1).toLowerCase())
+          .join(' ');
+
+      if (score !== null && score >= 0) {
+        const qualifier = score >= 85 ? 'exceptional' : score >= 70 ? 'strong' : 'solid';
         reasons.push(
-          `Located in ${match.job_location}, close to your preferred location (${effectiveLocation}).`
+          `AI match score of ${score.toFixed(1)} is ${qualifier}, signaling recruiters will quickly see how your achievements map to this opening.`
         );
       }
-      if (match.company_name) {
-        reasons.push(`${match.company_name} is hiring for ${match.job_title || 'this role'} right now.`);
+
+      if (targetPosition) {
+        const roleLabel = jobTitle || 'this role';
+        reasons.push(
+          `The ${roleLabel} brief keeps you squarely on the ${targetPosition} trajectory you called out, so your resume story stays perfectly aligned.`
+        );
       }
+
+      if (skillHits.length > 0) {
+        reasons.push(
+          `You already lead with ${formatListForSentence(skillHits)}, the exact stack cited in the description—zero retooling required.`
+        );
+      } else if (fallbackSkills.length > 0) {
+        reasons.push(
+          `Signature strengths like ${formatListForSentence(fallbackSkills)} give you punchy talking points for the hiring panel even before tailoring.`
+        );
+      }
+
+      if (jobDepartment) {
+        reasons.push(
+          `You'll partner with the ${jobDepartment} org, which mirrors the environments you've highlighted across your recent experience.`
+        );
+      }
+
+      if (jobRemoteType) {
+        const remoteLower = jobRemoteType.toLowerCase();
+        let remoteSentence = `Team supports a ${remoteLower} schedule`;
+        if (remoteLower.includes('remote')) {
+          remoteSentence = 'Team already operates fully remote, letting you contribute from wherever you are most effective';
+        } else if (remoteLower.includes('hybrid')) {
+          remoteSentence = 'Hybrid rhythm blends on-site collaboration with deep-focus remote days';
+        } else if (remoteLower.includes('onsite') || remoteLower.includes('on-site')) {
+          remoteSentence = 'On-site environment keeps you close to decision makers and speeds up feedback loops';
+        }
+        if (effectiveLocation) {
+          remoteSentence = `${remoteSentence}, aligning with your preferred location (${effectiveLocation}).`;
+        } else if (jobLocation) {
+          remoteSentence = `${remoteSentence} while staying connected to the ${jobLocation} hub.`;
+        } else {
+          remoteSentence = `${remoteSentence}.`;
+        }
+        reasons.push(remoteSentence);
+      }
+
+      if (jobLocation && effectiveLocation) {
+        reasons.push(`Located in ${jobLocation}, so you can chase the role without straying from ${effectiveLocation}.`);
+      } else if (jobLocation) {
+        reasons.push(`Located in ${jobLocation}, giving you immediate visibility with the hiring team.`);
+      }
+
+      if (employmentType) {
+        const displayEmployment = formatLabel(employmentType);
+        reasons.push(
+          `${displayEmployment} arrangement keeps scope clear and signals the kind of stability recruiters value in senior candidates.`
+        );
+      }
+
+      if (jobHighlight) {
+        reasons.push(
+          `The job description highlights "${jobHighlight}", echoing the impact stories you've already quantified in your resume.`
+        );
+      }
+
+      if (companyName) {
+        const roleLabel = jobTitle || 'this role';
+        reasons.push(
+          `${companyName} is actively scaling ${roleLabel}, so your application addresses a live, high-priority need instead of a passive talent pool.`
+        );
+      } else if (jobTitle) {
+        reasons.push(
+          `Hiring managers are prioritizing the ${jobTitle} seat right now, so your tailored resume lands while the opportunity is hot.`
+        );
+      }
+
+      let impactSnippetUsed = false;
+      if (latestRoleInfo && (latestRoleInfo.title || latestRoleInfo.company || latestRoleInfo.summary)) {
+        const latestLabelParts = [latestRoleInfo.title, latestRoleInfo.company].filter(Boolean);
+        const latestLabel = latestLabelParts.join(' at ');
+        const experienceLead = latestLabel ? `${latestLabel} experience` : 'Your recent experience';
+        let experienceSentence = `${experienceLead} mirrors the scope this team owns`;
+        if (latestImpactSnippet) {
+          experienceSentence = `${experienceSentence} — for example, ${latestImpactSnippet}`;
+          impactSnippetUsed = true;
+        }
+        reasons.push(`${experienceSentence}.`);
+      }
+
+      if (!impactSnippetUsed && quantifiedSummary) {
+        reasons.push(
+          `Your resume already quantifies wins: "${quantifiedSummary}", which gives the recruiter a persuasive proof point before they even open your profile.`
+        );
+      }
+
       if (!reasons.length) {
         reasons.push('This role aligns with the experience and skills saved in your resume.');
       }
-      return reasons.slice(0, 3);
+
+      return reasons;
     },
-    [effectiveLocation]
+    [effectiveLocation, resumeSkills, targetPosition, latestRoleInfo, latestImpactSnippet, quantifiedSummary]
   );
   const MatchReasonPopover = ({ reasons }) => {
     if (!Array.isArray(reasons) || reasons.length === 0) {
@@ -998,9 +1270,11 @@ function BuilderPage() {
       <div
         style={{
           position: 'absolute',
-          top: '-12px',
-          right: '-12px',
-          width: '260px',
+          top: 0,
+          left: 'calc(100% + 12px)',
+          right: 'auto',
+          width: '320px',
+          maxWidth: 'min(320px, 60vw)',
           background: '#ffffff',
           border: '1px solid #e2e8f0',
           boxShadow: '0 15px 35px rgba(15, 23, 42, 0.25)',
@@ -1186,8 +1460,8 @@ function BuilderPage() {
     const experienceSummary = summariseExperiences(data.experiences);
     const educationSummary = summariseEducation(data.education);
     const summaryText = typeof data.summary === 'string' ? data.summary : '';
-    const position = deriveTargetPosition(data, combinedJobDescription);
-    const skills = collectResumeSkills(data);
+    const position = targetPosition;
+    const skills = resumeSkills;
     const normalizedJobDescription = trimmedJobDescription;
 
     return {
@@ -1204,7 +1478,7 @@ function BuilderPage() {
       candidateJobLimit: 400,
       maxResults: 25,
     };
-  }, [data, combinedJobDescription, trimmedJobDescription, jobMatchesLocation, autoLocation]);
+  }, [data, trimmedJobDescription, jobMatchesLocation, autoLocation, targetPosition, resumeSkills]);
 
   const fetchJobMatches = useCallback(async () => {
     if (!user) {
