@@ -828,23 +828,7 @@ const ChatWidget = () => {
     const lower = trimmed.toLowerCase();
 
     if (awaitingJobMatchAnswer) {
-      if (isAffirmative(lower)) {
-        setAwaitingJobMatchAnswer(false);
-        appendBotMessage('Great! Opening job matches now.');
-        try {
-          window.localStorage.setItem('chatJobMatchesRedirect', '1');
-        } catch (_) {
-          // ignore storage issues
-        }
-        setTimeout(() => navigate('/builder'), 300);
-        setLastStep('chat_jobmatch_yes');
-      } else if (isNegative(lower)) {
-        setAwaitingJobMatchAnswer(false);
-        appendBotMessage('No problem! Let me know if you need anything else.');
-        setLastStep('chat_jobmatch_no');
-      } else {
-        appendBotMessage('Please reply "yes" or "no" so I know whether to show job matches.');
-      }
+      handleJobMatchDecision(trimmed);
       return;
     }
 
@@ -1005,6 +989,41 @@ const showJobMatchesPrompt = () => {
     });
   };
 
+const handleJobMatchDecision = (rawValue) => {
+    if (!awaitingJobMatchAnswer) {
+      return false;
+    }
+
+    const normalized = (rawValue || '').toString().trim().toLowerCase();
+    let jobMatchResponse = normalized;
+    if (jobMatchResponse.startsWith('jobmatches_')) {
+      jobMatchResponse = jobMatchResponse.replace('jobmatches_', '');
+    }
+
+    if (isAffirmative(jobMatchResponse)) {
+      setAwaitingJobMatchAnswer(false);
+      appendBotMessage('Great! Opening job matches now.');
+      try {
+        window.localStorage.setItem('chatJobMatchesRedirect', '1');
+      } catch (_) {
+        // ignore storage issues
+      }
+      setTimeout(() => navigate('/builder'), 300);
+      setLastStep('chat_jobmatch_yes');
+      return true;
+    }
+
+    if (isNegative(jobMatchResponse)) {
+      setAwaitingJobMatchAnswer(false);
+      appendBotMessage('No problem! Let me know if you need anything else.');
+      setLastStep('chat_jobmatch_no');
+      return true;
+    }
+
+    appendBotMessage('Please reply "yes" or "no" so I know whether to show job matches.');
+    return true;
+  };
+
 const buildSectionResponse = (sectionKey) => {
     const jobDescription =
       resumeFlowState.data.jobDescription || getStoredJobDescription();
@@ -1082,18 +1101,19 @@ const buildSectionResponse = (sectionKey) => {
     }
   };
 
-  const handleSubmit = async (event, overrideText = null) => {
+  const handleSubmit = async (event, overrideText = null, displayOverride = null) => {
     if (event && typeof event.preventDefault === 'function') {
       event.preventDefault();
     }
     const sourceText = overrideText !== null ? overrideText : input;
     const trimmed = sourceText.trim();
+    const displayText = (displayOverride !== null ? displayOverride : sourceText).trim();
     if (!trimmed || isLoading) {
       return;
     }
     const normalized = trimmed.toLowerCase();
 
-    const userMessage = { sender: 'user', text: trimmed };
+    const userMessage = { sender: 'user', text: displayText };
     setLastStep('chat_question_submitted');
     const updatedHistory = [...messages, userMessage];
     setMessages(updatedHistory);
@@ -1133,24 +1153,7 @@ const buildSectionResponse = (sectionKey) => {
     }
 
     if (awaitingJobMatchAnswer) {
-      const lower = trimmed.toLowerCase();
-      if (isAffirmative(lower)) {
-        setAwaitingJobMatchAnswer(false);
-        appendBotMessage('Great! Opening job matches now.');
-        try {
-          window.localStorage.setItem('chatJobMatchesRedirect', '1');
-        } catch (_) {
-          // ignore storage issues
-        }
-        setTimeout(() => navigate('/builder'), 300);
-        setLastStep('chat_jobmatch_yes');
-      } else if (isNegative(lower)) {
-        setAwaitingJobMatchAnswer(false);
-        appendBotMessage('No problem! Let me know if you need anything else.');
-        setLastStep('chat_jobmatch_no');
-      } else {
-        appendBotMessage('Please reply "yes" or "no" so I know whether to show job matches.');
-      }
+      handleJobMatchDecision(trimmed);
       setIsLoading(false);
       return;
     }
@@ -1242,7 +1245,7 @@ const buildSectionResponse = (sectionKey) => {
       return;
     }
     if (btn.value) {
-      handleSubmit(null, btn.value);
+      handleSubmit(null, btn.value, btn.label || btn.value);
     }
   };
 
