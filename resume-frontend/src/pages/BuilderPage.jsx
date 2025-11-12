@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef, useLayoutEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -1263,11 +1263,44 @@ function BuilderPage() {
     [effectiveLocation, resumeSkills, targetPosition, latestRoleInfo, latestImpactSnippet, quantifiedSummary]
   );
   const MatchReasonPopover = ({ reasons }) => {
+    const popoverRef = useRef(null);
+    const [verticalOffset, setVerticalOffset] = useState(0);
+
+    useLayoutEffect(() => {
+      if (!Array.isArray(reasons) || reasons.length === 0) {
+        setVerticalOffset(0);
+        return undefined;
+      }
+      if (typeof window === 'undefined') {
+        return undefined;
+      }
+      const reposition = () => {
+        if (!popoverRef.current) {
+          return;
+        }
+        const rect = popoverRef.current.getBoundingClientRect();
+        const viewportBottom = window.innerHeight - 16;
+        const overflow = rect.bottom - viewportBottom;
+        const nextOffset = overflow > 0 ? -overflow : 0;
+        setVerticalOffset((prev) => (prev === nextOffset ? prev : nextOffset));
+      };
+
+      reposition();
+      window.addEventListener('scroll', reposition, true);
+      window.addEventListener('resize', reposition);
+      return () => {
+        window.removeEventListener('scroll', reposition, true);
+        window.removeEventListener('resize', reposition);
+      };
+    }, [reasons]);
+
     if (!Array.isArray(reasons) || reasons.length === 0) {
       return null;
     }
+
     return (
       <div
+        ref={popoverRef}
         style={{
           position: 'absolute',
           top: 0,
@@ -1275,12 +1308,17 @@ function BuilderPage() {
           right: 'auto',
           width: '320px',
           maxWidth: 'min(320px, 60vw)',
+          maxHeight: 'calc(100vh - 32px)',
+          overflowY: 'auto',
           background: '#ffffff',
           border: '1px solid #e2e8f0',
           boxShadow: '0 15px 35px rgba(15, 23, 42, 0.25)',
           borderRadius: '14px',
           padding: '0.85rem 1rem',
           zIndex: 40,
+          transform: verticalOffset ? `translateY(${verticalOffset}px)` : undefined,
+          transition: 'transform 0.12s ease-out',
+          willChange: 'transform',
         }}
       >
         <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.35rem' }}>
