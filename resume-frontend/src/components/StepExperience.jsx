@@ -443,12 +443,12 @@ const StepExperience = () => {
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
                 gap: '1rem',
                 marginBottom: '1rem',
               }}
             >
-              <div>
+              <div style={{ minWidth: '220px' }}>
                 <label
                   style={{
                     display: 'block',
@@ -475,7 +475,7 @@ const StepExperience = () => {
                 />
               </div>
 
-              <div>
+              <div style={{ minWidth: '220px' }}>
                 <label
                   style={{
                     display: 'block',
@@ -502,7 +502,7 @@ const StepExperience = () => {
                 />
               </div>
 
-              <div>
+              <div style={{ minWidth: '220px' }}>
                 <label
                   style={{
                     display: 'block',
@@ -529,7 +529,7 @@ const StepExperience = () => {
                 />
               </div>
 
-              <div>
+              <div style={{ minWidth: '220px' }}>
                 <label
                   style={{
                     display: 'block',
