@@ -158,6 +158,55 @@
   transform: translateY(-1px);
 }
 
+.resume-history-upload {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1.5rem;
+}
+
+.upload-pdf-button {
+  align-self: flex-start;
+  padding: 0.65rem 1.25rem;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(120deg, #312e81, #4338ca);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 12px 24px rgba(49, 46, 129, 0.25);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.upload-pdf-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.upload-pdf-button:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 28px rgba(49, 46, 129, 0.35);
+}
+
+.upload-note {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.upload-error {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #b91c1c;
+}
+
+.upload-success {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #047857;
+}
+
 .import-button {
   padding: 0.5rem 1rem;
   background: linear-gradient(120deg, #312e81, #4338ca);
