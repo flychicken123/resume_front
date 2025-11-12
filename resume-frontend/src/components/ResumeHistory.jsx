@@ -1,8 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '../context/AuthContext';
 import { useResumeHistory } from '../hooks/useResumeHistory';
+import { uploadResumeHistoryPdf } from '../api';
 import './ResumeHistory.css';
+
+const ADMIN_UPLOAD_EMAIL = 'harwtalk@gmail.com';
 
 const ResumeHistory = ({ onClose, onSelectResume, importingResumeId }) => {
   const { user } = useAuth();
@@ -18,6 +21,11 @@ const ResumeHistory = ({ onClose, onSelectResume, importingResumeId }) => {
   } = useResumeHistory();
   const [editingId, setEditingId] = useState(null);
   const [newName, setNewName] = useState('');
+  const [uploadError, setUploadError] = useState('');
+  const [uploadNotice, setUploadNotice] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const uploadInputRef = useRef(null);
+  const canUploadPdf = (user?.email || '').toLowerCase() === ADMIN_UPLOAD_EMAIL;
 
   useEffect(() => {
     if (user) {
@@ -64,6 +72,46 @@ const ResumeHistory = ({ onClose, onSelectResume, importingResumeId }) => {
     setNewName('');
   };
 
+  const triggerUploadDialog = () => {
+    setUploadNotice('');
+    if (!canUploadPdf) {
+      setUploadError('We are doing internal testing, so only admins can upload PDFs right now.');
+      return;
+    }
+    setUploadError('');
+    if (uploadInputRef.current) {
+      uploadInputRef.current.value = '';
+      uploadInputRef.current.click();
+    }
+  };
+
+  const handleUploadChange = async (event) => {
+    const file = event.target.files && event.target.files[0];
+    if (!file) {
+      return;
+    }
+    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+    if (!isPdf) {
+      setUploadError('Only PDF files can be uploaded.');
+      return;
+    }
+    try {
+      setUploading(true);
+      setUploadError('');
+      setUploadNotice('');
+      await uploadResumeHistoryPdf(file);
+      await fetchResumeHistory();
+      setUploadNotice('Upload successful! Your resume has been added to history.');
+    } catch (err) {
+      setUploadError(err?.message || 'Failed to upload PDF.');
+    } finally {
+      setUploading(false);
+      if (uploadInputRef.current) {
+        uploadInputRef.current.value = '';
+      }
+    }
+  };
+
   if (!user) {
     return (
       <div className="resume-history-modal">
@@ -105,6 +153,34 @@ const ResumeHistory = ({ onClose, onSelectResume, importingResumeId }) => {
         </div>
 
         <div className="resume-history-body">
+          <div className="resume-history-upload">
+            <button
+              type="button"
+              className="upload-pdf-button"
+              onClick={triggerUploadDialog}
+              disabled={uploading}
+            >
+              {uploading
+                ? 'Uploading PDF…'
+                : canUploadPdf
+                ? 'Upload PDF to History'
+                : 'Upload PDF (admins only)'}
+            </button>
+            <input
+              type="file"
+              accept="application/pdf"
+              ref={uploadInputRef}
+              style={{ display: 'none' }}
+              onChange={handleUploadChange}
+            />
+            <p className="upload-note">
+              {canUploadPdf
+                ? 'Add a PDF from your device to keep it in your history.'
+                : 'We are doing internal testing so this upload is limited to administrators for now.'}
+            </p>
+            {uploadError && <p className="upload-error">{uploadError}</p>}
+            {uploadNotice && <p className="upload-success">{uploadNotice}</p>}
+          </div>
           {loading ? (
             <div className="loading">Loading resume history...</div>
           ) : error ? (

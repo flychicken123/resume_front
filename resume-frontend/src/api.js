@@ -287,6 +287,34 @@ export async function parseResumeFile(file) {
   return await res.json();
 }
 
+export async function uploadResumeHistoryPdf(file) {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const token = localStorage.getItem('resumeToken');
+  const headers = {};
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const res = await fetch(`${API_BASE_URL}/api/resume/history/upload`, {
+    method: 'POST',
+    headers,
+    body: formData,
+  });
+
+  if (res.status === 401) {
+    handleUnauthorized();
+    throw new Error('Session expired. Please log in again.');
+  }
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error || 'Failed to upload resume PDF.');
+  }
+  return data;
+}
+
 // Job Application API functions
 export async function submitJobApplication(applicationData) {
   const res = await fetchWithAuth(`${API_BASE_URL}/api/job/apply`, {
