@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import './ChatWidget.css';
-import { getAPIBaseURL, generateSummaryAI, fetchResumeHistoryList } from '../api';
+import { getAPIBaseURL, generateSummaryAI, fetchResumeHistoryList, fetchJobCount } from '../api';
 import { setLastStep } from '../utils/exitTracking';
 import { useAuth } from '../context/AuthContext';
 import { useResume } from '../context/ResumeContext';
@@ -203,6 +203,16 @@ const hasBackgroundAnalysisIntent = (text = '') => {
     normalized.includes('analysis my background') ||
     normalized.includes('analyze my background') ||
     normalized.includes('background analysis')
+  );
+};
+
+const hasSoftwareEngineerJobCountIntent = (text = '') => {
+  if (!text) return false;
+  const normalized = text.toLowerCase();
+  return (
+    normalized.includes('software engineer') &&
+    normalized.includes('job') &&
+    normalized.includes('how many')
   );
 };
 
@@ -450,6 +460,25 @@ const ChatWidget = () => {
       console.error('Background analysis failed', error);
       appendBotMessage("I couldn't analyze your resume right now. Please try again later.");
       setLastStep('chat_resume_analysis_error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSoftwareEngineerJobCount = async () => {
+    appendBotMessage('Let me check how many software engineer roles we have archived…');
+    setLastStep('chat_job_count_start');
+    try {
+      const response = await fetchJobCount('software engineer');
+      const count = typeof response?.count === 'number' ? response.count : 0;
+      appendBotMessage(
+        `We currently have ${count} software engineer job${count === 1 ? '' : 's'} archived in our system.`
+      );
+      setLastStep('chat_job_count_success');
+    } catch (error) {
+      console.error('Software engineer job count lookup failed', error);
+      appendBotMessage("I couldn't look up that job count right now. Please try again later.");
+      setLastStep('chat_job_count_error');
     } finally {
       setIsLoading(false);
     }
@@ -1095,6 +1124,11 @@ const buildSectionResponse = (sectionKey) => {
 
     if (hasBackgroundAnalysisIntent(trimmed)) {
       await handleBackgroundAnalysis();
+      return;
+    }
+
+    if (hasSoftwareEngineerJobCountIntent(trimmed)) {
+      await handleSoftwareEngineerJobCount();
       return;
     }
 
