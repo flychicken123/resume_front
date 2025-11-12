@@ -38,8 +38,8 @@
 }
 
 .chat-panel {
-  width: min(360px, calc(100vw - 32px));
-  height: 440px;
+  width: min(420px, calc(100vw - 32px));
+  height: 520px;
   background: #fff;
   border-radius: 18px;
   box-shadow: 0 20px 60px rgba(15, 23, 42, 0.25);
@@ -53,8 +53,8 @@
 }
 
 .chat-panel.chat-panel--large {
-  width: min(520px, calc(100vw - 32px));
-  height: 560px;
+  width: min(620px, calc(100vw - 32px));
+  height: 640px;
 }
 
 .chat-header {
@@ -224,19 +224,19 @@
   background: linear-gradient(120deg, #2563eb, #3b82f6) !important;
   border: none !important;
   border-radius: 999px !important;
-  padding: 8px 16px !important;
+  padding: 6px 12px !important;
   cursor: pointer !important;
   color: #fff !important;
   font-weight: 600 !important;
-  font-size: 0.85rem !important;
+  font-size: 0.8rem !important;
   letter-spacing: 0.01em !important;
   transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease !important;
-  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25) !important;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25) !important;
 }
 
 .chat-button:hover {
   transform: translateY(-1px) !important;
-  box-shadow: 0 10px 22px rgba(37, 99, 235, 0.35) !important;
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.35) !important;
   opacity: 0.95 !important;
 }
 
@@ -247,10 +247,10 @@
 
 .chat-button--highlight {
   background: linear-gradient(120deg, #f97316, #f59e0b) !important;
-  box-shadow: 0 6px 18px rgba(249, 115, 22, 0.35) !important;
+  box-shadow: 0 5px 16px rgba(249, 115, 22, 0.35) !important;
 }
 
 .chat-button--highlight:hover {
-  box-shadow: 0 10px 24px rgba(249, 115, 22, 0.45) !important;
+  box-shadow: 0 8px 20px rgba(249, 115, 22, 0.45) !important;
   opacity: 0.95 !important;
 }

@@ -1,6 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import './ChatWidget.css';
-import { getAPIBaseURL } from '../api';
+import { getAPIBaseURL, generateSummaryAI, fetchResumeHistoryList } from '../api';
 import { setLastStep } from '../utils/exitTracking';
 import { useAuth } from '../context/AuthContext';
 import { useResume } from '../context/ResumeContext';
@@ -20,6 +20,7 @@ const INITIAL_MESSAGES = [
       { label: 'Build Resume', value: 'build resume' },
       { label: 'Download Resume', value: 'download resume' },
       { label: 'Job Matches', value: 'job matches' },
+      { label: 'Analysis my background', value: 'analysis my background' },
     ],
   },
 ];
@@ -192,6 +193,16 @@ const hasQuitFlowIntent = (text = '') => {
   return (
     cancelWords.some((word) => normalized.includes(word)) &&
     flowTargets.some((word) => normalized.includes(word))
+  );
+};
+
+const hasBackgroundAnalysisIntent = (text = '') => {
+  if (!text) return false;
+  const normalized = text.toLowerCase();
+  return (
+    normalized.includes('analysis my background') ||
+    normalized.includes('analyze my background') ||
+    normalized.includes('background analysis')
   );
 };
 
@@ -386,6 +397,62 @@ const ChatWidget = () => {
     resetChatState({ keepOpen: true });
     setIsOpen(true);
     setLastStep('chat_session_restart');
+  };
+
+  const buildResumeSummaryInput = useCallback(() => {
+    if (!resumeData) {
+      return null;
+    }
+    const experienceText = flattenExperienceText(resumeData.experiences || []);
+    const educationText = flattenEducationText(resumeData.education || []);
+    const skillsArray = (resumeData.skills || '')
+      .split(/[\n,]/)
+      .map((skill) => skill.trim())
+      .filter(Boolean);
+
+    if (!experienceText && !educationText && skillsArray.length === 0) {
+      return null;
+    }
+    return {
+      experience: experienceText,
+      education: educationText,
+      skills: skillsArray,
+    };
+  }, [resumeData]);
+
+  const handleBackgroundAnalysis = async () => {
+    appendBotMessage('Let me review your latest resume from history…');
+    setLastStep('chat_resume_analysis_start');
+    try {
+      const response = await fetchResumeHistoryList();
+      const entries = Array.isArray(response?.history) ? response.history : [];
+      if (!entries || entries.length === 0) {
+        appendBotMessage('I could not find any resumes in your history yet. Please build or import one, then ask me again.');
+        setLastStep('chat_resume_analysis_missing_history');
+        return;
+      }
+      const summaryInput = buildResumeSummaryInput();
+      if (!summaryInput) {
+        appendBotMessage("I found a resume in your history, but I still need more details in the builder (experience, education, or skills) before I can analyze it. Please complete your resume and try again.");
+        setLastStep('chat_resume_analysis_missing_data');
+        return;
+      }
+      const aiSummary = await generateSummaryAI(summaryInput);
+      const cleanedSummary = (aiSummary || '').trim();
+      if (!cleanedSummary) {
+        appendBotMessage("I couldn't summarize your background this time. Please try again later.");
+        setLastStep('chat_resume_analysis_error');
+        return;
+      }
+      appendBotMessage(`Here's what stands out in your background:\n${cleanedSummary}`);
+      setLastStep('chat_resume_analysis_complete');
+    } catch (error) {
+      console.error('Background analysis failed', error);
+      appendBotMessage("I couldn't analyze your resume right now. Please try again later.");
+      setLastStep('chat_resume_analysis_error');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const jumpToTemplateSection = React.useCallback(() => {
@@ -1023,6 +1090,11 @@ const buildSectionResponse = (sectionKey) => {
         appendBotMessage('There is no guided resume step running right now. Say "build my resume" if you would like to start one.');
       }
       setIsLoading(false);
+      return;
+    }
+
+    if (hasBackgroundAnalysisIntent(trimmed)) {
+      await handleBackgroundAnalysis();
       return;
     }
 
