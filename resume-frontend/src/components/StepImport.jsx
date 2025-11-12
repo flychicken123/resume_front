@@ -1,14 +1,18 @@
 import React, { useState, useRef } from 'react';
-import { parseResumeFile } from '../api';
+import { parseResumeFile, getAPIBaseURL } from '../api';
 import { useFeedback } from '../context/FeedbackContext';
 import { setLastStep } from '../utils/exitTracking';
 import { useResume } from '../context/ResumeContext';
+import ResumeHistory from './ResumeHistory';
 
 const StepImport = ({ onSkip }) => {
   const [tab, setTab] = useState('file');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [selectedFileName, setSelectedFileName] = useState('');
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [historyImportError, setHistoryImportError] = useState('');
+  const [historyImportingId, setHistoryImportingId] = useState(null);
   const fileInputRef = useRef(null);
   const { applyImportedData } = useResume();
   const { triggerFeedbackPrompt } = useFeedback();
@@ -66,10 +70,107 @@ const StepImport = ({ onSkip }) => {
     importFromFile(file);
   };
 
+  const extractFilenameFromPath = (path = '') => {
+    if (!path) {
+      return '';
+    }
+    let cleaned = path.trim();
+    // Remove query string
+    const queryIndex = cleaned.indexOf('?');
+    if (queryIndex !== -1) {
+      cleaned = cleaned.slice(0, queryIndex);
+    }
+    try {
+      const url = new URL(cleaned);
+      const parts = url.pathname.split('/');
+      return parts.pop() || '';
+    } catch (err) {
+      const parts = cleaned.split('/');
+      return parts.pop() || '';
+    }
+  };
+
+  const fetchHistoryDownloadUrl = async (s3Path) => {
+    const filename = extractFilenameFromPath(s3Path);
+    if (!filename) {
+      throw new Error('Invalid resume reference.');
+    }
+    const headers = {};
+    const token = localStorage.getItem('resumeToken');
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+    const baseUrl = getAPIBaseURL();
+    const response = await fetch(`${baseUrl}/api/resume/download/${encodeURIComponent(filename)}`, {
+      method: 'GET',
+      headers,
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok || !payload.downloadUrl) {
+      throw new Error(payload?.error || 'Unable to retrieve resume from history.');
+    }
+    return payload.downloadUrl;
+  };
+
+  const handleSelectHistoryResume = async (historyItem) => {
+    if (!historyItem || historyImportingId) {
+      return;
+    }
+    setHistoryImportError('');
+    setHistoryImportingId(historyItem.id);
+    try {
+      const downloadUrl = await fetchHistoryDownloadUrl(historyItem.s3_path);
+      const response = await fetch(downloadUrl);
+      if (!response.ok) {
+        throw new Error('Failed to download resume from history.');
+      }
+      const blob = await response.blob();
+      const preferredName = historyItem.resume_name?.trim() || extractFilenameFromPath(historyItem.s3_path) || `resume-history-${historyItem.id}.pdf`;
+      const normalizedName = preferredName.includes('.') ? preferredName : `${preferredName}.pdf`;
+      const file = new File([blob], normalizedName, { type: blob.type || 'application/pdf' });
+      setSelectedFileName(normalizedName);
+      setShowHistoryModal(false);
+      await importFromFile(file);
+    } catch (err) {
+      console.error('History import failed', err);
+      setHistoryImportError(err.message || 'Unable to import resume from history.');
+    } finally {
+      setHistoryImportingId(null);
+    }
+  };
+
   return (
     <div>
       <h2>Let's import your career history</h2>
       <p>Import your information from an existing resume, LinkedIn profile, or add it manually.</p>
+
+      <div style={{ textAlign: 'center', margin: '1.5rem 0' }}>
+        <button
+          type="button"
+          onClick={() => {
+            setHistoryImportError('');
+            setShowHistoryModal(true);
+          }}
+          style={{
+            padding: '0.85rem 1.5rem',
+            borderRadius: '999px',
+            border: 'none',
+            background: 'linear-gradient(120deg, #312e81, #4338ca)',
+            color: '#fff',
+            fontWeight: 600,
+            cursor: 'pointer',
+            boxShadow: '0 10px 25px rgba(49, 46, 129, 0.3)',
+          }}
+        >
+          Import from Resume History
+        </button>
+        <p style={{ marginTop: '0.75rem', color: '#475569', fontSize: '0.9rem' }}>
+          Reuse resumes you've generated before and instantly load them into the builder.
+        </p>
+        {historyImportError && (
+          <div style={{ color: '#b91c1c', marginTop: '0.5rem' }}>{historyImportError}</div>
+        )}
+      </div>
 
       <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center', margin: '2rem 0' }}>
         <button
@@ -177,6 +278,20 @@ const StepImport = ({ onSkip }) => {
           <li>Preview and download your resume</li>
         </ol>
       </div>
+
+      {showHistoryModal && (
+        <ResumeHistory
+          onClose={() => {
+            if (historyImportingId) {
+              return;
+            }
+            setShowHistoryModal(false);
+            setHistoryImportError('');
+          }}
+          onSelectResume={handleSelectHistoryResume}
+          importingResumeId={historyImportingId}
+        />
+      )}
     </div>
   );
 };

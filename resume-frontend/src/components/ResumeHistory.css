@@ -15,9 +15,8 @@
   background: white;
   border-radius: 12px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  width: 90%;
-  max-width: 600px;
-  max-height: 80vh;
+  width: min(95vw, 900px);
+  max-height: 85vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -159,6 +158,28 @@
   transform: translateY(-1px);
 }
 
+.import-button {
+  padding: 0.5rem 1rem;
+  background: linear-gradient(120deg, #312e81, #4338ca);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.import-button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.import-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(49, 46, 129, 0.35);
+}
+
 .delete-button {
   padding: 0.5rem 1rem;
   background: #ef4444;
@@ -251,6 +272,7 @@
 @media (max-width: 768px) {
   .resume-history-content {
     width: 95%;
+    max-width: none;
     margin: 1rem;
   }
   
