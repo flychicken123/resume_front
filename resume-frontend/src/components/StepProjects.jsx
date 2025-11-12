@@ -206,7 +206,7 @@ const StepProjects = () => {
               <textarea
                 value={project.description}
                 onChange={(e) => updateProject(index, 'description', e.target.value)}
-                placeholder="Describe your project using bullet points (one per line). Start each line with • or just write normally:&#10;• Built a full-stack web application using React and Node.js&#10;• Implemented user authentication and real-time chat features&#10;• Optimized database queries, reducing load time by 40%&#10;• Integrated third-party APIs for payment processing&#10;• Deployed application to AWS with CI/CD pipeline"
+                placeholder="Jot a few raw ideas or accomplishments (e.g., 'React dashboard, real-time charts, AI insights')—AI will expand and polish them later."
                 rows={8}
               />
               <div className="textarea-actions" style={{ marginTop: '0.5rem' }}>
