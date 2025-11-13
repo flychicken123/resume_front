@@ -308,7 +308,9 @@ const readStoredUserEmail = () => {
   }
 };
 
-const ChatWidget = () => {
+const CHAT_WIDGET_ENABLED = false;
+
+const ChatWidgetInner = () => {
   const { user, token } = useAuth();
   const { data: resumeData, setData: updateResume } = useResume();
   const navigate = useNavigate();
@@ -1759,6 +1761,13 @@ const buildSectionResponse = (sectionKey) => {
       </div>
     </div>
   );
+};
+
+const ChatWidget = () => {
+  if (!CHAT_WIDGET_ENABLED) {
+    return null;
+  }
+  return <ChatWidgetInner />;
 };
 
 const RobotIcon = () => (
