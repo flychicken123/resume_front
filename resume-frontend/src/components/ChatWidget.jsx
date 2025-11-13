@@ -1699,7 +1699,7 @@ const buildSectionResponse = (sectionKey) => {
         {showIntroTooltip && (
           <div className="chat-intro-tooltip" role="status" aria-live="polite">
             <div className="chat-intro-tooltip__text">
-              I’m your AI job searching companion. Click to chat!
+              I’m your job search AI companion. Click to chat!
             </div>
             <button
               type="button"
