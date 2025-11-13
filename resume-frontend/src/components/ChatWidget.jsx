@@ -857,16 +857,17 @@ const clampLauncherPosition = useCallback(
 
   const promptForStage = (stage) => {
     switch (stage) {
-      case 'template':
-        appendBotMessage(
-          `Great! Which resume template should we use? Reply with the name or number:\n${TEMPLATE_PROMPT}\nNeed a visual? Jump straight to the Template & Format section below.`,
-          {
-            buttons: [
-              { label: 'Jump to Template & Format', action: 'jump_template_section', variant: 'highlight' },
-            ],
-          }
-        );
+      case 'template': {
+        const templateButtons = TEMPLATE_OPTIONS.map((template) => ({
+          label: template.name,
+          value: `template:${template.id}`,
+        }));
+        appendBotMessage('Great! Which resume template should we use?\nNeed a visual? Jump straight to the Template & Format section below.', {
+          buttons: [{ label: 'Jump to Template & Format', action: 'jump_template_section', variant: 'highlight' }],
+          extraButtons: templateButtons,
+        });
         break;
+      }
       case 'personal':
         appendBotMessage(
           "Let's capture your personal details. Please reply in this format:\nName: ...; Email: ...; Phone: ..."
@@ -1597,6 +1598,25 @@ const buildSectionResponse = (sectionKey) => {
         handleSubmit(null, btn.value, btn.label || btn.value, { intent: 'jobMatches' });
         return;
       }
+      if (normalizedValue.startsWith('template:')) {
+        const templateId = btn.value.split(':')[1];
+        const templateMeta = TEMPLATE_OPTIONS.find((tpl) => tpl.id === templateId);
+        if (templateMeta) {
+          updateResume((prev) => ({
+            ...prev,
+            selectedFormat: templateMeta.id,
+          }));
+          setResumeFlowState((prev) => ({
+            ...prev,
+            data: { ...prev.data, templateId: templateMeta.id },
+          }));
+          appendBotMessage(`Fantastic choice! We'll use the ${templateMeta.name} template.`);
+          advanceResumeStage(getNextStage('template'));
+        } else {
+          appendBotMessage('Please select a template from the buttons provided.');
+        }
+        return;
+      }
       handleSubmit(null, btn.value, btn.label || btn.value);
     }
   };
@@ -1671,6 +1691,20 @@ const buildSectionResponse = (sectionKey) => {
                         </button>
                       );
                     })}
+                  </div>
+                )}
+                {Array.isArray(message.extraButtons) && message.extraButtons.length > 0 && (
+                  <div className="chat-button-row chat-button-row--stacked">
+                    {message.extraButtons.map((btn, idx) => (
+                      <button
+                        key={`${message.sender}-${index}-extra-btn-${idx}`}
+                        type="button"
+                        className="chat-button"
+                        onClick={() => handleMessageButtonClick(btn)}
+                      >
+                        {btn.label}
+                      </button>
+                    ))}
                   </div>
                 )}
               </div>
