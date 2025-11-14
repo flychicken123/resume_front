@@ -216,6 +216,10 @@
   align-items: baseline;
 }
 
+.project-field-block {
+  display: block;
+}
+
 .skills-inline {
   display: flex;
   flex-wrap: wrap;
@@ -267,6 +271,12 @@
   display: inline-flex;
   flex-wrap: wrap;
   gap: 2px;
+}
+
+.experience-field-block {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }
 
 .experience-separator {
