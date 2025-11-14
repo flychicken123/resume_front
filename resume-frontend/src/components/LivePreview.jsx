@@ -322,8 +322,25 @@ const collectExperienceFieldChanges = (previousList = [], nextList = []) => {
     if (!contactItems.length) {
       return null;
     }
+    const inferredAlign = typeof contactStyle?.textAlign === 'string'
+      ? contactStyle.textAlign.toLowerCase()
+      : '';
+    const justifyContent = inferredAlign === 'center'
+      ? 'center'
+      : inferredAlign === 'right'
+        ? 'flex-end'
+        : 'flex-start';
+    const lineStyle = {
+      display: 'flex',
+      flexWrap: 'wrap',
+      gap: '4px',
+      alignItems: 'center',
+      justifyContent,
+      width: '100%',
+      ...contactStyle,
+    };
     return (
-      <div style={contactStyle} className="contact-inline">
+      <div style={lineStyle} className="contact-inline">
         {contactItems.map((item, index) => (
           <Fragment key={`${item.highlightKey}-${index}`}>
             <span className={getSectionHighlightClass(item.highlightKey, 'contact-entry')}>
