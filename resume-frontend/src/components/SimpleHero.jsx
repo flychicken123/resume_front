@@ -6,17 +6,11 @@ import TRUSTED_COMPANIES from '../constants/trustedCompanies';
 
 const resumePreviewSrc = '/templates/modern.png';
 
-const SimpleHero = ({ onCreateClick, onJobsClick }) => {
+const SimpleHero = ({ onCreateClick }) => {
   const handleCreate = () => {
     setLastStep('clicked_create_from_hero');
     trackCTAClick('hero_create_cta', { page: window.location.pathname });
     onCreateClick?.();
-  };
-
-  const handleBrowseJobs = () => {
-    setLastStep('clicked_jobs_from_hero');
-    trackCTAClick('hero_jobs_cta', { page: window.location.pathname });
-    onJobsClick?.();
   };
 
   return (
@@ -25,8 +19,13 @@ const SimpleHero = ({ onCreateClick, onJobsClick }) => {
         <div className="hero-left">
           <span className="hero-eyebrow">Launch your resume in minutes</span>
           <h1 className="hero-headline">
-            Build an ATS-ready resume with AI guidance
+            Build resume with AI
           </h1>
+          <div className="hero-primary-cta">
+            <button className="btn-create" onClick={handleCreate}>
+              Create my resume
+            </button>
+          </div>
 
           <p className="hero-description">
             Start for free, polish every section with smart suggestions, and see how your resume
@@ -51,15 +50,6 @@ const SimpleHero = ({ onCreateClick, onJobsClick }) => {
           <div className="hero-job-match-note">
             <span className="hero-job-match-icon" aria-hidden="true">💼</span>
             Match your resume to live job openings without leaving HiHired.
-          </div>
-
-          <div className="hero-buttons">
-            <button className="btn-create" onClick={handleCreate}>
-              Create my resume
-            </button>
-            <button type="button" className="btn-jobs" onClick={handleBrowseJobs}>
-              Browse jobs
-            </button>
           </div>
 
           <div className="hero-quick-stats">
