@@ -640,10 +640,6 @@ const Home = () => {
 
           openBuilderFrom("home_create_cta");
         }}
-        onJobsClick={() => {
-          trackBuilderStart("home_jobs_cta");
-          openBuilderFrom("home_jobs_cta", { targetStep: BUILDER_TARGET_JOB_MATCHES });
-        }}
       />
 
       {/* Job Match Feature */}
