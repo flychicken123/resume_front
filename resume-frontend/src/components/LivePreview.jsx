@@ -2028,8 +2028,8 @@ const renderExperiences = (experiences, styles) => {
         `experience-${resolvedExperienceIndex}`,
         'experience-entry'
       );
-      const experienceFieldClass = (field) =>
-        getSectionHighlightClass(`experience-${resolvedExperienceIndex}-${field}`, 'experience-field');
+      const experienceFieldClass = (field, extraClass = 'experience-field') =>
+        getSectionHighlightClass(`experience-${resolvedExperienceIndex}-${field}`, extraClass);
       if (typeof exp === 'string') {
         const lines = exp.split(/\r?\n/);
         const headerLine = (lines[0] || '').trim();
@@ -2133,7 +2133,10 @@ const renderExperiences = (experiences, styles) => {
           : null;
         const descriptionContent = exp.description
           ? (
-              <div style={{ marginTop: '2px' }} className={experienceFieldClass('description')}>
+              <div
+                style={{ marginTop: '2px' }}
+                className={experienceFieldClass('description', 'experience-field experience-field-block')}
+              >
                 {exp.description.split(/\r?\n/).map((line, lineIdx) =>
                   renderBulletLine(line, `${idx}-${lineIdx}`, styles)
                 )}
@@ -2552,7 +2555,10 @@ const renderEducation = (education, styles) => {
             )}
 
             {project.description && (
-              <div className={projectFieldClass('description')} style={{ marginTop: '2px' }}>
+            <div
+              className={projectFieldClass('description', 'project-field project-field-block')}
+              style={{ marginTop: '2px' }}
+            >
                 {project.description.split('\n').map((line, lineIdx) =>
                   renderBulletLine(line, `project-${idx}-${lineIdx}`, styles)
                 )}
