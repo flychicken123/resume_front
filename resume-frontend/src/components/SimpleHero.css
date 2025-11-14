@@ -35,7 +35,7 @@
   font-size: 48px;
   font-weight: 900;
   line-height: 1.2;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
   color: #000;
 }
 
@@ -119,11 +119,8 @@
   font-size: 18px;
 }
 
-.hero-buttons {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-  margin-bottom: 40px;
+.hero-primary-cta {
+  margin-bottom: 28px;
 }
 
 .hero-quick-stats {
@@ -154,39 +151,17 @@
   padding: 16px 32px;
   font-size: 18px;
   font-weight: 700;
-  background: #3b82f6;
+  background: #ff8c00;
   color: white;
-  border: none;
+  border: 1px solid #ff8c00;
   border-radius: 50px;
   cursor: pointer;
   transition: all 0.3s ease;
+  box-shadow: 0 12px 24px rgba(255, 140, 0, 0.35);
 }
 
 .btn-create:hover {
-  background: #2563eb;
-  transform: translateY(-2px);
-}
-
-.btn-jobs {
-  padding: 16px 32px;
-  font-size: 18px;
-  font-weight: 700;
-  background: rgba(15, 23, 42, 0.06);
-  color: #1e293b;
-  border: 1px solid rgba(15, 23, 42, 0.15);
-  border-radius: 50px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.btn-jobs:hover {
-  background: rgba(37, 99, 235, 0.12);
-  border-color: rgba(37, 99, 235, 0.35);
-  color: #1d4ed8;
+  background: #db7400;
   transform: translateY(-2px);
 }
 
@@ -579,12 +554,7 @@
     font-size: 16px;
   }
 
-  .hero-buttons {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .btn-jobs {
+  .hero-primary-cta {
     width: 100%;
   }
 
