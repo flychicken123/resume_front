@@ -308,7 +308,17 @@ const readStoredUserEmail = () => {
   }
 };
 
-const CHAT_WIDGET_ENABLED = false;
+const CHAT_WIDGET_ENABLED = true;
+const RESUME_BUILD_ALLOWLIST = new Set(['harwtalk@gmail.com']);
+const RESUME_BUILD_LOCKED_MESSAGE =
+  'Chat resume builder coming soon - please use the main resume builder UI for now.';
+
+const isResumeBuildAllowed = (email) => {
+  if (!email || typeof email !== 'string') {
+    return false;
+  }
+  return RESUME_BUILD_ALLOWLIST.has(email.trim().toLowerCase());
+};
 
 const ChatWidgetInner = () => {
   const { user, token } = useAuth();
@@ -1543,6 +1553,13 @@ const buildSectionResponse = (sectionKey) => {
     }
 
     if (hasResumeIntent(trimmed)) {
+      const resolvedEmailForAccess = (user?.email || readStoredUserEmail() || '').trim().toLowerCase();
+      if (!isResumeBuildAllowed(resolvedEmailForAccess)) {
+        appendBotMessage(RESUME_BUILD_LOCKED_MESSAGE);
+        setLastStep('chat_resume_feature_locked');
+        setIsLoading(false);
+        return;
+      }
       startResumeFlow(trimmed);
       setIsLoading(false);
       return;
