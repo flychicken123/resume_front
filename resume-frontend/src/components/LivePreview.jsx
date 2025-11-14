@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, Fragment } from 'react';
 import { useResume } from '../context/ResumeContext';
 import { TEMPLATE_SLUGS, DEFAULT_TEMPLATE_ID, normalizeTemplateId } from '../constants/templates';
 import './LivePreview.css';
@@ -15,12 +15,270 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload, downloadNotice })
   const selectedFormat = normalizeTemplateId(data.selectedFormat);
   const [pages, setPages] = useState([]);
   const [useConservativePaging, setUseConservativePaging] = useState(false);
+  const [isPreviewHighlightActive, setIsPreviewHighlightActive] = useState(false);
+  const [highlightedSections, setHighlightedSections] = useState({});
+  const highlightTimeoutRef = useRef(null);
+  const previousDataRef = useRef(null);
   const isIndustryManagerFormat = (selectedFormat === TEMPLATE_SLUGS.EXECUTIVE_SERIF);
   const isAttorneyFormat = (selectedFormat === TEMPLATE_SLUGS.ATTORNEY_TEMPLATE);
   // Reset paging heuristics whenever template changes so new format starts fresh
   useEffect(() => {
     setUseConservativePaging(false);
   }, [selectedFormat]);
+  const safeStringify = (value) => {
+    try {
+      return JSON.stringify(value ?? null);
+    } catch (error) {
+      return String(value ?? '');
+    }
+  };
+  const toComparableText = (value) => {
+    if (value == null) return '';
+    return typeof value === 'string' ? value : String(value);
+  };
+  const toArray = (value) => (Array.isArray(value) ? value : []);
+  const collectListItemChanges = (
+    previousList,
+    nextList,
+    baseKey,
+    { skipWhenBothObjects = false } = {}
+  ) => {
+    const prevArray = toArray(previousList);
+    const nextArray = toArray(nextList);
+    const maxLength = Math.max(prevArray.length, nextArray.length);
+    const itemKeys = [];
+    for (let index = 0; index < maxLength; index += 1) {
+      const prevValue = prevArray[index];
+      const nextValue = nextArray[index];
+      const prevExists = prevValue !== undefined;
+      const nextExists = nextValue !== undefined;
+      if (!prevExists && !nextExists) {
+        continue;
+      }
+      if (!prevExists || !nextExists) {
+        itemKeys.push(`${baseKey}-${index}`);
+        continue;
+      }
+      const bothObjects =
+        typeof prevValue === 'object' &&
+        prevValue !== null &&
+        typeof nextValue === 'object' &&
+        nextValue !== null;
+      if (skipWhenBothObjects && bothObjects) {
+        continue;
+      }
+      if (safeStringify(prevValue) !== safeStringify(nextValue)) {
+        itemKeys.push(`${baseKey}-${index}`);
+      }
+    }
+    return itemKeys;
+  };
+const collectExperienceFieldChanges = (previousList = [], nextList = []) => {
+    const prevArray = toArray(previousList);
+    const nextArray = toArray(nextList);
+    const maxLength = Math.max(prevArray.length, nextArray.length);
+    const changes = [];
+    for (let index = 0; index < maxLength; index += 1) {
+      const prevEntry = prevArray[index];
+      const nextEntry = nextArray[index];
+      if (
+        !prevEntry ||
+        !nextEntry ||
+        typeof prevEntry !== 'object' ||
+        typeof nextEntry !== 'object'
+      ) {
+        continue;
+      }
+      const pushIfDifferent = (fieldKey, prevValue, nextValue) => {
+        if (toComparableText(prevValue) !== toComparableText(nextValue)) {
+          changes.push(`experience-${index}-${fieldKey}`);
+        }
+      };
+      pushIfDifferent('jobTitle', prevEntry.jobTitle, nextEntry.jobTitle);
+      pushIfDifferent('employer', prevEntry.company, nextEntry.company);
+      pushIfDifferent('city', prevEntry.city, nextEntry.city);
+      pushIfDifferent('state', prevEntry.state, nextEntry.state);
+      pushIfDifferent('startDate', prevEntry.startDate, nextEntry.startDate);
+      pushIfDifferent('endDate', prevEntry.endDate, nextEntry.endDate);
+      pushIfDifferent('location', prevEntry.location, nextEntry.location);
+      pushIfDifferent('description', prevEntry.description, nextEntry.description);
+    }
+    return changes;
+  };
+  const collectProjectFieldChanges = (previousList = [], nextList = []) => {
+    const prevArray = toArray(previousList);
+    const nextArray = toArray(nextList);
+    const maxLength = Math.max(prevArray.length, nextArray.length);
+    const changes = [];
+    for (let index = 0; index < maxLength; index += 1) {
+      const prevEntry = prevArray[index];
+      const nextEntry = nextArray[index];
+      if (
+        !prevEntry ||
+        !nextEntry ||
+        typeof prevEntry !== 'object' ||
+        typeof nextEntry !== 'object'
+      ) {
+        continue;
+      }
+      const pushIfDifferent = (fieldKey, prevValue, nextValue) => {
+        if (toComparableText(prevValue) !== toComparableText(nextValue)) {
+          changes.push(`project-${index}-${fieldKey}`);
+        }
+      };
+      pushIfDifferent('name', prevEntry.projectName, nextEntry.projectName);
+      pushIfDifferent('technologies', prevEntry.technologies, nextEntry.technologies);
+      pushIfDifferent('url', prevEntry.projectUrl, nextEntry.projectUrl);
+      pushIfDifferent('description', prevEntry.description, nextEntry.description);
+    }
+    return changes;
+  };
+  const collectEducationFieldChanges = (previousList = [], nextList = []) => {
+    const prevArray = toArray(previousList);
+    const nextArray = toArray(nextList);
+    const maxLength = Math.max(prevArray.length, nextArray.length);
+    const changes = [];
+    for (let index = 0; index < maxLength; index += 1) {
+      const prevEntry = prevArray[index];
+      const nextEntry = nextArray[index];
+      if (
+        !prevEntry ||
+        !nextEntry ||
+        typeof prevEntry !== 'object' ||
+        typeof nextEntry !== 'object'
+      ) {
+        continue;
+      }
+      const pushIfDifferent = (fieldKey, prevValue, nextValue) => {
+        if (toComparableText(prevValue) !== toComparableText(nextValue)) {
+          changes.push(`education-${index}-${fieldKey}`);
+        }
+      };
+      pushIfDifferent('school', prevEntry.school, nextEntry.school);
+      pushIfDifferent('degree', prevEntry.degree, nextEntry.degree);
+      pushIfDifferent('field', prevEntry.field, nextEntry.field);
+      pushIfDifferent('city', prevEntry.city, nextEntry.city);
+      pushIfDifferent('state', prevEntry.state, nextEntry.state);
+      pushIfDifferent('location', prevEntry.location, nextEntry.location);
+      pushIfDifferent('gpa', prevEntry.gpa, nextEntry.gpa);
+      pushIfDifferent('honors', prevEntry.honors, nextEntry.honors);
+      const startChanged =
+        toComparableText(prevEntry.startMonth) !== toComparableText(nextEntry.startMonth) ||
+        toComparableText(prevEntry.startYear) !== toComparableText(nextEntry.startYear) ||
+        toComparableText(prevEntry.startDate) !== toComparableText(nextEntry.startDate);
+      const endChanged =
+        toComparableText(prevEntry.graduationMonth) !== toComparableText(nextEntry.graduationMonth) ||
+        toComparableText(prevEntry.graduationYear) !== toComparableText(nextEntry.graduationYear) ||
+        toComparableText(prevEntry.endDate) !== toComparableText(nextEntry.endDate);
+      if (startChanged) {
+        changes.push(`education-${index}-startDate`);
+      }
+      if (endChanged) {
+        changes.push(`education-${index}-endDate`);
+      }
+    }
+    return changes;
+  };
+  const resolveSourceIndex = (collection, candidate, fallbackIndex) => {
+    if (!Array.isArray(collection)) {
+      return fallbackIndex;
+    }
+    const locatedIndex = collection.indexOf(candidate);
+    return locatedIndex >= 0 ? locatedIndex : fallbackIndex;
+  };
+  const detectChangedSections = useCallback((previous = {}, next = {}) => {
+    const changes = [];
+    if (toComparableText(previous.name) !== toComparableText(next.name)) {
+      changes.push('name');
+    }
+    if (toComparableText(previous.email) !== toComparableText(next.email)) {
+      changes.push('contact-email');
+    }
+    if (toComparableText(previous.phone) !== toComparableText(next.phone)) {
+      changes.push('contact-phone');
+    }
+    if (toComparableText(previous.location) !== toComparableText(next.location)) {
+      changes.push('contact-location');
+    }
+    if (safeStringify(previous.summary) !== safeStringify(next.summary)) {
+      changes.push('summary');
+    }
+    collectListItemChanges(previous.experiences, next.experiences, 'experience', {
+      skipWhenBothObjects: true,
+    }).forEach((key) => {
+      changes.push(key);
+    });
+    collectExperienceFieldChanges(previous.experiences, next.experiences).forEach((key) => {
+      changes.push(key);
+    });
+    collectListItemChanges(previous.projects, next.projects, 'project', {
+      skipWhenBothObjects: true,
+    }).forEach((key) => {
+      changes.push(key);
+    });
+    collectProjectFieldChanges(previous.projects, next.projects).forEach((key) => {
+      changes.push(key);
+    });
+    collectListItemChanges(previous.education, next.education, 'education', {
+      skipWhenBothObjects: true,
+    }).forEach((key) => {
+      changes.push(key);
+    });
+    collectEducationFieldChanges(previous.education, next.education).forEach((key) => {
+      changes.push(key);
+    });
+    const previousSkillsList = parseSkills(previous.skills);
+    const nextSkillsList = parseSkills(next.skills);
+    collectListItemChanges(previousSkillsList, nextSkillsList, 'skill').forEach((key) => {
+      changes.push(key);
+    });
+    return changes;
+  }, []);
+  useEffect(() => {
+    const nextData = data || {};
+    if (!previousDataRef.current) {
+      previousDataRef.current = nextData;
+      return;
+    }
+    const changedSections = detectChangedSections(previousDataRef.current, nextData);
+    previousDataRef.current = nextData;
+    if (!changedSections.length) {
+      return;
+    }
+    setIsPreviewHighlightActive(true);
+    setHighlightedSections(
+      changedSections.reduce((acc, key) => {
+        if (key) {
+          acc[key] = true;
+        }
+        return acc;
+      }, {})
+    );
+    if (highlightTimeoutRef.current) {
+      clearTimeout(highlightTimeoutRef.current);
+    }
+    highlightTimeoutRef.current = setTimeout(() => {
+      setIsPreviewHighlightActive(false);
+      setHighlightedSections({});
+      highlightTimeoutRef.current = null;
+    }, 1100);
+  }, [data, detectChangedSections]);
+  useEffect(() => () => {
+    if (highlightTimeoutRef.current) {
+      clearTimeout(highlightTimeoutRef.current);
+    }
+  }, []);
+  const isSectionHighlighted = (sectionKey) => Boolean(sectionKey && highlightedSections[sectionKey]);
+  const getSectionHighlightClass = (sectionKey, extraClass = '') => {
+    if (!sectionKey) {
+      return extraClass || undefined;
+    }
+    const classes = [extraClass, 'preview-field'];
+    if (isSectionHighlighted(sectionKey)) {
+      classes.push('preview-field-highlight');
+    }
+    return classes.filter(Boolean).join(' ');
+  };
   // Normalize any value into safe display text
   const toText = (val) => {
     if (val == null) return '';
@@ -36,6 +294,50 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload, downloadNotice })
       }
     }
     return String(val);
+  };
+  const buildContactEntries = (source = {}, options = {}) => {
+    const { includeLocation = false } = options;
+    const entries = [];
+    const emailText = toText(source.email);
+    if (emailText) {
+      entries.push({ text: emailText, highlightKey: 'contact-email' });
+    }
+    const phoneText = toText(source.phone);
+    if (phoneText) {
+      entries.push({ text: phoneText, highlightKey: 'contact-phone' });
+    }
+    if (includeLocation) {
+      const locationText = toText(source.location);
+      if (locationText) {
+        entries.push({ text: locationText, highlightKey: 'contact-location' });
+      }
+    }
+    return entries;
+  };
+  const renderContactLine = (
+    source = {},
+    { includeLocation = false, style: contactStyle } = {}
+  ) => {
+    const contactItems = buildContactEntries(source, { includeLocation });
+    if (!contactItems.length) {
+      return null;
+    }
+    return (
+      <div style={contactStyle} className="contact-inline">
+        {contactItems.map((item, index) => (
+          <Fragment key={`${item.highlightKey}-${index}`}>
+            <span className={getSectionHighlightClass(item.highlightKey, 'contact-entry')}>
+              {item.text}
+            </span>
+            {index < contactItems.length - 1 && (
+              <span className="contact-separator" aria-hidden="true">
+                {'\u00B7'}
+              </span>
+            )}
+          </Fragment>
+        ))}
+      </div>
+    );
   };
   const contentRef = useRef(null);
   // Page dimensions in pixels (8.5" x 11" at 96 DPI)
@@ -1406,7 +1708,7 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
       </div>
     );
   };
-const parseSkills = (value) => {
+function parseSkills(value) {
   const toArray = (input) =>
     input
       .replace(/\r?\n/g, ',')
@@ -1423,24 +1725,36 @@ const parseSkills = (value) => {
       });
   }
   return toArray(String(value));
-};
+}
   const renderSkillsSection = (skills, styles, { inlineOnly = false } = {}) => {
     if (!skills) return null;
     const skillsArray = Array.isArray(skills) ? skills : parseSkills(skills);
     if (!skillsArray || skillsArray.length === 0) return null;
     const isIndustryManager = selectedFormat === TEMPLATE_SLUGS.EXECUTIVE_SERIF;
+    const getSkillLabel = (value) => (typeof value === 'string' ? value : toText(value));
+    const renderInlineSkills = () => (
+      <div
+        style={{
+          ...styles.skills,
+          whiteSpace: 'pre-wrap',
+          marginBottom: 0,
+        }}
+        className="skills-inline"
+      >
+        {skillsArray.map((skill, idx) => (
+          <Fragment key={`skill-inline-${idx}`}>
+            <span className={getSectionHighlightClass(`skill-${idx}`, 'skill-chip')}>
+              {getSkillLabel(skill)}
+            </span>
+            {idx < skillsArray.length - 1 && (
+              <span className="skill-separator">, </span>
+            )}
+          </Fragment>
+        ))}
+      </div>
+    );
     if (inlineOnly || !styles.skillsGrid || !styles.skillsColumn || selectedFormat !== TEMPLATE_SLUGS.EXECUTIVE_SERIF) {
-      return (
-        <div
-          style={{
-            ...styles.skills,
-            whiteSpace: 'pre-wrap',
-            marginBottom: 0,
-          }}
-        >
-          {skillsArray.join(', ')}
-        </div>
-      );
+      return renderInlineSkills();
     }
     if (isIndustryManager) {
       const columnCount = 2;
@@ -1510,27 +1824,32 @@ const parseSkills = (value) => {
               gap: rowGap,
               minWidth: 0,
             };
+            const columnStartIndex = columnIdx * itemsPerColumn;
             return (
               <ul key={columnIdx} style={columnStyle}>
-                {column.map((skill, skillIdx) => (
-                  <li
-                    key={`${columnIdx}-${skillIdx}`}
-                    style={{
-                      ...(styles.skillItem || {}),
-                      ...baseItemStyle,
-                    }}
-                  >
-                    <span style={markerStyle}>{skillMarkerChar}</span>
-                    <span style={textStyle}>{skill}</span>
-                  </li>
-                ))}
+                {column.map((skill, skillIdx) => {
+                  const globalIndex = columnStartIndex + skillIdx;
+                  return (
+                    <li
+                      key={`${columnIdx}-${skillIdx}`}
+                      style={{
+                        ...(styles.skillItem || {}),
+                        ...baseItemStyle,
+                      }}
+                      className={getSectionHighlightClass(`skill-${globalIndex}`, 'skill-chip')}
+                    >
+                      <span style={markerStyle}>{skillMarkerChar}</span>
+                      <span style={textStyle}>{getSkillLabel(skill)}</span>
+                    </li>
+                  );
+                })}
               </ul>
             );
           })}
         </div>
       );
     }
-    return <div style={styles.skills}>{skillsArray.join(', ')}</div>;
+    return renderInlineSkills();
   };
   const renderSummaryContent = (value, styles) => {
     const summaryText = toText(value);
@@ -1678,6 +1997,7 @@ const renderExperiences = (experiences, styles) => {
   if (!experiences || experiences.length === 0) return null;
   const isIndustryManager = selectedFormat === TEMPLATE_SLUGS.EXECUTIVE_SERIF;
   const isAttorneyTemplate = selectedFormat === TEMPLATE_SLUGS.ATTORNEY_TEMPLATE;
+  const baseExperiences = Array.isArray(data.experiences) ? data.experiences : [];
   const normalizeRange = (start, end, currentlyWorking) => {
     if (!start && !end) return '';
     const separator = isIndustryManager ? ' – ' : ' - ';
@@ -1693,8 +2013,23 @@ const renderExperiences = (experiences, styles) => {
     return cleaned.join(separator);
   };
   const renderExecutiveHeaderRow = createExecutiveHeaderRenderer(styles);
+  const getExperienceClassName = (entry, fallbackIndex) => {
+    const resolvedIndex = resolveSourceIndex(baseExperiences, entry, fallbackIndex);
+    return getSectionHighlightClass(`experience-${resolvedIndex}`, 'experience-entry');
+  };
+
   return experiences
     .map((exp, idx) => {
+      if (exp == null) {
+        return null;
+      }
+      const resolvedExperienceIndex = resolveSourceIndex(baseExperiences, exp, idx);
+      const experienceClassName = getSectionHighlightClass(
+        `experience-${resolvedExperienceIndex}`,
+        'experience-entry'
+      );
+      const experienceFieldClass = (field) =>
+        getSectionHighlightClass(`experience-${resolvedExperienceIndex}-${field}`, 'experience-field');
       if (typeof exp === 'string') {
         const lines = exp.split(/\r?\n/);
         const headerLine = (lines[0] || '').trim();
@@ -1749,7 +2084,7 @@ const renderExperiences = (experiences, styles) => {
           const metaLine = formatHeaderSegments(metaLineSegments, true);
           if (renderExecutiveHeaderRow) {
             return (
-              <div key={idx} style={itemStyle}>
+              <div key={idx} style={itemStyle} className={experienceClassName}>
                 {renderExecutiveHeaderRow(jobLine, metaLine)}
                 {descriptionContent}
               </div>
@@ -1757,21 +2092,23 @@ const renderExperiences = (experiences, styles) => {
           }
           const fallbackBullet = styles.headerBulletChar || '●';
           return (
-            <div key={idx} style={itemStyle}>
+            <div key={idx} style={itemStyle} className={experienceClassName}>
               <div style={styles.company}>{`${fallbackBullet} ${jobLine}`}</div>
               {descriptionContent}
             </div>
           );
         }
         return (
-          <div key={idx} style={styles.item}>
+          <div key={idx} style={styles.item} className={experienceClassName}>
             {contentNode}
           </div>
         );
       } else {
-        const location = exp.city && exp.state
-          ? `${toText(exp.city)}, ${toText(exp.state)}`
-          : toText(exp.city) || toText(exp.state) || '';
+        const cityText = toText(exp.city);
+        const stateText = toText(exp.state);
+        const explicitLocation = toText(exp.location);
+        const combinedCityState = cityText && stateText ? `${cityText}, ${stateText}` : (cityText || stateText || '');
+        const location = combinedCityState || explicitLocation;
         let startDate = '';
         let endDate = '';
         if (exp.startDate) {
@@ -1783,16 +2120,11 @@ const renderExperiences = (experiences, styles) => {
           endDate = endDateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'short', timeZone: 'UTC' });
         }
         const dateRange = normalizeRange(startDate, endDate, exp.currentlyWorking);
+        const startLabel = startDate;
+        const endLabel = exp.currentlyWorking ? 'Present' : endDate;
         const jobTitle = toText(exp.jobTitle) || 'Job Title';
         const companyName = toText(exp.company) || 'Company';
         const locationLabel = exp.remote ? 'Remote' : location;
-        const headerSegments = [jobTitle, companyName, locationLabel, dateRange];
-        const headerPrimary = isIndustryManager
-          ? formatHeaderSegments(headerSegments, true)
-          : formatHeaderSegments(headerSegments);
-        const secondaryLine = (!isIndustryManager && !isAttorneyTemplate)
-          ? ''
-          : '';
         const attorneyPrimary = isAttorneyTemplate
           ? [jobTitle, dateRange].filter(Boolean).join(' • ')
           : null;
@@ -1801,7 +2133,7 @@ const renderExperiences = (experiences, styles) => {
           : null;
         const descriptionContent = exp.description
           ? (
-              <div style={{ marginTop: '2px' }}>
+              <div style={{ marginTop: '2px' }} className={experienceFieldClass('description')}>
                 {exp.description.split(/\r?\n/).map((line, lineIdx) =>
                   renderBulletLine(line, `${idx}-${lineIdx}`, styles)
                 )}
@@ -1816,7 +2148,7 @@ const renderExperiences = (experiences, styles) => {
           const metaLine = formatHeaderSegments(metaLineSegments, true);
           if (renderExecutiveHeaderRow) {
             return (
-              <div key={idx} style={itemStyle}>
+              <div key={idx} style={itemStyle} className={experienceClassName}>
                 {renderExecutiveHeaderRow(jobLine, metaLine)}
                 {descriptionContent}
               </div>
@@ -1824,21 +2156,85 @@ const renderExperiences = (experiences, styles) => {
           }
           const fallbackBullet = styles.headerBulletChar || '●';
           return (
-            <div key={idx} style={itemStyle}>
+            <div key={idx} style={itemStyle} className={experienceClassName}>
               <div style={styles.company}>{`${fallbackBullet} ${jobLine}`}</div>
               {descriptionContent}
             </div>
           );
         }
-        return (
-          <div key={idx} style={styles.item}>
-            <div style={styles.company}>{isAttorneyTemplate ? (attorneyPrimary || jobTitle) : headerPrimary}</div>
-            {!isAttorneyTemplate && secondaryLine && (
-              <div style={styles.date}>{secondaryLine}</div>
-            )}
-            {isAttorneyTemplate && attorneySecondary && (
+        const renderStandardHeader = () => {
+          const shouldShowLocation = locationLabel || cityText || stateText;
+          const shouldShowDates = startLabel || endLabel;
+          return (
+            <div style={styles.company} className="experience-header">
+              {jobTitle && (
+                <span className={experienceFieldClass('jobTitle')}>
+                  {jobTitle}
+                </span>
+              )}
+              {companyName && (
+                <>
+                  <span className="experience-separator"> • </span>
+                  <span className={experienceFieldClass('employer')}>{companyName}</span>
+                </>
+              )}
+              {shouldShowLocation && (
+                <>
+                  <span className="experience-separator"> • </span>
+                  <span className="experience-location">
+                    {cityText && (
+                      <span className={experienceFieldClass('city')}>
+                        {cityText}
+                      </span>
+                    )}
+                    {cityText && stateText && <span>, </span>}
+                    {stateText && (
+                      <span className={experienceFieldClass('state')}>
+                        {stateText}
+                      </span>
+                    )}
+                    {!cityText && !stateText && locationLabel && (
+                      <span className={experienceFieldClass('location')}>
+                        {locationLabel}
+                      </span>
+                    )}
+                  </span>
+                </>
+              )}
+              {shouldShowDates && (
+                <>
+                  <span className="experience-separator"> • </span>
+                  <span className="experience-date">
+                    {startLabel && (
+                      <span className={experienceFieldClass('startDate')}>
+                        {startLabel}
+                      </span>
+                    )}
+                    {startLabel && endLabel && <span> – </span>}
+                    {endLabel && (
+                      <span className={experienceFieldClass('endDate')}>
+                        {endLabel}
+                      </span>
+                    )}
+                  </span>
+                </>
+              )}
+            </div>
+          );
+        };
+        const renderAttorneyHeader = () => (
+          <>
+            <div style={styles.company}>
+              {attorneyPrimary || jobTitle}
+            </div>
+            {attorneySecondary && (
               <div style={styles.date}>{attorneySecondary}</div>
             )}
+          </>
+        );
+        return (
+          <div key={idx} style={styles.item} className={experienceClassName}>
+            {isAttorneyTemplate ? renderAttorneyHeader() : renderStandardHeader()}
             {descriptionContent}
           </div>
         );
@@ -1851,6 +2247,12 @@ const renderEducation = (education, styles) => {
   if (!education) return null;
   const isIndustryManager = selectedFormat === TEMPLATE_SLUGS.EXECUTIVE_SERIF;
   const renderExecutiveHeaderRow = createExecutiveHeaderRenderer(styles);
+  const baseEducation = Array.isArray(data.education) ? data.education : [];
+  const resolveEducationIndexHelper = (entry, fallbackIndex) => resolveSourceIndex(baseEducation, entry, fallbackIndex);
+  const getEducationEntryClass = (entry, fallbackIndex, extraClass = 'education-entry') =>
+    getSectionHighlightClass(`education-${resolveEducationIndexHelper(entry, fallbackIndex)}`, extraClass);
+  const educationFieldClass = (entry, fallbackIndex, field, extraClass = 'education-field') =>
+    getSectionHighlightClass(`education-${resolveEducationIndexHelper(entry, fallbackIndex)}-${field}`, extraClass);
   const formatMonthYear = (month, year) => {
     const safeMonth = toText(month);
     const safeYear = toText(year);
@@ -1866,9 +2268,12 @@ const renderEducation = (education, styles) => {
     return '';
   };
   const normalizeRange = (edu) => {
-    const dash = isIndustryManager ? ' – ' : ' - ';
-    const startFormatted = formatMonthYear(edu.startMonth, edu.startYear);
-    const gradFormatted = formatMonthYear(edu.graduationMonth, edu.graduationYear);
+    const dash = isIndustryManager ? ' • ' : ' - ';
+    const startFormatted = formatMonthYear(edu.startMonth, edu.startYear) || toText(edu.startDate);
+    const gradFormatted =
+      formatMonthYear(edu.graduationMonth, edu.graduationYear) ||
+      toText(edu.endDate) ||
+      toText(edu.graduationYear);
     if (startFormatted && gradFormatted) {
       return `${startFormatted}${dash}${gradFormatted}`;
     }
@@ -1878,54 +2283,51 @@ const renderEducation = (education, styles) => {
     if (startFormatted) {
       return `${startFormatted}${dash}Present`;
     }
-    if (edu.graduationYear) {
-      const gradYear = parseInt(edu.graduationYear, 10);
-      if (!Number.isNaN(gradYear)) {
-        return `${gradYear - 4}${dash}${gradYear}`;
-      }
-      return edu.graduationYear;
-    }
-    if (edu.startDate && edu.endDate) {
-      return `${edu.startDate}${dash}${edu.endDate}`;
-    }
-    if (edu.endDate) {
-      return edu.endDate;
-    }
-    if (edu.startDate) {
-      return `${edu.startDate}${dash}Present`;
-    }
     return '';
+  };
+  const splitEducationDates = (edu) => {
+    const startLabel = formatMonthYear(edu.startMonth, edu.startYear) || toText(edu.startDate) || '';
+    const endLabel =
+      formatMonthYear(edu.graduationMonth, edu.graduationYear) ||
+      toText(edu.endDate) ||
+      toText(edu.graduationYear) ||
+      '';
+    return { startLabel, endLabel: endLabel || (startLabel ? 'Present' : '') };
   };
   const buildIndustryLine = (edu, key) => {
     const indentPx = styles.indentPx != null ? Number(styles.indentPx) : null;
-    const normalizeSegment = (segment) => segment.replace(/\s+-\s+/g, ' – ').trim();
+    const normalizeSegment = (segment) => segment.replace(/\s+-\s+/g, ' • ').trim();
     const degreePart = [toText(edu.degree), toText(edu.field)].filter(Boolean).join(' in ');
     const datePart = normalizeSegment(normalizeRange(edu) || '').trim();
-    const locationText = (() => {
-      const explicitLocation = toText(edu.location);
-      const cityState = [toText(edu.city), toText(edu.state)].filter(Boolean).join(', ');
-      if (explicitLocation && cityState) {
-        return normalizeSegment(`${explicitLocation} • ${cityState}`);
-      }
-      return normalizeSegment(explicitLocation || cityState || '');
-    })();
+    const { startLabel, endLabel } = splitEducationDates(edu);
+    const explicitLocation = toText(edu.location);
+    const cityText = toText(edu.city);
+    const stateText = toText(edu.state);
+    const cityState = [cityText, stateText].filter(Boolean).join(', ');
+    const locationText = normalizeSegment(explicitLocation || cityState || '');
     const schoolSegment = normalizeSegment(toText(edu.school) || '');
-    const primaryText = [schoolSegment, locationText].filter(Boolean).join(' • ');
-    const metaText = datePart;
-    const detailLines = [];
-    if (degreePart) {
-      detailLines.push(degreePart);
-    }
-    const honorsPieces = [
-      edu.gpa ? `GPA: ${toText(edu.gpa)}` : '',
-      toText(edu.honors)
-    ].filter(Boolean);
-    if (honorsPieces.length > 0) {
-      detailLines.push(honorsPieces.join(' • '));
-    }
-    if (!primaryText && !metaText && detailLines.length === 0) {
+    const hasPrimaryContent = schoolSegment || locationText || datePart || degreePart || toText(edu.honors) || edu.gpa;
+    if (!hasPrimaryContent) {
       return null;
     }
+    const entryClassName = getEducationEntryClass(edu, key);
+    const fieldClass = (field, extra) => educationFieldClass(edu, key, field, extra);
+    const primaryNode = (
+      <span className="education-header">
+        {schoolSegment && <span className={fieldClass('school')}>{schoolSegment}</span>}
+        {schoolSegment && locationText && <span className="education-separator"> • </span>}
+        {locationText && <span className={fieldClass('location')}>{locationText}</span>}
+      </span>
+    );
+    const metaNode = (startLabel || endLabel)
+      ? (
+        <span className="education-date">
+          {startLabel && <span className={fieldClass('startDate')}>{startLabel}</span>}
+          {startLabel && endLabel && <span> – </span>}
+          {endLabel && <span className={fieldClass('endDate')}>{endLabel}</span>}
+        </span>
+      )
+      : (datePart ? <span className={fieldClass('dates')}>{datePart}</span> : null);
     const basePrimary = { ...(styles.educationDetail || {}) };
     const baseSecondary = { ...(styles.educationDetailSecondary || styles.educationDetail || {}) };
     if (indentPx != null && basePrimary.paddingLeft == null) {
@@ -1936,25 +2338,52 @@ const renderEducation = (education, styles) => {
     }
     basePrimary.textIndent = 0;
     baseSecondary.textIndent = 0;
+    const detailNodes = [];
+    const pushDetail = (keyName, content) => {
+      const style = detailNodes.length === 0 ? basePrimary : baseSecondary;
+      detailNodes.push(
+        <div key={`${key}-${keyName}`} style={style} className="education-detail">
+          {content}
+        </div>
+      );
+    };
+    if (degreePart) {
+      pushDetail('degree', (
+        <>
+          {toText(edu.degree) && <span className={fieldClass('degree')}>{toText(edu.degree)}</span>}
+          {toText(edu.field) && (
+            <>
+              <span> in </span>
+              <span className={fieldClass('field')}>{toText(edu.field)}</span>
+            </>
+          )}
+        </>
+      ));
+    }
+    if (edu.gpa) {
+      pushDetail('gpa', <span className={fieldClass('gpa')}>GPA: {toText(edu.gpa)}</span>);
+    }
+    if (toText(edu.honors)) {
+      pushDetail('honors', <span className={fieldClass('honors')}>{toText(edu.honors)}</span>);
+    }
+    const headingNode = renderExecutiveHeaderRow
+      ? renderExecutiveHeaderRow(primaryNode, metaNode)
+      : (
+        <div style={styles.company} className="education-header education-header--fallback">
+          <span className="education-bullet">{styles.headerBulletChar || '•'}</span>
+          {primaryNode}
+          {metaNode && (
+            <>
+              <span className="education-separator"> | </span>
+              {metaNode}
+            </>
+          )}
+        </div>
+      );
     return (
-      <div key={key} style={styles.item || { marginTop: '6px' }}>
-        {(primaryText || metaText) && (
-          renderExecutiveHeaderRow
-            ? renderExecutiveHeaderRow(primaryText, metaText)
-            : (
-              <div style={styles.company}>
-                {`${styles.headerBulletChar || '●'} ${[primaryText, metaText].filter(Boolean).join(' | ')}`}
-              </div>
-            )
-        )}
-        {detailLines.map((line, idx) => (
-          <div
-            key={`${key}-detail-${idx}`}
-            style={idx === 0 ? basePrimary : baseSecondary}
-          >
-            {line}
-          </div>
-        ))}
+      <div key={key} style={styles.item || { marginTop: '6px' }} className={entryClassName}>
+        {headingNode}
+        {detailNodes}
       </div>
     );
   };
@@ -1964,14 +2393,19 @@ const renderEducation = (education, styles) => {
   }
   if (Array.isArray(education)) {
     return education.map((edu, idx) => {
-      let yearRange = normalizeRange(edu);
+      const entryClassName = getEducationEntryClass(edu, idx);
+      const fieldClass = (field, extra) => educationFieldClass(edu, idx, field, extra);
+      const { startLabel, endLabel } = splitEducationDates(edu);
+      const cityText = toText(edu.city);
+      const stateText = toText(edu.state);
+      const locationText = toText(edu.location);
       return (
-        <div key={idx} style={styles.item}>
-          <div style={{ width: '100%', overflow: 'hidden' }}>
-            <div style={{ ...styles.company, float: 'left' }}>
+        <div key={idx} style={styles.item} className={entryClassName}>
+          <div style={{ width: '100%', overflow: 'hidden' }} className="education-header">
+            <div style={{ ...styles.company, float: 'left' }} className={fieldClass('school')}>
               {edu.school || 'University'}
             </div>
-            {yearRange && (
+            {(startLabel || endLabel) && (
               <div
                 style={{
                   ...styles.date,
@@ -1980,8 +2414,19 @@ const renderEducation = (education, styles) => {
                   textAlign: 'right',
                   whiteSpace: 'nowrap',
                 }}
+                className="education-date"
               >
-                {yearRange}
+                {startLabel && (
+                  <span className={fieldClass('startDate')}>
+                    {startLabel}
+                  </span>
+                )}
+                {startLabel && endLabel && <span> – </span>}
+                {endLabel && (
+                  <span className={fieldClass('endDate')}>
+                    {endLabel}
+                  </span>
+                )}
               </div>
             )}
           </div>
@@ -1992,16 +2437,47 @@ const renderEducation = (education, styles) => {
               marginTop: '2px',
               clear: 'both',
             }}
+            className="education-detail"
           >
-            {edu.degree} {edu.field && `in ${edu.field}`}
-            {edu.gpa && ` • GPA: ${edu.gpa}`}
+            {toText(edu.degree) && (
+              <span className={fieldClass('degree')}>
+                {toText(edu.degree)}
+              </span>
+            )}
+            {toText(edu.field) && (
+              <>
+                <span> in </span>
+                <span className={fieldClass('field')}>{toText(edu.field)}</span>
+              </>
+            )}
+            {edu.gpa && (
+              <>
+                <span className="education-separator"> • </span>
+                <span className={fieldClass('gpa')}>GPA: {edu.gpa}</span>
+              </>
+            )}
           </div>
+          {(cityText || stateText || locationText) && (
+            <div className="education-location-line">
+              {cityText && <span className={fieldClass('city')}>{cityText}</span>}
+              {cityText && stateText && <span>, </span>}
+              {stateText && <span className={fieldClass('state')}>{stateText}</span>}
+              {!cityText && !stateText && locationText && (
+                <span className={fieldClass('location')}>{locationText}</span>
+              )}
+            </div>
+          )}
+          {toText(edu.honors) && (
+            <div className={fieldClass('honors')} style={{ marginTop: '2px' }}>
+              {toText(edu.honors)}
+            </div>
+          )}
         </div>
       );
     });
   }
   return (
-    <div style={styles.item}>
+    <div style={styles.item} className="education-entry">
       <div style={{ width: '100%', overflow: 'hidden' }}>
         <div style={{ ...styles.company, float: 'left' }}>Degree</div>
         <div
@@ -2013,7 +2489,7 @@ const renderEducation = (education, styles) => {
             whiteSpace: 'nowrap',
           }}
         >
-          University • Year
+          2018 - 2022
         </div>
       </div>
       <div
@@ -2024,49 +2500,68 @@ const renderEducation = (education, styles) => {
           clear: 'both',
         }}
       >
-        Degree • Field
+        University Name • GPA: 3.8
       </div>
     </div>
   );
 };
+
   const renderProjects = (projects, styles) => {
     if (!projects || projects.length === 0) return null;
-    return projects.map((project, idx) => {
-      // Skip empty projects
-      if (!project.projectName && !project.description) return null;
-      const nameText = toText(project.projectName);
-      const techText = toText(project.technologies);
-      const urlText = toText(project.projectUrl);
-      return (
-        <div key={idx} style={styles.item}>
-          <div style={styles.company}>
-            {nameText}
+    const baseProjects = Array.isArray(data.projects) ? data.projects : [];
+    return projects
+      .map((project, idx) => {
+        if (!project) return null;
+        const hasContent = project.projectName || project.description || project.technologies || project.projectUrl;
+        if (!hasContent) return null;
+        const nameText = toText(project.projectName);
+        const techText = toText(project.technologies);
+        const urlText = toText(project.projectUrl);
+        const resolvedProjectIndex = resolveSourceIndex(baseProjects, project, idx);
+        const projectEntryClass = getSectionHighlightClass(
+          `project-${resolvedProjectIndex}`,
+          'project-entry'
+        );
+        const projectFieldClass = (field, extraClass = 'project-field') =>
+          getSectionHighlightClass(`project-${resolvedProjectIndex}-${field}`, extraClass);
+        return (
+          <div key={idx} style={styles.item} className={projectEntryClass}>
+            {nameText && (
+              <div style={styles.company} className={projectFieldClass('name')}>
+                {nameText}
+              </div>
+            )}
+
+            {techText && (
+              <div className="project-tech" style={{ fontStyle: 'italic', fontSize: '0.9em', marginTop: '2px', marginBottom: '4px' }}>
+                <span className="project-label">Technologies:</span>{' '}
+                <span className={projectFieldClass('technologies')}>{techText}</span>
+              </div>
+            )}
+
+            {urlText && (
+              <div className="project-url" style={{ fontSize: '0.9em', marginTop: '2px', marginBottom: '4px' }}>
+                <a
+                  href={urlText}
+                  className={projectFieldClass('url')}
+                  style={{ color: '#0066cc', textDecoration: 'none' }}
+                >
+                  {urlText}
+                </a>
+              </div>
+            )}
+
+            {project.description && (
+              <div className={projectFieldClass('description')} style={{ marginTop: '2px' }}>
+                {project.description.split('\n').map((line, lineIdx) =>
+                  renderBulletLine(line, `project-${idx}-${lineIdx}`, styles)
+                )}
+              </div>
+            )}
           </div>
-          
-          {techText && (
-            <div style={{ fontStyle: 'italic', fontSize: '0.9em', marginTop: '2px', marginBottom: '4px' }}>
-              Technologies: {techText}
-            </div>
-          )}
-          
-          {urlText && (
-            <div style={{ fontSize: '0.9em', marginTop: '2px', marginBottom: '4px' }}>
-              <a href={urlText} style={{ color: '#0066cc', textDecoration: 'none' }}>
-                {urlText}
-              </a>
-            </div>
-          )}
-          
-          {project.description && (
-            <div style={{ marginTop: '2px' }}>
-              {project.description.split('\n').map((line, lineIdx) =>
-                renderBulletLine(line, `project-${idx}-${lineIdx}`, styles)
-              )}
-            </div>
-          )}
-        </div>
-      );
-    }).filter(Boolean);
+        );
+      })
+      .filter(Boolean);
   };
   // Render a single section
   const renderSection = (title, content, styles, opts = {}) => {
@@ -2090,8 +2585,9 @@ const renderEducation = (education, styles) => {
     const baseTitle = formatTitle(title);
     const continuationSuffix = isContinuation ? ' (continued)' : '';
     const displayTitle = `${baseTitle}${continuationSuffix}`;
+    const wrapperClassName = getSectionHighlightClass(opts.sectionKey, opts.wrapperClassName);
     return (
-      <div>
+      <div className={wrapperClassName}>
         {showTitle && (
           <div style={styles.sectionTitle}>
             {isIndustryManager ? `${(styles.sectionTitleBullet || '●')} ${displayTitle}` : displayTitle}
@@ -2119,40 +2615,60 @@ const renderEducation = (education, styles) => {
               {(selectedFormat === TEMPLATE_SLUGS.MODERN_CLEAN) ? (
                 <div style={styles.headerContainer}>
                   {section.content.name && (
-                    <div style={styles.header}>
+                    <div className={getSectionHighlightClass('name')} style={styles.header}>
                       {toText(section.content.name)}
                     </div>
                   )}
-                  {(section.content.email || section.content.phone) && (
-                    <div style={styles.contact}>
-                      {[section.content.email, section.content.phone].map(toText).filter(Boolean).join(' • ')}
-                    </div>
-                  )}
+                  {renderContactLine(section.content, { style: styles.contact })}
                 </div>
               ) : (
                 <>
                   {section.content.name && (
-                    <div style={styles.header}>
+                    <div className={getSectionHighlightClass('name')} style={styles.header}>
                       {toText(section.content.name)}
                     </div>
                   )}
-                  {(section.content.email || section.content.phone) && (
-                    <div style={styles.contact}>
-                      {[section.content.email, section.content.phone].map(toText).filter(Boolean).join(' • ')}
-                    </div>
-                  )}
+                  {renderContactLine(section.content, { style: styles.contact })}
                 </>
               )}
             </div>
           );
         case 'summary':
-          return <div key={idx}>{renderSection('SUMMARY', renderSummaryContent(section.content, styles), styles, { showTitle })}</div>;
+          return (
+            <div key={idx}>
+              {renderSection('SUMMARY', renderSummaryContent(section.content, styles), styles, {
+                showTitle,
+                sectionKey: 'summary',
+              })}
+            </div>
+          );
         case 'experience':
-          return <div key={idx}>{renderSection('EXPERIENCE', renderExperiences(section.content, styles), styles, { showTitle })}</div>;
+          return (
+            <div key={idx}>
+              {renderSection('EXPERIENCE', renderExperiences(section.content, styles), styles, {
+                showTitle,
+                sectionKey: 'experience',
+              })}
+            </div>
+          );
         case 'education':
-          return <div key={idx}>{renderSection('EDUCATION', renderEducation(section.content, styles), styles, { showTitle })}</div>;
+          return (
+            <div key={idx}>
+              {renderSection('EDUCATION', renderEducation(section.content, styles), styles, {
+                showTitle,
+                sectionKey: 'education',
+              })}
+            </div>
+          );
         case 'projects':
-          return <div key={idx}>{renderSection('PROJECTS', renderProjects(section.content, styles), styles, { showTitle })}</div>;
+          return (
+            <div key={idx}>
+              {renderSection('PROJECTS', renderProjects(section.content, styles), styles, {
+                showTitle,
+                sectionKey: 'projects',
+              })}
+            </div>
+          );
         case 'skills': {
           const skills = parseSkills(section.content);
           const inlineOnly = selectedFormat !== TEMPLATE_SLUGS.EXECUTIVE_SERIF;
@@ -2162,7 +2678,7 @@ const renderEducation = (education, styles) => {
                 'SKILLS',
                 renderSkillsSection(skills, styles, { inlineOnly }),
                 styles,
-                { showTitle }
+                { showTitle, sectionKey: 'skills' }
               )}
             </div>
           );
@@ -2205,18 +2721,35 @@ const renderEducation = (education, styles) => {
   const buildAttorneySidebarData = () => {
     const locationValue = deriveAttorneyLocation();
     const contactEntries = [
-      data.email ? toText(data.email) : null,
-      data.phone ? toText(data.phone) : null,
-      locationValue || null
+      data.email ? { text: toText(data.email), highlightKey: 'contact-email' } : null,
+      data.phone ? { text: toText(data.phone), highlightKey: 'contact-phone' } : null,
+      locationValue ? { text: locationValue, highlightKey: 'contact-location' } : null,
     ].filter(Boolean);
 
     const educationItems = Array.isArray(data.education)
-      ? data.education.filter((edu) =>
-          edu && (toText(edu.degree) || toText(edu.school) || toText(edu.field) || toText(edu.graduationYear) || toText(edu.honors))
-        )
+      ? data.education
+          .map((edu, idx) => {
+            if (
+              !edu ||
+              !(
+                toText(edu.degree) ||
+                toText(edu.school) ||
+                toText(edu.field) ||
+                toText(edu.graduationYear) ||
+                toText(edu.honors)
+              )
+            ) {
+              return null;
+            }
+            return { ...edu, __sourceIndex: idx };
+          })
+          .filter(Boolean)
       : [];
 
-    const skillsList = parseSkills(data.skills);
+    const skillsList = parseSkills(data.skills).map((skill, index) => ({
+      value: skill,
+      sourceIndex: index,
+    }));
 
     return { contactEntries, educationItems, skillsList };
   };
@@ -2338,7 +2871,7 @@ const renderAttorneySummaryBlock = (summaryValue) => {
   const summaryText = toText(summaryValue);
   if (!summaryText) return null;
   return (
-    <div style={styles.mainSection}>
+    <div className={getSectionHighlightClass('summary')} style={styles.mainSection}>
         <div style={styles.mainHeading}>
           <span style={styles.mainHeadingBullet}>•</span>
           <span style={styles.mainHeadingText}>Profile</span>
@@ -2353,7 +2886,7 @@ const renderAttorneySummaryBlock = (summaryValue) => {
   const renderAttorneyExperienceBlock = (experiences, headingLabel) => {
     if (!experiences || experiences.length === 0) return null;
     return (
-      <div style={styles.mainSection}>
+      <div className={getSectionHighlightClass('experience')} style={styles.mainSection}>
         <div style={styles.mainHeading}>
           <span style={styles.mainHeadingBullet}>•</span>
           <span style={styles.mainHeadingText}>{headingLabel}</span>
@@ -2387,9 +2920,13 @@ const renderAttorneySummaryBlock = (summaryValue) => {
             <div style={styles.sidebarContent}>
               <ul style={styles.sidebarList}>
                 {contactEntries.map((entry, idx) => (
-                  <li key={`contact-${idx}`} style={styles.sidebarListItem}>
+                  <li
+                    key={`contact-${idx}`}
+                    className={getSectionHighlightClass(entry.highlightKey)}
+                    style={styles.sidebarListItem}
+                  >
                     <span style={styles.sidebarBullet}>•</span>
-                    <span style={styles.contactText}>{entry}</span>
+                    <span style={styles.contactText}>{entry.text}</span>
                   </li>
                 ))}
               </ul>
@@ -2397,7 +2934,7 @@ const renderAttorneySummaryBlock = (summaryValue) => {
           </div>
         )}
         {showEducation && educationItems.length > 0 && (
-          <div style={styles.sidebarSection}>
+          <div className={getSectionHighlightClass('education')} style={styles.sidebarSection}>
             <div style={styles.sidebarHeading}>
               <span style={styles.sidebarHeadingBullet}>•</span>
               <span style={styles.sidebarHeadingText}>Education</span>
@@ -2405,19 +2942,57 @@ const renderAttorneySummaryBlock = (summaryValue) => {
             <div style={styles.sidebarContent}>
               <div style={styles.sidebarBody}>
                 {educationItems.map((edu, idx) => {
-                  const degreeLine = [toText(edu.degree), toText(edu.field)].filter(Boolean).join(', ');
-                  const schoolLine = [toText(edu.school), toText(edu.location)].filter(Boolean).join(' • ');
+                  const sourceIndex = typeof edu.__sourceIndex === 'number' ? edu.__sourceIndex : idx;
+                  const entryClassName = getSectionHighlightClass(`education-${sourceIndex}`, 'education-sidebar-entry');
+                  const fieldClass = (field, extra = 'education-field') =>
+                    getSectionHighlightClass(`education-${sourceIndex}-${field}`, extra);
+                  const degreeText = toText(edu.degree);
+                  const fieldText = toText(edu.field);
+                  const schoolText = toText(edu.school);
+                  const locationText = toText(edu.location);
                   const dateLine = formatAttorneyEducationDate(edu);
                   const honorsLine = toText(edu.honors);
                   return (
                     <div
                       key={`edu-${idx}`}
+                      className={entryClassName}
                       style={{ marginBottom: idx === educationItems.length - 1 ? 0 : educationBlockSpacing }}
                     >
-                      {degreeLine && <div style={{ fontWeight: 600 }}>{degreeLine}</div>}
-                      {schoolLine && <div>{schoolLine}</div>}
-                      {dateLine && <div>{dateLine}</div>}
-                      {honorsLine && <div>{honorsLine}</div>}
+                      {(degreeText || fieldText) && (
+                        <div style={{ fontWeight: 600 }} className="education-detail">
+                          {degreeText && <span className={fieldClass('degree')}>{degreeText}</span>}
+                          {fieldText && (
+                            <>
+                              <span> in </span>
+                              <span className={fieldClass('field')}>{fieldText}</span>
+                            </>
+                          )}
+                        </div>
+                      )}
+                      {schoolText && (
+                        <div className={fieldClass('school')}>
+                          {schoolText}
+                          {locationText && (
+                            <>
+                              <span className="education-separator"> • </span>
+                              <span className={fieldClass('location')}>{locationText}</span>
+                            </>
+                          )}
+                        </div>
+                      )}
+                      {!schoolText && locationText && (
+                        <div className={fieldClass('location')}>{locationText}</div>
+                      )}
+                      {dateLine && (
+                        <div className={fieldClass('dates')}>
+                          {dateLine}
+                        </div>
+                      )}
+                      {honorsLine && (
+                        <div className={fieldClass('honors')}>
+                          {honorsLine}
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -2426,7 +3001,7 @@ const renderAttorneySummaryBlock = (summaryValue) => {
           </div>
         )}
         {skillsList.length > 0 && (
-          <div style={styles.sidebarSection}>
+          <div className={getSectionHighlightClass('skills')} style={styles.sidebarSection}>
             <div style={styles.sidebarHeading}>
               <span style={styles.sidebarHeadingBullet}>•</span>
               <span style={styles.sidebarHeadingText}>
@@ -2435,12 +3010,22 @@ const renderAttorneySummaryBlock = (summaryValue) => {
             </div>
             <div style={styles.sidebarContent}>
               <ul style={styles.sidebarList}>
-                {skillsList.map((skill, idx) => (
-                  <li key={`skill-${idx}`} style={styles.sidebarListItem}>
-                    <span style={styles.sidebarBullet}>•</span>
-                    <span style={styles.contactText}>{skill}</span>
-                  </li>
-                ))}
+                {skillsList.map((skill, idx) => {
+                  const skillLabel = typeof skill === 'string' ? skill : (skill?.value || '');
+                  const sourceIndex = typeof skill === 'object' && typeof skill.sourceIndex === 'number'
+                    ? skill.sourceIndex
+                    : idx;
+                  return (
+                    <li
+                      key={`skill-${idx}`}
+                      style={styles.sidebarListItem}
+                      className={getSectionHighlightClass(`skill-${sourceIndex}`, 'skill-chip')}
+                    >
+                      <span style={styles.sidebarBullet}>•</span>
+                      <span style={styles.contactText}>{skillLabel}</span>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           </div>
@@ -2462,7 +3047,7 @@ const renderAttorneySummaryBlock = (summaryValue) => {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100%' }}>
         <div style={styles.headerArea}>
-          <div style={styles.headerName}>{name}</div>
+          <div className={getSectionHighlightClass('name')} style={styles.headerName}>{name}</div>
           {defaultTitle && <div style={styles.headerTitle}>{defaultTitle}</div>}
         </div>
         <div style={styles.columns}>
@@ -2525,7 +3110,7 @@ const renderAttorneySummaryBlock = (summaryValue) => {
     return [
       <div key={`attorney-page-${pageIndex}`} style={{ display: 'flex', flexDirection: 'column', minHeight: '100%' }}>
         <div style={styles.headerArea}>
-          <div style={styles.headerName}>{headerName}</div>
+          <div className={getSectionHighlightClass('name')} style={styles.headerName}>{headerName}</div>
           {headerTitle && <div style={styles.headerTitle}>{headerTitle}</div>}
         </div>
         <div style={styles.columns}>
@@ -2546,7 +3131,7 @@ const renderAttorneySummaryBlock = (summaryValue) => {
   // Determine if we should show multiple pages
   const shouldShowMultiPage = pages.length > 1;
   return (
-    <div className="live-preview-container">
+    <div className={`live-preview-container${isPreviewHighlightActive ? ' preview-updating' : ''}`}>
       {/* Download PDF Button */}
       {onDownload && (
         <div style={{ 
@@ -2619,44 +3204,36 @@ const renderAttorneySummaryBlock = (summaryValue) => {
               {(selectedFormat === TEMPLATE_SLUGS.MODERN_CLEAN) ? (
                 <div style={styles.headerContainer}>
                   {data.name && (
-                    <div style={styles.header}>
+                    <div className={getSectionHighlightClass('name')} style={styles.header}>
                       {toText(data.name)}
                     </div>
                   )}
-                  {(data.email || data.phone) && (
-                    <div style={styles.contact}>
-                      {[data.email, data.phone].map(toText).filter(Boolean).join(' • ')}
-                    </div>
-                  )}
+                  {renderContactLine({ email: data.email, phone: data.phone }, { style: styles.contact })}
                 </div>
               ) : (
                 <>
                   {data.name && (
-                    <div style={styles.header}>
+                    <div className={getSectionHighlightClass('name')} style={styles.header}>
                       {toText(data.name)}
                     </div>
                   )}
-                  {(data.email || data.phone) && (
-                    <div style={styles.contact}>
-                      {[data.email, data.phone].map(toText).filter(Boolean).join(' • ')}
-                    </div>
-                  )}
+                  {renderContactLine({ email: data.email, phone: data.phone }, { style: styles.contact })}
                 </>
               )}
               {data.summary && (
-                renderSection('SUMMARY', renderSummaryContent(data.summary, styles), styles)
+                renderSection('SUMMARY', renderSummaryContent(data.summary, styles), styles, { sectionKey: 'summary' })
               )}
               {data.experiences && data.experiences.length > 0 && (
-                renderSection('EXPERIENCE', renderExperiences(data.experiences, styles), styles)
+                renderSection('EXPERIENCE', renderExperiences(data.experiences, styles), styles, { sectionKey: 'experience' })
               )}
               {data.projects && data.projects.length > 0 && (
-                renderSection('PROJECTS', renderProjects(data.projects, styles), styles)
+                renderSection('PROJECTS', renderProjects(data.projects, styles), styles, { sectionKey: 'projects' })
               )}
               {data.education && (
-                renderSection('EDUCATION', renderEducation(data.education, styles), styles)
+                renderSection('EDUCATION', renderEducation(data.education, styles), styles, { sectionKey: 'education' })
               )}
               {singlePageSkills.length > 0 && (
-                renderSection('SKILLS', renderSkillsSection(singlePageSkills, styles), styles)
+                renderSection('SKILLS', renderSkillsSection(singlePageSkills, styles), styles, { sectionKey: 'skills' })
               )}
             </div>
           )}
