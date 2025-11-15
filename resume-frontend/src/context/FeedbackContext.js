@@ -222,7 +222,6 @@ export const FeedbackProvider = ({ children }) => {
   return (
     <FeedbackContext.Provider value={contextValue}>
       {children}
-      <FeedbackWidget onOpen={() => contextValue.openFeedbackWidget()} />
       <FeedbackPrompt
         prompt={promptState}
         isSubmitting={isSubmitting}
@@ -241,17 +240,6 @@ export const useFeedback = () => {
     throw new Error('useFeedback must be used within a FeedbackProvider');
   }
   return ctx;
-};
-
-const FeedbackWidget = ({ onOpen }) => {
-  if (typeof window === 'undefined') return null;
-  return (
-    <div style={widgetContainerStyle}>
-      <button type="button" style={widgetButtonStyle} onClick={onOpen}>
-        💬 Give Feedback
-      </button>
-    </div>
-  );
 };
 
 const FeedbackPrompt = ({ prompt, isSubmitting, error, showThanks, onClose, onSubmit }) => {
@@ -339,25 +327,6 @@ const ratingOptions = [
   { value: 2, label: 'Needs work', icon: '😕' },
   { value: 1, label: 'Frustrating', icon: '😣' },
 ];
-
-const widgetContainerStyle = {
-  position: 'fixed',
-  bottom: '6.5rem',
-  right: '1.5rem',
-  zIndex: 1200,
-};
-
-const widgetButtonStyle = {
-  background: '#6366f1',
-  color: '#ffffff',
-  border: 'none',
-  borderRadius: '9999px',
-  padding: '0.75rem 1.5rem',
-  fontSize: '0.95rem',
-  fontWeight: 600,
-  boxShadow: '0 10px 25px -10px rgba(79, 70, 229, 0.6)',
-  cursor: 'pointer',
-};
 
 const backdropStyle = {
   position: 'fixed',

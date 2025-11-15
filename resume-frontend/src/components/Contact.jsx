@@ -18,11 +18,19 @@ import { setLastStep } from '../utils/exitTracking';
 
 
 
+import { useFeedback } from '../context/FeedbackContext';
+
+
+
 const Contact = () => {
 
 
 
   const navigate = useNavigate();
+
+
+
+  const { openFeedbackWidget } = useFeedback();
 
 
 
@@ -398,6 +406,22 @@ const Contact = () => {
 
 
 
+  const handleFeedbackClick = () => {
+
+
+
+    setLastStep('contact_feedback_widget');
+
+
+
+    openFeedbackWidget();
+
+
+
+  };
+
+
+
   return (
 
 
@@ -502,7 +526,7 @@ const Contact = () => {
 
 
 
-                <p>We typically respond to all inquiries within 24 hours during business days.</p>
+                <p>We typically respond to all inquiries within 1-2 business days.</p>
 
 
 
@@ -571,6 +595,54 @@ const Contact = () => {
 
 
             </div>
+
+
+
+              <div className="contact-method">
+
+
+
+                <div className="contact-icon contact-icon-text">Feedback</div>
+
+
+
+                <h4>Product Feedback</h4>
+
+
+
+                <p>Tell us what's working well and where we can do better. Your insights shape our roadmap.</p>
+
+
+
+                <button
+
+
+
+                  type="button"
+
+
+
+                  className="contact-email-btn contact-feedback-btn"
+
+
+
+                  onClick={handleFeedbackClick}
+
+
+
+                >
+
+
+
+                  Give Feedback
+
+
+
+                </button>
+
+
+
+              </div>
 
 
 

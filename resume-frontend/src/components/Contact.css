@@ -72,6 +72,13 @@
   display: block;
 }
 
+.contact-icon-text {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
 .contact-method h4 {
   font-size: 1.3rem;
   font-weight: 600;
@@ -104,6 +111,17 @@
   background: rgba(255, 255, 255, 0.3);
   border-color: rgba(255, 255, 255, 0.5);
   transform: translateY(-2px);
+}
+
+.contact-feedback-btn {
+  background: #ffffff;
+  color: #f5576c;
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.contact-feedback-btn:hover {
+  background: rgba(255, 255, 255, 0.9);
+  color: #fa868a;
 }
 
 .response-time {
@@ -284,4 +302,3 @@
   color: #facc15;
   font-weight: 600;
 }
-

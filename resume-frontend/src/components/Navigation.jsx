@@ -102,7 +102,7 @@ const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setS
             </>
           )}
           <Link to="/#about" className="nav-link">About</Link>
-          <Link to="/#contact" className="nav-link">Contact</Link>
+          <Link to="/contact" className="nav-link">Contact</Link>
         </div>
 
         <div className="nav-navbar-right">
@@ -261,7 +261,7 @@ const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setS
               About
             </Link>
             <Link
-              to="/#contact"
+              to="/contact"
               className="mobile-nav-link"
               onClick={() => setShowMobileMenu(false)}
             >

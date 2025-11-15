@@ -5,7 +5,7 @@ import { AuthProvider } from './context/AuthContext';
 import { ResumeProvider } from './context/ResumeContext';
 import { FeedbackProvider } from './context/FeedbackContext';
 import Home from './components/Home';
-import { LoginPage, BuilderPage, AdminMembershipPage, AdminExitAnalyticsPage, TermsOfServicePage, PrivacyPolicyPage, MembershipPage, GuidesPage, GuideDetailPage } from './pages';
+import { LoginPage, BuilderPage, AdminMembershipPage, AdminExitAnalyticsPage, TermsOfServicePage, PrivacyPolicyPage, MembershipPage, GuidesPage, GuideDetailPage, ContactPage } from './pages';
 import PricingPage from './components/PricingPage';
 import SubscriptionSuccess from './components/SubscriptionSuccess';
 import SubscriptionCancel from './components/SubscriptionCancel';
@@ -62,6 +62,7 @@ function App() {
               <Route path="/account" element={<MembershipPage />} />
               <Route path="/guides" element={<GuidesPage />} />
               <Route path="/guides/:slug" element={<GuideDetailPage />} />
+              <Route path="/contact" element={<ContactPage />} />
               {/* Hidden - Apply to Jobs feature
               <Route path="/apply" element={<JobApplicationPage />} />
               */}
