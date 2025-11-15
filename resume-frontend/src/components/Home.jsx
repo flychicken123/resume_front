@@ -15,7 +15,6 @@ import SimpleHero from "./SimpleHero";
 
 import About from "./About";
 
-import Contact from "./Contact";
 
 import ProductOverview from "./ProductOverview";
 
@@ -321,19 +320,9 @@ const Home = () => {
 
           */}
 
-          <a
-            href="#contact"
-            className="home-nav-link"
-            onClick={(e) => {
-              e.preventDefault();
-
-              document
-                .getElementById("contact")
-                .scrollIntoView({ behavior: "smooth" });
-            }}
-          >
+          <Link to="/contact" className="home-nav-link">
             Contact
-          </a>
+          </Link>
         </div>
 
         <div className="home-navbar-right">
@@ -613,21 +602,13 @@ const Home = () => {
 
             */}
 
-            <a
-              href="#contact"
+            <Link
+              to="/contact"
               className="mobile-nav-link"
-              onClick={(e) => {
-                e.preventDefault();
-
-                document
-                  .getElementById("contact")
-                  .scrollIntoView({ behavior: "smooth" });
-
-                setShowMobileMenu(false);
-              }}
+              onClick={() => setShowMobileMenu(false)}
             >
               Contact
-            </a>
+            </Link>
           </div>
         </div>
       )}
@@ -1225,10 +1206,6 @@ const Home = () => {
       <About />
 
       <TeamSection />
-
-      {/* Contact Section */}
-
-      <Contact />
 
       <footer
         style={{
