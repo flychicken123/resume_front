@@ -55,6 +55,23 @@ const RESUME_FLOW_PROMPTS = {
     'Write a concise Summary/Elevator Pitch at the top (2-3 sentences). Click Next once the summary reads well to finish the flow.',
 };
 
+const RESUME_FLOW_STEP_RESPONSES = {
+  importChoice:
+    'I’m still learning how to handle the Import vs Resume History choice inside chat. Please pick an option in the builder UI for now, then hit Next.',
+  personal:
+    'Collecting Personal Details via chat is coming soon. Use the Personal Details card in the builder, then move forward when it looks good.',
+  jobDescription:
+    'Uploading the Job Description right here is still under construction. Paste it into the Job Description panel in the builder and continue.',
+  experience:
+    'I’m not ready to capture Experience inside chat yet. Add your roles in the Experience section and press Next.',
+  education:
+    'Education entry is still being wired up for chat. Fill in the Education card in the builder before continuing.',
+  skills:
+    'Capturing Skills via chat is on the roadmap. Use the Skills field in the builder UI, then go to the next step.',
+  summary:
+    'The Summary step isn’t interactive in chat yet. Write it in the builder and click Finish when it looks good.',
+};
+
 const TEMPLATE_PROMPT = TEMPLATE_OPTIONS.map((template, index) => `${index + 1}. ${template.name}`).join(', ');
 
 const DEFAULT_RESUME_FLOW_STATE = {
@@ -893,35 +910,44 @@ const clampLauncherPosition = useCallback(
     return false;
   };
 
+  const createStageMessage = useCallback((stage) => {
+    if (!stage) {
+      return null;
+    }
+    const stageIndex = RESUME_FLOW_SEQUENCE.indexOf(stage);
+    if (stageIndex === -1) {
+      return null;
+    }
+    const total = RESUME_FLOW_SEQUENCE.length;
+    const body = RESUME_FLOW_PROMPTS[stage] || '';
+    const buttons = [];
+    if (stageIndex > 0) {
+      buttons.push({ label: 'Previous', value: 'resume_flow_prev' });
+    }
+    buttons.push({ label: 'Next', value: 'resume_flow_next' });
+    return {
+      sender: 'bot',
+      text: body.trim(),
+      buttons,
+      progress: {
+        current: stageIndex + 1,
+        total,
+      },
+      meta: {
+        stageKey: stage,
+      },
+    };
+  }, []);
+
   const promptForStage = useCallback(
     (stage) => {
-      if (!stage) {
+      const stageMessage = createStageMessage(stage);
+      if (!stageMessage) {
         return;
       }
-      const stageIndex = RESUME_FLOW_SEQUENCE.indexOf(stage);
-      if (stageIndex === -1) {
-        return;
-      }
-      const total = RESUME_FLOW_SEQUENCE.length;
-      const body = RESUME_FLOW_PROMPTS[stage] || '';
-      const buttons = [];
-      if (stageIndex > 0) {
-        buttons.push({ label: 'Previous', value: 'resume_flow_prev' });
-      }
-      buttons.push({ label: 'Next', value: 'resume_flow_next' });
-      setMessages([
-        {
-          sender: 'bot',
-          text: body.trim(),
-          buttons,
-          progress: {
-            current: stageIndex + 1,
-            total,
-          },
-        },
-      ]);
+      setMessages([stageMessage]);
     },
-    [setMessages]
+    [createStageMessage, setMessages]
   );
 
   const getNextStage = (current) => {
@@ -1079,8 +1105,32 @@ const clampLauncherPosition = useCallback(
         return;
       default:
         if (resumeFlowState.active && RESUME_FLOW_SEQUENCE.includes(resumeFlowState.stage)) {
-          appendBotMessage('Please use the Previous/Next buttons below to move through each resume step.');
-          promptForStage(resumeFlowState.stage);
+          const placeholder =
+            RESUME_FLOW_STEP_RESPONSES[resumeFlowState.stage] ||
+            "I'm still getting ready for this step inside chat. Please keep using the builder UI and the Previous/Next buttons.";
+          const userEntry = { sender: 'user', text: trimmed };
+          const botEntry = { sender: 'bot', text: placeholder };
+          setMessages((prev) => {
+            let stageMessage = prev[0];
+            let existingConversation = prev.slice(1);
+            if (!stageMessage || stageMessage.meta?.stageKey !== resumeFlowState.stage) {
+              const rebuiltStageMessage = createStageMessage(resumeFlowState.stage);
+              stageMessage = rebuiltStageMessage || stageMessage;
+              existingConversation = [];
+            } else if (
+              existingConversation.length > 0 &&
+              existingConversation[existingConversation.length - 1]?.sender === 'user' &&
+              existingConversation[existingConversation.length - 1]?.text === userEntry.text
+            ) {
+              existingConversation = existingConversation.slice(0, -1);
+            }
+            const preservedConversation =
+              stageMessage && stageMessage.meta?.stageKey === resumeFlowState.stage
+                ? existingConversation
+                : [];
+            const base = stageMessage ? [stageMessage] : [];
+            return [...base, ...preservedConversation, userEntry, botEntry];
+          });
           setIsLoading(false);
           return;
         }
