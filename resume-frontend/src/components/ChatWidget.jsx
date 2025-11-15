@@ -1268,21 +1268,38 @@ const clampLauncherPosition = useCallback(
   };
 
 const handleChatDownloadRequest = async (userRequest) => {
-    if (!user || !token) {
-      appendBotMessage(
-        "Please log in first so I can generate your PDF. Use the Login button above and then type \"ready\"."
-      );
-      setLastStep('chat_resume_download_login_required');
-      return;
-    }
+  if (!user || !token) {
+    appendBotMessage(
+      "Please log in first so I can generate your PDF. Use the Login button above and then type \"ready\"."
+    );
+    setLastStep('chat_resume_download_login_required');
+    return;
+  }
 
-    if (!resumeData) {
-      appendBotMessage('I could not find your resume details yet. Try opening the builder first.');
-      return;
-    }
+  if (!resumeData) {
+    appendBotMessage('I could not find your resume details yet. Try opening the builder first.');
+    return;
+  }
 
-    const jobDescription =
-      resumeFlowState.data.jobDescription || getStoredJobDescription();
+  let historyEntries = [];
+  try {
+    const historyResponse = await fetchResumeHistoryList();
+    historyEntries = Array.isArray(historyResponse?.history) ? historyResponse.history : [];
+  } catch (error) {
+    console.error('Unable to load resume history for download', error);
+    appendBotMessage('I could not check your resume history right now. Please open the builder and download from there.');
+    setLastStep('chat_resume_download_history_error');
+    return;
+  }
+
+  if (!historyEntries.length) {
+    appendBotMessage('I could not find any generated resumes yet. Please build or import one first, then ask me again.');
+    setLastStep('chat_resume_download_no_history');
+    return;
+  }
+
+  const jobDescription =
+    resumeFlowState.data.jobDescription || getStoredJobDescription();
     const html = buildResumeHtml(resumeData, jobDescription);
     const payload = buildDownloadPayload(resumeData, jobDescription, html);
 
