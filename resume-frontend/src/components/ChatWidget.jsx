@@ -29,15 +29,31 @@ const FALLBACK_REPLY =
   "I'm having trouble reaching our AI right now. Please use the Help bubble or contact us at hihired.org/contact and we'll help right away.";
 
 const RESUME_FLOW_SEQUENCE = [
-  'template',
+  'importChoice',
   'personal',
   'jobDescription',
   'experience',
-  'projects',
   'education',
   'skills',
   'summary',
 ];
+
+const RESUME_FLOW_PROMPTS = {
+  importChoice:
+    'Choose whether you want to Import Resume or reuse one from Resume History. Use those buttons in the builder, then click Next to continue.',
+  personal:
+    'Open the Personal Details card and fill in your full name, primary email, and phone number. Click Next when the Personal Details section looks good.',
+  jobDescription:
+    'Paste the target Job Description into its field so the AI knows what role to target. Click Next when you are ready.',
+  experience:
+    'Add each role in the Experience section (job title, company, dates, location, and bullet points). Click Next after your latest role is entered.',
+  education:
+    'Fill in the Education section with degree, school, location, and graduation info. Click Next when your education details are captured.',
+  skills:
+    'List your core skills and tools in the Skills section (separate them with commas). Click Next once the Skills list is ready.',
+  summary:
+    'Write a concise Summary/Elevator Pitch at the top (2-3 sentences). Click Next once the summary reads well to finish the flow.',
+};
 
 const TEMPLATE_PROMPT = TEMPLATE_OPTIONS.map((template, index) => `${index + 1}. ${template.name}`).join(', ');
 
@@ -309,7 +325,7 @@ const readStoredUserEmail = () => {
 };
 
 const CHAT_WIDGET_ENABLED = true;
-const RESUME_BUILD_ALLOWLIST = new Set(['harwtalk@gmail.com']);
+const RESUME_BUILD_ALLOWLIST = new Set(['harwtalk@gmail.com', 'flychicken1991@gmail.com']);
 const RESUME_BUILD_LOCKED_MESSAGE =
   'Chat resume builder coming soon - please use the main resume builder UI for now.';
 
@@ -461,6 +477,16 @@ const clampLauncherPosition = useCallback(
   const appendBotMessage = (text, extras = {}) => {
     setMessages((prev) => [...prev, { sender: 'bot', text, ...extras }]);
   };
+
+  const getProgressInfo = useCallback((progress) => {
+    if (!progress || typeof progress.total !== 'number' || progress.total <= 0) {
+      return null;
+    }
+    const total = Math.max(1, progress.total);
+    const current = Math.min(Math.max(progress.current || 0, 0), total);
+    const percent = Math.min(100, Math.max(0, (current / total) * 100));
+    return { current, total, percent };
+  }, []);
 
   const dismissIntroTooltip = React.useCallback(() => {
     setShowIntroTooltip(false);
@@ -706,7 +732,7 @@ const clampLauncherPosition = useCallback(
   }, [resumeData]);
 
   const handleBackgroundAnalysis = async () => {
-    appendBotMessage('Let me review your latest resume from history…');
+    appendBotMessage('Let me review your latest resume from history...');
     setLastStep('chat_resume_analysis_start');
     try {
       const response = await fetchResumeHistoryList();
@@ -741,7 +767,7 @@ const clampLauncherPosition = useCallback(
   };
 
   const handleSoftwareEngineerJobCount = async () => {
-    appendBotMessage('Let me check how many software engineer roles we have archived…');
+    appendBotMessage('Let me check how many software engineer roles we have archived...');
     setLastStep('chat_job_count_start');
     try {
       const response = await fetchJobCount('software engineer');
@@ -867,56 +893,36 @@ const clampLauncherPosition = useCallback(
     return false;
   };
 
-  const promptForStage = (stage) => {
-    switch (stage) {
-      case 'template': {
-        const templateButtons = TEMPLATE_OPTIONS.map((template) => ({
-          label: template.name,
-          value: `template:${template.id}`,
-        }));
-        appendBotMessage('Great! Which resume template should we use?\nNeed a visual? Jump straight to the Template & Format section below.', {
-          buttons: [{ label: 'Jump to Template & Format', action: 'jump_template_section', variant: 'highlight' }],
-          extraButtons: templateButtons,
-        });
-        break;
+  const promptForStage = useCallback(
+    (stage) => {
+      if (!stage) {
+        return;
       }
-      case 'personal':
-        appendBotMessage(
-          "Let's capture your personal details. Please reply in this format:\nName: ...; Email: ...; Phone: ..."
-        );
-        break;
-      case 'jobDescription':
-        appendBotMessage(
-          "Please paste the job description you're targeting. I'll store it so the AI can tailor your resume."
-        );
-        break;
-      case 'experience':
-        appendBotMessage(
-          'Tell me about your most recent role. Format suggestion:\nTitle: ...; Company: ...; Highlights: bullet points or sentences describing your impact.'
-        );
-        break;
-      case 'projects':
-        appendBotMessage(
-          "Share a key project (name, what you built, and technologies or tools). I'll add it to your resume."
-        );
-        break;
-      case 'education':
-        appendBotMessage(
-          'List your education details. Example:\nDegree: B.S. Computer Science; School: UCLA; Graduation: 2023'
-        );
-        break;
-      case 'skills':
-        appendBotMessage('List your core skills separated by commas (e.g., React, Python, Product Strategy).');
-        break;
-      case 'summary':
-        appendBotMessage(
-          'Finally, share a brief summary or elevator pitch for the top of your resume (2-3 sentences).'
-        );
-        break;
-      default:
-        break;
-    }
-  };
+      const stageIndex = RESUME_FLOW_SEQUENCE.indexOf(stage);
+      if (stageIndex === -1) {
+        return;
+      }
+      const total = RESUME_FLOW_SEQUENCE.length;
+      const body = RESUME_FLOW_PROMPTS[stage] || '';
+      const buttons = [];
+      if (stageIndex > 0) {
+        buttons.push({ label: 'Previous', value: 'resume_flow_prev' });
+      }
+      buttons.push({ label: 'Next', value: 'resume_flow_next' });
+      setMessages([
+        {
+          sender: 'bot',
+          text: body.trim(),
+          buttons,
+          progress: {
+            current: stageIndex + 1,
+            total,
+          },
+        },
+      ]);
+    },
+    [setMessages]
+  );
 
   const getNextStage = (current) => {
     const index = RESUME_FLOW_SEQUENCE.indexOf(current);
@@ -926,6 +932,27 @@ const clampLauncherPosition = useCallback(
     return RESUME_FLOW_SEQUENCE[index + 1];
   };
 
+  const beginResumeFlowWizard = useCallback(() => {
+    const initialStage = RESUME_FLOW_SEQUENCE[0];
+    setResumeFlowState((prev) => ({
+      ...prev,
+      active: true,
+      stage: initialStage,
+    }));
+    promptForStage(initialStage);
+  }, [promptForStage]);
+
+  const completeResumeFlow = useCallback(() => {
+    setMessages([
+      {
+        sender: 'bot',
+        text: "You're all set! You finished the resume build process in chat. Keep working inside the builder, and let me know if there's anything else I can help with.",
+      },
+    ]);
+    setLastStep('chat_resume_flow_complete');
+    setResumeFlowState(DEFAULT_RESUME_FLOW_STATE);
+  }, [setMessages, setLastStep, setResumeFlowState]);
+
   const advanceResumeStage = (nextStage) => {
     if (!nextStage) {
       completeResumeFlow();
@@ -934,6 +961,39 @@ const clampLauncherPosition = useCallback(
     setResumeFlowState((prev) => ({ ...prev, stage: nextStage }));
     promptForStage(nextStage);
   };
+
+  const handleResumeFlowNavigation = useCallback(
+    (direction) => {
+      const currentStage = resumeFlowState.stage;
+      if (!currentStage) {
+        return;
+      }
+      const currentIndex = RESUME_FLOW_SEQUENCE.indexOf(currentStage);
+      if (currentIndex === -1) {
+        return;
+      }
+      if (direction === 'next') {
+        const nextStage = getNextStage(currentStage);
+        if (!nextStage) {
+          completeResumeFlow();
+          return;
+        }
+        setResumeFlowState((prev) => ({ ...prev, stage: nextStage }));
+        promptForStage(nextStage);
+        return;
+      }
+      if (direction === 'prev') {
+        const firstStage = RESUME_FLOW_SEQUENCE[0];
+        if (currentIndex === 0) {
+          promptForStage(firstStage);
+          return;
+        }
+        setResumeFlowState((prev) => ({ ...prev, stage: firstStage }));
+        promptForStage(firstStage);
+      }
+    },
+    [resumeFlowState.stage, completeResumeFlow, promptForStage, setResumeFlowState]
+  );
 
   const startResumeFlow = (initialRequest) => {
     setResumeFlowState({
@@ -954,228 +1014,6 @@ const clampLauncherPosition = useCallback(
     setLastStep('chat_resume_flow_offer');
   };
 
-  const completeResumeFlow = () => {
-    appendBotMessage(
-      "Amazing! I've saved these details in your AI Builder workspace. Opening the resume builder so you can review and download."
-    );
-    setLastStep('chat_resume_flow_complete');
-    setResumeFlowState(DEFAULT_RESUME_FLOW_STATE);
-    setTimeout(() => {
-      navigate('/builder');
-      setIsOpen(false);
-    }, 1000);
-  };
-
-  const handleTemplateStage = (text) => {
-    const choice = matchTemplateChoice(text);
-    if (!choice) {
-      appendBotMessage('Please choose one of the templates by name or number so we can continue.');
-      return;
-    }
-
-    updateResume((prev) => ({
-      ...prev,
-      selectedFormat: choice.id,
-    }));
-
-    setResumeFlowState((prev) => ({
-      ...prev,
-      data: { ...prev.data, templateId: choice.id },
-    }));
-
-    appendBotMessage(`Fantastic choice! We'll use the ${choice.name} template.`);
-    advanceResumeStage(getNextStage('template'));
-  };
-
-  const handlePersonalStage = (text) => {
-    const parsed = parsePersonalDetails(text);
-    if (!parsed.name && !parsed.email && !parsed.phone) {
-      appendBotMessage('Could you include your name, email, and phone in the reply?');
-      return;
-    }
-
-    updateResume((prev) => ({
-      ...prev,
-      name: parsed.name || prev.name,
-      email: parsed.email || prev.email,
-      phone: parsed.phone || prev.phone,
-    }));
-
-    setResumeFlowState((prev) => ({
-      ...prev,
-      data: {
-        ...prev.data,
-        personal: {
-          name: parsed.name || prev.data.personal?.name || '',
-          email: parsed.email || prev.data.personal?.email || '',
-          phone: parsed.phone || prev.data.personal?.phone || '',
-          dateOfBirth: parsed.dateOfBirth || prev.data.personal?.dateOfBirth || '',
-        },
-      },
-    }));
-
-    const confirmationParts = [];
-    if (parsed.name) confirmationParts.push(`name (${parsed.name})`);
-    if (parsed.email) confirmationParts.push(`email (${parsed.email})`);
-    if (parsed.phone) confirmationParts.push(`phone (${parsed.phone})`);
-    if (parsed.dateOfBirth) confirmationParts.push(`DOB (${parsed.dateOfBirth})`);
-
-    appendBotMessage(
-      confirmationParts.length > 0
-        ? `Great! I captured your ${confirmationParts.join(', ')}.`
-        : 'Personal details captured!'
-    );
-    advanceResumeStage(getNextStage('personal'));
-  };
-
-  const handleJobDescriptionStage = (text) => {
-    const cleaned = text.trim();
-    if (!cleaned) {
-      appendBotMessage('Please paste at least a few lines from the job description.');
-      return;
-    }
-
-    const entry = [
-      {
-        id: `chat-job-${Date.now().toString(36)}`,
-        url: '',
-        text: cleaned,
-      },
-    ];
-    try {
-      localStorage.setItem('jobDescriptions', JSON.stringify(entry));
-      localStorage.setItem('jobDescription', cleaned);
-    } catch (error) {
-      console.error('Failed to persist job description from chat:', error);
-    }
-
-    setResumeFlowState((prev) => ({
-      ...prev,
-      data: { ...prev.data, jobDescription: cleaned },
-    }));
-
-    appendBotMessage('Got it! The job description is saved for tailoring.');
-    advanceResumeStage(getNextStage('jobDescription'));
-  };
-
-  const handleExperienceStage = (text) => {
-    const parsed = parseExperienceDetails(text);
-    if (!parsed.jobTitle && !parsed.company && !parsed.description) {
-      appendBotMessage('Please share the role, company, and a few highlights so I can add it.');
-      return;
-    }
-
-    updateResume((prev) => {
-      const experiences =
-        Array.isArray(prev.experiences) && prev.experiences.length > 0
-          ? prev.experiences.map((exp, index) =>
-              index === 0 ? { ...exp, ...parsed } : exp
-            )
-          : [{ ...createEmptyExperience(), ...parsed }];
-      return { ...prev, experiences };
-    });
-
-    setResumeFlowState((prev) => ({
-      ...prev,
-      data: { ...prev.data, experience: parsed },
-    }));
-
-    appendBotMessage('Experience added!');
-    advanceResumeStage(getNextStage('experience'));
-  };
-
-  const handleProjectsStage = (text) => {
-    const parsed = parseProjectDetails(text);
-    if (!parsed.projectName && !parsed.description) {
-      appendBotMessage('Please include a project name and what you built so I can add it.');
-      return;
-    }
-
-    updateResume((prev) => {
-      const projects =
-        Array.isArray(prev.projects) && prev.projects.length > 0
-          ? prev.projects.map((proj, index) =>
-              index === 0 ? { ...proj, ...parsed } : proj
-            )
-          : [{ ...createEmptyProject(), ...parsed }];
-      return { ...prev, projects };
-    });
-
-    setResumeFlowState((prev) => ({
-      ...prev,
-      data: { ...prev.data, projects: parsed },
-    }));
-
-    appendBotMessage('Project noted!');
-    advanceResumeStage(getNextStage('projects'));
-  };
-
-  const handleEducationStage = (text) => {
-    const parsed = parseEducationDetails(text);
-    if (!parsed.degree && !parsed.school) {
-      appendBotMessage('Please share at least the degree and school so I can add it.');
-      return;
-    }
-
-    updateResume((prev) => {
-      const education =
-        Array.isArray(prev.education) && prev.education.length > 0
-          ? prev.education.map((ed, index) =>
-              index === 0 ? { ...ed, ...parsed } : ed
-            )
-          : [{ ...createEmptyEducation(), ...parsed }];
-      return { ...prev, education };
-    });
-
-    setResumeFlowState((prev) => ({
-      ...prev,
-      data: { ...prev.data, education: parsed },
-    }));
-
-    appendBotMessage('Education saved!');
-    advanceResumeStage(getNextStage('education'));
-  };
-
-  const handleSkillsStage = (text) => {
-    const parsed = text.split(/\s*,\s*/).filter(Boolean).join(', ');
-    if (!parsed) {
-      appendBotMessage('List at least one skill, separated by commas.');
-      return;
-    }
-
-    updateResume((prev) => ({
-      ...prev,
-      skills: parsed,
-    }));
-
-    setResumeFlowState((prev) => ({
-      ...prev,
-      data: { ...prev.data, skills: parsed },
-    }));
-
-    appendBotMessage('Skills captured.');
-    advanceResumeStage(getNextStage('skills'));
-  };
-
-  const handleSummaryStage = (text) => {
-    const summary = text.trim();
-    if (!summary) {
-      appendBotMessage('Please share a short summary so I can place it at the top of your resume.');
-      return;
-    }
-
-    updateResume((prev) => ({
-      ...prev,
-      summary,
-    }));
-
-    setResumeFlowState((prev) => ({
-      ...prev,
-      data: { ...prev.data, summary },
-    }));
-
-    completeResumeFlow();
-  };
 
   const handleResumeFlowMessage = async (userInput) => {
     const trimmed = userInput.trim();
@@ -1220,7 +1058,7 @@ const clampLauncherPosition = useCallback(
       case 'confirm':
         if (isAffirmative(lower)) {
           if (ensureAuthenticatedForFlow()) {
-            advanceResumeStage('template');
+            beginResumeFlowWizard();
           }
         } else if (isNegative(lower)) {
           appendBotMessage('All good! Ask me anything else whenever you like.');
@@ -1228,43 +1066,27 @@ const clampLauncherPosition = useCallback(
         } else {
           appendBotMessage('Just let me know yes or no - should we create your resume here?');
         }
+        setIsLoading(false);
         return;
       case 'awaitLogin':
         if (user && token) {
           appendBotMessage("Welcome back! Let's keep going.");
-          advanceResumeStage('template');
+          beginResumeFlowWizard();
         } else {
           appendBotMessage("I still need you to finish logging in. Once you're ready, just say \"ready\".");
         }
-        return;
-      case 'template':
-        handleTemplateStage(trimmed);
-        return;
-      case 'personal':
-        handlePersonalStage(trimmed);
-        return;
-      case 'jobDescription':
-        handleJobDescriptionStage(trimmed);
-        return;
-      case 'experience':
-        handleExperienceStage(trimmed);
-        return;
-      case 'projects':
-        handleProjectsStage(trimmed);
-        return;
-      case 'education':
-        handleEducationStage(trimmed);
-        return;
-      case 'skills':
-        handleSkillsStage(trimmed);
-        return;
-      case 'summary':
-        handleSummaryStage(trimmed);
+        setIsLoading(false);
         return;
       default:
-        setResumeFlowState(DEFAULT_RESUME_FLOW_STATE);
+        if (resumeFlowState.active && RESUME_FLOW_SEQUENCE.includes(resumeFlowState.stage)) {
+          appendBotMessage('Please use the Previous/Next buttons below to move through each resume step.');
+          promptForStage(resumeFlowState.stage);
+          setIsLoading(false);
+          return;
+        }
         break;
     }
+
   };
 
 const handleChatDownloadRequest = async (userRequest) => {
@@ -1550,7 +1372,7 @@ const buildSectionResponse = (sectionKey) => {
 
     if (hasInterviewProcessIntent(trimmed)) {
       appendBotMessage(
-        "Great question! We're building an upcoming feature that shares interview insights for specific companies. Stay tuned—it's on our roadmap!"
+        "Great question! We're building an upcoming feature that shares interview insights for specific companies. Stay tuned -- it's on our roadmap!"
       );
       setLastStep('chat_interview_future_feature');
       setIsLoading(false);
@@ -1624,6 +1446,14 @@ const buildSectionResponse = (sectionKey) => {
     if (!btn) {
       return;
     }
+    if (btn.value === 'resume_flow_next') {
+      handleResumeFlowNavigation('next');
+      return;
+    }
+    if (btn.value === 'resume_flow_prev') {
+      handleResumeFlowNavigation('prev');
+      return;
+    }
     if (btn.action === 'jump_template_section') {
       jumpToTemplateSection();
       return;
@@ -1683,7 +1513,7 @@ const buildSectionResponse = (sectionKey) => {
                 onClick={toggleSize}
                 aria-label={isLarge ? 'Reduce chat size' : 'Enlarge chat'}
               >
-                {isLarge ? '▢' : '⤢'}
+                {isLarge ? 'Shrink' : 'Expand'}
               </button>
               <button
                 type="button"
@@ -1696,8 +1526,24 @@ const buildSectionResponse = (sectionKey) => {
             </div>
           </div>
           <div className="chat-messages">
-            {messages.map((message, index) => (
-              <div key={`${message.sender}-${index}`} className={`chat-message ${message.sender}`}>
+            {messages.map((message, index) => {
+              const progressInfo = getProgressInfo(message.progress);
+              return (
+                <div key={`${message.sender}-${index}`} className={`chat-message ${message.sender}`}>
+                  {progressInfo && (
+                    <div
+                      className="chat-progress"
+                      aria-label={`Step ${progressInfo.current} of ${progressInfo.total}`}
+                    >
+                      <div className="chat-progress-track">
+                        <div
+                          className="chat-progress-fill"
+                          style={{ width: `${progressInfo.percent}%` }}
+                        />
+                      </div>
+                      <div className="chat-progress-label">{`Step ${progressInfo.current} of ${progressInfo.total}`}</div>
+                    </div>
+                  )}
                 {message.text && <span>{message.text}</span>}
                 {message.linkUrl && (
                   <a
@@ -1743,8 +1589,9 @@ const buildSectionResponse = (sectionKey) => {
                     ))}
                   </div>
                 )}
-              </div>
-            ))}
+                </div>
+              );
+            })}
             {isLoading && <div className="chat-message bot typing">HiHired assistant is typing...</div>}
           </div>
           <form className="chat-input" onSubmit={handleSubmit}>
@@ -1769,7 +1616,7 @@ const buildSectionResponse = (sectionKey) => {
         {showIntroTooltip && (
           <div className="chat-intro-tooltip" role="status" aria-live="polite">
             <div className="chat-intro-tooltip__text">
-              I’m your job search AI companion. Click to chat!
+              I'm your job search AI companion. Click to chat!
             </div>
             <button
               type="button"
@@ -1978,7 +1825,7 @@ const deriveTargetPosition = (resumeData, jobDescription = '') => {
   if (typeof resumeData.summary === 'string' && resumeData.summary.trim()) {
     const summary = resumeData.summary.trim();
     const summaryLower = summary.toLowerCase();
-    const cleaned = summary.replace(/[|•·].*$/, '').replace(/-.*/, '').replace(/,.*/, '');
+    const cleaned = summary.replace(/[|\u2022\u00b7].*$/, '').replace(/-.*/, '').replace(/,.*/, '');
     if (looksLikeJobTitle(cleaned) && cleaned.split(/\s+/).length <= 6) {
       return cleaned;
     }
@@ -1992,7 +1839,7 @@ const deriveTargetPosition = (resumeData, jobDescription = '') => {
       const sliceEnd = summary.indexOf(' ', index + keyword.length);
       const candidate = summary
         .slice(sliceStart >= 0 ? sliceStart : 0, sliceEnd >= 0 ? sliceEnd : summary.length)
-        .replace(/[|•·].*$/, '')
+        .replace(/[|\u2022\u00b7].*$/, '')
         .trim();
       if (looksLikeJobTitle(candidate) && candidate.split(/\s+/).length <= 6) {
         return candidate;
@@ -2012,7 +1859,7 @@ const deriveTargetPosition = (resumeData, jobDescription = '') => {
           return after;
         }
       }
-      const stripped = line.replace(/[:\-–].*$/, '').trim();
+      const stripped = line.replace(/[:\-\u2013].*$/, '').trim();
       if (looksLikeJobTitle(stripped) && stripped.split(/\s+/).length <= 6) {
         return stripped;
       }
@@ -2098,34 +1945,6 @@ const buildJobMatchPayloadForChat = (resumeData, jobDescription = '') => {
   };
 };
 
-const matchTemplateChoice = (text) => {
-  if (!text) return null;
-  const normalized = text.toLowerCase();
-  const numberMatch = normalized.match(/\b([1-3])\b/);
-  if (numberMatch) {
-    const index = parseInt(numberMatch[1], 10) - 1;
-    return TEMPLATE_OPTIONS[index] || null;
-  }
-
-  const foundByName = TEMPLATE_OPTIONS.find((template) =>
-    normalized.includes(template.name.toLowerCase())
-  );
-  if (foundByName) {
-    return foundByName;
-  }
-
-  if (normalized.includes('classic')) {
-    return TEMPLATE_OPTIONS[0];
-  }
-  if (normalized.includes('modern')) {
-    return TEMPLATE_OPTIONS[1];
-  }
-  if (normalized.includes('executive') || normalized.includes('serif')) {
-    return TEMPLATE_OPTIONS[2];
-  }
-  return null;
-};
-
 const parseKeyValue = (text, key) => {
   if (!text) return '';
   const regex = new RegExp(`${key}\\s*[:\\-]\\s*([^;\\n]+)`, 'i');
@@ -2181,16 +2000,35 @@ const parsePersonalDetails = (text) => {
     return { name: '', email: '', phone: '', dateOfBirth: '' };
   }
   const emailMatch = text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
-  const phoneMatch = text.match(/(\+?\d[\d\s().-]{7,}\d)/);
+  const loosePhoneMatch = text.match(/(\+?\d[\d\s().-]{4,}\d)/);
+  const phoneFromLabel = parseKeyValue(text, 'phone') || parseKeyValue(text, 'phone number');
+  const phonePhraseMatch = text.match(/phone(?: number)?(?: is| was|=|:)?\s*([+\d][\d\s().-]*)/i);
   const nameFromLabel = parseKeyValue(text, 'name');
   const naturalName = extractNameFromNaturalText(text);
   const firstSegment = text.split(/[\n;.]/)[0]?.replace(/^(hi|hello|it'?s)\s+/i, '').trim();
   const dateOfBirth = extractDateOfBirth(text);
 
+  const selectPhoneCandidate = (...candidates) => {
+    for (const candidate of candidates) {
+      if (!candidate) continue;
+      const digits = candidate.replace(/\D+/g, '');
+      if (digits.length >= 6) {
+        return candidate;
+      }
+    }
+    return '';
+  };
+
+  const phoneValue = selectPhoneCandidate(
+    loosePhoneMatch ? loosePhoneMatch[0] : '',
+    phonePhraseMatch ? phonePhraseMatch[1] : '',
+    phoneFromLabel
+  );
+
   return {
     name: cleanCapturedName(normalizeCapturedValue(nameFromLabel || naturalName || firstSegment || '')),
     email: normalizeCapturedValue(emailMatch ? emailMatch[0] : parseKeyValue(text, 'email')),
-    phone: normalizeCapturedValue(phoneMatch ? phoneMatch[0] : parseKeyValue(text, 'phone')),
+    phone: normalizeCapturedValue(phoneValue || ''),
     dateOfBirth,
   };
 };
@@ -2524,7 +2362,7 @@ const buildResumeHtml = (data = {}, jobDescription = '') => {
       .join('');
 
   const experienceHtml = renderList(experiences || [], (exp) => {
-    const titleLine = [exp.jobTitle, exp.company].filter(Boolean).join(' · ');
+    const titleLine = [exp.jobTitle, exp.company].filter(Boolean).join(' \u00b7 ');
     const datesLine = [exp.startDate, exp.endDate].filter(Boolean).join(' - ');
     return `
       <div class="item">
@@ -2558,8 +2396,8 @@ const buildResumeHtml = (data = {}, jobDescription = '') => {
   });
 
   const educationHtml = renderList(education || [], (ed) => {
-    const degreeLine = [ed.degree, ed.field].filter(Boolean).join(' · ');
-    const schoolLine = [ed.school, ed.location].filter(Boolean).join(' · ');
+    const degreeLine = [ed.degree, ed.field].filter(Boolean).join(' \u00b7 ');
+    const schoolLine = [ed.school, ed.location].filter(Boolean).join(' \u00b7 ');
     const datesLine = [ed.startYear, ed.graduationYear].filter(Boolean).join(' - ');
     return `
       <div class="item">
@@ -2647,7 +2485,7 @@ const buildResumeHtml = (data = {}, jobDescription = '') => {
           ${name ? `<h1>${escapeHtml(name)}</h1>` : ''}
           <p>
             ${email ? escapeHtml(email) : ''}
-            ${email && phone ? ' · ' : ''}
+            ${email && phone ? ' \u00b7 ' : ''}
             ${phone ? escapeHtml(phone) : ''}
           </p>
         </header>
@@ -2710,3 +2548,4 @@ const SECTION_UPDATE_PATTERNS = [
 ];
 
 export default ChatWidget;
+
