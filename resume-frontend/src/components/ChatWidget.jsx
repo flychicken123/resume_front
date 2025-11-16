@@ -72,8 +72,6 @@ const RESUME_FLOW_STEP_RESPONSES = {
     'The Summary step isn’t interactive in chat yet. Write it in the builder and click Finish when it looks good.',
 };
 
-const TEMPLATE_PROMPT = TEMPLATE_OPTIONS.map((template, index) => `${index + 1}. ${template.name}`).join(', ');
-
 const DEFAULT_RESUME_FLOW_STATE = {
   active: false,
   stage: null,
@@ -341,7 +339,7 @@ const readStoredUserEmail = () => {
   }
 };
 
-const CHAT_WIDGET_ENABLED = true;
+const CHAT_WIDGET_ENABLED = false;
 const RESUME_BUILD_ALLOWLIST = new Set(['harwtalk@gmail.com', 'flychicken1991@gmail.com']);
 const RESUME_BUILD_LOCKED_MESSAGE =
   'Chat resume builder coming soon - please use the main resume builder UI for now.';
