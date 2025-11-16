@@ -252,7 +252,7 @@ const extractJobDescriptionHighlight = (description) => {
   }
   const lineCandidates = plainText
     .split(/\r?\n+/)
-    .map((line) => line.replace(/^[\-\*\u2022]\s*/, '').trim())
+    .map((line) => line.replace(/^[-*\u2022]\s*/, '').trim())
     .filter((line) => line.length >= 40 && line.length <= 220);
   if (lineCandidates.length > 0) {
     return lineCandidates[0];
@@ -1432,8 +1432,6 @@ function BuilderPage() {
 
   const keywordFilteredCount = Math.max(jobMatches.length - keywordFilteredMatches.length, 0);
   const locationFilteredCount = Math.max(keywordFilteredMatches.length - filteredJobMatches.length, 0);
-  const filteredOutCount = Math.max(jobMatches.length - filteredJobMatches.length, 0);
-
   const filterSummaryText = useMemo(() => {
     const parts = [];
     if (locationFilteredCount > 0) {

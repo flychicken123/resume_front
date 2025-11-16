@@ -2030,11 +2030,6 @@ const renderExperiences = (experiences, styles) => {
     return cleaned.join(separator);
   };
   const renderExecutiveHeaderRow = createExecutiveHeaderRenderer(styles);
-  const getExperienceClassName = (entry, fallbackIndex) => {
-    const resolvedIndex = resolveSourceIndex(baseExperiences, entry, fallbackIndex);
-    return getSectionHighlightClass(`experience-${resolvedIndex}`, 'experience-entry');
-  };
-
   return experiences
     .map((exp, idx) => {
       if (exp == null) {
