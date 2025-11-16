@@ -69,6 +69,12 @@
   color: #047857;
 }
 
+.membership-alert-warning {
+  background: rgba(251, 191, 36, 0.15);
+  border-color: rgba(251, 191, 36, 0.4);
+  color: #92400e;
+}
+
 .membership-loading {
   display: flex;
   flex-direction: column;
@@ -156,6 +162,14 @@
   margin: 0;
   font-size: 1rem;
   color: rgba(226, 232, 240, 0.9);
+}
+
+.membership-status-note {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 0.92rem;
+  color: #fde68a;
+  font-weight: 500;
 }
 
 .membership-usage-bar {

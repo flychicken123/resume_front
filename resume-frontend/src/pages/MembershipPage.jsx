@@ -107,7 +107,10 @@ const MembershipPage = () => {
   const currentPlanName = (subscription?.plan_name || "free").toLowerCase();
   const resumeLimit = subscription?.resume_limit || 0;
   const resumesRemaining = usage?.remaining ?? null;
-  const renewDate = usage?.reset_date ? formatDate(usage.reset_date) : null;
+  const periodBoundary =
+    subscription?.current_period_end || usage?.reset_date || null;
+  const renewDate = periodBoundary ? formatDate(periodBoundary) : null;
+  const cancelScheduled = Boolean(subscription?.cancel_at_period_end);
   const usagePercent =
     resumeLimit > 0 && resumesRemaining != null
       ? Math.min(
@@ -149,10 +152,13 @@ const MembershipPage = () => {
     setStatusMessage("");
     setError("");
     try {
-      await cancelUserSubscription();
-      const endDate = renewDate
-        ? ` You'll keep access until ${renewDate}.`
-        : "";
+      const result = await cancelUserSubscription();
+      const cancelBoundary =
+        result?.current_period_end || periodBoundary || null;
+      const cancelDate = cancelBoundary ? formatDate(cancelBoundary) : null;
+      const endDate = cancelDate
+        ? ` You'll keep access until ${cancelDate}.`
+        : " You'll keep access until the current billing period ends.";
       setStatusMessage(
         "Your membership will cancel at the end of the current period." +
           endDate
@@ -265,6 +271,19 @@ const MembershipPage = () => {
             {statusMessage}
           </div>
         )}
+        {subscription?.cancel_at_period_end && (
+          <div className="membership-alert membership-alert-warning">
+            Billing will stop automatically{" "}
+            {renewDate ? (
+              <>
+                on <strong>{renewDate}</strong>.
+              </>
+            ) : (
+              "after your current billing period."
+            )}{" "}
+            You keep every premium feature until that date.
+          </div>
+        )}
 
         {loading ? (
           <div className="membership-loading">
@@ -305,6 +324,12 @@ const MembershipPage = () => {
                         subscription.status.slice(1)
                       : "Active"}
                   </strong>
+                  {cancelScheduled && (
+                    <span className="membership-status-note">
+                      — scheduled to end{" "}
+                      {renewDate ? `on ${renewDate}` : "after this period"}
+                    </span>
+                  )}
                 </p>
 
                 {resumeLimit > 0 && resumesRemaining != null ? (
@@ -328,7 +353,8 @@ const MembershipPage = () => {
 
                 {renewDate && (
                   <p className="membership-renewal">
-                    Renews on <strong>{renewDate}</strong>
+                    {cancelScheduled ? "Ends on" : "Renews on"}{" "}
+                    <strong>{renewDate}</strong>
                   </p>
                 )}
               </div>
@@ -358,7 +384,11 @@ const MembershipPage = () => {
               </div>
               {currentPlanName !== "free" && (
                 <p className="membership-cancel-note">
-                  {renewDate
+                  {cancelScheduled
+                    ? renewDate
+                      ? `Cancellation scheduled — access ends ${renewDate}.`
+                      : "Cancellation scheduled for the end of this billing period."
+                    : renewDate
                     ? `Cancelling keeps your plan active until ${renewDate}.`
                     : "Cancelling keeps your plan active until the end of this billing period."}
                 </p>
