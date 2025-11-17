@@ -75,6 +75,23 @@
   color: #92400e;
 }
 
+.membership-intro-banner {
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: rgba(37, 99, 235, 0.08);
+  border: 1px solid rgba(37, 99, 235, 0.25);
+  color: #1d4ed8;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.membership-intro-banner strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 1rem;
+  color: #1e3a8a;
+}
+
 .membership-loading {
   display: flex;
   flex-direction: column;
@@ -170,6 +187,13 @@
   font-size: 0.92rem;
   color: #fde68a;
   font-weight: 500;
+}
+
+.membership-intro-note {
+  margin: 8px 0 16px;
+  font-size: 0.9rem;
+  color: #2563eb;
+  font-weight: 600;
 }
 
 .membership-usage-bar {
@@ -321,6 +345,47 @@
   font-size: 1.4rem;
   font-weight: 700;
   color: #2563eb;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.membership-plan-price.has-intro-price {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  color: #0f172a;
+}
+
+.membership-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.membership-price-original {
+  text-decoration: line-through;
+  color: #94a3b8;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.membership-price-arrow {
+  color: #94a3b8;
+  font-size: 1.1rem;
+}
+
+.membership-price-intro {
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: #dc2626;
+}
+
+.membership-price-period {
+  font-size: 0.95rem;
+  color: #475569;
+  font-weight: 500;
 }
 
 .membership-plan-period {

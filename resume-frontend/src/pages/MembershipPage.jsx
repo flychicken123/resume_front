@@ -12,6 +12,11 @@ import { useAuth } from "../context/AuthContext";
 import Navigation from "../components/Navigation";
 import "./MembershipPage.css";
 
+const INTRO_PRICING = {
+  premium: { firstMonth: "$1.99", thereafter: "$7.99" },
+  ultimate: { firstMonth: "$6.99", thereafter: "$29.99" },
+};
+
 const formatPrice = (price) => {
   if (price == null) {
     return "$0";
@@ -111,6 +116,8 @@ const MembershipPage = () => {
     subscription?.current_period_end || usage?.reset_date || null;
   const renewDate = periodBoundary ? formatDate(periodBoundary) : null;
   const cancelScheduled = Boolean(subscription?.cancel_at_period_end);
+  const introEligible =
+    !subscription || (subscription?.status || "").toLowerCase() === "free";
   const usagePercent =
     resumeLimit > 0 && resumesRemaining != null
       ? Math.min(
@@ -129,12 +136,14 @@ const MembershipPage = () => {
           ? plan.price
           : parseFloat(plan?.price ?? "0");
       const isPaidPlan = !Number.isNaN(numericPrice) && numericPrice > 0;
+      const introPricing = INTRO_PRICING[normalizedName] || null;
       return {
         ...plan,
         normalizedName,
         isCurrent,
         features,
         isPaidPlan,
+        introPricing,
       };
     });
   }, [plans, currentPlanName]);
@@ -403,29 +412,75 @@ const MembershipPage = () => {
                   output or unlock additional AI coaching.
                 </p>
               </div>
+              {introEligible && (
+                <div className="membership-intro-banner">
+                  <strong>New member intro pricing:</strong> Premium starts at{" "}
+                  {INTRO_PRICING.premium.firstMonth} for the first month before returning to{" "}
+                  {INTRO_PRICING.premium.thereafter}/mo. Ultimate members pay{" "}
+                  {INTRO_PRICING.ultimate.firstMonth} for month one, then{" "}
+                  {INTRO_PRICING.ultimate.thereafter}/mo. Discounts apply automatically at checkout.
+                </div>
+              )}
 
               <div className="membership-plan-grid">
-                {planCards.map((plan) => (
-                  <div
-                    key={plan.id || plan.normalizedName}
-                    className={`membership-plan-card ${
-                      plan.isCurrent ? "membership-plan-card-current" : ""
-                    }`}
-                  >
-                    <div className="membership-plan-heading">
-                      <span className="membership-plan-name">
-                        {plan.display_name || plan.name}
-                      </span>
-                      <span className="membership-plan-price">
-                        {formatPrice(plan.price)}
-                        {plan.resume_period ? (
-                          <span className="membership-plan-period">
-                            {" "}
-                            / {plan.resume_period}
-                          </span>
-                        ) : null}
-                      </span>
-                    </div>
+                {planCards.map((plan) => {
+                  const showIntroDiscount =
+                    introEligible &&
+                    plan.introPricing &&
+                    !plan.isCurrent &&
+                    plan.isPaidPlan;
+                  return (
+                    <div
+                      key={plan.id || plan.normalizedName}
+                      className={`membership-plan-card ${
+                        plan.isCurrent ? "membership-plan-card-current" : ""
+                      }`}
+                    >
+                      <div className="membership-plan-heading">
+                        <span className="membership-plan-name">
+                          {plan.display_name || plan.name}
+                        </span>
+                        <div
+                          className={`membership-plan-price ${
+                            showIntroDiscount ? "has-intro-price" : ""
+                          }`}
+                        >
+                          {showIntroDiscount ? (
+                            <>
+                              <div className="membership-price-row">
+                                <span className="membership-price-original">
+                                  {formatPrice(plan.price)}
+                                </span>
+                                <span className="membership-price-arrow">→</span>
+                                <span className="membership-price-intro">
+                                  {plan.introPricing.firstMonth}
+                                </span>
+                              </div>
+                              <span className="membership-price-period">
+                                First month • then{" "}
+                                {plan.introPricing.thereafter}/mo
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <span>{formatPrice(plan.price)}</span>
+                              {plan.resume_period ? (
+                                <span className="membership-plan-period">
+                                  {" "}
+                                  / {plan.resume_period}
+                                </span>
+                              ) : null}
+                            </>
+                          )}
+                        </div>
+                      </div>
+
+                      {showIntroDiscount && (
+                        <p className="membership-intro-note">
+                          First month {plan.introPricing.firstMonth}, then{" "}
+                          {plan.introPricing.thereafter}/month for new members.
+                        </p>
+                      )}
 
                     <ul className="membership-plan-features">
                       {plan.features.length > 0 ? (
@@ -459,7 +514,8 @@ const MembershipPage = () => {
                         : "Switch to Free"}
                     </button>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </section>
 
