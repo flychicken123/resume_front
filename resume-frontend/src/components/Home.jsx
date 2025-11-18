@@ -755,17 +755,17 @@ const Home = () => {
               </div>
 
               <div className="home-trusted-logos" role="list">
-                {TRUSTED_COMPANIES.map(({ name, logo }) => (
+                {TRUSTED_COMPANIES.map(({ name, logo, logoHeight }) => (
                   <span key={name} className="home-trusted-logo" role="listitem">
                     <img
                       src={logo}
                       alt={`${name} logo`}
+                      style={logoHeight ? { height: `${logoHeight}px` } : undefined}
                       loading="lazy"
                       onError={(event) => {
                         event.currentTarget.style.display = "none";
                       }}
                     />
-                    <span className="home-trusted-logo-label">{name}</span>
                   </span>
                 ))}
               </div>

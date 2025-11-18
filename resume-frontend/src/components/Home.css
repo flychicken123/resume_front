@@ -167,15 +167,6 @@
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-.home-trusted-logo-label {
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #475569;
-  font-weight: 600;
-  display: none;
-}
-
 .home-trusted-logo:hover {
   transform: translateY(-3px);
   box-shadow: 0 12px 24px rgba(15, 23, 42, 0.1);
