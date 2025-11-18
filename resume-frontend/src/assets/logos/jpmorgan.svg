@@ -1,0 +1,8 @@
+<svg width="140" height="32" viewBox="0 0 140 32" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="JPMorgan Chase logo">
+  <rect width="140" height="32" rx="6" fill="none"/>
+  <g transform="translate(12,8)">
+    <rect width="20" height="20" rx="4" fill="#003A70"/>
+    <rect x="4" y="4" width="12" height="12" rx="2" fill="#C0D6EC"/>
+    <text x="32" y="14" fill="#003A70" font-family="'Times New Roman', Georgia, serif" font-size="14" font-weight="700">JPMorgan Chase</text>
+  </g>
+</svg>
