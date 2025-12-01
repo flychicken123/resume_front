@@ -5,10 +5,13 @@ import "./Home.css";
 import { Link, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../context/AuthContext";
+import { useExperiments } from "../context/ExperimentContext";
+import { useResume } from "../context/ResumeContext";
 
 import Login from "./auth/Login";
 
 import ResumeHistory from "./ResumeHistory";
+import NewHome from "./NewHome";
 import SimpleHero from "./SimpleHero";
 import About from "./About";
 import ProductOverview from "./ProductOverview";
@@ -41,11 +44,36 @@ const HERO_FEATURES = [
   },
 ];
 
+const HOME_EXPERIMENT_KEY = "new-home";
+
+const getForcedHomeVariant = () => {
+  if (typeof window === "undefined") return "";
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const queryVariant = params.get("homeVariant") || params.get("home_variant");
+    if (queryVariant) return queryVariant;
+    const stored = window.localStorage.getItem("force_home_variant");
+    return stored || "";
+  } catch {
+    return "";
+  }
+};
+
 const Home = () => {
   const { user, login, isAdmin } = useAuth();
+  const { assignments, assignVariant, trackEvent } = useExperiments();
+  const { resume, hasResume } = useResume();
 
   const displayName =
     typeof user === "string" ? user : user?.name || user?.email || "";
+  const forcedHomeVariant = getForcedHomeVariant();
+  const [homeVariant, setHomeVariant] = useState(
+    () =>
+      forcedHomeVariant ||
+      assignments?.[HOME_EXPERIMENT_KEY]?.variant?.variant_key ||
+      assignments?.[HOME_EXPERIMENT_KEY]?.variant?.VariantKey ||
+      "control"
+  );
 
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [pendingBuilderStep, setPendingBuilderStep] = useState(null);
@@ -103,37 +131,105 @@ const Home = () => {
     trackReferrer();
   }, []);
 
+  useEffect(() => {
+    if (forcedHomeVariant && homeVariant !== forcedHomeVariant) {
+      setHomeVariant(forcedHomeVariant);
+      return;
+    }
+
+    const knownVariant =
+      assignments?.[HOME_EXPERIMENT_KEY]?.variant?.variant_key ||
+      assignments?.[HOME_EXPERIMENT_KEY]?.variant?.VariantKey;
+
+    if (knownVariant && knownVariant !== homeVariant) {
+      setHomeVariant(knownVariant);
+      return;
+    }
+
+    let isMounted = true;
+    if (!knownVariant) {
+      assignVariant(HOME_EXPERIMENT_KEY, { requestPath: "/" })
+        .then((result) => {
+          if (!isMounted) return;
+          const variantKey =
+            result?.variant?.variant_key || result?.variant?.VariantKey;
+          if (variantKey) {
+            setHomeVariant(variantKey);
+          }
+        })
+        .catch(() => {});
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [assignVariant, assignments, forcedHomeVariant, homeVariant]);
+
+  const trackHomeEvent = (eventName, metadata = {}) => {
+    trackEvent(HOME_EXPERIMENT_KEY, eventName, {
+      ...metadata,
+      variant: homeVariant || "control",
+    });
+  };
+
+  const triggerBuilderCta = (sourceId, options = {}) => {
+    const stepId = options.stepId || sourceId;
+    trackReferrer();
+    trackCTAClick(sourceId, {
+      page: window.location.pathname,
+      variant: homeVariant || "control",
+    });
+    trackBuilderStart(sourceId);
+    trackHomeEvent("cta_click", { source: sourceId });
+    openBuilderFrom(stepId, options);
+  };
+
+  const openLoginModal = (message = "") => {
+    setAuthContextMessage(message);
+    setPendingBuilderStep(null);
+    setShowAuthModal(true);
+    trackHomeEvent("open_login", { source: message ? "prompt" : "direct" });
+  };
+
   // Calculate optimal spacing based on button width
 
   const handleStartBuilding = () => {
     // Track referrer and builder start when user clicks the button
-
-    trackReferrer();
-    trackCTAClick("home_primary_cta", { page: window.location.pathname });
-
-    trackBuilderStart("home_page_button");
-
-    openBuilderFrom("home_builder_cta");
+    triggerBuilderCta("home_primary_cta", { stepId: "home_builder_cta" });
   };
 
   const handleNavbarStart = () => {
-    trackReferrer();
-    trackCTAClick("home_nav_primary_cta", { page: window.location.pathname });
-    trackBuilderStart("home_nav_primary_cta");
-    openBuilderFrom("home_nav_primary_cta");
+    triggerBuilderCta("home_nav_primary_cta");
   };
 
   const handleNavbarJobs = () => {
-    trackReferrer();
-    trackCTAClick("home_nav_jobs_cta", { page: window.location.pathname });
-    trackBuilderStart("home_nav_jobs_cta");
-    openBuilderFrom("home_nav_jobs_cta", { targetStep: BUILDER_TARGET_JOB_MATCHES });
+    triggerBuilderCta("home_nav_jobs_cta", {
+      targetStep: BUILDER_TARGET_JOB_MATCHES,
+    });
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("resumeUser");
-    localStorage.removeItem("resumeToken");
-    window.location.reload();
+  const handleNewHomeSearch = ({ role, location, seniority }) => {
+    trackHomeEvent("job_search", { role, location, seniority });
+    triggerBuilderCta("new_home_search", {
+      targetStep: BUILDER_TARGET_JOB_MATCHES,
+    });
+  };
+
+  const handleTailorForRole = (job) => {
+    trackHomeEvent("tailor_resume", {
+      title: job?.title,
+      company: job?.company,
+    });
+    triggerBuilderCta("new_home_role_cta", {
+      targetStep: BUILDER_TARGET_JOB_MATCHES,
+    });
+  };
+
+  const handleJobAlertClick = () => {
+    trackHomeEvent("job_alert_click");
+    if (!user) {
+      openLoginModal("Sign in to create job alerts");
+    }
   };
 
   useEffect(() => {
@@ -155,6 +251,87 @@ const Home = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showAccountMenu]);
+
+  const normalizedHomeVariant = (homeVariant || "").trim().toLowerCase();
+  const isNewHomeVariant =
+    normalizedHomeVariant === "new" ||
+    normalizedHomeVariant === "new-home" ||
+    normalizedHomeVariant === "newlayout" ||
+    normalizedHomeVariant.startsWith("new-");
+
+  const handleLogout = () => {
+    localStorage.removeItem("resumeUser");
+    localStorage.removeItem("resumeToken");
+    window.location.reload();
+  };
+
+  if (isNewHomeVariant) {
+    return (
+      <>
+        <SEO
+          title="Curated Tech Jobs + ATS Resume Builder | HiHired"
+          description="A Simplify-inspired home: verified tech roles with compensation, plus an AI resume builder that tailors every apply. Join the experiment."
+          canonical="https://hihired.org/"
+        />
+        <NewHome
+          user={user}
+          displayName={displayName}
+          isAdmin={isAdmin}
+          hasResume={!!hasResume}
+          variantKey={homeVariant}
+          onPrimaryCta={() =>
+            triggerBuilderCta("new_home_primary", { stepId: "home_builder_cta" })
+          }
+          onSecondaryCta={() =>
+            triggerBuilderCta("new_home_jobs", {
+              targetStep: BUILDER_TARGET_JOB_MATCHES,
+            })
+          }
+          onSearch={handleNewHomeSearch}
+          onTailorJob={handleTailorForRole}
+          onJobAlertClick={handleJobAlertClick}
+          onOpenLogin={(message) => openLoginModal(message)}
+          onOpenResumeHistory={() => setShowResumeHistory(true)}
+          onLogout={handleLogout}
+          onTrack={trackHomeEvent}
+        />
+
+        {showAuthModal && (
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100vw",
+              height: "100vh",
+
+              background: "rgba(0,0,0,0.25)",
+              zIndex: 200,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <div style={{ position: "relative" }}>
+                <Login
+                  contextMessage={authContextMessage}
+                  onLogin={handleAuthSuccess}
+                  onClose={() => {
+                    setShowAuthModal(false);
+                    setPendingBuilderStep(null);
+                    setAuthContextMessage("");
+                  }}
+                />
+              </div>
+            </div>
+          )}
+
+        {showResumeHistory && (
+          <ResumeHistory onClose={() => setShowResumeHistory(false)} />
+        )}
+      </>
+    );
+  }
 
   return (
     <div>
@@ -395,9 +572,7 @@ const Home = () => {
             <button
               className="home-auth-btn"
               onClick={() => {
-                setAuthContextMessage("");
-                setPendingBuilderStep(null);
-                setShowAuthModal(true);
+                openLoginModal("");
               }}
               style={{ flexShrink: 0 }}
             >
