@@ -21,10 +21,39 @@ const API_BASE_URL = getAPIBaseURL();
 // Export the function so other files can use it
 export { getAPIBaseURL };
 
+const EXPERIMENT_USER_STORAGE_KEY = 'experimentUserId';
+
+export const ensureExperimentUserId = () => {
+  if (typeof window === 'undefined') {
+    return 'server';
+  }
+  const existing = localStorage.getItem(EXPERIMENT_USER_STORAGE_KEY);
+  if (existing && existing !== 'undefined' && existing !== 'null') {
+    return existing;
+  }
+
+  const randomPart = typeof crypto !== 'undefined' && crypto.randomUUID
+    ? crypto.randomUUID()
+    : Math.random().toString(36).slice(2);
+  const nextId = `anon:${randomPart}`;
+  localStorage.setItem(EXPERIMENT_USER_STORAGE_KEY, nextId);
+  try {
+    document.cookie = `ab_user_id=${nextId}; path=/; max-age=${60 * 60 * 24 * 60}`;
+  } catch (err) {
+    // Cookie setting can fail in strict environments; ignore silently
+  }
+  return nextId;
+};
+
+const getExperimentHeaders = () => ({
+  'X-Experiment-User': ensureExperimentUserId(),
+});
+
 const getAuthHeaders = () => {
   const token = localStorage.getItem('resumeToken');
   const baseHeaders = {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    ...getExperimentHeaders(),
   };
   
   if (!token) return baseHeaders;
@@ -44,7 +73,14 @@ const handleUnauthorized = () => {
 
 // Helper function to make fetch requests with automatic 401 handling
 const fetchWithAuth = async (url, options = {}) => {
-  const response = await fetch(url, options);
+  const mergedHeaders = {
+    ...getExperimentHeaders(),
+    ...(options.headers || {}),
+  };
+  const response = await fetch(url, {
+    ...options,
+    headers: mergedHeaders,
+  });
   
   // Check for 401 Unauthorized
   if (response.status === 401) {
@@ -634,6 +670,100 @@ export async function createSubscriptionCheckoutSession(planName) {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new Error(data?.error || 'Failed to start checkout session.');
+  }
+  return data;
+}
+
+export async function assignExperimentVariant(experimentKey, options = {}) {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/experiments/assign`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getExperimentHeaders(),
+    },
+    body: JSON.stringify({
+      experiment_key: experimentKey,
+      request_path: options.requestPath || (typeof window !== 'undefined' ? window.location.pathname : ''),
+      user_id: options.userId,
+      anonymous_id: options.anonymousId || ensureExperimentUserId(),
+      force_reassign: !!options.forceReassign,
+    }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error || 'Failed to assign experiment variant.');
+  }
+  return data;
+}
+
+export async function trackExperimentEvent(experimentKey, eventName, metadata = {}, variantKey) {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/experiments/event`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getExperimentHeaders(),
+    },
+    body: JSON.stringify({
+      experiment_key: experimentKey,
+      event_name: eventName,
+      variant_key: variantKey,
+      metadata,
+      anonymous_id: ensureExperimentUserId(),
+      request_path: typeof window !== 'undefined' ? window.location.pathname : '',
+    }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error || 'Failed to record experiment event.');
+  }
+  return data;
+}
+
+export async function listExperiments() {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/admin/experiments`, {
+    method: 'GET',
+    headers: getAuthHeaders(),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error || 'Failed to load experiments.');
+  }
+  return data;
+}
+
+export async function saveExperiment(experimentPayload) {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/admin/experiments`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(experimentPayload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error || 'Failed to save experiment.');
+  }
+  return data;
+}
+
+export async function getExperimentMetrics(key) {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/admin/experiments/${encodeURIComponent(key)}/metrics`, {
+    method: 'GET',
+    headers: getAuthHeaders(),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error || 'Failed to load experiment metrics.');
+  }
+  return data;
+}
+
+export async function deleteExperiment(key) {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/admin/experiments/${encodeURIComponent(key)}`, {
+    method: 'DELETE',
+    headers: getAuthHeaders(),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error || 'Failed to delete experiment.');
   }
   return data;
 }
