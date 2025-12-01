@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import SEO from '../components/SEO';
 import { deleteExperiment, getExperimentMetrics, listExperiments, saveExperiment } from '../api';
@@ -192,11 +192,6 @@ const AdminExperimentsPage = () => {
       setSaving(false);
     }
   };
-
-  const currentExperiment = useMemo(
-    () => experiments.find((item) => item?.experiment?.key === selectedKey),
-    [experiments, selectedKey]
-  );
 
   if (!loading && !user) {
     return <Navigate to="/login" replace />;
