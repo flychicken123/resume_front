@@ -74,6 +74,14 @@ export const ExperimentProvider = ({ children }) => {
       const nextId = `user:${user.id}`;
       setUserId(nextId);
       localStorage.setItem('experimentUserId', nextId);
+
+      // Clear cached assignments when identity changes so logged-in users get their own bucket.
+      const cached = readCachedAssignments();
+      const hasAssignments = Object.keys(cached || {}).length > 0;
+      if (hasAssignments) {
+        setAssignments({});
+        writeCachedAssignments({});
+      }
     }
   }, [user]);
 
@@ -83,16 +91,31 @@ export const ExperimentProvider = ({ children }) => {
       return null;
     }
 
-    if (assignments[key] && !options.force) {
+    const getAssignmentUserId = (assignment) =>
+      assignment?.user_id ||
+      assignment?.assignment?.user_identifier ||
+      assignment?.assignment?.user_id ||
+      '';
+
+    const cachedAssignment = assignments[key];
+    const shouldReassignForUser =
+      Boolean(userId) &&
+      userId.startsWith('user:') &&
+      cachedAssignment &&
+      getAssignmentUserId(cachedAssignment) &&
+      getAssignmentUserId(cachedAssignment) !== userId;
+
+    if (cachedAssignment && !options.force && !shouldReassignForUser) {
       return assignments[key];
     }
 
     const cached = readCachedAssignments();
-    if (cached[key] && !options.force) {
+    if (cached[key] && !options.force && !shouldReassignForUser) {
       setAssignments((prev) => ({ ...prev, [key]: cached[key] }));
-      if (cached[key]?.user_id) {
-        setUserId(cached[key].user_id);
-        localStorage.setItem('experimentUserId', cached[key].user_id);
+      const cachedUserId = getAssignmentUserId(cached[key]);
+      if (cachedUserId) {
+        setUserId(cachedUserId);
+        localStorage.setItem('experimentUserId', cachedUserId);
       }
       return cached[key];
     }
@@ -111,13 +134,14 @@ export const ExperimentProvider = ({ children }) => {
     }
 
     setLoadingKeys((prev) => ({ ...prev, [key]: true }));
+    const shouldForceReassign = options.forceReassign || shouldReassignForUser;
     inflightRef.current[key] = (async () => {
       try {
         const result = await assignExperimentVariant(key, {
           requestPath: options.requestPath || (typeof window !== 'undefined' ? window.location.pathname : ''),
           userId,
           anonymousId: userId,
-          forceReassign: options.forceReassign,
+          forceReassign: shouldForceReassign,
         });
 
         if (result?.user_id) {
