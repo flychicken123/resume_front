@@ -4,8 +4,9 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import { AuthProvider } from './context/AuthContext';
 import { ResumeProvider } from './context/ResumeContext';
 import { FeedbackProvider } from './context/FeedbackContext';
+import { ExperimentProvider } from './context/ExperimentContext';
 import Home from './components/Home';
-import { LoginPage, BuilderPage, AdminMembershipPage, AdminExitAnalyticsPage, TermsOfServicePage, PrivacyPolicyPage, MembershipPage, GuidesPage, GuideDetailPage, ContactPage } from './pages';
+import { LoginPage, BuilderPage, AdminMembershipPage, AdminExitAnalyticsPage, AdminExperimentsPage, TermsOfServicePage, PrivacyPolicyPage, MembershipPage, GuidesPage, GuideDetailPage, ContactPage } from './pages';
 import PricingPage from './components/PricingPage';
 import SubscriptionSuccess from './components/SubscriptionSuccess';
 import SubscriptionCancel from './components/SubscriptionCancel';
@@ -32,45 +33,48 @@ function ExitTrackingBridge() {
 function App() {
   return (
     <AuthProvider>
-      <ResumeProvider>
-        <Router
-          future={{
-            v7_startTransition: true,
-            v7_relativeSplatPath: true,
-          }}
-        >
-          <FeedbackProvider>
-            <SEO
-              title="Free AI Resume Builder — Create Professional Resumes | HiHired"
-              description="Build a professional, ATS-friendly resume in minutes with our free AI resume builder. No signup required. Choose templates, tailor to job descriptions, and download as PDF."
-              ogImage="https://hihired.org/og-image.jpg"
-            />
-            <Analytics />
-            <SessionMonitor />
-            <ExitTrackingBridge />
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/builder" element={<BuilderPage />} />
-              <Route path="/pricing" element={<PricingPage />} />
-              <Route path="/admin/analytics" element={<AdminExitAnalyticsPage />} />
-              <Route path="/admin/memberships" element={<AdminMembershipPage />} />
-              <Route path="/subscription/success" element={<SubscriptionSuccess />} />
-              <Route path="/subscription/cancel" element={<SubscriptionCancel />} />
-              <Route path="/terms" element={<TermsOfServicePage />} />
-              <Route path="/privacy" element={<PrivacyPolicyPage />} />
-              <Route path="/account" element={<MembershipPage />} />
-              <Route path="/guides" element={<GuidesPage />} />
-              <Route path="/guides/:slug" element={<GuideDetailPage />} />
-              <Route path="/contact" element={<ContactPage />} />
-              {/* Hidden - Apply to Jobs feature
-              <Route path="/apply" element={<JobApplicationPage />} />
-              */}
-            </Routes>
-            <ChatWidget />
-          </FeedbackProvider>
-        </Router>
-      </ResumeProvider>
+      <ExperimentProvider>
+        <ResumeProvider>
+          <Router
+            future={{
+              v7_startTransition: true,
+              v7_relativeSplatPath: true,
+            }}
+          >
+            <FeedbackProvider>
+              <SEO
+                title="Free AI Resume Builder — Create Professional Resumes | HiHired"
+                description="Build a professional, ATS-friendly resume in minutes with our free AI resume builder. No signup required. Choose templates, tailor to job descriptions, and download as PDF."
+                ogImage="https://hihired.org/og-image.jpg"
+              />
+              <Analytics />
+              <SessionMonitor />
+              <ExitTrackingBridge />
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/builder" element={<BuilderPage />} />
+                <Route path="/pricing" element={<PricingPage />} />
+                <Route path="/admin/analytics" element={<AdminExitAnalyticsPage />} />
+                <Route path="/admin/experiments" element={<AdminExperimentsPage />} />
+                <Route path="/admin/memberships" element={<AdminMembershipPage />} />
+                <Route path="/subscription/success" element={<SubscriptionSuccess />} />
+                <Route path="/subscription/cancel" element={<SubscriptionCancel />} />
+                <Route path="/terms" element={<TermsOfServicePage />} />
+                <Route path="/privacy" element={<PrivacyPolicyPage />} />
+                <Route path="/account" element={<MembershipPage />} />
+                <Route path="/guides" element={<GuidesPage />} />
+                <Route path="/guides/:slug" element={<GuideDetailPage />} />
+                <Route path="/contact" element={<ContactPage />} />
+                {/* Hidden - Apply to Jobs feature
+                <Route path="/apply" element={<JobApplicationPage />} />
+                */}
+              </Routes>
+              <ChatWidget />
+            </FeedbackProvider>
+          </Router>
+        </ResumeProvider>
+      </ExperimentProvider>
     </AuthProvider>
   );
 }

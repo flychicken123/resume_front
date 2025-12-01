@@ -569,24 +569,44 @@ const AdminMembershipPage = () => {
         <div style={{ padding: "2rem", maxWidth: "1200px", margin: "0 auto" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", flexWrap: "wrap", marginBottom: "1.5rem" }}>
           <h1 style={{ fontSize: "1.75rem", fontWeight: 700, margin: 0 }}>Membership Management</h1>
-          <Link
-            to="/admin/analytics"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "6px",
-              padding: "0.65rem 1rem",
-              borderRadius: "10px",
-              border: "1px solid #2563eb",
-              color: "#ffffff",
-              background: "#2563eb",
-              fontWeight: 600,
-              textDecoration: "none",
-              boxShadow: "0 6px 14px rgba(37, 99, 235, 0.18)",
-            }}
-          >
-            View Exit Analytics
-          </Link>
+          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+            <Link
+              to="/admin/analytics"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "0.65rem 1rem",
+                borderRadius: "10px",
+                border: "1px solid #2563eb",
+                color: "#ffffff",
+                background: "#2563eb",
+                fontWeight: 600,
+                textDecoration: "none",
+                boxShadow: "0 6px 14px rgba(37, 99, 235, 0.18)",
+              }}
+            >
+              View Exit Analytics
+            </Link>
+            <Link
+              to="/admin/experiments"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "0.65rem 1rem",
+                borderRadius: "10px",
+                border: "1px solid #10b981",
+                color: "#0f172a",
+                background: "#34d399",
+                fontWeight: 700,
+                textDecoration: "none",
+                boxShadow: "0 6px 14px rgba(16, 185, 129, 0.18)",
+              }}
+            >
+              A/B Test Lab
+            </Link>
+          </div>
         </div>
 
         {error && (

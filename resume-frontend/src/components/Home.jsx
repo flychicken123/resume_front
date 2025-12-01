@@ -8,22 +8,13 @@ import { useAuth } from "../context/AuthContext";
 
 import Login from "./auth/Login";
 
-
 import ResumeHistory from "./ResumeHistory";
-
 import SimpleHero from "./SimpleHero";
-
 import About from "./About";
-
-
 import ProductOverview from "./ProductOverview";
-
 import TeamSection from "./TeamSection";
-
 import { setLastStep } from "../utils/exitTracking";
-
 import SEO from "./SEO";
-
 import { trackReferrer, trackBuilderStart, trackCTAClick } from "./Analytics";
 import TRUSTED_COMPANIES from "../constants/trustedCompanies";
 import { BUILDER_TARGET_STEP_KEY, BUILDER_TARGET_JOB_MATCHES } from "../constants/builder";
@@ -164,6 +155,264 @@ const Home = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showAccountMenu]);
+
+  const useNewHome = false;
+
+  const renderNewHomeLayout = () => (
+    <div style={{ background: "radial-gradient(circle at 20% 20%, rgba(56,189,248,0.16), transparent 25%), radial-gradient(circle at 80% 0%, rgba(52,211,153,0.16), transparent 25%), #050815", color: "#e2e8f0", minHeight: "100vh" }}>
+      <SEO
+        title="Build an ATS-ready resume in minutes | HiHired"
+        description="New home experience: launch a tailored, ATS-safe resume in under 3 minutes with role-specific bullets and exportable PDFs."
+        keywords="ai resume builder, ats resume, fast resume, job matching, ai cover letter"
+        canonical="https://hihired.org/"
+      />
+
+      <header style={{ maxWidth: "1200px", margin: "0 auto", padding: "22px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", position: "sticky", top: 0, zIndex: 20, backdropFilter: "blur(10px)", background: "rgba(5,8,21,0.72)", borderBottom: "1px solid rgba(148,163,184,0.18)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <span style={{ fontWeight: 800, fontSize: "1.25rem", letterSpacing: "0.4px" }}>HiHired</span>
+          <span style={{ padding: "4px 10px", borderRadius: 999, background: "rgba(56,189,248,0.15)", color: "#38bdf8", fontSize: "0.85rem", fontWeight: 700 }}>NEW</span>
+        </div>
+        <nav style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+          <button
+            type="button"
+            onClick={() => document.getElementById("new-home-how")?.scrollIntoView({ behavior: "smooth" })}
+            style={{ background: "transparent", border: "none", color: "#cbd5e1", fontWeight: 600, cursor: "pointer" }}
+          >
+            How it works
+          </button>
+          <button
+            type="button"
+            onClick={() => document.getElementById("new-home-proof")?.scrollIntoView({ behavior: "smooth" })}
+            style={{ background: "transparent", border: "none", color: "#cbd5e1", fontWeight: 600, cursor: "pointer" }}
+          >
+            Proof
+          </button>
+          {user ? (
+            <button
+              type="button"
+              onClick={() => setShowResumeHistory(true)}
+              style={{ background: "transparent", border: "1px solid rgba(148,163,184,0.4)", color: "#e2e8f0", padding: "8px 12px", borderRadius: 10, fontWeight: 700, cursor: "pointer" }}
+            >
+              My resumes
+            </button>
+          ) : null}
+          {!user && (
+            <button
+              type="button"
+              onClick={() => {
+                setAuthContextMessage("Welcome back — sign in to keep everything synced.");
+                setShowAuthModal(true);
+              }}
+              style={{ background: "transparent", border: "none", color: "#cbd5e1", fontWeight: 600, cursor: "pointer" }}
+            >
+              Log in
+            </button>
+          )}
+          {user ? (
+            <button
+              type="button"
+              onClick={handleLogout}
+              style={{ background: "transparent", border: "none", color: "#94a3b8", fontWeight: 600, cursor: "pointer" }}
+            >
+              Sign out
+            </button>
+          ) : null}
+          <button
+            type="button"
+            onClick={handleNavbarJobs}
+            style={{ background: "rgba(56,189,248,0.12)", border: "1px solid rgba(56,189,248,0.6)", color: "#e0f2fe", padding: "10px 14px", borderRadius: 12, fontWeight: 800, cursor: "pointer", boxShadow: "0 10px 30px rgba(56,189,248,0.2)" }}
+          >
+            Start free
+          </button>
+        </nav>
+      </header>
+
+      <main style={{ maxWidth: "1200px", margin: "0 auto", padding: "28px 20px 80px", display: "flex", flexDirection: "column", gap: "32px" }}>
+        <section style={{ display: "grid", gridTemplateColumns: "1.15fr 0.95fr", gap: "24px", alignItems: "center", background: "linear-gradient(135deg, rgba(56,189,248,0.12), rgba(52,211,153,0.08))", borderRadius: 20, padding: "28px 28px 24px", border: "1px solid rgba(148,163,184,0.2)" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "8px 12px", borderRadius: 999, background: "rgba(148,163,184,0.12)", color: "#cbd5e1", fontWeight: 700, width: "fit-content" }}>
+              <span style={{ fontSize: "1.2rem" }}>🚀</span> New home experience: build faster
+            </div>
+            <h1 style={{ fontSize: "2.4rem", lineHeight: 1.15, margin: 0, color: "#f8fafc", letterSpacing: "-0.03em" }}>
+              Ship an ATS-ready resume in minutes{displayName ? `, ${displayName.split(" ")[0]}` : ""}.
+            </h1>
+            <p style={{ margin: 0, color: "#cbd5e1", fontSize: "1.05rem", maxWidth: "720px" }}>
+              Paste a job description, get role-aligned bullets, and export a clean PDF without formatting fights. No credit card. Keep your own voice—just sharper.
+            </p>
+            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+              <button
+                type="button"
+                onClick={handleStartBuilding}
+                style={{ padding: "12px 16px", borderRadius: 12, border: "none", background: "linear-gradient(90deg, #22c55e, #38bdf8)", color: "#0b1021", fontWeight: 800, cursor: "pointer", boxShadow: "0 12px 30px rgba(34,197,94,0.35)" }}
+              >
+                Build my resume
+              </button>
+              <button
+                type="button"
+                onClick={() => document.getElementById("new-home-how")?.scrollIntoView({ behavior: "smooth" })}
+                style={{ padding: "12px 16px", borderRadius: 12, border: "1px solid rgba(148,163,184,0.35)", background: "transparent", color: "#e2e8f0", fontWeight: 700, cursor: "pointer" }}
+              >
+                See how it works
+              </button>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "12px", marginTop: "6px" }}>
+              {NEW_HOME_METRICS.map((metric) => (
+                <div key={metric.title} style={{ padding: "12px 14px", borderRadius: 14, border: "1px solid rgba(148,163,184,0.18)", background: "rgba(255,255,255,0.02)" }}>
+                  <div style={{ fontSize: "1.4rem", fontWeight: 800, color: "#f8fafc" }}>{metric.title}</div>
+                  <div style={{ color: "#cbd5e1", fontWeight: 700 }}>{metric.subtitle}</div>
+                  <div style={{ color: "#94a3b8", marginTop: 4, fontSize: "0.95rem" }}>{metric.detail}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ background: "rgba(15,23,42,0.7)", border: "1px solid rgba(148,163,184,0.2)", borderRadius: 16, padding: "16px", position: "relative", overflow: "hidden" }}>
+            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(56,189,248,0.08), rgba(34,197,94,0.04))", pointerEvents: "none" }} />
+            <div style={{ position: "relative", display: "grid", gap: "12px" }}>
+              {NEW_HOME_FEATURES.map((feature) => (
+                <div key={feature.label} style={{ padding: "12px 12px", borderRadius: 12, border: "1px solid rgba(148,163,184,0.15)", background: "rgba(255,255,255,0.02)" }}>
+                  <div style={{ fontWeight: 800, color: "#e2e8f0" }}>{feature.label}</div>
+                  <div style={{ color: "#94a3b8", marginTop: 4 }}>{feature.detail}</div>
+                </div>
+              ))}
+              <div style={{ marginTop: "6px", padding: "14px 12px", borderRadius: 12, border: "1px dashed rgba(52,211,153,0.5)", background: "rgba(52,211,153,0.08)", color: "#bbf7d0", fontWeight: 700 }}>
+                Private by default. We never train on your data.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="new-home-proof" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          <div style={{ color: "#94a3b8", fontWeight: 700, letterSpacing: "0.2em", fontSize: "0.75rem" }}>TRUSTED BY TEAMS FROM</div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "14px", alignItems: "center" }}>
+            {TRUSTED_COMPANIES.slice(0, 8).map((company) => (
+              <div key={company.name} style={{ padding: "10px 12px", borderRadius: 12, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(148,163,184,0.2)", color: "#cbd5e1", fontWeight: 700, fontSize: "0.95rem" }}>
+                {company.name}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section id="new-home-how" style={{ display: "grid", gridTemplateColumns: "1.1fr 0.9fr", gap: "18px", alignItems: "start", marginTop: "6px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <h2 style={{ margin: 0, fontSize: "1.65rem", color: "#f8fafc" }}>How it works</h2>
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              {NEW_HOME_STEPS.map((step, idx) => (
+                <div key={step.title} style={{ border: "1px solid rgba(148,163,184,0.18)", borderRadius: 14, padding: "12px 12px", background: "rgba(255,255,255,0.02)", display: "grid", gridTemplateColumns: "32px 1fr", gap: "10px" }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(56,189,248,0.14)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, color: "#38bdf8" }}>
+                    {idx + 1}
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 800, color: "#e2e8f0" }}>{step.title}</div>
+                    <div style={{ color: "#94a3b8", marginTop: 4 }}>{step.copy}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              <button
+                type="button"
+                onClick={handleStartBuilding}
+                style={{ padding: "12px 14px", borderRadius: 12, border: "none", background: "linear-gradient(90deg, #22c55e, #38bdf8)", color: "#0b1021", fontWeight: 800, cursor: "pointer" }}
+              >
+                Start for free
+              </button>
+              <button
+                type="button"
+                onClick={handleNavbarJobs}
+                style={{ padding: "12px 14px", borderRadius: 12, border: "1px solid rgba(148,163,184,0.35)", background: "transparent", color: "#e2e8f0", fontWeight: 700, cursor: "pointer" }}
+              >
+                Try with a job post
+              </button>
+            </div>
+          </div>
+
+          <div style={{ border: "1px solid rgba(148,163,184,0.2)", borderRadius: 16, padding: "16px", background: "rgba(15,23,42,0.85)", display: "grid", gap: "10px" }}>
+            <div style={{ fontWeight: 800, color: "#e2e8f0", fontSize: "1.1rem" }}>Guides we’ll auto-suggest</div>
+            {geoGuides.slice(0, 4).map((guide) => (
+              <div key={guide.title} style={{ padding: "10px 10px", borderRadius: 12, border: "1px solid rgba(148,163,184,0.15)", background: "rgba(255,255,255,0.02)" }}>
+                <div style={{ color: "#cbd5e1", fontWeight: 700 }}>{guide.title}</div>
+                <div style={{ color: "#94a3b8", fontSize: "0.95rem", marginTop: 4 }}>{guide.description}</div>
+              </div>
+            ))}
+            <div style={{ fontSize: "0.9rem", color: "#94a3b8" }}>
+              Need to talk to a human? Ping us in the chat — a real person answers.
+            </div>
+          </div>
+        </section>
+
+        <section style={{ marginTop: "10px", padding: "18px", borderRadius: 16, border: "1px solid rgba(148,163,184,0.18)", background: "rgba(255,255,255,0.02)", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px", alignItems: "center" }}>
+          <div>
+            <div style={{ color: "#94a3b8", fontWeight: 700, letterSpacing: "0.15em", fontSize: "0.78rem" }}>FINAL STEP</div>
+            <h3 style={{ margin: "6px 0", color: "#f8fafc", fontSize: "1.4rem" }}>Export an ATS-safe PDF without fiddling</h3>
+            <p style={{ margin: 0, color: "#cbd5e1" }}>
+              Choose from clean, recruiter-approved templates. No weird spacing, no broken bullets. Update once, export everywhere.
+            </p>
+          </div>
+          <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end", flexWrap: "wrap" }}>
+            <button
+              type="button"
+              onClick={handleStartBuilding}
+              style={{ padding: "12px 14px", borderRadius: 12, border: "none", background: "#22c55e", color: "#0b1021", fontWeight: 800, cursor: "pointer" }}
+            >
+              Start building
+            </button>
+            <button
+              type="button"
+              onClick={handleNavbarStart}
+              style={{ padding: "12px 14px", borderRadius: 12, border: "1px solid rgba(148,163,184,0.35)", background: "transparent", color: "#e2e8f0", fontWeight: 700, cursor: "pointer" }}
+            >
+              View templates
+            </button>
+          </div>
+        </section>
+      </main>
+
+      {showAuthModal && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            background: "rgba(0,0,0,0.55)",
+            zIndex: 200,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "16px",
+          }}
+        >
+          <div style={{ position: "relative", maxWidth: "520px", width: "100%" }}>
+            <Login
+              contextMessage={authContextMessage}
+              onLogin={handleAuthSuccess}
+              onClose={() => {
+                setShowAuthModal(false);
+                setPendingBuilderStep(null);
+                setAuthContextMessage("");
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {showResumeHistory && (
+        <ResumeHistory onClose={() => setShowResumeHistory(false)} />
+      )}
+
+      <footer style={{ marginTop: 20, padding: "24px 20px", borderTop: "1px solid rgba(148,163,184,0.15)", color: "#94a3b8", textAlign: "center", fontSize: "0.95rem" }}>
+        <div style={{ maxWidth: "960px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "12px", alignItems: "center" }}>
+          <span>© {new Date().getFullYear()} HiHired. Made for fast, ATS-safe resumes.</span>
+          <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", justifyContent: "center" }}>
+            <Link to="/terms">Terms</Link>
+            <Link to="/privacy">Privacy</Link>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
 
   return (
     <div>

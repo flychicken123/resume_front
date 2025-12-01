@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { ensureExperimentUserId } from '../api';
 
 const AuthContext = createContext();
 
@@ -105,14 +106,19 @@ export const AuthProvider = ({ children }) => {
     console.log('AuthContext getAuthHeaders - token state:', token);
     console.log('AuthContext getAuthHeaders - localStorage token:', localStorage.getItem('resumeToken'));
     
+    const baseHeaders = {
+      'Content-Type': 'application/json',
+      'X-Experiment-User': ensureExperimentUserId(),
+    };
+
     if (!token || token === 'undefined' || token === 'null') {
       console.log('AuthContext getAuthHeaders - no valid token, returning basic headers');
-      return { 'Content-Type': 'application/json' };
+      return baseHeaders;
     }
     
     console.log('AuthContext getAuthHeaders - returning headers with token');
     return {
-      'Content-Type': 'application/json',
+      ...baseHeaders,
       'Authorization': `Bearer ${token}`
     };
   };
