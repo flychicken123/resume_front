@@ -325,15 +325,15 @@ const NewHome = ({
             </button>
           </div>
           <div className="nh-product-card">
-            <p className="nh-card-label">Job Alerts</p>
-            <h3>Curated tech roles with verified compensation</h3>
+            <p className="nh-card-label">Job Alerts (coming soon)</p>
+            <h3>Tell us what roles and pay ranges to prioritize</h3>
             <ul>
-              <li>Remote, visa, and salary filters - no recruiter spam.</li>
-              <li>Daily refresh powered by human review and hiring signals.</li>
-              <li>Apply with an already-tailored resume for faster callbacks.</li>
+              <li>Share your target titles, locations, and comp bands so we can curate the feed.</li>
+              <li>Human review to keep out recruiter spam and ghost jobs.</li>
+              <li>We&apos;ll alert you when we ship the first batch for your preferences.</li>
             </ul>
-            <button type="button" className="nh-secondary" onClick={onJobAlertClick}>
-              Create an alert
+            <button type="button" className="nh-secondary" onClick={onPrimaryCta}>
+              Build my resume
             </button>
           </div>
         </section>
