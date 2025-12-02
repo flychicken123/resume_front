@@ -19,6 +19,7 @@ const NewHome = ({
   onOpenResumeHistory,
   onLogout,
   onTrack,
+  onRequireResume,
 }) => {
   const [role, setRole] = useState('Product designer');
   const [location, setLocation] = useState('Remote or city');
@@ -35,11 +36,19 @@ const NewHome = ({
 
   const handleSearchSubmit = (event) => {
     event.preventDefault();
+    if (!hasResume) {
+      onRequireResume?.("search");
+      return;
+    }
     onTrack?.('search_submit', { role, location, seniority });
     onSearch?.({ role, location, seniority });
   };
 
   const handleTailorClick = (job) => {
+    if (!hasResume) {
+      onRequireResume?.("tailor_click");
+      return;
+    }
     onTrack?.('tailor_card', { title: job.title, company: job.company });
     onTailorJob?.(job);
   };
@@ -246,13 +255,16 @@ const NewHome = ({
                     type="button"
                     className="nh-ghost"
                     onClick={() => {
+                      if (!hasResume) {
+                        onRequireResume?.("view_role");
+                        return;
+                      }
                       onTrack?.("view_role_click", {
                         title: job.title,
                         company: job.company,
                       });
                       onSecondaryCta?.();
                     }}
-                    disabled={!hasResume}
                     title={!hasResume ? "Build your resume to view and tailor" : undefined}
                   >
                     View

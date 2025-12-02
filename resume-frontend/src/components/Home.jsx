@@ -81,6 +81,7 @@ const Home = () => {
   const [showResumeHistory, setShowResumeHistory] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showAccountMenu, setShowAccountMenu] = useState(false);
+  const [showResumePrompt, setShowResumePrompt] = useState(false);
   const accountMenuRef = useRef(null);
 
   const navigate = useNavigate();
@@ -209,6 +210,11 @@ const Home = () => {
   };
 
   const handleNewHomeSearch = ({ role, location, seniority }) => {
+    if (!hasResume) {
+      setShowResumePrompt(true);
+      trackHomeEvent("resume_prompt", { source: "search" });
+      return;
+    }
     trackHomeEvent("job_search", { role, location, seniority });
     triggerBuilderCta("new_home_search", {
       targetStep: BUILDER_TARGET_JOB_MATCHES,
@@ -216,6 +222,11 @@ const Home = () => {
   };
 
   const handleTailorForRole = (job) => {
+    if (!hasResume) {
+      setShowResumePrompt(true);
+      trackHomeEvent("resume_prompt", { source: "tailor_click" });
+      return;
+    }
     trackHomeEvent("tailor_resume", {
       title: job?.title,
       company: job?.company,
@@ -294,6 +305,10 @@ const Home = () => {
           onOpenResumeHistory={() => setShowResumeHistory(true)}
           onLogout={handleLogout}
           onTrack={trackHomeEvent}
+          onRequireResume={(source) => {
+            setShowResumePrompt(true);
+            trackHomeEvent("resume_prompt", { source });
+          }}
         />
 
         {showAuthModal && (
@@ -325,6 +340,59 @@ const Home = () => {
               </div>
             </div>
           )}
+
+        {showResumePrompt && (
+          <div
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(0,0,0,0.25)",
+              zIndex: 210,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "12px",
+            }}
+          >
+            <div
+              style={{
+                width: "100%",
+                maxWidth: 440,
+                background: "#ffffff",
+                borderRadius: 12,
+                padding: "18px 16px",
+                boxShadow: "0 18px 40px rgba(15,23,42,0.2)",
+                color: "#0f172a",
+              }}
+            >
+              <h3 style={{ margin: "0 0 6px" }}>Create your resume to proceed</h3>
+              <p style={{ margin: 0, color: "#475569" }}>
+                Build or start a resume first—then we&apos;ll tailor it to the job you pick.
+              </p>
+              <div style={{ display: "flex", gap: 10, marginTop: 12, flexWrap: "wrap" }}>
+                <button
+                  type="button"
+                  className="nh-primary"
+                  style={{ border: "none" }}
+                  onClick={() => {
+                    setShowResumePrompt(false);
+                    triggerBuilderCta("new_home_resume_prompt", { stepId: "home_builder_cta" });
+                  }}
+                >
+                  Start my resume
+                </button>
+                <button
+                  type="button"
+                  className="nh-ghost"
+                  style={{ border: "1px solid #e2e8f0" }}
+                  onClick={() => setShowResumePrompt(false)}
+                >
+                  Maybe later
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {showResumeHistory && (
           <ResumeHistory onClose={() => setShowResumeHistory(false)} />
