@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import SEO from './components/SEO';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { ResumeProvider } from './context/ResumeContext';
 import { FeedbackProvider } from './context/FeedbackContext';
 import { ExperimentProvider } from './context/ExperimentContext';
@@ -16,7 +16,7 @@ import ChatWidget from './components/ChatWidget';
 import { initExitTracking, setCurrentPage } from './utils/exitTracking';
 import './App.css';
 
-const CHAT_WIDGET_ENABLED = false;
+const CHAT_WIDGET_ENABLED = true;
 
 function ExitTrackingBridge() {
   const location = useLocation();
@@ -30,6 +30,19 @@ function ExitTrackingBridge() {
   }, [location.pathname]);
 
   return null;
+}
+
+function ChatWidgetGate() {
+  const { userEmail } = useAuth();
+
+  if (
+    !CHAT_WIDGET_ENABLED ||
+    !userEmail ||
+    userEmail.toLowerCase() !== 'harwtalk@gmail.com'
+  ) {
+    return null;
+  }
+  return <ChatWidget />;
 }
 
 function App() {
@@ -69,7 +82,7 @@ function App() {
                 <Route path="/guides/:slug" element={<GuideDetailPage />} />
                 <Route path="/contact" element={<ContactPage />} />
               </Routes>
-              {CHAT_WIDGET_ENABLED && <ChatWidget />}
+              <ChatWidgetGate />
             </FeedbackProvider>
           </Router>
         </ResumeProvider>
