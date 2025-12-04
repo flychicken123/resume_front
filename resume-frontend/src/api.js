@@ -186,6 +186,21 @@ export async function generateSummaryAI({ experience, education, skills }) {
   return data.summary;
 }
 
+export async function parsePersonalDetailsAI(text) {
+  const res = await fetch(`${API_BASE_URL}/api/assistant/personal-info`, {
+    method: "POST",
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ text }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error || 'Failed to understand personal details.');
+  }
+  return data?.data || data;
+}
+
 // AI Grammar/Refactor functions - always available
 export async function improveExperienceGrammarAI(experience) {
   const res = await fetchWithAuth(`${API_BASE_URL}/api/experience/improve-grammar`, {
