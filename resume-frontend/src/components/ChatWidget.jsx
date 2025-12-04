@@ -1,6 +1,13 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import './ChatWidget.css';
-import { getAPIBaseURL, generateSummaryAI, fetchResumeHistoryList, fetchJobCount, computeJobMatches } from '../api';
+import {
+  getAPIBaseURL,
+  generateSummaryAI,
+  fetchResumeHistoryList,
+  fetchJobCount,
+  computeJobMatches,
+  parsePersonalDetailsAI,
+} from '../api';
 import { setLastStep } from '../utils/exitTracking';
 import { useAuth } from '../context/AuthContext';
 import { useResume } from '../context/ResumeContext';
@@ -30,9 +37,11 @@ const FALLBACK_REPLY =
 
 const RESUME_FLOW_SEQUENCE = [
   'importChoice',
+  'template',
   'personal',
   'jobDescription',
   'experience',
+  'projects',
   'education',
   'skills',
   'summary',
@@ -41,12 +50,16 @@ const RESUME_FLOW_SEQUENCE = [
 const RESUME_FLOW_PROMPTS = {
   importChoice:
     'Choose whether you want to Import Resume or reuse one from Resume History. Use those buttons in the builder, then click Next to continue.',
+  template:
+    'Open the Template & Format section to pick your design. Tap a template (Classic Professional, Modern Clean, Executive Serif, or Attorney Professional), adjust the font size if needed, then click Next.',
   personal:
     'Open the Personal Details card and fill in your full name, primary email, and phone number. Click Next when the Personal Details section looks good.',
   jobDescription:
     'Paste the target Job Description into its field so the AI knows what role to target. Click Next when you are ready.',
   experience:
     'Add each role in the Experience section (job title, company, dates, location, and bullet points). Click Next after your latest role is entered.',
+  projects:
+    'Scroll to the Projects section and enter each project name, description, technologies, and any relevant links. Click Next when your key projects are captured.',
   education:
     'Fill in the Education section with degree, school, location, and graduation info. Click Next when your education details are captured.',
   skills:
@@ -58,12 +71,16 @@ const RESUME_FLOW_PROMPTS = {
 const RESUME_FLOW_STEP_RESPONSES = {
   importChoice:
     'I’m still learning how to handle the Import vs Resume History choice inside chat. Please pick an option in the builder UI for now, then hit Next.',
+  template:
+    'Template picking inside chat is coming soon. Open the Template & Format section in the builder, choose your favorite template/font, then click Next.',
   personal:
     'Collecting Personal Details via chat is coming soon. Use the Personal Details card in the builder, then move forward when it looks good.',
   jobDescription:
     'Uploading the Job Description right here is still under construction. Paste it into the Job Description panel in the builder and continue.',
   experience:
     'I’m not ready to capture Experience inside chat yet. Add your roles in the Experience section and press Next.',
+  projects:
+    'Project entry via chat is still on the roadmap. Please fill in your projects in the builder UI, then hit Next.',
   education:
     'Education entry is still being wired up for chat. Fill in the Education card in the builder before continuing.',
   skills:
@@ -122,6 +139,31 @@ const isAffirmative = (text) => /\b(yes|yep|sure|please|ok|okay|absolutely|let's
 const isNegative = (text) => /\b(no|nope|not now|maybe later|stop|don't)\b/i.test(text);
 const hasDownloadIntent = (text = '') =>
   DOWNLOAD_KEYWORDS.some((phrase) => text.toLowerCase().includes(phrase));
+
+const normalizePhone = (value = '') => {
+  const digits = value.replace(/[^\d+]/g, '');
+  if (!digits) {
+    return '';
+  }
+  if (digits.startsWith('+')) {
+    return `+${digits.slice(1)}`;
+  }
+  return digits;
+};
+
+const cleanExtractedName = (value = '') => {
+  let cleaned = value;
+  cleaned = cleaned.split(/[,.;]/)[0];
+  cleaned = cleaned.split(/\band\b/i)[0];
+  cleaned = cleaned.replace(/my number is.*$/i, '');
+  cleaned = cleaned.replace(/my email is.*$/i, '');
+  cleaned = cleaned.replace(/my name is/i, '');
+  cleaned = cleaned.trim();
+  if (!cleaned) {
+    return '';
+  }
+  return cleaned.replace(/\s+/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
+};
 
 const detectSectionRequest = (text = '') => {
   const normalized = text.toLowerCase();
@@ -339,7 +381,55 @@ const readStoredUserEmail = () => {
   }
 };
 
-const CHAT_WIDGET_ENABLED = false;
+const parseEnvBoolean = (value) => {
+  if (typeof value !== 'string') {
+    return null;
+  }
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) {
+    return null;
+  }
+  if (['1', 'true', 'yes', 'on', 'enable', 'enabled'].includes(normalized)) {
+    return true;
+  }
+  if (['0', 'false', 'no', 'off', 'disable', 'disabled'].includes(normalized)) {
+    return false;
+  }
+  return null;
+};
+
+const isLocalDevHost = () => {
+  if (typeof window === 'undefined' || !window.location) {
+    return false;
+  }
+  const hostname = (window.location.hostname || '').toLowerCase();
+  if (!hostname) {
+    return false;
+  }
+  if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname === '0.0.0.0') {
+    return true;
+  }
+  if (hostname.endsWith('.local')) {
+    return true;
+  }
+  if (/^10\./.test(hostname) || /^192\.168\./.test(hostname) || /^172\.(1[6-9]|2\d|3[0-1])\./.test(hostname)) {
+    return true;
+  }
+  return false;
+};
+
+const computeChatWidgetEnabled = () => {
+  const envFlag =
+    typeof process !== 'undefined' && process.env
+      ? parseEnvBoolean(process.env.REACT_APP_CHAT_WIDGET_ENABLED)
+      : null;
+  if (envFlag !== null) {
+    return envFlag;
+  }
+  return isLocalDevHost();
+};
+
+const CHAT_WIDGET_ENABLED = computeChatWidgetEnabled();
 const RESUME_BUILD_ALLOWLIST = new Set(['harwtalk@gmail.com', 'flychicken1991@gmail.com']);
 const RESUME_BUILD_LOCKED_MESSAGE =
   'Chat resume builder coming soon - please use the main resume builder UI for now.';
@@ -349,6 +439,24 @@ const isResumeBuildAllowed = (email) => {
     return false;
   }
   return RESUME_BUILD_ALLOWLIST.has(email.trim().toLowerCase());
+};
+
+const TEMPLATE_STAGE_BUTTONS_ENABLED = false;
+
+const buildTemplateStageButtons = () => {
+  if (!TEMPLATE_STAGE_BUTTONS_ENABLED) {
+    return [];
+  }
+  return [
+    ...TEMPLATE_OPTIONS.map(({ id, name }) => ({
+      label: name,
+      value: `template:${id}`,
+    })),
+    {
+      label: 'Open Template & Format',
+      action: 'jump_template_section',
+    },
+  ];
 };
 
 const ChatWidgetInner = () => {
@@ -370,6 +478,15 @@ const ChatWidgetInner = () => {
   const launcherPositionRef = React.useRef(launcherPosition);
   const dragStateRef = React.useRef(null);
   const clickSuppressedRef = React.useRef(false);
+  const notifyBuilderStage = useCallback((stage) => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    if (!stage || !RESUME_FLOW_SEQUENCE.includes(stage)) {
+      return;
+    }
+    window.dispatchEvent(new CustomEvent('builder:focus-stage', { detail: { stage } }));
+  }, []);
 
 const clampLauncherPosition = useCallback(
     (pos, overrides = {}) => {
@@ -833,6 +950,111 @@ const clampLauncherPosition = useCallback(
     navigate('/builder#job-matches');
   };
 
+  const inferPersonalDetailsAI = useCallback(async (text) => {
+    try {
+      const response = await parsePersonalDetailsAI(text);
+      if (response && typeof response === 'object') {
+        const normalized = {};
+        if (typeof response.name === 'string' && response.name.trim()) {
+          normalized.name = cleanExtractedName(response.name.trim());
+        }
+        if (typeof response.email === 'string') {
+          normalized.email = response.email.trim();
+        }
+        if (typeof response.phone === 'string') {
+          const normalizedPhone = normalizePhone(response.phone);
+          normalized.phone = normalizedPhone || '';
+        }
+        if (typeof response.summary === 'string') {
+          normalized.summary = response.summary.trim();
+        }
+        return normalized;
+      }
+    } catch (error) {
+      console.error('AI personal info parse failed', error);
+    }
+    return {};
+  }, []);
+
+  const applyPersonalDetailsFromAI = useCallback(
+    async (inputText, options = {}) => {
+      const { promptIfEmpty = true } = options;
+      const aiParsed = await inferPersonalDetailsAI(inputText);
+      const resumeUpdates = {};
+      const personalStateUpdates = {};
+      const confirmations = [];
+      let hasUpdate = false;
+
+      if (aiParsed.name) {
+        const cleanedName = cleanExtractedName(aiParsed.name);
+        if (cleanedName) {
+          resumeUpdates.name = cleanedName;
+          personalStateUpdates.name = cleanedName;
+          confirmations.push(`name as ${cleanedName}`);
+          hasUpdate = true;
+        }
+      }
+
+      if (Object.prototype.hasOwnProperty.call(aiParsed, 'email')) {
+        const emailValue = aiParsed.email ? aiParsed.email.trim() : '';
+        resumeUpdates.email = emailValue;
+        personalStateUpdates.email = emailValue;
+        confirmations.push(emailValue ? `email as ${emailValue}` : 'removed email');
+        hasUpdate = true;
+      }
+
+      if (Object.prototype.hasOwnProperty.call(aiParsed, 'phone')) {
+        const normalizedPhone = normalizePhone(aiParsed.phone || '');
+        resumeUpdates.phone = normalizedPhone;
+        personalStateUpdates.phone = normalizedPhone;
+        confirmations.push(normalizedPhone ? `phone as ${normalizedPhone}` : 'removed phone number');
+        hasUpdate = true;
+      }
+
+      if (Object.prototype.hasOwnProperty.call(aiParsed, 'summary')) {
+        const summaryValue = aiParsed.summary || '';
+        resumeUpdates.summary = summaryValue;
+        personalStateUpdates.summary = summaryValue;
+        confirmations.push(summaryValue ? 'professional summary updated' : 'cleared summary');
+        hasUpdate = true;
+      }
+
+      if (!hasUpdate) {
+        if (promptIfEmpty) {
+          appendBotMessage(
+            'I can record your personal info here. Try phrasing it naturally, e.g. "My name is Jane Doe, email me at jane@example.com, my phone is 555-123-4567, and my summary is Passionate product manager...".'
+          );
+        }
+        return false;
+      }
+
+      updateResume((prev) => ({
+        ...prev,
+        ...resumeUpdates,
+      }));
+      setResumeFlowState((prev) => ({
+        ...prev,
+        data: {
+          ...prev.data,
+          personal: {
+            ...prev.data.personal,
+            ...personalStateUpdates,
+          },
+          summary: resumeUpdates.summary ?? prev.data.summary,
+        },
+      }));
+
+      const confirmationText =
+        confirmations.length > 0
+          ? `Got it! I saved your ${confirmations.join(', ')}.`
+          : "Got it! I've saved that info.";
+      appendBotMessage(`${confirmationText} Let me know if anything needs changes or tap Next when you're ready.`);
+      setLastStep('chat_resume_flow_personal_saved');
+      return true;
+    },
+    [appendBotMessage, inferPersonalDetailsAI, setLastStep, setResumeFlowState, updateResume]
+  );
+
   const handleJobMatchesShortcut = async () => {
     setIsLoading(true);
     setAwaitingJobMatchAnswer(false);
@@ -918,11 +1140,13 @@ const clampLauncherPosition = useCallback(
     }
     const total = RESUME_FLOW_SEQUENCE.length;
     const body = RESUME_FLOW_PROMPTS[stage] || '';
-    const buttons = [];
+    const stageButtons = stage === 'template' ? buildTemplateStageButtons() : [];
+    const navButtons = [];
     if (stageIndex > 0) {
-      buttons.push({ label: 'Previous', value: 'resume_flow_prev' });
+      navButtons.push({ label: 'Previous', value: 'resume_flow_prev' });
     }
-    buttons.push({ label: 'Next', value: 'resume_flow_next' });
+    navButtons.push({ label: 'Next', value: 'resume_flow_next' });
+    const buttons = stageButtons.length > 0 ? [...navButtons, ...stageButtons] : navButtons;
     return {
       sender: 'bot',
       text: body.trim(),
@@ -944,8 +1168,9 @@ const clampLauncherPosition = useCallback(
         return;
       }
       setMessages([stageMessage]);
+      notifyBuilderStage(stage);
     },
-    [createStageMessage, setMessages]
+    [createStageMessage, notifyBuilderStage, setMessages]
   );
 
   const getNextStage = (current) => {
@@ -954,6 +1179,14 @@ const clampLauncherPosition = useCallback(
       return null;
     }
     return RESUME_FLOW_SEQUENCE[index + 1];
+  };
+
+  const getPreviousStage = (current) => {
+    const index = RESUME_FLOW_SEQUENCE.indexOf(current);
+    if (index <= 0) {
+      return null;
+    }
+    return RESUME_FLOW_SEQUENCE[index - 1];
   };
 
   const beginResumeFlowWizard = useCallback(() => {
@@ -1007,13 +1240,14 @@ const clampLauncherPosition = useCallback(
         return;
       }
       if (direction === 'prev') {
-        const firstStage = RESUME_FLOW_SEQUENCE[0];
-        if (currentIndex === 0) {
+        const prevStage = getPreviousStage(currentStage);
+        if (!prevStage) {
+          const firstStage = RESUME_FLOW_SEQUENCE[0];
           promptForStage(firstStage);
           return;
         }
-        setResumeFlowState((prev) => ({ ...prev, stage: firstStage }));
-        promptForStage(firstStage);
+        setResumeFlowState((prev) => ({ ...prev, stage: prevStage }));
+        promptForStage(prevStage);
       }
     },
     [resumeFlowState.stage, completeResumeFlow, promptForStage, setResumeFlowState]
@@ -1068,8 +1302,16 @@ const clampLauncherPosition = useCallback(
       return;
     }
 
+    if (looksLikePersonalInfoMessage(trimmed) && resumeFlowState.stage !== 'personal') {
+      const updated = await applyPersonalDetailsFromAI(trimmed, { promptIfEmpty: true });
+      if (updated) {
+        setIsLoading(false);
+        return;
+      }
+    }
+
     const sectionKey = detectSectionRequest(trimmed);
-    if (sectionKey) {
+    if (sectionKey && resumeFlowState.stage !== sectionKey) {
       const response = buildSectionResponse(sectionKey);
       appendBotMessage(
         response || "I don't have that information yet. Try filling out that section first."
@@ -1101,6 +1343,16 @@ const clampLauncherPosition = useCallback(
         }
         setIsLoading(false);
         return;
+      case 'personal': {
+        const updated = await applyPersonalDetailsFromAI(trimmed, { promptIfEmpty: true });
+        if (!updated) {
+          // applyPersonalDetailsFromAI already prompted the user.
+          setIsLoading(false);
+          return;
+        }
+        setIsLoading(false);
+        return;
+      }
       default:
         if (resumeFlowState.active && RESUME_FLOW_SEQUENCE.includes(resumeFlowState.stage)) {
           const placeholder =
@@ -2597,3 +2849,21 @@ const SECTION_UPDATE_PATTERNS = [
 
 export default ChatWidget;
 
+const PERSONAL_INFO_KEYWORDS = [
+  'my name',
+  'name is',
+  'email',
+  'e-mail',
+  'phone',
+  'number',
+  'contact',
+  'summary',
+  'about me',
+  'reach me',
+];
+
+const looksLikePersonalInfoMessage = (text = '') => {
+  if (!text) return false;
+  const normalized = text.toLowerCase();
+  return PERSONAL_INFO_KEYWORDS.some((keyword) => normalized.includes(keyword));
+};

@@ -756,6 +756,18 @@ const STEP_IDS = {
   COVER_LETTER: 11,
 };
 
+const CHAT_STAGE_TO_STEP = {
+  importChoice: STEP_IDS.IMPORT,
+  template: STEP_IDS.FORMAT,
+  personal: STEP_IDS.PERSONAL,
+  jobDescription: STEP_IDS.JOB_DESCRIPTION,
+  experience: STEP_IDS.EXPERIENCE,
+  projects: STEP_IDS.PROJECTS,
+  education: STEP_IDS.EDUCATION,
+  skills: STEP_IDS.SKILLS,
+  summary: STEP_IDS.SUMMARY,
+};
+
 function BuilderPage() {
   const [step, setStep] = useState(STEP_IDS.FORMAT);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -784,17 +796,22 @@ function BuilderPage() {
   const [tailorNotice, setTailorNotice] = useState(null);
   const [tailorError, setTailorError] = useState(null);
   const [hoveredMatchKey, setHoveredMatchKey] = useState(null);
-  const focusTemplateStep = useCallback(() => {
-    setStep(STEP_IDS.FORMAT);
-    if (typeof window !== 'undefined') {
-      window.requestAnimationFrame(() => {
-        const builderSection = document.querySelector('.builder-main-section');
-        if (builderSection) {
-          builderSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      });
+  const scrollBuilderIntoView = useCallback(() => {
+    if (typeof window === 'undefined') {
+      return;
     }
+    window.requestAnimationFrame(() => {
+      const builderSection = document.querySelector('.builder-main-section');
+      if (builderSection) {
+        builderSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
   }, []);
+  const focusTemplateStep = useCallback(() => {
+    setUserRequestedImport(false);
+    setStep(STEP_IDS.FORMAT);
+    scrollBuilderIntoView();
+  }, [scrollBuilderIntoView, setStep, setUserRequestedImport]);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -1831,6 +1848,33 @@ function BuilderPage() {
     }
     setStep(nextStep);
   };
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return undefined;
+    }
+    const handleBuilderStageFocus = (event) => {
+      const stageKey = event?.detail?.stage;
+      if (!stageKey) {
+        return;
+      }
+      const targetStep = CHAT_STAGE_TO_STEP[stageKey];
+      if (!targetStep) {
+        return;
+      }
+      if (targetStep === STEP_IDS.IMPORT) {
+        setUserRequestedImport(true);
+      } else {
+        setUserRequestedImport(false);
+      }
+      setStep(targetStep);
+      scrollBuilderIntoView();
+    };
+    window.addEventListener('builder:focus-stage', handleBuilderStageFocus);
+    return () => {
+      window.removeEventListener('builder:focus-stage', handleBuilderStageFocus);
+    };
+  }, [scrollBuilderIntoView, setStep, setUserRequestedImport]);
 
   const goToPreviousStep = () => {
     handleStepChange(Math.max(step - 1, STEP_IDS.IMPORT));
@@ -2898,7 +2942,17 @@ function BuilderPage() {
       />
       <div style={{ display: 'flex', minHeight: '100vh', width: '100%' }}>
         {/* Left Side - Resume Builder */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#f8fafc' }}>
+        <div
+          style={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            background: '#f8fafc',
+            position: 'relative',
+            zIndex: 2,
+          }}
+        >
           <div className="site-header" style={{ width: '100%', paddingTop: '2.5rem', paddingBottom: '1.5rem', textAlign: 'center', background: 'transparent', position: 'relative' }}>
             <div className="back-home-wrapper">
               <Link to="/" className="back-home-link">
@@ -3686,15 +3740,19 @@ function BuilderPage() {
       </div>
 
       {/* Right Side - Live Resume Preview */}
-      <div style={{ 
-        flex: 1, 
-        background: 'white', 
-        borderLeft: '1px solid #e5e7eb',
-        display: 'flex',
-        flexDirection: 'column',
-        minHeight: '100vh',
-        overflow: 'auto'
-      }}>
+      <div
+        style={{
+          flex: 1,
+          background: 'white',
+          borderLeft: '1px solid #e5e7eb',
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: '100vh',
+          overflow: 'auto',
+          position: 'relative',
+          zIndex: 1,
+        }}
+      >
         <div style={{
           padding: '1rem',
           borderBottom: '1px solid #e5e7eb',

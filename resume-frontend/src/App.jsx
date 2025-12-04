@@ -16,6 +16,8 @@ import ChatWidget from './components/ChatWidget';
 import { initExitTracking, setCurrentPage } from './utils/exitTracking';
 import './App.css';
 
+const CHAT_WIDGET_ENABLED = false;
+
 function ExitTrackingBridge() {
   const location = useLocation();
 
@@ -66,11 +68,8 @@ function App() {
                 <Route path="/guides" element={<GuidesPage />} />
                 <Route path="/guides/:slug" element={<GuideDetailPage />} />
                 <Route path="/contact" element={<ContactPage />} />
-                {/* Hidden - Apply to Jobs feature
-                <Route path="/apply" element={<JobApplicationPage />} />
-                */}
               </Routes>
-              <ChatWidget />
+              {CHAT_WIDGET_ENABLED && <ChatWidget />}
             </FeedbackProvider>
           </Router>
         </ResumeProvider>

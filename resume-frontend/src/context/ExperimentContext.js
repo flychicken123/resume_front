@@ -176,7 +176,24 @@ export const ExperimentProvider = ({ children }) => {
     }
 
     const knownVariant = variantKey || assignments[key]?.variant?.variant_key || assignments[key]?.variant?.VariantKey;
-    return trackExperimentEvent(key, eventName, { ...metadata, experimentUserId: userId }, knownVariant);
+
+    try {
+      return await trackExperimentEvent(
+        key,
+        eventName,
+        { ...metadata, experimentUserId: userId },
+        knownVariant
+      );
+    } catch (error) {
+      // Experiment tracking is best-effort only; never break the UI.
+      // eslint-disable-next-line no-console
+      console.warn('[Experiment] Failed to record event', {
+        experimentKey: key,
+        eventName,
+        error,
+      });
+      return null;
+    }
   };
 
   const clearAssignment = (experimentKey) => {
