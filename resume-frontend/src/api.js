@@ -199,6 +199,36 @@ export async function generateSummaryAI({ experience, education, skills }) {
   return data.summary;
 }
 
+// Auto-generate a comma-separated skills list from the in-progress resume data.
+export async function autoGenerateSkillsAI(resumeData, jobDescription = '') {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/skills/auto-generate`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      resumeData,
+      jobDescription,
+    }),
+  });
+
+  const raw = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(raw?.error || 'AI skills extraction failed.');
+  }
+
+  const payload = raw && typeof raw === 'object' ? raw.data || raw : {};
+
+  if (payload && typeof payload.skillsText === 'string') {
+    return payload.skillsText;
+  }
+  if (payload && Array.isArray(payload.skills)) {
+    return payload.skills.join(', ');
+  }
+
+  return '';
+}
+
 export async function parsePersonalDetailsAI(text) {
   const res = await fetch(`${API_BASE_URL}/api/assistant/personal-info`, {
     method: "POST",
