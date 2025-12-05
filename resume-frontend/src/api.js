@@ -485,6 +485,19 @@ export async function fetchResumeHistoryList() {
   return data;
 }
 
+export async function explainJobFit(resumeData, match) {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/jobs/explain-fit`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ resumeData, match }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error || 'Failed to explain job fit.');
+  }
+  return Array.isArray(data.reasons) ? data.reasons : [];
+}
+
 // Job Application API functions
 export async function submitJobApplication(applicationData) {
   const res = await fetchWithAuth(`${API_BASE_URL}/api/job/apply`, {
