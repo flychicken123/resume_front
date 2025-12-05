@@ -931,7 +931,7 @@ const StepExperience = () => {
                       color: '#111827',
                     }}
                   >
-                    Projects for this role
+                    Projects for this role (optional)
                   </div>
                   <div
                     style={{
