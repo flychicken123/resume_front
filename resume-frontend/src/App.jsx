@@ -33,15 +33,54 @@ function ExitTrackingBridge() {
 }
 
 function ChatWidgetGate() {
-  const { userEmail } = useAuth();
+  const { user, userEmail, token } = useAuth();
 
-  if (
-    !CHAT_WIDGET_ENABLED ||
-    !userEmail ||
-    userEmail.toLowerCase() !== 'harwtalk@gmail.com'
-  ) {
+  const normalizedEmail = (userEmail || '').trim().toLowerCase();
+
+  // Diagnostic logging to understand why the chat widget might be hidden in production
+  try {
+    // eslint-disable-next-line no-console
+    console.log('[ChatWidgetGate] state', {
+      CHAT_WIDGET_ENABLED,
+      userEmail,
+      normalizedEmail,
+      hasToken: !!token,
+      user,
+      location: typeof window !== 'undefined' ? window.location.href : 'no-window',
+    });
+  } catch (_) {
+    // ignore logging errors
+  }
+
+  if (!CHAT_WIDGET_ENABLED) {
+    try {
+      // eslint-disable-next-line no-console
+      console.log('[ChatWidgetGate] widget disabled by flag');
+    } catch (_) {}
     return null;
   }
+
+  if (!userEmail) {
+    try {
+      // eslint-disable-next-line no-console
+      console.log('[ChatWidgetGate] no userEmail available; chat hidden');
+    } catch (_) {}
+    return null;
+  }
+
+  if (normalizedEmail !== 'harwtalk@gmail.com') {
+    try {
+      // eslint-disable-next-line no-console
+      console.log('[ChatWidgetGate] email mismatch; expected harwtalk@gmail.com, got', normalizedEmail);
+    } catch (_) {}
+    return null;
+  }
+
+  try {
+    // eslint-disable-next-line no-console
+    console.log('[ChatWidgetGate] conditions satisfied; rendering ChatWidget');
+  } catch (_) {}
+
   return <ChatWidget />;
 }
 
