@@ -428,7 +428,9 @@ const computeChatWidgetEnabled = () => {
   if (envFlag !== null) {
     return envFlag;
   }
-  return isLocalDevHost();
+  // Default to enabled when no explicit override is provided.
+  // Visibility for production is controlled by ChatWidgetGate in App.jsx.
+  return true;
 };
 
 const CHAT_WIDGET_ENABLED = computeChatWidgetEnabled();
