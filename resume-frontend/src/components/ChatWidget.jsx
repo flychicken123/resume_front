@@ -7,6 +7,8 @@ import {
   fetchJobCount,
   computeJobMatches,
   parsePersonalDetailsAI,
+  inferTemplatePreference,
+  inferJobIntent,
 } from '../api';
 import { setLastStep } from '../utils/exitTracking';
 import { useAuth } from '../context/AuthContext';
@@ -1055,6 +1057,177 @@ const clampLauncherPosition = useCallback(
     [appendBotMessage, inferPersonalDetailsAI, setLastStep, setResumeFlowState, updateResume]
   );
 
+  const applyJobDescriptionFromChat = useCallback(
+    async (inputText) => {
+      const trimmed = (inputText || '').trim();
+      if (!trimmed) {
+        appendBotMessage('Please paste a job posting URL, the job description text, or both.');
+        setLastStep('chat_job_description_missing_input');
+        return { hasUrl: false, hasText: false };
+      }
+
+      let intent;
+      try {
+        intent = await inferJobIntent(trimmed);
+      } catch (error) {
+        console.error('Job intent parse failed', error);
+        appendBotMessage(
+          "I couldn't understand that job posting yet. Please paste the job URL or the full job description text again."
+        );
+        setLastStep('chat_job_description_error');
+        return { hasUrl: false, hasText: false };
+      }
+
+      const rawUrl =
+        typeof intent?.url === 'string'
+          ? intent.url.trim()
+          : '';
+      const textFromUser =
+        typeof intent?.job_description_from_text === 'string'
+          ? intent.job_description_from_text.trim()
+          : '';
+
+      let finalUrl = rawUrl;
+      let finalText = textFromUser;
+      let extractedFromUrl = '';
+
+      if (rawUrl) {
+        try {
+          const response = await fetch(`${apiBaseUrl}/api/job/extract`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: rawUrl }),
+          });
+          const data = await response.json().catch(() => ({}));
+          if (!response.ok) {
+            throw new Error(data?.error || 'Failed to fetch job description from URL.');
+          }
+
+          if (data && typeof data.description === 'string' && data.description.trim()) {
+            let formatted = '';
+            if (data.title) {
+              formatted += `Position: ${data.title}\n`;
+            }
+            if (data.company) {
+              formatted += `Company: ${data.company}\n\n`;
+            }
+            formatted += data.description;
+            extractedFromUrl = formatted;
+          }
+        } catch (error) {
+          console.error('Job description fetch from URL failed', error);
+        }
+      }
+
+      if (extractedFromUrl) {
+        finalText = extractedFromUrl;
+      }
+
+      // Update local storage-backed job descriptions so the builder UI stays in sync.
+      try {
+        if (typeof window !== 'undefined') {
+          const existingRaw = window.localStorage.getItem('jobDescriptions');
+          let list = [];
+          if (existingRaw) {
+            try {
+              const parsed = JSON.parse(existingRaw);
+              if (Array.isArray(parsed)) {
+                list = parsed;
+              }
+            } catch (parseErr) {
+              console.error('Failed to parse stored job descriptions in chat', parseErr);
+            }
+          }
+
+          if (!list.length) {
+            list = [
+              {
+                id: `chat-job-${Date.now().toString(36)}`,
+                url: '',
+                text: '',
+              },
+            ];
+          }
+
+          const first = { ...(list[0] || {}) };
+          if (finalUrl) {
+            first.url = finalUrl;
+          }
+          if (finalText) {
+            first.text = finalText;
+          }
+          list[0] = {
+            id:
+              typeof first.id === 'string' && first.id.trim()
+                ? first.id
+                : `chat-job-${Date.now().toString(36)}`,
+            url: typeof first.url === 'string' ? first.url : '',
+            text: typeof first.text === 'string' ? first.text : '',
+          };
+
+          const sanitizedList = list.map((entry) => ({
+            id:
+              typeof entry.id === 'string' && entry.id.trim()
+                ? entry.id
+                : `chat-job-${Date.now().toString(36)}`,
+            url: typeof entry.url === 'string' ? entry.url : '',
+            text: typeof entry.text === 'string' ? entry.text : '',
+          }));
+
+          window.localStorage.setItem('jobDescriptions', JSON.stringify(sanitizedList));
+
+          if (finalText) {
+            window.localStorage.setItem('jobDescription', finalText);
+          }
+
+          window.dispatchEvent(new Event('builder:reload-job-descriptions'));
+        }
+      } catch (error) {
+        console.error('Failed to persist job description updates from chat', error);
+      }
+
+      setResumeFlowState((prev) => ({
+        ...prev,
+        data: {
+          ...prev.data,
+          jobDescription: finalText || prev.data.jobDescription || '',
+        },
+      }));
+
+      const hasUrl = !!finalUrl;
+      const hasText = !!finalText;
+      const hasExtractedText = !!extractedFromUrl;
+
+      if (hasUrl && hasExtractedText) {
+        appendBotMessage(
+          'Got it! I saved the job posting URL and imported the job description into your Job Description step.'
+        );
+        setLastStep('chat_job_description_url_and_text_imported');
+      } else if (hasUrl && hasText && !hasExtractedText) {
+        appendBotMessage(
+          'Got it! I saved the job posting URL and updated your job description text. I was not able to auto-extract details from the site, so I used the text you provided.'
+        );
+        setLastStep('chat_job_description_url_and_user_text_saved');
+      } else if (hasUrl && !hasText) {
+        appendBotMessage(
+          "I saved the job posting URL, but I couldn't extract the job description from that site. Please paste the job description text into the Job Description field."
+        );
+        setLastStep('chat_job_description_url_only_no_extract');
+      } else if (!hasUrl && hasText) {
+        appendBotMessage('Got it! I have updated your job description text.');
+        setLastStep('chat_job_description_text_only_saved');
+      } else {
+        appendBotMessage(
+          "I couldn't find a job posting URL or description to save. Please paste a job URL or the job description text."
+        );
+        setLastStep('chat_job_description_nothing_detected');
+      }
+
+      return { hasUrl, hasText };
+    },
+    [apiBaseUrl, appendBotMessage, setLastStep, setResumeFlowState]
+  );
+
   const handleJobMatchesShortcut = async () => {
     setIsLoading(true);
     setAwaitingJobMatchAnswer(false);
@@ -1291,6 +1464,11 @@ const clampLauncherPosition = useCallback(
 
     const updateIntent = detectSectionUpdateIntent(trimmed);
     if (updateIntent) {
+      if (resumeFlowState.stage === 'jobDescription' && updateIntent.key === 'jobDescription') {
+        await applyJobDescriptionFromChat(updateIntent.value);
+        setIsLoading(false);
+        return;
+      }
       const result = handleSectionUpdateIntent({
         ...updateIntent,
         resumeData,
@@ -1350,6 +1528,55 @@ const clampLauncherPosition = useCallback(
           setIsLoading(false);
           return;
         }
+        setIsLoading(false);
+        return;
+      }
+      case 'template': {
+        try {
+          const result = await inferTemplatePreference(trimmed);
+          const templateId = (result.template_id || result.templateId || '').trim();
+          const fontSizeId = (result.font_size_id || result.fontSizeId || '').trim();
+
+          if (templateId || fontSizeId) {
+            updateResume((prev) => ({
+              ...prev,
+              selectedFormat: templateId || prev.selectedFormat,
+              selectedFontSize: fontSizeId || prev.selectedFontSize,
+            }));
+          }
+
+          const chosenTemplate = TEMPLATE_OPTIONS.find(
+            (tpl) => tpl.id === templateId
+          );
+          const humanTemplateName =
+            chosenTemplate?.name || (templateId ? templateId : 'a template');
+
+          const parts = [];
+          if (templateId) {
+            parts.push(`template: ${humanTemplateName}`);
+          }
+          if (fontSizeId) {
+            parts.push(`font size: ${fontSizeId}`);
+          }
+
+          const summary =
+            parts.length > 0
+              ? `Got it! I'll use ${parts.join(' and ')}. You can review the preview on the right, then click Next when you're ready.`
+              : 'Got it! I will keep your current template settings. You can adjust them or click Next when you are ready.';
+
+          appendBotMessage(summary);
+        } catch (error) {
+          console.error('Template preference error from chat:', error);
+          const placeholder =
+            RESUME_FLOW_STEP_RESPONSES.template ||
+            'Template picking inside chat is still limited. Please open the Template & Format section to choose a template and font size.';
+          appendBotMessage(placeholder);
+        }
+        setIsLoading(false);
+        return;
+      }
+      case 'jobDescription': {
+        await applyJobDescriptionFromChat(trimmed);
         setIsLoading(false);
         return;
       }

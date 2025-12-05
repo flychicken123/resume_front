@@ -117,6 +117,19 @@ export async function computeJobMatches(payload) {
   return await res.json();
 }
 
+export async function inferTemplatePreference(text) {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/template/preference`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ text }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error || 'Failed to infer template preference.');
+  }
+  return data;
+}
+
 export async function getJobMatches(params = {}) {
   const searchParams = new URLSearchParams();
   if (params.resumeHash) {
@@ -199,6 +212,22 @@ export async function parsePersonalDetailsAI(text) {
     throw new Error(data?.error || 'Failed to understand personal details.');
   }
   return data?.data || data;
+}
+
+// Job description intent (URL + text) via LangChain backend
+export async function inferJobIntent(text) {
+  const res = await fetch(`${API_BASE_URL}/api/assistant/job-intent`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ text }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error || 'Failed to understand job description details.');
+  }
+  return data;
 }
 
 // AI Grammar/Refactor functions - always available
