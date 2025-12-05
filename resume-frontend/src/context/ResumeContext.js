@@ -46,6 +46,9 @@ const createDefaultResumeData = () => ({
   // that should be used for resume preview instead of the raw skills field.
   skillsCategorized: "",
   summary: "",
+  // Optional: last generated letter text/type for the Cover/Recommendation step.
+  coverLetterText: "",
+  coverLetterType: "",
   selectedFormat: DEFAULT_TEMPLATE_ID,
   selectedFontSize: "medium"
 });
@@ -66,6 +69,12 @@ const normalizeResumeData = (resume) => {
 
   if (typeof next.skillsCategorized !== 'string') {
     next.skillsCategorized = "";
+  }
+  if (typeof next.coverLetterText !== 'string') {
+    next.coverLetterText = "";
+  }
+  if (typeof next.coverLetterType !== 'string') {
+    next.coverLetterType = "";
   }
 
   return next;

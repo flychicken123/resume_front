@@ -150,6 +150,17 @@
   cursor: not-allowed;
 }
 
+.generate-button.secondary {
+  background: #e5e7eb;
+  color: #111827;
+  border-color: #e5e7eb;
+}
+
+.generate-button.secondary:hover:not(:disabled) {
+  background: #ffffff;
+  border-color: #111827;
+}
+
 /* Cover Letter Result */
 .cover-letter-result {
   margin-top: 2rem;
