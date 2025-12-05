@@ -252,39 +252,44 @@ export async function improveExperienceGrammarAI(experience) {
 
 export async function optimizeProjectAI(projectData, jobDescription = '') {
   const res = await fetchWithAuth(`${API_BASE_URL}/api/project/optimize`, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ 
-      projectData: projectData,
-      jobDescription: jobDescription
+    body: JSON.stringify({
+      projectData,
+      jobDescription,
     }),
   });
+
+  const raw = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = await res.json();
-    throw new Error(err.error || "AI project optimization failed.");
+    throw new Error(raw?.error || 'AI project optimization failed.');
   }
-  const data = await res.json();
-  return data.optimizedProject;
+
+  const payload = raw && typeof raw === 'object' ? raw.data || raw : {};
+  // Fall back to original text if backend returns nothing
+  return payload.optimizedProject || projectData || '';
 }
 
 export async function improveProjectGrammarAI(projectData) {
   const res = await fetchWithAuth(`${API_BASE_URL}/api/project/improve-grammar`, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ 
-      projectData: projectData
+    body: JSON.stringify({
+      projectData,
     }),
   });
+
+  const raw = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = await res.json();
-    throw new Error(err.error || "AI project grammar improvement failed.");
+    throw new Error(raw?.error || 'AI project grammar improvement failed.');
   }
-  const data = await res.json();
-  return data.improvedProject;
+
+  const payload = raw && typeof raw === 'object' ? raw.data || raw : {};
+  return payload.improvedProject || projectData || '';
 }
 
 export async function improveSummaryGrammarAI(summary) {

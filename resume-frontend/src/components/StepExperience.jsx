@@ -1,7 +1,12 @@
 // src/components/StepExperience.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { useResume } from '../context/ResumeContext';
-import { generateExperienceAI, improveExperienceGrammarAI } from '../api';
+import {
+  generateExperienceAI,
+  improveExperienceGrammarAI,
+  optimizeProjectAI,
+  improveProjectGrammarAI,
+} from '../api';
 import { useLocation } from 'react-router-dom';
 
 const createEmptyExperience = () => ({
@@ -162,10 +167,13 @@ const formatDateRange = (exp) => {
 
   return '';
 };
+
 const StepExperience = () => {
   const { data, setData } = useResume();
   const [loadingIndex, setLoadingIndex] = useState(null);
   const [aiMode, setAiMode] = useState({});
+  const [projectLoading, setProjectLoading] = useState({});
+  const [projectAiMode, setProjectAiMode] = useState({});
   const [bulkLoading, setBulkLoading] = useState(false);
   const location = useLocation();
 
@@ -314,6 +322,156 @@ const StepExperience = () => {
     } finally {
       setBulkLoading(false);
       setLoadingIndex(null);
+    }
+  };
+
+  const getProjectsForExperience = (idx) => {
+    const exp = experiences[idx];
+    if (exp && Array.isArray(exp.projectsForRole) && exp.projectsForRole.length > 0) {
+      return exp.projectsForRole;
+    }
+    return [
+      {
+        projectName: '',
+        description: '',
+        technologies: '',
+        projectUrl: '',
+      },
+    ];
+  };
+
+  const updateExperienceProjects = (idx, updater) => {
+    updateExperiences((current) => {
+      const next = [...current];
+      const exp = next[idx] || createEmptyExperience();
+      const currentProjects =
+        Array.isArray(exp.projectsForRole) && exp.projectsForRole.length > 0
+          ? exp.projectsForRole
+          : [
+              {
+                projectName: '',
+                description: '',
+                technologies: '',
+                projectUrl: '',
+              },
+            ];
+      const updatedProjects = updater(currentProjects);
+      next[idx] = {
+        ...exp,
+        projectsForRole:
+          Array.isArray(updatedProjects) && updatedProjects.length > 0
+            ? updatedProjects
+            : [
+                {
+                  projectName: '',
+                  description: '',
+                  technologies: '',
+                  projectUrl: '',
+                },
+              ],
+      };
+      return next;
+    });
+  };
+
+  const handleProjectFieldChange = (experienceIndex, projectIndex, field, value) => {
+    updateExperienceProjects(experienceIndex, (currentProjects) => {
+      const nextProjects = [...currentProjects];
+      const existing =
+        nextProjects[projectIndex] || {
+          projectName: '',
+          description: '',
+          technologies: '',
+          projectUrl: '',
+        };
+      nextProjects[projectIndex] = {
+        ...existing,
+        [field]: value,
+      };
+      return nextProjects;
+    });
+  };
+
+  const addExperienceProjectRow = (experienceIndex) => {
+    updateExperienceProjects(experienceIndex, (currentProjects) => [
+      ...currentProjects,
+      {
+        projectName: '',
+        description: '',
+        technologies: '',
+        projectUrl: '',
+      },
+    ]);
+  };
+
+  const removeExperienceProjectRow = (experienceIndex, projectIndex) => {
+    updateExperienceProjects(experienceIndex, (currentProjects) =>
+      currentProjects.filter((_, idx) => idx !== projectIndex)
+    );
+  };
+
+  const moveExperienceProjectRow = (experienceIndex, fromIndex, toIndex) => {
+    updateExperienceProjects(experienceIndex, (currentProjects) => {
+      if (
+        !Array.isArray(currentProjects) ||
+        toIndex < 0 ||
+        toIndex >= currentProjects.length ||
+        fromIndex === toIndex
+      ) {
+        return currentProjects;
+      }
+      const next = [...currentProjects];
+      const [moved] = next.splice(fromIndex, 1);
+      next.splice(toIndex, 0, moved);
+      return next;
+    });
+  };
+
+  const checkProjectWithAI = async (experienceIndex, projectIndex) => {
+    const projects = getProjectsForExperience(experienceIndex);
+    const project = projects[projectIndex];
+    if (!project || !(project.description || '').trim()) {
+      alert('Please enter your project description first.');
+      return;
+    }
+
+    const key = `${experienceIndex}-${projectIndex}`;
+    try {
+      setProjectLoading((prev) => ({ ...prev, [key]: true }));
+      const desc = (project.description || '').trim();
+      const jobDesc = getJobDescription();
+      const improvedRaw = jobDesc
+        ? await optimizeProjectAI(desc, jobDesc)
+        : await improveProjectGrammarAI(desc);
+      const improved = (improvedRaw || '').trim();
+
+      if (!improved) {
+        console.warn('AI project enhancement returned empty text; keeping original description');
+        return;
+      }
+
+      updateExperienceProjects(experienceIndex, (currentProjects) => {
+        const next = [...currentProjects];
+        const existing =
+          next[projectIndex] || {
+            projectName: '',
+            description: '',
+            technologies: '',
+            projectUrl: '',
+          };
+        next[projectIndex] = {
+          ...existing,
+          description: improved,
+        };
+        return next;
+      });
+
+      setProjectAiMode((prev) => ({ ...prev, [key]: true }));
+    } catch (err) {
+      console.error('AI project enhancement for role failed', err);
+      alert('Failed to check project with AI. Please try again.');
+    } finally {
+      setProjectLoading((prev) => ({ ...prev, [key]: false }));
     }
   };
 
@@ -746,6 +904,336 @@ const StepExperience = () => {
               >
                 {loadingIndex === idx ? 'Checking...' : aiMode[idx] ? '✓ AI Enhanced' : '✨ Check with AI'}
               </button>
+            </div>
+
+            <div
+              style={{
+                marginTop: '1.5rem',
+                paddingTop: '1.25rem',
+                borderTop: '1px solid #e5e7eb',
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start',
+                  gap: '1rem',
+                  marginBottom: '0.75rem',
+                  flexWrap: 'wrap',
+                }}
+              >
+                <div>
+                  <div
+                    style={{
+                      fontWeight: 600,
+                      fontSize: '0.95rem',
+                      color: '#111827',
+                    }}
+                  >
+                    Projects for this role
+                  </div>
+                  <div
+                    style={{
+                      fontSize: '0.8rem',
+                      color: '#6b7280',
+                      marginTop: '0.25rem',
+                    }}
+                  >
+                    Add one or more projects that belong to this role.
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => addExperienceProjectRow(idx)}
+                  style={{
+                    padding: '0.5rem 0.9rem',
+                    backgroundColor: '#f3f4f6',
+                    color: '#374151',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '0.85rem',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  + Add Project
+                </button>
+              </div>
+
+              {getProjectsForExperience(idx).map((project, projectIndex, projectsArray) => (
+                <div
+                  key={projectIndex}
+                  style={{
+                    marginBottom: '1.25rem',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    padding: '1rem',
+                    background: '#f9fafb',
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                      gap: '0.75rem',
+                      marginBottom: '0.75rem',
+                    }}
+                  >
+                    <div>
+                      <label
+                        style={{
+                          display: 'block',
+                          marginBottom: '0.35rem',
+                          fontWeight: 500,
+                          color: '#374151',
+                          fontSize: '0.8rem',
+                        }}
+                      >
+                        Project Name
+                      </label>
+                      <input
+                        type="text"
+                        value={project.projectName}
+                        onChange={(e) =>
+                          handleProjectFieldChange(idx, projectIndex, 'projectName', e.target.value)
+                        }
+                        placeholder="e.g., Internal reliability dashboard"
+                        style={{
+                          width: '100%',
+                          padding: '0.6rem',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '6px',
+                          fontSize: '0.9rem',
+                        }}
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        style={{
+                          display: 'block',
+                          marginBottom: '0.35rem',
+                          fontWeight: 500,
+                          color: '#374151',
+                          fontSize: '0.8rem',
+                        }}
+                      >
+                        Technologies
+                      </label>
+                      <input
+                        type="text"
+                        value={project.technologies}
+                        onChange={(e) =>
+                          handleProjectFieldChange(idx, projectIndex, 'technologies', e.target.value)
+                        }
+                        placeholder="e.g., Go, React, PostgreSQL"
+                        style={{
+                          width: '100%',
+                          padding: '0.6rem',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '6px',
+                          fontSize: '0.9rem',
+                        }}
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        style={{
+                          display: 'block',
+                          marginBottom: '0.35rem',
+                          fontWeight: 500,
+                          color: '#374151',
+                          fontSize: '0.8rem',
+                        }}
+                      >
+                        Project URL
+                      </label>
+                      <input
+                        type="url"
+                        value={project.projectUrl}
+                        onChange={(e) =>
+                          handleProjectFieldChange(idx, projectIndex, 'projectUrl', e.target.value)
+                        }
+                        placeholder="https://..."
+                        style={{
+                          width: '100%',
+                          padding: '0.6rem',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '6px',
+                          fontSize: '0.9rem',
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label
+                      style={{
+                        display: 'block',
+                        marginBottom: '0.35rem',
+                        fontWeight: 500,
+                        color: '#374151',
+                        fontSize: '0.8rem',
+                      }}
+                    >
+                      Project Description
+                    </label>
+                    <textarea
+                      rows="3"
+                      value={project.description}
+                      onChange={(e) =>
+                        handleProjectFieldChange(idx, projectIndex, 'description', e.target.value)
+                      }
+                      placeholder="Briefly describe what you built and your impact."
+                      style={{
+                        width: '100%',
+                        padding: '0.6rem',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '6px',
+                        fontSize: '0.9rem',
+                        resize: 'vertical',
+                      }}
+                    />
+                  </div>
+                  <div
+                    style={{
+                      marginTop: '0.75rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem',
+                      flexWrap: 'wrap',
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        flexWrap: 'wrap',
+                      }}
+                    >
+                      <button
+                        type="button"
+                        onClick={() =>
+                          moveExperienceProjectRow(idx, projectIndex, projectIndex - 1)
+                        }
+                        disabled={projectIndex === 0}
+                        style={{
+                          padding: '0.25rem 0.5rem',
+                          backgroundColor:
+                            projectIndex === 0 ? '#e5e7eb' : '#f3f4f6',
+                          color: projectIndex === 0 ? '#9ca3af' : '#374151',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '4px',
+                          fontSize: '0.75rem',
+                          cursor: projectIndex === 0 ? 'not-allowed' : 'pointer',
+                        }}
+                        title="Move project up"
+                      >
+                        Up
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          moveExperienceProjectRow(idx, projectIndex, projectIndex + 1)
+                        }
+                        disabled={projectIndex === projectsArray.length - 1}
+                        style={{
+                          padding: '0.25rem 0.5rem',
+                          backgroundColor:
+                            projectIndex === projectsArray.length - 1
+                              ? '#e5e7eb'
+                              : '#f3f4f6',
+                          color:
+                            projectIndex === projectsArray.length - 1
+                              ? '#9ca3af'
+                              : '#374151',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '4px',
+                          fontSize: '0.75rem',
+                          cursor:
+                            projectIndex === projectsArray.length - 1
+                              ? 'not-allowed'
+                              : 'pointer',
+                        }}
+                        title="Move project down"
+                      >
+                        Down
+                      </button>
+                    </div>
+
+                    <div
+                      style={{
+                        flex: 1,
+                        display: 'flex',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => checkProjectWithAI(idx, projectIndex)}
+                        disabled={
+                          projectLoading[`${idx}-${projectIndex}`] ||
+                          !(project.description || '').trim()
+                        }
+                        style={{
+                          padding: '0.4rem 0.9rem',
+                          backgroundColor: projectAiMode[`${idx}-${projectIndex}`]
+                            ? '#10b981'
+                            : '#3b82f6',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: (project.description || '').trim() ? 'pointer' : 'not-allowed',
+                          opacity: (project.description || '').trim() ? 1 : 0.5,
+                          fontSize: '0.8rem',
+                          whiteSpace: 'nowrap',
+                        }}
+                        title={
+                          getJobDescription()
+                            ? 'Optimize project for this job'
+                            : 'Improve grammar and clarity'
+                        }
+                      >
+                        {projectLoading[`${idx}-${projectIndex}`]
+                          ? 'Checking...'
+                          : projectAiMode[`${idx}-${projectIndex}`]
+                          ? '✓ AI Enhanced'
+                          : '✓ Check with AI'}
+                      </button>
+                    </div>
+
+                    <div
+                      style={{
+                        minWidth: '120px',
+                        display: 'flex',
+                        justifyContent: 'flex-end',
+                        visibility: projectIndex > 0 ? 'visible' : 'hidden',
+                      }}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => removeExperienceProjectRow(idx, projectIndex)}
+                        style={{
+                          background: '#fee2e2',
+                          color: '#dc2626',
+                          border: '1px solid #fecaca',
+                          borderRadius: '4px',
+                          padding: '0.25rem 0.6rem',
+                          fontSize: '0.75rem',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Remove project
+                      </button>
+                    </div>
+                  </div>
+
+                </div>
+              ))}
             </div>
           </div>
         ))
