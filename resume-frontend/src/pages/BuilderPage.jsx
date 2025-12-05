@@ -740,7 +740,7 @@ const steps = [
   "Skills",
   "Summary",
   "Job Matches",
-  "Cover Letter"
+  "Cover/Recommendation Letter"
 ];
 const STEP_IDS = {
   IMPORT: 1,

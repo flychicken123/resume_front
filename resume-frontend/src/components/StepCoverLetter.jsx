@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useResume } from '../context/ResumeContext';
 import { useAuth } from '../context/AuthContext';
+import { fetchResumeHistoryList } from '../api';
 import './StepCoverLetter.css';
 
 const getAPIBaseURL = () => {
@@ -14,9 +15,8 @@ const getAPIBaseURL = () => {
 };
 
 const StepCoverLetter = ({ onGeneratePremiumFeature }) => {
-  const { resumeData } = useResume();
+  const { data: resumeData, setData } = useResume();
   const { getAuthHeaders } = useAuth();
-  const [coverLetter, setCoverLetter] = useState('');
   const [companyName, setCompanyName] = useState('');
   const [position, setPosition] = useState('');
   const [jobDescription, setJobDescription] = useState('');
@@ -72,7 +72,7 @@ const StepCoverLetter = ({ onGeneratePremiumFeature }) => {
     return subscription.plan_name !== 'premium' && subscription.plan_name !== 'ultimate';
   };
 
-  const generateCoverLetter = async () => {
+  const generateLetter = async (letterType) => {
     // Check if user has premium/ultimate
     if (isPremiumFeature()) {
       if (onGeneratePremiumFeature) {
@@ -81,15 +81,20 @@ const StepCoverLetter = ({ onGeneratePremiumFeature }) => {
       return;
     }
 
-    if (!companyName || !position) {
-      setError('Please enter company name and position');
-      return;
-    }
-
-    setError('');
-    setIsGenerating(true);
-
     try {
+      setError('');
+      setIsGenerating(true);
+
+      // Ensure the user has at least one generated resume in history
+      const historyResponse = await fetchResumeHistoryList().catch((err) => {
+        throw new Error(err.message || 'Unable to load resume history.');
+      });
+      const history = Array.isArray(historyResponse?.history) ? historyResponse.history : [];
+      if (!history.length) {
+        setError('Please generate your resume first in the builder before creating a cover or recommendation letter.');
+        return;
+      }
+
       const response = await fetch(`${getAPIBaseURL()}/api/cover-letter/generate`, {
         method: 'POST',
         headers: {
@@ -100,7 +105,8 @@ const StepCoverLetter = ({ onGeneratePremiumFeature }) => {
           resumeData,
           companyName,
           position,
-          jobDescription
+          jobDescription,
+          letterType,
         })
       });
 
@@ -109,7 +115,8 @@ const StepCoverLetter = ({ onGeneratePremiumFeature }) => {
       }
 
       const data = await response.json();
-      setCoverLetter(data.coverLetter || '');
+      const text = data.coverLetter || '';
+      setData({ ...resumeData, coverLetterText: text, coverLetterType: letterType });
     } catch (err) {
       setError(err.message || 'Failed to generate cover letter');
     } finally {
@@ -118,9 +125,9 @@ const StepCoverLetter = ({ onGeneratePremiumFeature }) => {
   };
 
   const handleDownload = () => {
-    if (!coverLetter) return;
+    if (!resumeData.coverLetterText) return;
 
-    const content = `${companyName}\n${new Date().toLocaleDateString()}\n\n${coverLetter}`;
+    const content = `${companyName}\n${new Date().toLocaleDateString()}\n\n${resumeData.coverLetterText}`;
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -138,7 +145,7 @@ const StepCoverLetter = ({ onGeneratePremiumFeature }) => {
 
   return (
     <div className="step-cover-letter">
-      <h2>Cover Letter Generator</h2>
+      <h2>Cover/Recommendation Letter</h2>
       {isPremiumFeature() ? (
         <div className="premium-notice">
           <div className="premium-icon">👑</div>
@@ -153,60 +160,42 @@ const StepCoverLetter = ({ onGeneratePremiumFeature }) => {
         </div>
       ) : (
         <div className="cover-letter-form">
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="company">Company Name *</label>
-              <input
-                id="company"
-                type="text"
-                value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
-                placeholder="e.g., Google"
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="position">Position *</label>
-              <input
-                id="position"
-                type="text"
-                value={position}
-                onChange={(e) => setPosition(e.target.value)}
-                placeholder="e.g., Software Engineer"
-              />
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="jobDesc">Job Description (Optional)</label>
-            <textarea
-              id="jobDesc"
-              value={jobDescription}
-              onChange={(e) => setJobDescription(e.target.value)}
-              placeholder="Paste the job description here for a more tailored cover letter..."
-              rows="6"
-            />
-          </div>
+          <p style={{ marginBottom: '1rem', color: '#4b5563' }}>
+            For job-customized letters, first fill the{" "}
+            <strong>Job Description (Optional)</strong> section in the builder. We’ll use your
+            latest generated resume as the core context and, when available, the job description
+            content to tailor the letter.
+          </p>
 
           {error && <div className="error-message">{error}</div>}
 
-          <button
-            onClick={generateCoverLetter}
-            disabled={isGenerating || !companyName || !position}
-            className="generate-button"
-          >
-            {isGenerating ? 'Generating...' : 'Generate Cover Letter'}
-          </button>
+          <div className="letter-actions">
+            <button
+              onClick={() => generateLetter('first_party')}
+              disabled={isGenerating}
+              className="generate-button"
+            >
+              {isGenerating ? 'Generating...' : 'First party Cover Letter'}
+            </button>
+            <button
+              onClick={() => generateLetter('third_party')}
+              disabled={isGenerating}
+              className="generate-button secondary"
+            >
+              {isGenerating ? 'Generating...' : '3rd party Recommendation Letter'}
+            </button>
+          </div>
 
-          {coverLetter && (
+          {resumeData.coverLetterText && (
             <div className="cover-letter-result">
-              <h3>Your Cover Letter</h3>
+              <h3>Your Letter</h3>
               <div className="cover-letter-preview">
                 <div className="letter-header">
                   <p>{companyName}</p>
                   <p>{new Date().toLocaleDateString()}</p>
                 </div>
                 <div className="letter-content">
-                  {coverLetter.split('\n').map((paragraph, index) => (
+                  {resumeData.coverLetterText.split('\n').map((paragraph, index) => (
                     <p key={index}>{paragraph}</p>
                   ))}
                 </div>
@@ -216,7 +205,7 @@ const StepCoverLetter = ({ onGeneratePremiumFeature }) => {
                   Download as Text
                 </button>
                 <button
-                  onClick={() => navigator.clipboard.writeText(coverLetter)}
+                  onClick={() => navigator.clipboard.writeText(resumeData.coverLetterText || '')}
                   className="copy-button"
                 >
                   Copy to Clipboard
