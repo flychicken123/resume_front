@@ -68,10 +68,12 @@ function ChatWidgetGate() {
     return null;
   }
 
-  if (normalizedEmail !== 'harwtalk@gmail.com') {
+  const allowedEmails = ['harwtalk@gmail.com', 'flychicken1991@gmail.com'];
+
+  if (!allowedEmails.includes(normalizedEmail)) {
     try {
       // eslint-disable-next-line no-console
-      console.log('[ChatWidgetGate] email mismatch; expected harwtalk@gmail.com, got', normalizedEmail);
+      console.log('[ChatWidgetGate] email not in allowlist; got', normalizedEmail);
     } catch (_) {}
     return null;
   }
