@@ -51,44 +51,44 @@ const RESUME_FLOW_SEQUENCE = [
 
 const RESUME_FLOW_PROMPTS = {
   importChoice:
-    'Choose whether you want to Import Resume or reuse one from Resume History. Use those buttons in the builder, then click Next to continue.',
+    'Choose whether you want to Import Resume or reuse one from Resume History. Use those buttons in the builder, then click Next to continue. You can also just tell me in plain language what you want to do, and I’ll guide you.',
   template:
-    'Open the Template & Format section to pick your design. Tap a template (Classic Professional, Modern Clean, Executive Serif, or Attorney Professional), adjust the font size if needed, then click Next.',
+    'Open the Template & Format section to pick your design. Tap a template (Classic Professional, Modern Clean, Executive Serif, or Attorney Professional), adjust the font size if needed, then click Next. Or simply describe your ideal resume style here in chat and I’ll use AI to pick a template and font size for you.',
   personal:
-    'Open the Personal Details card and fill in your full name, primary email, and phone number. Click Next when the Personal Details section looks good.',
+    'Open the Personal Details card and fill in your full name, primary email, and phone number. Click Next when the Personal Details section looks good. You can also type your details in one natural sentence (e.g. “My name is X, email Y, phone Z”) and I’ll use AI to fill the fields for you.',
   jobDescription:
-    'Paste the target Job Description into its field so the AI knows what role to target. Click Next when you are ready.',
+    'Paste the target Job Description into its field so the AI knows what role to target. Click Next when you are ready. You can also paste a job URL or description into chat and I’ll use AI to store it for the builder.',
   experience:
-    'Add each role in the Experience section (job title, company, dates, location, and bullet points). Click Next after your latest role is entered.',
+    'Add each role in the Experience section (job title, company, dates, location, and bullet points). Click Next after your latest role is entered. If you prefer, describe a role in plain language here and I’ll help turn it into structured experience entries.',
   projects:
-    'Scroll to the Projects section and enter each project name, description, technologies, and any relevant links. Click Next when your key projects are captured.',
+    'Scroll to the Projects section and enter each project name, description, technologies, and any relevant links. You can also describe a project in your own words in chat and I’ll help convert it into structured project details.',
   education:
-    'Fill in the Education section with degree, school, location, and graduation info. Click Next when your education details are captured.',
+    'Fill in the Education section with degree, school, location, and graduation info. Or tell me about your education in a sentence or two here and I’ll help map it into the Education section.',
   skills:
-    'List your core skills and tools in the Skills section (separate them with commas). Click Next once the Skills list is ready.',
+    'List your core skills and tools in the Skills section (separate them with commas). You can also paste a rough skills list into chat and I’ll tidy it into a clean, structured list for you.',
   summary:
-    'Write a concise Summary/Elevator Pitch at the top (2-3 sentences). Click Next once the summary reads well to finish the flow.',
+    'Write a concise Summary/Elevator Pitch at the top (2-3 sentences). Or describe your background in your own words here and I’ll help you turn it into a polished summary using AI.',
 };
 
 const RESUME_FLOW_STEP_RESPONSES = {
   importChoice:
-    'I’m still learning how to handle the Import vs Resume History choice inside chat. Please pick an option in the builder UI for now, then hit Next.',
+    'Tell me what you’d like to do (for example “start from my PDF” or “reuse a previous resume”), and I’ll explain which Import vs Resume History option to click in the builder.',
   template:
-    'Template picking inside chat is coming soon. Open the Template & Format section in the builder, choose your favorite template/font, then click Next.',
+    'Describe your ideal resume look (e.g. “modern, clean, medium font”) and I’ll use AI to set a matching template and font size. You can always fine-tune it in the Template & Format section and then click Next.',
   personal:
-    'Collecting Personal Details via chat is coming soon. Use the Personal Details card in the builder, then move forward when it looks good.',
+    'Share your name, email, and phone in a single sentence (for example “My name is X, email Y, phone Z”) and I’ll use AI to fill in the Personal Details for you.',
   jobDescription:
-    'Uploading the Job Description right here is still under construction. Paste it into the Job Description panel in the builder and continue.',
+    'Paste a job URL or the full job description into chat and I’ll store it for the Job Description step, and when possible extract the text for you.',
   experience:
-    'I’m not ready to capture Experience inside chat yet. Add your roles in the Experience section and press Next.',
+    'Describe one of your roles (title, company, what you did, impact) in natural language and I’ll help transform it into structured experience content.',
   projects:
-    'Project entry via chat is still on the roadmap. Please fill in your projects in the builder UI, then hit Next.',
+    'Tell me about a project in your own words and I’ll help rewrite it into a clear, resume-ready project entry.',
   education:
-    'Education entry is still being wired up for chat. Fill in the Education card in the builder before continuing.',
+    'Share your degree, school, and graduation details in a sentence or two and I’ll help shape them into a structured Education entry.',
   skills:
-    'Capturing Skills via chat is on the roadmap. Use the Skills field in the builder UI, then go to the next step.',
+    'Paste or type your skills in any rough format (comma separated, lines, or a paragraph) and I’ll clean them up into a tidy Skills list.',
   summary:
-    'The Summary step isn’t interactive in chat yet. Write it in the builder and click Finish when it looks good.',
+    'Tell me about your background, strengths, and target role in natural language and I’ll help you craft a concise, polished summary.',
 };
 
 const DEFAULT_RESUME_FLOW_STATE = {
