@@ -183,7 +183,7 @@ input, textarea {
   width: 100%;
   padding: 0.85rem;
   font-size: 1.05rem;
-  border: 1.5px solid #d1d5fa;
+  border: 1.5px solid #9ca3af;
   border-radius: 10px;
   background: #fff;
   transition: border 0.2s;
@@ -930,7 +930,6 @@ body > div > div[style*='flex-direction:column'] {
 }
 
 /* Print styles for PDF generation */
-
 
 
 

@@ -23,22 +23,35 @@ const StepPreview = ({ onDownload, hideActions = false, dataOverride }) => {
 
   
   const parseSkills = (value) => {
-    const toArray = (input) =>
-      input
+    const toArray = (input) => {
+      const text = String(input || '').trim();
+      if (!text) return [];
+
+      // If the value looks like categorized skills (multiple lines with keys),
+      // treat each non-empty line as a single row so keys appear on their own lines.
+      if (text.includes('\n') && text.includes(':')) {
+        return text
+          .split(/\r?\n/)
+          .map((line) => line.trim())
+          .filter(Boolean);
+      }
+
+      return text
         .replace(/\r?\n/g, ',')
         .split(/[,;]+/)
         .map((skill) => skill.trim())
         .filter(Boolean);
+    };
 
     if (!value) return [];
     if (Array.isArray(value)) {
       return value
         .flatMap((item) => {
-          if (typeof item === "string") return toArray(item);
+          if (typeof item === 'string') return toArray(item);
           return toArray(toText(item));
         });
     }
-    return toArray(String(value));
+    return toArray(value);
   };
 
 
@@ -294,7 +307,7 @@ const isAttorneyTemplate = normalizedFormat === TEMPLATE_SLUGS.ATTORNEY_TEMPLATE
   };
 
   const formatSkills = () => {
-    const skills = parseSkills(data.skills);
+    const skills = parseSkills(data.skillsCategorized || data.skills);
     if (skills.length === 0) return null;
 
     if (isIndustryManager) {
@@ -344,7 +357,20 @@ const isAttorneyTemplate = normalizedFormat === TEMPLATE_SLUGS.ATTORNEY_TEMPLATE
       );
     }
 
-    return <p>{skills.join(', ')}</p>;
+    const isCategorized = skills.length > 0 && skills.every((s) => typeof s === 'string' && s.includes(':'));
+
+    if (isCategorized) {
+      // Render each "<key>: <value>" on its own line for readability.
+      return (
+        <div style={{ whiteSpace: 'pre-wrap' }}>
+          {skills.map((skill, idx) => (
+            <div key={idx}>{skill}</div>
+          ))}
+        </div>
+      );
+    }
+
+    return <p>{skills.join(', ')} </p>;
   };
 
   // Format projects data
@@ -630,7 +656,7 @@ const isAttorneyTemplate = normalizedFormat === TEMPLATE_SLUGS.ATTORNEY_TEMPLATE
       locationValue || null
     ].filter(Boolean);
     const summaryText = toText(data.summary);
-    const skillsList = parseSkills(data.skills);
+    const skillsList = parseSkills(data.skillsCategorized || data.skills);
     const educationItems = Array.isArray(data.education)
       ? data.education.filter((edu) =>
           edu && (toText(edu.degree) || toText(edu.school) || toText(edu.field) || toText(edu.graduationYear)))

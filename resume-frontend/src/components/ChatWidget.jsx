@@ -2182,23 +2182,28 @@ const RobotIcon = () => (
   </svg>
 );
 
-const buildDownloadPayload = (data, jobDescription, html) => ({
-  name: data.name || '',
-  email: data.email || '',
-  phone: data.phone || '',
-  summary: data.summary || '',
-  experience: flattenExperienceText(data.experiences || []),
-  education: flattenEducationText(data.education || []),
-  jobDescription: jobDescription || '',
-  location: '',
-  skills: (data.skills || '')
-    .split(',')
-    .map((skill) => skill.trim())
-    .filter(Boolean),
-  format: data.selectedFormat || 'classic-professional',
-  engine: 'chromium-strict',
-  htmlContent: html,
-});
+const buildDownloadPayload = (data, jobDescription, html) => {
+  const skillsSource =
+    (data.skillsCategorized && data.skillsCategorized.trim()) || data.skills || '';
+
+  return {
+    name: data.name || '',
+    email: data.email || '',
+    phone: data.phone || '',
+    summary: data.summary || '',
+    experience: flattenExperienceText(data.experiences || []),
+    education: flattenEducationText(data.education || []),
+    jobDescription: jobDescription || '',
+    location: '',
+    skills: skillsSource
+      .split(',')
+      .map((skill) => skill.trim())
+      .filter(Boolean),
+    format: data.selectedFormat || 'classic-professional',
+    engine: 'chromium-strict',
+    htmlContent: html,
+  };
+};
 
 const normalizeSkillTokens = (skills) => {
   if (Array.isArray(skills)) {
@@ -2865,7 +2870,10 @@ const buildResumeHtml = (data = {}, jobDescription = '') => {
     education = [],
     projects = [],
     skills = '',
+    skillsCategorized = '',
   } = data;
+
+  const skillsSource = (skillsCategorized && skillsCategorized.trim()) || skills;
 
   const renderList = (items, renderer) =>
     items
@@ -2920,8 +2928,8 @@ const buildResumeHtml = (data = {}, jobDescription = '') => {
     `;
   });
 
-  const skillsHtml = skills
-    ? `<div class="item-text">${formatMultiline(skills)}</div>`
+  const skillsHtml = skillsSource
+    ? `<div class="item-text">${formatMultiline(skillsSource)}</div>`
     : '';
   const summaryHtml = summary ? `<div class="item-text">${formatMultiline(summary)}</div>` : '';
   const jdHtml = jobDescription

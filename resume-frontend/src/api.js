@@ -229,6 +229,33 @@ export async function autoGenerateSkillsAI(resumeData, jobDescription = '') {
   return '';
 }
 
+// Categorize an existing skills string into labeled buckets (e.g., "Cloud: Azure, AWS").
+export async function categorizeSkillsAI(skillsText, jobDescription = '') {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/skills/categorize`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      skillsText,
+      jobDescription,
+    }),
+  });
+
+  const raw = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(raw?.error || 'AI skills categorization failed.');
+  }
+
+  const payload = raw && typeof raw === 'object' ? raw.data || raw : {};
+
+  if (payload && typeof payload.formattedText === 'string') {
+    return payload.formattedText;
+  }
+
+  return skillsText || '';
+}
+
 export async function parsePersonalDetailsAI(text) {
   const res = await fetch(`${API_BASE_URL}/api/assistant/personal-info`, {
     method: "POST",

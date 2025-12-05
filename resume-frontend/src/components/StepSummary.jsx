@@ -108,6 +108,41 @@ const StepSummary = () => {
     return localStorage.getItem('jobDescription') || '';
   };
 
+  const handleGenerateWithAI = async () => {
+    try {
+      setLoading(true);
+      const jobDesc = getJobDescription();
+      const experienceText = buildExperienceText();
+      const educationText = buildEducationText();
+      const skillsList = normalizeSkills();
+      const hasContext = Boolean(experienceText || educationText || skillsList.length || jobDesc);
+
+      if (!hasContext) {
+        alert('Please add some experience, education, skills, or a job description so AI can generate your summary.');
+        return;
+      }
+
+      const experiencePayload = [
+        experienceText,
+        jobDesc ? `Job Description:\n${jobDesc}` : ''
+      ]
+        .filter(Boolean)
+        .join('\n\n');
+
+      const suggestion = await generateSummaryAI({
+        experience: experiencePayload,
+        education: educationText,
+        skills: skillsList,
+      });
+      setData({ ...data, summary: suggestion });
+      setAiMode(true);
+    } catch (err) {
+      alert('Failed to generate summary with AI. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const checkWithAI = async () => {
     try {
       setLoading(true);
@@ -159,7 +194,7 @@ const StepSummary = () => {
 
       <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#374151' }}>Professional Summary</label>
       <textarea
-        rows="4"
+        rows="8"
         value={data.summary}
         onChange={(e) => setData({ ...data, summary: e.target.value })}
         placeholder="Write a brief overview of your professional background, key skills, and career objectives..."
@@ -170,11 +205,38 @@ const StepSummary = () => {
           borderRadius: '6px',
           fontSize: '0.95rem',
           resize: 'vertical',
-          marginBottom: '1rem'
+          marginBottom: '1rem',
+          minHeight: '220px',
         }}
       />
 
-      <div style={{ marginTop: '1rem' }}>
+      <div
+        style={{
+          marginTop: '1rem',
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '0.75rem',
+          alignItems: 'center',
+        }}
+      >
+        <button
+          onClick={handleGenerateWithAI}
+          disabled={loading}
+          style={{
+            background: '#0ea5e9',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            padding: '0.5rem 1rem',
+            fontSize: '0.875rem',
+            cursor: loading ? 'not-allowed' : 'pointer',
+            opacity: loading ? 0.5 : 1,
+            whiteSpace: 'nowrap',
+          }}
+          title="Let AI draft a brief overview of your background and key qualifications."
+        >
+          {loading ? 'Generating...' : 'AI generate'}
+        </button>
         <button
           onClick={checkWithAI}
           disabled={loading}

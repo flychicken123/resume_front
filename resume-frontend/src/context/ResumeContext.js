@@ -42,6 +42,9 @@ const createDefaultResumeData = () => ({
     projectUrl: ''
   }],
   skills: "",
+  // Optional: when present, this is the categorized/AI-structured skills string
+  // that should be used for resume preview instead of the raw skills field.
+  skillsCategorized: "",
   summary: "",
   selectedFormat: DEFAULT_TEMPLATE_ID,
   selectedFontSize: "medium"
@@ -56,11 +59,16 @@ const normalizeResumeData = (resume) => {
   const template = getTemplateMetaById(normalizedFormat);
   const nextFormat = template ? template.id : DEFAULT_TEMPLATE_ID;
 
-  if (resume.selectedFormat !== nextFormat) {
-    return { ...resume, selectedFormat: nextFormat };
+  const next = {
+    ...resume,
+    selectedFormat: nextFormat,
+  };
+
+  if (typeof next.skillsCategorized !== 'string') {
+    next.skillsCategorized = "";
   }
 
-  return resume;
+  return next;
 };
 
 // Helper function to get data from localStorage with user-specific key
