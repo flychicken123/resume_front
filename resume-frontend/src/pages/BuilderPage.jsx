@@ -1146,6 +1146,30 @@ function BuilderPage() {
   }, [jobDescriptions, combinedJobDescription]);
 
   useEffect(() => {
+    if (typeof window === 'undefined') {
+      return undefined;
+    }
+    const handleReloadJobDescriptions = () => {
+      try {
+        const serializedList = window.localStorage.getItem('jobDescriptions');
+        if (serializedList) {
+          const parsed = JSON.parse(serializedList);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setJobDescriptions(ensureJobDescriptionList(parsed));
+            return;
+          }
+        }
+      } catch (err) {
+        console.error('Failed to reload job descriptions from event', err);
+      }
+    };
+    window.addEventListener('builder:reload-job-descriptions', handleReloadJobDescriptions);
+    return () => {
+      window.removeEventListener('builder:reload-job-descriptions', handleReloadJobDescriptions);
+    };
+  }, []);
+
+  useEffect(() => {
     if (!user) {
       setJobMatches([]);
       setJobMatchesHash(null);
@@ -1839,6 +1863,7 @@ function BuilderPage() {
     }
     setUserRequestedImport(false);
     setStep(STEP_IDS.PERSONAL);
+    scrollBuilderIntoView();
   };
   const handleStepChange = (nextStep) => {
     if (nextStep === STEP_IDS.IMPORT) {
@@ -1847,6 +1872,7 @@ function BuilderPage() {
       setUserRequestedImport(false);
     }
     setStep(nextStep);
+    scrollBuilderIntoView();
   };
 
   useEffect(() => {

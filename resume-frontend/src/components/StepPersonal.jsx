@@ -4,8 +4,6 @@ import { useResume } from '../context/ResumeContext';
 const StepPersonal = () => {
   const { data, setData } = useResume();
 
-
-
   const handleChange = (field, value) => {
     setData({ ...data, [field]: value });
   };
