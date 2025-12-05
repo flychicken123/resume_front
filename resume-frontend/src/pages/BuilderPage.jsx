@@ -31,7 +31,14 @@ import UpgradeModal from '../components/UpgradeModal';
 import SubscriptionStatus from '../components/SubscriptionStatus';
 import SEO from '../components/SEO';
 import { trackResumeGeneration, trackBuilderLoaded, trackDownloadClicked } from '../components/Analytics';
-import { computeJobMatches, getJobMatches, generateExperienceAI, optimizeProjectAI, generateSummaryAI } from '../api';
+import {
+  computeJobMatches,
+  getJobMatches,
+  generateExperienceAI,
+  optimizeProjectAI,
+  generateSummaryAI,
+  explainJobFit,
+} from '../api';
 import './BuilderPage.css';
 
 const getAPIBaseURL = () => {
@@ -1345,12 +1352,57 @@ function BuilderPage() {
     },
     [effectiveLocation, resumeSkills, targetPosition, latestRoleInfo, latestImpactSnippet, quantifiedSummary]
   );
-  const MatchReasonPopover = ({ reasons }) => {
+  const MatchReasonPopover = ({ match, fallbackReasons }) => {
     const popoverRef = useRef(null);
     const [verticalOffset, setVerticalOffset] = useState(0);
+    const [aiReasons, setAiReasons] = useState(null);
+    const [isLoadingReasons, setIsLoadingReasons] = useState(false);
+    const [hasTriedAI, setHasTriedAI] = useState(false);
+
+    const effectiveReasons = Array.isArray(aiReasons) && aiReasons.length > 0 ? aiReasons : fallbackReasons;
+
+    useEffect(() => {
+      let cancelled = false;
+      const shouldCallAI =
+        !hasTriedAI &&
+        match &&
+        typeof match === 'object' &&
+        data &&
+        typeof data === 'object';
+
+      if (!shouldCallAI) {
+        return undefined;
+      }
+
+      const load = async () => {
+        try {
+          setIsLoadingReasons(true);
+          setHasTriedAI(true);
+          const reasons = await explainJobFit(data, match);
+          if (!cancelled) {
+            setAiReasons(reasons);
+          }
+        } catch (_) {
+          // Swallow errors; fallbackReasons will be shown instead.
+          if (!cancelled) {
+            setAiReasons(null);
+          }
+        } finally {
+          if (!cancelled) {
+            setIsLoadingReasons(false);
+          }
+        }
+      };
+
+      load();
+
+      return () => {
+        cancelled = true;
+      };
+    }, [data, match, hasTriedAI]);
 
     useLayoutEffect(() => {
-      if (!Array.isArray(reasons) || reasons.length === 0) {
+      if (!Array.isArray(effectiveReasons) || effectiveReasons.length === 0) {
         setVerticalOffset(0);
         return undefined;
       }
@@ -1375,9 +1427,9 @@ function BuilderPage() {
         window.removeEventListener('scroll', reposition, true);
         window.removeEventListener('resize', reposition);
       };
-    }, [reasons]);
+    }, [effectiveReasons]);
 
-    if (!Array.isArray(reasons) || reasons.length === 0) {
+    if (!Array.isArray(effectiveReasons) || effectiveReasons.length === 0) {
       return null;
     }
 
@@ -1407,8 +1459,13 @@ function BuilderPage() {
         <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.35rem' }}>
           Why it's a fit
         </div>
+        {isLoadingReasons && (
+          <div style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: '0.35rem' }}>
+            Thinking through your fit for this role...
+          </div>
+        )}
         <ul style={{ margin: 0, paddingLeft: '1rem', color: '#0f172a', fontSize: '0.85rem', lineHeight: 1.45 }}>
-          {reasons.map((reason, idx) => (
+          {effectiveReasons.map((reason, idx) => (
             <li key={`reason-${idx}`} style={{ marginBottom: '0.25rem' }}>
               {reason}
             </li>
@@ -3506,7 +3563,10 @@ function BuilderPage() {
                       onMouseLeave={() => setHoveredMatchKey(null)}
                     >
                       {hoveredMatchKey === topMatchKey && (
-                        <MatchReasonPopover reasons={buildJobFitReasons(topMatch)} />
+                        <MatchReasonPopover
+                          match={topMatch}
+                          fallbackReasons={buildJobFitReasons(topMatch)}
+                        />
                       )}
                       <span style={{ fontSize: '0.75rem', color: '#0ea5e9', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Top match</span>
                       <h4 style={{ margin: 0, fontSize: '1.1rem', color: '#0f172a' }}>{topMatch.job_title || 'Role'}</h4>
@@ -3588,7 +3648,10 @@ function BuilderPage() {
                             onMouseLeave={() => setHoveredMatchKey(null)}
                           >
                             {hoveredMatchKey === matchKey && (
-                              <MatchReasonPopover reasons={buildJobFitReasons(match)} />
+                              <MatchReasonPopover
+                                match={match}
+                                fallbackReasons={buildJobFitReasons(match)}
+                              />
                             )}
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '0.5rem' }}>
                               <strong style={{ color: '#1e293b', fontSize: '0.95rem' }}>{match.job_title || 'Role'}</strong>
