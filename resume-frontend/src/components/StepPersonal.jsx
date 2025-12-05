@@ -92,7 +92,7 @@ const StepPersonal = () => {
             }}
           />
           <p style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '0.5rem' }}>
-            This summary will appear at the top of your resume to give recruiters a quick overview of your background.
+            This summary appears at the top of your resume. You can keep it rough or even leave it blank for now—once you’ve filled out the rest of your resume, the Summary step includes an AI helper that can generate or polish this section for you.
           </p>
         </div>
       </div>
