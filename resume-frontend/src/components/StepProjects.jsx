@@ -103,7 +103,7 @@ const StepProjects = () => {
   return (
     <div className="step-content">
       <h2>Projects</h2>
-      <p>Showcase your academic, personal, or professional projects. This is especially important if you have limited work experience.</p>
+      <p>Showcase your academic, personal, or professional projects. This is especially important if you have <strong>limited work experience</strong>.</p>
       
       {data.projects && data.projects.map((project, index) => (
         <div key={index} style={{ marginBottom: '2rem', border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem' }}>
