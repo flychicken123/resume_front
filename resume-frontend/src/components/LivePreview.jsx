@@ -688,8 +688,9 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
       });
     }
 
-    if (!isAttorneyFormat && data.skills) {
-      const skillsText = toText(data.skills);
+    const skillsSource = data.skillsCategorized || data.skills;
+    if (!isAttorneyFormat && skillsSource) {
+      const skillsText = toText(skillsSource);
       if (skillsText) {
         const rawSkillsHeight = estimateSectionHeight(skillsText, 'skills');
         const skillsHeight = adjustSkillContentEstimate(rawSkillsHeight, { includeHeader: true });
@@ -1726,50 +1727,89 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
     );
   };
 function parseSkills(value) {
-  const toArray = (input) =>
-    input
-      .replace(/\r?\n/g, ',')
+  const toArray = (input) => {
+    const text = String(input || "").trim();
+    if (!text) return [];
+
+    // If the value looks like categorized skills (multiple lines with keys),
+    // treat each non-empty line as a single "skill" row so that keys appear
+    // on their own lines in the preview.
+    if (text.includes("\n") && text.includes(":")) {
+      return text
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean);
+    }
+
+    return text
+      .replace(/\r?\n/g, ",")
       .split(/[,;]+/)
       .map((skill) => skill.trim())
       .filter(Boolean);
+  };
 
   if (!value) return [];
   if (Array.isArray(value)) {
-    return value
-      .flatMap((item) => {
-        if (typeof item === "string") return toArray(item);
-        return toArray(toText(item));
-      });
+    return value.flatMap((item) => {
+      if (typeof item === "string") return toArray(item);
+      return toArray(toText(item));
+    });
   }
-  return toArray(String(value));
+  return toArray(value);
 }
   const renderSkillsSection = (skills, styles, { inlineOnly = false } = {}) => {
     if (!skills) return null;
     const skillsArray = Array.isArray(skills) ? skills : parseSkills(skills);
     if (!skillsArray || skillsArray.length === 0) return null;
     const isIndustryManager = selectedFormat === TEMPLATE_SLUGS.EXECUTIVE_SERIF;
+    const isCategorizedSource =
+      (typeof skills === 'string' && skills.includes('\n') && skills.includes(':')) ||
+      (Array.isArray(skills) &&
+        skills.length > 0 &&
+        skills.every((item) => typeof item === 'string' && item.includes(':')));
     const getSkillLabel = (value) => (typeof value === 'string' ? value : toText(value));
-    const renderInlineSkills = () => (
-      <div
-        style={{
-          ...styles.skills,
-          whiteSpace: 'pre-wrap',
-          marginBottom: 0,
-        }}
-        className="skills-inline"
-      >
-        {skillsArray.map((skill, idx) => (
-          <Fragment key={`skill-inline-${idx}`}>
-            <span className={getSectionHighlightClass(`skill-${idx}`, 'skill-chip')}>
-              {getSkillLabel(skill)}
-            </span>
-            {idx < skillsArray.length - 1 && (
-              <span className="skill-separator">, </span>
-            )}
-          </Fragment>
-        ))}
-      </div>
-    );
+    const renderInlineSkills = () => {
+      // For categorized skills we want each "<key>: <value>" on its own line
+      // without comma separators. We use the parsed skillsArray so that any
+      // extra blank lines in the source are removed (no empty line between entries).
+      if (isCategorizedSource) {
+        const textBlock = skillsArray.map((skill) => getSkillLabel(skill)).join('\n');
+        return (
+          <div
+            style={{
+              ...styles.skills,
+              whiteSpace: 'pre-wrap',
+              marginBottom: 0,
+            }}
+            className="skills-inline"
+          >
+            {textBlock}
+          </div>
+        );
+      }
+
+      return (
+        <div
+          style={{
+            ...styles.skills,
+            whiteSpace: 'pre-wrap',
+            marginBottom: 0,
+          }}
+          className="skills-inline"
+        >
+          {skillsArray.map((skill, idx) => (
+            <Fragment key={`skill-inline-${idx}`}>
+              <span className={getSectionHighlightClass(`skill-${idx}`, 'skill-chip')}>
+                {getSkillLabel(skill)}
+              </span>
+              {idx < skillsArray.length - 1 && (
+                <span className="skill-separator">, </span>
+              )}
+            </Fragment>
+          ))}
+        </div>
+      );
+    };
     if (inlineOnly || !styles.skillsGrid || !styles.skillsColumn || selectedFormat !== TEMPLATE_SLUGS.EXECUTIVE_SERIF) {
       return renderInlineSkills();
     }
@@ -2707,13 +2747,12 @@ const renderEducation = (education, styles) => {
             </div>
           );
         case 'skills': {
-          const skills = parseSkills(section.content);
           const inlineOnly = selectedFormat !== TEMPLATE_SLUGS.EXECUTIVE_SERIF;
           return (
             <div key={idx}>
               {renderSection(
                 'SKILLS',
-                renderSkillsSection(skills, styles, { inlineOnly }),
+                renderSkillsSection(section.content, styles, { inlineOnly }),
                 styles,
                 { showTitle, sectionKey: 'skills' }
               )}
@@ -2783,7 +2822,7 @@ const renderEducation = (education, styles) => {
           .filter(Boolean)
       : [];
 
-    const skillsList = parseSkills(data.skills).map((skill, index) => ({
+    const skillsList = parseSkills(data.skillsCategorized || data.skills).map((skill, index) => ({
       value: skill,
       sourceIndex: index,
     }));
@@ -3164,7 +3203,8 @@ const renderAttorneySummaryBlock = (summaryValue) => {
     ...(styles?.container || {}),
     overflow: 'visible'
   };
-  const singlePageSkills = parseSkills(data.skills);
+  const skillsSource = data.skillsCategorized || data.skills;
+  const singlePageSkills = parseSkills(skillsSource);
   // Determine if we should show multiple pages
   const shouldShowMultiPage = pages.length > 1;
   return (
@@ -3270,7 +3310,7 @@ const renderAttorneySummaryBlock = (summaryValue) => {
                 renderSection('EDUCATION', renderEducation(data.education, styles), styles, { sectionKey: 'education' })
               )}
               {singlePageSkills.length > 0 && (
-                renderSection('SKILLS', renderSkillsSection(singlePageSkills, styles), styles, { sectionKey: 'skills' })
+                renderSection('SKILLS', renderSkillsSection(skillsSource, styles), styles, { sectionKey: 'skills' })
               )}
             </div>
           )}

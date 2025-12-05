@@ -2552,11 +2552,18 @@ function BuilderPage() {
             overflow: visible !important;
             max-height: none !important;
             height: auto !important;
+            /* Let most content wrap normally to avoid overflow */
             white-space: normal !important;
             word-wrap: break-word !important;
             overflow-wrap: break-word !important;
             hyphens: auto !important;
             /* Do NOT set font-size here - preserve inline styles */
+          }
+
+          /* But for the skills section we rely on explicit
+             newlines for readability, so preserve them. */
+          .skills-inline {
+            white-space: pre-wrap !important;
           }
           
           /* Ensure experience and content sections don't get truncated */
@@ -2638,11 +2645,11 @@ function BuilderPage() {
 </body>
 </html>`;
 
-        // Minify HTML to keep payload very small
+        // Minify HTML to keep payload small while preserving
+        // meaningful newlines inside text (used with white-space: pre-wrap).
         const minifyHtml = (html) => html
           .replace(/>\s+</g, '><')
-          .replace(/\n+/g, '')
-          .replace(/\s{2,}/g, ' ');
+          .replace(/[ \t]{2,}/g, ' ');
         const minHtmlContent = minifyHtml(htmlContent);
 
         // Call the backend to generate PDF using multipart upload (smaller, proxy-friendly)
