@@ -387,6 +387,26 @@ export async function generateResumeAdviceAI(resumeData, jobDescription = '') {
   return data.advice;
 }
 
+export async function parseExperienceAI(text) {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/assistant/experience`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      text,
+    }),
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error || 'Failed to parse experience with AI.');
+  }
+
+  const payload = data && typeof data === 'object' ? data.data || data : {};
+  return payload;
+}
+
 export async function generateCoverLetterAI(resumeData, jobDescription = '', companyName = '') {
   const res = await fetchWithAuth(`${API_BASE_URL}/api/cover-letter/generate`, {
     method: "POST",
