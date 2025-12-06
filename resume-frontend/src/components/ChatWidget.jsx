@@ -9,6 +9,7 @@ import {
   parsePersonalDetailsAI,
   inferTemplatePreference,
   inferJobIntent,
+  parseExperienceAI,
 } from '../api';
 import { setLastStep } from '../utils/exitTracking';
 import { useAuth } from '../context/AuthContext';
@@ -1049,6 +1050,83 @@ const clampLauncherPosition = useCallback(
     [appendBotMessage, inferPersonalDetailsAI, setLastStep, setResumeFlowState, updateResume]
   );
 
+  const applyExperienceFromAI = useCallback(
+    async (inputText, options = {}) => {
+      const { promptIfEmpty = true } = options;
+      const trimmed = (inputText || '').trim();
+      if (!trimmed) {
+        return false;
+      }
+
+      try {
+        const payload = await parseExperienceAI(trimmed);
+        const parsedExperiences = Array.isArray(payload.experiences) ? payload.experiences : [];
+        if (!parsedExperiences.length) {
+          if (promptIfEmpty) {
+            appendBotMessage(
+              'I can help turn your work history into structured experience entries. For example: "I worked at Microsoft from July 2018 to July 2025 in Redmond WA on project A, B, C. Before that, I worked at Amazon from 2010 to 2015 on projects D and E."'
+            );
+          }
+          return false;
+        }
+
+        updateResume((prev) => {
+          const existing = Array.isArray(prev.experiences) ? prev.experiences.filter(Boolean) : [];
+          const next = [...existing];
+          parsedExperiences.forEach((exp) => {
+            if (!exp) return;
+            next.push(exp);
+          });
+          return {
+            ...prev,
+            experiences: next,
+          };
+        });
+
+        setResumeFlowState((prev) => ({
+          ...prev,
+          data: {
+            ...prev.data,
+            experience: trimmed,
+          },
+        }));
+
+        const summaryLines = parsedExperiences.map((exp, index) => {
+          const headerParts = [exp.jobTitle, exp.company].filter(Boolean);
+          const header = headerParts.length ? headerParts.join(' at ') : `Role ${index + 1}`;
+          const projectNames = Array.isArray(exp.projectsForRole)
+            ? exp.projectsForRole.map((p) => p.projectName).filter(Boolean)
+            : [];
+          const projectsLabel = projectNames.length ? `projects: ${projectNames.join(', ')}` : null;
+          return [header, projectsLabel].filter(Boolean).join(' — ');
+        });
+
+        const confirmation =
+          summaryLines.length > 0
+            ? `Got it! I created ${summaryLines.length} experience entr${
+                summaryLines.length === 1 ? 'y' : 'ies'
+              }:\n\n${summaryLines.join('\n')}`
+            : 'Got it! I updated your experience section.';
+
+        appendBotMessage(
+          `${confirmation}\n\nYou can refine any role directly in the Experience card on the left, and I’ll keep everything in sync.`
+        );
+
+        setLastStep('chat_resume_flow_experience_saved');
+        return true;
+      } catch (error) {
+        console.error('AI experience parse failed', error);
+        if (promptIfEmpty) {
+          appendBotMessage(
+            "I couldn't reliably parse that into structured experience. Try describing your roles one more time with company, dates, and any projects, or fill them in directly in the Experience section."
+          );
+        }
+        return false;
+      }
+    },
+    [appendBotMessage, parseExperienceAI, setLastStep, setResumeFlowState, updateResume]
+  );
+
   const applyJobDescriptionFromChat = useCallback(
     async (inputText) => {
       const trimmed = (inputText || '').trim();
@@ -1517,6 +1595,16 @@ const clampLauncherPosition = useCallback(
         const updated = await applyPersonalDetailsFromAI(trimmed, { promptIfEmpty: true });
         if (!updated) {
           // applyPersonalDetailsFromAI already prompted the user.
+          setIsLoading(false);
+          return;
+        }
+        setIsLoading(false);
+        return;
+      }
+      case 'experience': {
+        const updated = await applyExperienceFromAI(trimmed, { promptIfEmpty: true });
+        if (!updated) {
+          // applyExperienceFromAI already prompted the user.
           setIsLoading(false);
           return;
         }
