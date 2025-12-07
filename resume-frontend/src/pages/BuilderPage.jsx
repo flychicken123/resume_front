@@ -2467,20 +2467,21 @@ function BuilderPage() {
             padding: 0;
           }
           
-          /* Each PDF page should be exactly one page */
-          .multi-page-pdf-container > div[class^="pdf-page-"] {
-            page-break-after: always !important;
-            page-break-inside: avoid !important;
-            min-height: auto !important;
-            max-height: none !important;
-            padding-bottom: 12px !important;
-            overflow: visible !important;
-            box-sizing: border-box !important;
-          }
-          .multi-page-pdf-container > div[class^="pdf-page-"]:first-child {
-            padding-top: 12px !important;
-            margin-top: 0 !important;
-          }
+            /* Let the browser decide natural page breaks between logical pages.
+               We still keep basic spacing, but avoid forcing an extra blank page
+               when content slightly overflows a preview page. */
+            .multi-page-pdf-container > div[class^="pdf-page-"] {
+              page-break-inside: auto !important;
+              min-height: auto !important;
+              max-height: none !important;
+              padding-bottom: 12px !important;
+              overflow: visible !important;
+              box-sizing: border-box !important;
+            }
+            .multi-page-pdf-container > div[class^="pdf-page-"]:first-child {
+              padding-top: 12px !important;
+              margin-top: 0 !important;
+            }
 
           .pdf-single-page-root > .single-page-container {
             padding-top: 12px !important;
@@ -2497,11 +2498,9 @@ function BuilderPage() {
             font-family: ${templateFont} !important;
           }
 
-          /* Last page shouldn't have page break after */
-          .multi-page-pdf-container > div[class^="pdf-page-"]:last-child {
-            page-break-after: avoid !important;
-          }
-          
+            /* Do not force explicit page-break-after; allow natural flow so
+               preview pagination and PDF pagination stay closely aligned. */
+
           /* Additional page break support */
           .page-content {
             display: block !important;
