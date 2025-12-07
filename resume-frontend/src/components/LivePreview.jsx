@@ -450,11 +450,14 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
       case 'experience': {
         if (Array.isArray(content)) {
           const totalHeight = content.reduce((total, exp) => {
-            let height = Math.round(28 * fontScale); // Reduced from 35
+            // Base height per role for title/company/location
+            let height = Math.round(32 * fontScale);
             if (exp.description) {
               const rawLines = String(exp.description).split(/\n+/).filter((line) => line.trim());
-              const descCharsPerLine = Math.round(140 / fontScale);
-              const lineHeightPx = Math.round(13 * fontScale);
+              // More conservative line width so long bullets near the bottom
+              // of the page don't get clipped.
+              const descCharsPerLine = Math.round(100 / fontScale);
+              const lineHeightPx = Math.round(14 * fontScale);
               let descLines = 0;
               for (const rawLine of rawLines.length ? rawLines : [String(exp.description)]) {
                 const cleanLine = rawLine.replace(/[•\u2022-]+/g, '').trim();
@@ -463,14 +466,15 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
               }
               height += descLines * lineHeightPx;
               if (rawLines.length > 1) {
-                height += Math.round(Math.min(6, 2 * fontScale));
+                height += Math.round(Math.min(8, 3 * fontScale));
               }
             }
-            return total + height + Math.round(6 * fontScale); // Reduced from 8
+            // Slightly larger spacing between roles
+            return total + height + Math.round(8 * fontScale);
           }, 0);
           return applyFormatAdjustment(totalHeight, 'experience');
         }
-        return applyFormatAdjustment(Math.round(35 * fontScale), 'experience');
+        return applyFormatAdjustment(Math.round(40 * fontScale), 'experience');
       }
       case 'education': {
         const entryLineHeight = Math.round(13 * fontScale);
