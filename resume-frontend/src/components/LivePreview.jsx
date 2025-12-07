@@ -357,6 +357,7 @@ const collectExperienceFieldChanges = (previousList = [], nextList = []) => {
     );
   };
   const contentRef = useRef(null);
+  const pageRefs = useRef([]);
   // Page dimensions in pixels (8.5" x 11" at 96 DPI)
   const PAGE_HEIGHT = 1056;
   const CONTENT_MARGIN = 20; // Matches container padding for accurate estimates
@@ -1125,6 +1126,89 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
       })));
     }
   }, [pages, DEBUG_PAGINATION]);
+
+  // For multi-page preview, make sure no page's real DOM height
+  // exceeds our page height; if it does, move the last non-header
+  // section from that page to the next page. This keeps all content
+  // visually inside the white page bounds even when our height
+  // estimates are slightly optimistic.
+  useEffect(() => {
+    if (!isBrowser) {
+      return;
+    }
+    if (isAttorneyFormat) {
+      return;
+    }
+    if (!pages || pages.length <= 1) {
+      return;
+    }
+
+    const nextPages = pages.map((page) => [...page]);
+    let changed = false;
+
+    pageRefs.current.forEach((pageEl, index) => {
+      if (!pageEl || index >= nextPages.length) {
+        return;
+      }
+      const contentEl = pageEl.querySelector('.page-content');
+      if (!contentEl) {
+        return;
+      }
+      const actualHeight = contentEl.scrollHeight;
+      const maxContentHeight = AVAILABLE_HEIGHT;
+      if (actualHeight <= maxContentHeight) {
+        return;
+      }
+
+      const pageSections = nextPages[index];
+      if (!Array.isArray(pageSections) || pageSections.length <= 1) {
+        return;
+      }
+      if (index >= nextPages.length - 1) {
+        return;
+      }
+
+      // Move the last non-header section to the next page
+      let moveIdx = -1;
+      for (let i = pageSections.length - 1; i >= 0; i -= 1) {
+        const sectionType = pageSections[i]?.type;
+        if (sectionType && sectionType !== 'header') {
+          moveIdx = i;
+          break;
+        }
+      }
+
+      if (moveIdx === -1) {
+        return;
+      }
+
+      const [movedSection] = pageSections.splice(moveIdx, 1);
+      if (!movedSection) {
+        return;
+      }
+
+      const targetPage = nextPages[index + 1] ? [...nextPages[index + 1]] : [];
+      targetPage.unshift({
+        ...movedSection,
+        _pageStart: true,
+        _suppressTitle: false,
+      });
+      nextPages[index + 1] = targetPage;
+      nextPages[index] = pageSections;
+      changed = true;
+    });
+
+    if (changed) {
+      if (DEBUG_PAGINATION) {
+        console.log('[Pagination] adjusted pages to avoid overflow', nextPages.map((pageSections, pageIdx) => ({
+          page: pageIdx + 1,
+          types: pageSections.map((section) => section.type),
+        })));
+      }
+      setPages(nextPages);
+    }
+  }, [pages, isBrowser, isAttorneyFormat, DEBUG_PAGINATION, AVAILABLE_HEIGHT]);
+
   useEffect(() => {
     const node = contentRef.current;
     if (!node) {
@@ -3353,7 +3437,14 @@ const renderAttorneySummaryBlock = (summaryValue) => {
       {shouldShowMultiPage && (
         <div className="multi-page-container">
           {pages.map((pageSections, pageIndex) => (
-            <div key={pageIndex} className="page-wrapper" style={pageContainerStyle}>
+            <div
+              key={pageIndex}
+              className="page-wrapper"
+              style={pageContainerStyle}
+              ref={(el) => {
+                pageRefs.current[pageIndex] = el;
+              }}
+            >
               {/* Page Content - Rendered based on section types */}
               <div className="page-content">
                 {renderPageContent(pageSections, styles, pageIndex)}
