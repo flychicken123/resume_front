@@ -1058,6 +1058,35 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
       });
     }
 
+    // Non-attorney formats: if the first page has a lot of unused space while
+    // later sections are pushed to page 2, try to pull the first section from
+    // page 2 up onto page 1 when it comfortably fits. This reduces the case
+    // where page 1 only shows Summary + Experience and everything else starts
+    // on page 2 despite visible whitespace.
+    if (!isAttorneyFormat && pages.length > 1) {
+      const firstPage = pages[0];
+      const secondPage = pages[1];
+      if (firstPage && secondPage && secondPage.length > 0) {
+        const currentHeight = sumEstimatedHeight(firstPage);
+        const candidateIndex = 0;
+        const candidate = secondPage[candidateIndex];
+        if (candidate) {
+          const bufferedHeight = addBuffer(candidate.estimatedHeight || 0, candidate.type);
+          // Allow a small slack above the nominal available height because the
+          // estimator is conservative and we prefer denser first pages.
+          const maxHeightWithSlack = effectiveAvailableHeight * 1.06;
+          if (currentHeight + bufferedHeight <= maxHeightWithSlack) {
+            const moved = { ...candidate, _pageStart: false };
+            secondPage.splice(candidateIndex, 1);
+            firstPage.push(moved);
+            if (secondPage.length === 0) {
+              pages.splice(1, 1);
+            }
+          }
+        }
+      }
+    }
+
     if (pages.length > 1 && pages[0].length === 1 && pages[0][0]?.type === 'header') {
       if (DEBUG_PAGINATION) {
         console.log('[Pagination] collapsing header-only first page');
