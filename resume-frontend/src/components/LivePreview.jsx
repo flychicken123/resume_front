@@ -1155,7 +1155,10 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
         return;
       }
       const actualHeight = contentEl.scrollHeight;
-      const maxContentHeight = AVAILABLE_HEIGHT;
+      // Allow a bit more content on the first page (to avoid
+      // over-splitting) while keeping later pages stricter.
+      const slackFactor = index === 0 ? 1.06 : 1.0;
+      const maxContentHeight = AVAILABLE_HEIGHT * slackFactor;
       if (actualHeight <= maxContentHeight) {
         return;
       }
