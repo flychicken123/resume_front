@@ -727,7 +727,7 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
     };
 
     const sumEstimatedHeight = (sections = []) =>
-      sections.reduce((total, item) => total + addBuffer(item?.estimatedHeight || 0, item?.type), 0);
+      sections.reduce((total, item) => total + (item?.estimatedHeight || 0), 0);
 
     allSections.forEach((section) => {
       const bufferedHeight = addBuffer(section.estimatedHeight, section.type);
@@ -1075,11 +1075,11 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
         const candidateIndex = 0;
         const candidate = secondPage[candidateIndex];
         if (candidate) {
-          const bufferedHeight = addBuffer(candidate.estimatedHeight || 0, candidate.type);
-          // Allow a small slack above the nominal available height because the
-          // estimator is conservative and we prefer denser first pages.
-          const maxHeightWithSlack = effectiveAvailableHeight * 1.06;
-          if (currentHeight + bufferedHeight <= maxHeightWithSlack) {
+          const candidateHeight = candidate.estimatedHeight || 0;
+          // Allow a bit of slack above nominal height because the estimator is
+          // conservative and we prefer denser first pages.
+          const maxHeightWithSlack = effectiveAvailableHeight * 1.08;
+          if (currentHeight + candidateHeight <= maxHeightWithSlack) {
             const moved = { ...candidate, _pageStart: false };
             secondPage.splice(candidateIndex, 1);
             firstPage.push(moved);
