@@ -2164,68 +2164,31 @@ function BuilderPage() {
 
         if (multiPageContainer && !workingSinglePageContainer) {
           const pageWrappers = multiPageContainer.querySelectorAll('.page-wrapper');
-          console.log("HTML before processing:", clonedElement.innerHTML.includes("EDUCATION") ? "Contains EDUCATION" : "Missing EDUCATION");
-          console.log("Found", pageWrappers.length, "pages in multi-page container");
+          console.log(
+            'HTML before processing:',
+            clonedElement.innerHTML.includes('EDUCATION') ? 'Contains EDUCATION' : 'Missing EDUCATION'
+          );
+          console.log('Found', pageWrappers.length, 'pages in multi-page container');
 
+          // Flatten all preview pages into a single continuous flow for PDF.
+          // This avoids cases where a tiny amount of content (like a single
+          // bullet) gets isolated onto its own PDF page just because it was
+          // on a separate preview page.
           const combinedContent = document.createElement('div');
           combinedContent.className = 'multi-page-pdf-container';
-          combinedContent.style.cssText = 'background: white; color: black; padding: 0; margin: 0; box-sizing: border-box;';
+          combinedContent.style.cssText =
+            'background: white; color: black; padding: 16px 20px 20px 20px; margin: 0; box-sizing: border-box;';
 
-          const measuredPages = Array.from(pageWrappers)
-            .map(wrapper => ({
-              wrapper,
-              pageContent: wrapper.querySelector('.page-content') || wrapper
-            }))
-            .filter(item => !!item.pageContent);
-
-          measuredPages.forEach((page, index) => {
-            const pageContainer = document.createElement('div');
-            pageContainer.className = `pdf-page-${index + 1}`;
-
-            let paddingTop = '20px';
-            let paddingRight = '20px';
-            let paddingBottom = '20px';
-            let paddingLeft = '20px';
-
-            if (page.wrapper && window.getComputedStyle) {
-              const computedPadding = window.getComputedStyle(page.wrapper);
-              paddingTop = computedPadding.getPropertyValue('padding-top') || paddingTop;
-              paddingRight = computedPadding.getPropertyValue('padding-right') || paddingRight;
-              paddingBottom = computedPadding.getPropertyValue('padding-bottom') || paddingBottom;
-              paddingLeft = computedPadding.getPropertyValue('padding-left') || paddingLeft;
+          Array.from(pageWrappers).forEach((wrapper) => {
+            const pageContent = wrapper.querySelector('.page-content') || wrapper;
+            if (!pageContent) {
+              return;
             }
-
-            const parsedTop = parseFloat(paddingTop);
-            let normalizedTop = Number.isNaN(parsedTop) ? 18 : Math.min(parsedTop, 18);
-            if (index === 0) {
-              normalizedTop = 16;
-            }
-            paddingTop = `${normalizedTop}px`;
-
-            pageContainer.style.cssText = `
-              width: 100%;
-              padding: ${paddingTop} ${paddingRight} ${paddingBottom} ${paddingLeft};
-              margin: 0;
-              box-sizing: border-box;
-              background: white;
-              color: black;
-              border: none;
-              box-shadow: none;
-              border-radius: 0;
-              page-break-inside: avoid;
-            `;
-
-            const contentClone = page.pageContent.cloneNode(true);
+            const contentClone = pageContent.cloneNode(true);
             normalizeElementSizing(contentClone);
             contentClone.style.background = 'white';
             contentClone.style.color = 'black';
-            pageContainer.appendChild(contentClone);
-
-            if (index < measuredPages.length - 1) {
-              pageContainer.style.pageBreakAfter = 'always';
-            }
-
-            combinedContent.appendChild(pageContainer);
+            combinedContent.appendChild(contentClone);
           });
 
           multiPageContainer.parentNode.replaceChild(combinedContent, multiPageContainer);
@@ -2467,20 +2430,21 @@ function BuilderPage() {
             padding: 0;
           }
           
-          /* Each PDF page should be exactly one page */
-          .multi-page-pdf-container > div[class^="pdf-page-"] {
-            page-break-after: always !important;
-            page-break-inside: avoid !important;
-            min-height: auto !important;
-            max-height: none !important;
-            padding-bottom: 12px !important;
-            overflow: visible !important;
-            box-sizing: border-box !important;
-          }
-          .multi-page-pdf-container > div[class^="pdf-page-"]:first-child {
-            padding-top: 12px !important;
-            margin-top: 0 !important;
-          }
+            /* Let the browser decide natural page breaks between logical pages.
+               We still keep basic spacing, but avoid forcing an extra blank page
+               when content slightly overflows a preview page. */
+            .multi-page-pdf-container > div[class^="pdf-page-"] {
+              page-break-inside: auto !important;
+              min-height: auto !important;
+              max-height: none !important;
+              padding-bottom: 12px !important;
+              overflow: visible !important;
+              box-sizing: border-box !important;
+            }
+            .multi-page-pdf-container > div[class^="pdf-page-"]:first-child {
+              padding-top: 12px !important;
+              margin-top: 0 !important;
+            }
 
           .pdf-single-page-root > .single-page-container {
             padding-top: 12px !important;
@@ -2497,11 +2461,9 @@ function BuilderPage() {
             font-family: ${templateFont} !important;
           }
 
-          /* Last page shouldn't have page break after */
-          .multi-page-pdf-container > div[class^="pdf-page-"]:last-child {
-            page-break-after: avoid !important;
-          }
-          
+            /* Do not force explicit page-break-after; allow natural flow so
+               preview pagination and PDF pagination stay closely aligned. */
+
           /* Additional page break support */
           .page-content {
             display: block !important;

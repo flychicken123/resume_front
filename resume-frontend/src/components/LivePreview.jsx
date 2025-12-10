@@ -357,6 +357,7 @@ const collectExperienceFieldChanges = (previousList = [], nextList = []) => {
     );
   };
   const contentRef = useRef(null);
+  const pageRefs = useRef([]);
   // Page dimensions in pixels (8.5" x 11" at 96 DPI)
   const PAGE_HEIGHT = 1056;
   const CONTENT_MARGIN = 20; // Matches container padding for accurate estimates
@@ -450,11 +451,14 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
       case 'experience': {
         if (Array.isArray(content)) {
           const totalHeight = content.reduce((total, exp) => {
-            let height = Math.round(28 * fontScale); // Reduced from 35
+            // Base height per role for title/company/location
+            let height = Math.round(32 * fontScale);
             if (exp.description) {
               const rawLines = String(exp.description).split(/\n+/).filter((line) => line.trim());
-              const descCharsPerLine = Math.round(140 / fontScale);
-              const lineHeightPx = Math.round(13 * fontScale);
+              // More conservative line width so long bullets near the bottom
+              // of the page don't get clipped.
+              const descCharsPerLine = Math.round(100 / fontScale);
+              const lineHeightPx = Math.round(14 * fontScale);
               let descLines = 0;
               for (const rawLine of rawLines.length ? rawLines : [String(exp.description)]) {
                 const cleanLine = rawLine.replace(/[•\u2022-]+/g, '').trim();
@@ -463,14 +467,15 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
               }
               height += descLines * lineHeightPx;
               if (rawLines.length > 1) {
-                height += Math.round(Math.min(6, 2 * fontScale));
+                height += Math.round(Math.min(8, 3 * fontScale));
               }
             }
-            return total + height + Math.round(6 * fontScale); // Reduced from 8
+            // Slightly larger spacing between roles
+            return total + height + Math.round(8 * fontScale);
           }, 0);
           return applyFormatAdjustment(totalHeight, 'experience');
         }
-        return applyFormatAdjustment(Math.round(35 * fontScale), 'experience');
+        return applyFormatAdjustment(Math.round(40 * fontScale), 'experience');
       }
       case 'education': {
         const entryLineHeight = Math.round(13 * fontScale);
@@ -723,7 +728,7 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
     };
 
     const sumEstimatedHeight = (sections = []) =>
-      sections.reduce((total, item) => total + addBuffer(item?.estimatedHeight || 0, item?.type), 0);
+      sections.reduce((total, item) => total + (item?.estimatedHeight || 0), 0);
 
     allSections.forEach((section) => {
       const bufferedHeight = addBuffer(section.estimatedHeight, section.type);
@@ -1058,6 +1063,35 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
       });
     }
 
+    // Non-attorney formats: if the first page has a lot of unused space while
+    // later sections are pushed to page 2, try to pull the first section from
+    // page 2 up onto page 1 when it comfortably fits. This reduces the case
+    // where page 1 only shows Summary + Experience and everything else starts
+    // on page 2 despite visible whitespace.
+    if (!isAttorneyFormat && pages.length > 1) {
+      const firstPage = pages[0];
+      const secondPage = pages[1];
+      if (firstPage && secondPage && secondPage.length > 0) {
+        const currentHeight = sumEstimatedHeight(firstPage);
+        const candidateIndex = 0;
+        const candidate = secondPage[candidateIndex];
+        if (candidate) {
+          const candidateHeight = candidate.estimatedHeight || 0;
+          // Allow a bit of slack above nominal height because the estimator is
+          // conservative and we prefer denser first pages.
+          const maxHeightWithSlack = effectiveAvailableHeight * 1.08;
+          if (currentHeight + candidateHeight <= maxHeightWithSlack) {
+            const moved = { ...candidate, _pageStart: false };
+            secondPage.splice(candidateIndex, 1);
+            firstPage.push(moved);
+            if (secondPage.length === 0) {
+              pages.splice(1, 1);
+            }
+          }
+        }
+      }
+    }
+
     if (pages.length > 1 && pages[0].length === 1 && pages[0][0]?.type === 'header') {
       if (DEBUG_PAGINATION) {
         console.log('[Pagination] collapsing header-only first page');
@@ -1092,6 +1126,92 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
       })));
     }
   }, [pages, DEBUG_PAGINATION]);
+
+  // For multi-page preview, make sure no page's real DOM height
+  // exceeds our page height; if it does, move the last non-header
+  // section from that page to the next page. This keeps all content
+  // visually inside the white page bounds even when our height
+  // estimates are slightly optimistic.
+  useEffect(() => {
+    if (!isBrowser) {
+      return;
+    }
+    if (isAttorneyFormat) {
+      return;
+    }
+    if (!pages || pages.length <= 1) {
+      return;
+    }
+
+    const nextPages = pages.map((page) => [...page]);
+    let changed = false;
+
+    pageRefs.current.forEach((pageEl, index) => {
+      if (!pageEl || index >= nextPages.length) {
+        return;
+      }
+      const contentEl = pageEl.querySelector('.page-content');
+      if (!contentEl) {
+        return;
+      }
+      const actualHeight = contentEl.scrollHeight;
+      // Allow a bit more content on the first page (to avoid
+      // over-splitting) while keeping later pages stricter.
+      const slackFactor = index === 0 ? 1.06 : 1.0;
+      const maxContentHeight = AVAILABLE_HEIGHT * slackFactor;
+      if (actualHeight <= maxContentHeight) {
+        return;
+      }
+
+      const pageSections = nextPages[index];
+      if (!Array.isArray(pageSections) || pageSections.length <= 1) {
+        return;
+      }
+      if (index >= nextPages.length - 1) {
+        return;
+      }
+
+      // Move the last non-header section to the next page
+      let moveIdx = -1;
+      for (let i = pageSections.length - 1; i >= 0; i -= 1) {
+        const sectionType = pageSections[i]?.type;
+        if (sectionType && sectionType !== 'header') {
+          moveIdx = i;
+          break;
+        }
+      }
+
+      if (moveIdx === -1) {
+        return;
+      }
+
+      const [movedSection] = pageSections.splice(moveIdx, 1);
+      if (!movedSection) {
+        return;
+      }
+
+      const targetPage = nextPages[index + 1] ? [...nextPages[index + 1]] : [];
+      targetPage.unshift({
+        ...movedSection,
+        _pageStart: true,
+        _suppressTitle: false,
+      });
+      nextPages[index + 1] = targetPage;
+      nextPages[index] = pageSections;
+      changed = true;
+    });
+
+    if (changed) {
+      if (DEBUG_PAGINATION) {
+        console.log('[Pagination] adjusted pages to avoid overflow', nextPages.map((pageSections, pageIdx) => ({
+          page: pageIdx + 1,
+          types: pageSections.map((section) => section.type),
+        })));
+      }
+      setPages(nextPages);
+    }
+  }, [pages, isBrowser, isAttorneyFormat, DEBUG_PAGINATION, AVAILABLE_HEIGHT]);
+
   useEffect(() => {
     const node = contentRef.current;
     if (!node) {
@@ -3320,7 +3440,14 @@ const renderAttorneySummaryBlock = (summaryValue) => {
       {shouldShowMultiPage && (
         <div className="multi-page-container">
           {pages.map((pageSections, pageIndex) => (
-            <div key={pageIndex} className="page-wrapper" style={pageContainerStyle}>
+            <div
+              key={pageIndex}
+              className="page-wrapper"
+              style={pageContainerStyle}
+              ref={(el) => {
+                pageRefs.current[pageIndex] = el;
+              }}
+            >
               {/* Page Content - Rendered based on section types */}
               <div className="page-content">
                 {renderPageContent(pageSections, styles, pageIndex)}
