@@ -2718,6 +2718,8 @@ function BuilderPage() {
         formData.append('name', data.name || '');
         formData.append('email', data.email || '');
         formData.append('phone', data.phone || '');
+        formData.append('resumeData', JSON.stringify(data));
+        formData.append('format', data.selectedFormat || '');
         
         // Force Chromium engine usage in backend
         formData.append('engine', 'chromium-strict');

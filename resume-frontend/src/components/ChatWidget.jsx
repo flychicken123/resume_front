@@ -2354,11 +2354,14 @@ const buildDownloadPayload = (data, jobDescription, html) => {
     education: flattenEducationText(data.education || []),
     jobDescription: jobDescription || '',
     location: '',
+    skillsCategorized: data.skillsCategorized || '',
     skills: skillsSource
       .split(',')
       .map((skill) => skill.trim())
       .filter(Boolean),
     format: data.selectedFormat || 'classic-professional',
+    resumeData: data,
+    selectedFontSize: data.selectedFontSize || '',
     engine: 'chromium-strict',
     htmlContent: html,
   };
