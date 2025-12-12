@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef, useLayoutEffect } from 'react';
 import { Helmet } from 'react-helmet';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useResume } from '../context/ResumeContext';
 import { useFeedback } from '../context/FeedbackContext';
@@ -38,6 +38,7 @@ import {
   optimizeProjectAI,
   generateSummaryAI,
   explainJobFit,
+  getJobById,
 } from '../api';
 import './BuilderPage.css';
 
@@ -59,6 +60,31 @@ const formatLocationParts = (parts) => {
     .map((part) => (typeof part === 'string' ? part.trim() : ''))
     .filter(Boolean)
     .join(', ');
+};
+
+const decodeHtmlEntities = (value) => {
+  if (!value || typeof value !== 'string') {
+    return '';
+  }
+  if (typeof window === 'undefined') {
+    return value;
+  }
+  const textarea = window.document.createElement('textarea');
+  textarea.innerHTML = value;
+  return textarea.value;
+};
+
+const stripHtmlToText = (value) => {
+  if (!value || typeof value !== 'string') {
+    return '';
+  }
+  const decoded = decodeHtmlEntities(value);
+  if (typeof window !== 'undefined') {
+    const div = window.document.createElement('div');
+    div.innerHTML = decoded;
+    return (div.textContent || div.innerText || '').trim();
+  }
+  return decoded.replace(/<[^>]+>/g, ' ').trim();
 };
 
 const derivePrimaryLocation = (resumeData) => {
@@ -187,47 +213,6 @@ const extractResumeLocations = (resumeData) => {
   }
 
   return ordered.slice(0, 8);
-};
-
-const decodeHtmlEntities = (value) => {
-  if (typeof value !== 'string') {
-    return '';
-  }
-  const htmlEntityMap = {
-    '&nbsp;': ' ',
-    '&#160;': ' ',
-    '&amp;': '&',
-    '&quot;': '"',
-    '&#34;': '"',
-    '&apos;': "'",
-    '&#39;': "'",
-    '&lt;': '<',
-    '&#60;': '<',
-    '&gt;': '>',
-    '&#62;': '>',
-  };
-  let decoded = value.replace(/&[a-zA-Z#0-9]+;/g, (entity) => {
-    const lower = entity.toLowerCase();
-    if (htmlEntityMap[lower]) {
-      return htmlEntityMap[lower];
-    }
-    if (/^&#x[0-9a-f]+;$/i.test(entity)) {
-      const hex = entity.slice(3, -1);
-      const codePoint = parseInt(hex, 16);
-      if (!Number.isNaN(codePoint)) {
-        return String.fromCharCode(codePoint);
-      }
-    }
-    if (/^&#\d+;$/i.test(entity)) {
-      const num = entity.slice(2, -1);
-      const codePoint = parseInt(num, 10);
-      if (!Number.isNaN(codePoint)) {
-        return String.fromCharCode(codePoint);
-      }
-    }
-    return entity;
-  });
-  return decoded;
 };
 
 const convertHTMLToPlainText = (value) => {
@@ -910,6 +895,9 @@ function BuilderPage() {
   const { user, logout, loading } = useAuth();
   const { triggerFeedbackPrompt, scheduleFollowUp } = useFeedback();
   const { data, updateData } = useResume();
+  const locationHook = useLocation();
+  const jobPrefillHandledRef = useRef(false);
+  const pendingJobIdRef = useRef(null);
   const displayName = typeof user === 'string' ? user : (user?.name || user?.email || '');
   const selectedFormat = normalizeTemplateId(data?.selectedFormat);
   const autoLocation = useMemo(() => derivePrimaryLocation(data), [data]);
@@ -937,6 +925,43 @@ function BuilderPage() {
       setNavigateToJobMatchesPending(true);
     }
   }, []);
+
+  useEffect(() => {
+    const jobId = pendingJobIdRef.current;
+    if (!jobId) {
+      return;
+    }
+    if (!user) {
+      return;
+    }
+    if (jobPrefillHandledRef.current) {
+      return;
+    }
+    (async () => {
+      try {
+        const job = await getJobById(jobId);
+        const description = stripHtmlToText(job?.description || '');
+        const entry = createJobDescriptionEntry({
+          id: `job-${jobId}`,
+          url: job?.job_url || '',
+          text: description,
+        });
+        setJobDescriptions(() => ensureJobDescriptionList([entry]));
+        try {
+          const prepared = prepareJobDescriptionsForStorage([entry]);
+          if (prepared.length > 0) {
+            window.localStorage.setItem('jobDescriptions', JSON.stringify(prepared));
+            window.localStorage.setItem('jobDescription', entry.text || '');
+          }
+        } catch (storeErr) {
+          console.error('Failed to persist prefilled job description', storeErr);
+        }
+        jobPrefillHandledRef.current = true;
+      } catch (err) {
+        console.error('Failed to prefill job description from jobId', err);
+      }
+    })();
+  }, [user]);
 
   const locationSuggestionOptions = useMemo(() => {
     const seen = new Set();
@@ -1115,19 +1140,54 @@ function BuilderPage() {
         const parsed = JSON.parse(serializedList);
         if (Array.isArray(parsed) && parsed.length > 0) {
           setJobDescriptions(ensureJobDescriptionList(parsed));
-          return;
         }
       }
       const legacy = window.localStorage.getItem('jobDescription');
       if (legacy && legacy.trim()) {
-        setJobDescriptions(
-          ensureJobDescriptionList([createJobDescriptionEntry({ text: legacy.trim() })])
+        setJobDescriptions((prev) =>
+          ensureJobDescriptionList([createJobDescriptionEntry({ text: legacy.trim() }), ...prev])
         );
+      }
+      const params = new URLSearchParams(locationHook.search || '');
+      const jobId = params.get('jobId');
+      if (jobId) {
+        pendingJobIdRef.current = jobId;
       }
     } catch (err) {
       console.error('Failed to load stored job descriptions', err);
     }
-  }, []);
+  }, [locationHook.search]);
+
+  useEffect(() => {
+    if (jobPrefillHandledRef.current) {
+      return;
+    }
+    const params = new URLSearchParams(locationHook.search || '');
+    const jobId = params.get('jobId');
+    if (!jobId) {
+      return;
+    }
+
+    jobPrefillHandledRef.current = true;
+
+    (async () => {
+      try {
+        const job = await getJobById(jobId);
+        const description = stripHtmlToText(job?.description || '');
+        const entry = createJobDescriptionEntry({
+          id: `job-${jobId}`,
+          url: job?.job_url || '',
+          text: description,
+        });
+        setJobDescriptions((prev) => {
+          const next = [entry, ...prev.filter((item) => item?.id !== entry.id)];
+          return ensureJobDescriptionList(next);
+        });
+      } catch (err) {
+        console.error('Failed to prefill job description from jobId', err);
+      }
+    })();
+  }, [locationHook.search]);
 
   // Persist job descriptions and combined legacy string
   useEffect(() => {
