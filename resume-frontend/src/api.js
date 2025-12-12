@@ -199,6 +199,18 @@ export async function generateSummaryAI({ experience, education, skills }) {
   return data.summary;
 }
 
+export async function getJobById(id) {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/jobs/${id}`, {
+    method: "GET",
+    headers: getAuthHeaders(),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error || "Failed to load job");
+  }
+  return data;
+}
+
 // Auto-generate a comma-separated skills list from the in-progress resume data.
 export async function autoGenerateSkillsAI(resumeData, jobDescription = '') {
   const res = await fetchWithAuth(`${API_BASE_URL}/api/skills/auto-generate`, {
