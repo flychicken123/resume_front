@@ -2720,9 +2720,21 @@ const renderEducation = (education, styles) => {
           getSectionHighlightClass(`project-${resolvedProjectIndex}-${field}`, extraClass);
         return (
           <div key={idx} style={styles.item} className={projectEntryClass}>
-            {nameText && (
+            {(nameText || urlText) && (
               <div style={styles.company} className={projectFieldClass('name')}>
                 {nameText}
+                {urlText && (
+                  <>
+                    {' '}
+                    <a
+                      href={urlText}
+                      className={projectFieldClass('url')}
+                      style={{ color: '#0066cc', textDecoration: 'none' }}
+                    >
+                      [{urlText}]
+                    </a>
+                  </>
+                )}
               </div>
             )}
 
@@ -2730,18 +2742,6 @@ const renderEducation = (education, styles) => {
               <div className="project-tech" style={{ fontStyle: 'italic', fontSize: '0.9em', marginTop: '2px', marginBottom: '4px' }}>
                 <span className="project-label">Technologies:</span>{' '}
                 <span className={projectFieldClass('technologies')}>{techText}</span>
-              </div>
-            )}
-
-            {urlText && (
-              <div className="project-url" style={{ fontSize: '0.9em', marginTop: '2px', marginBottom: '4px' }}>
-                <a
-                  href={urlText}
-                  className={projectFieldClass('url')}
-                  style={{ color: '#0066cc', textDecoration: 'none' }}
-                >
-                  {urlText}
-                </a>
               </div>
             )}
 
@@ -3460,7 +3460,6 @@ const renderAttorneySummaryBlock = (summaryValue) => {
   );
 };
 export default LivePreview; 
-
 
 
 
