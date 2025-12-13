@@ -19,6 +19,8 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload, downloadNotice })
   const [highlightedSections, setHighlightedSections] = useState({});
   const highlightTimeoutRef = useRef(null);
   const previousDataRef = useRef(null);
+  const lastPagingToggleRef = useRef(0);
+  const pagingToggleCountRef = useRef(0);
   const isIndustryManagerFormat = (selectedFormat === TEMPLATE_SLUGS.EXECUTIVE_SERIF);
   const isAttorneyFormat = (selectedFormat === TEMPLATE_SLUGS.ATTORNEY_TEMPLATE);
   // Reset paging heuristics whenever template changes so new format starts fresh
@@ -1111,11 +1113,30 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
 
     return pages;
   };
+  const logPaginationDiagnostics = useCallback(
+    (pagesSnapshot, measuredHeights = []) => {
+      if (!DEBUG_PAGINATION) return;
+      const summary = pagesSnapshot.map((pageSections, idx) => {
+        const estimated = pageSections.reduce((acc, section) => acc + (section?.estimatedHeight || 0), 0);
+        const measured = measuredHeights[idx] || null;
+        return {
+          page: idx + 1,
+          types: pageSections.map((s) => s.type),
+          estimated,
+          measured,
+        };
+      });
+      console.log('[Pagination] diagnostics', summary);
+    },
+    [DEBUG_PAGINATION]
+  );
+
   // Recalculate pages when data changes
   useEffect(() => {
     const newPages = splitContentIntoPages();
     setPages(newPages);
-  }, [data, useConservativePaging]);
+    logPaginationDiagnostics(newPages);
+  }, [data, useConservativePaging, logPaginationDiagnostics]);
 
   useEffect(() => {
     if (DEBUG_PAGINATION) {
@@ -1209,8 +1230,13 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
         })));
       }
       setPages(nextPages);
+      const measuredHeights = pageRefs.current.map((el) => {
+        const node = el?.querySelector?.('.page-content');
+        return node ? node.scrollHeight : null;
+      });
+      logPaginationDiagnostics(nextPages, measuredHeights);
     }
-  }, [pages, isBrowser, isAttorneyFormat, DEBUG_PAGINATION, AVAILABLE_HEIGHT]);
+  }, [pages, isBrowser, isAttorneyFormat, DEBUG_PAGINATION, AVAILABLE_HEIGHT, logPaginationDiagnostics]);
 
   useEffect(() => {
     const node = contentRef.current;
@@ -1227,10 +1253,18 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
         return;
       }
       const actualHeight = node.scrollHeight;
-      if (!useConservativePaging && actualHeight > enableThreshold) {
+      const now = Date.now();
+      const canToggle =
+        pagingToggleCountRef.current < 5 &&
+        (now - lastPagingToggleRef.current > 200);
+      if (!useConservativePaging && actualHeight > enableThreshold && canToggle) {
         setUseConservativePaging(true);
-      } else if (useConservativePaging && actualHeight < disableThreshold) {
+        lastPagingToggleRef.current = now;
+        pagingToggleCountRef.current += 1;
+      } else if (useConservativePaging && actualHeight < disableThreshold && canToggle) {
         setUseConservativePaging(false);
+        lastPagingToggleRef.current = now;
+        pagingToggleCountRef.current += 1;
       }
     };
     const raf = requestAnimationFrame(checkOverflow);
@@ -3460,8 +3494,3 @@ const renderAttorneySummaryBlock = (summaryValue) => {
   );
 };
 export default LivePreview; 
-
-
-
-
-
