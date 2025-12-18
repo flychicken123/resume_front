@@ -438,6 +438,10 @@
   height: auto;
   max-height: none;
   overflow: visible;
+  box-sizing: border-box;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: auto;
   position: relative;
   border-radius: 0;
   padding: 0;
