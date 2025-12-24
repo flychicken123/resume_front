@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, Fragment } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo, Fragment } from 'react';
 import { useResume } from '../context/ResumeContext';
 import { TEMPLATE_SLUGS, DEFAULT_TEMPLATE_ID, normalizeTemplateId } from '../constants/templates';
 import './LivePreview.css';
@@ -27,6 +27,12 @@ const LivePreview = ({ isVisible = true, onToggle, onDownload, downloadNotice })
   useEffect(() => {
     setUseConservativePaging(false);
   }, [selectedFormat]);
+  // Executive Serif needs stricter paging to avoid content clipping; enable conservative mode by default
+  useEffect(() => {
+    if (selectedFormat === TEMPLATE_SLUGS.EXECUTIVE_SERIF && !useConservativePaging) {
+      setUseConservativePaging(true);
+    }
+  }, [selectedFormat, useConservativePaging]);
   const safeStringify = (value) => {
     try {
       return JSON.stringify(value ?? null);
@@ -374,6 +380,56 @@ const collectExperienceFieldChanges = (previousList = [], nextList = []) => {
     };
     return fontSizeMultipliers[data.selectedFontSize || 'medium'] || 1.2;
   };
+  const getPagingProfile = (templateId, fontSize = 'medium', conservative = false) => {
+    const base = {
+      summaryCharsBase: 120,
+      experienceCharsBase: 100,
+      projectsCharsBase: 140,
+      paddingAdjust: { summary: 0, projects: 0, skills: 0, experience: 0, education: 0, header: 0 },
+      projectSpacingMult: conservative ? 5 : 5,
+      experienceSpacing: 8,
+      availableHeightScale: 1,
+      pageBufferAdjust: 0,
+      pullUpSlack: 1.08,
+      overflowSlackFirst: 1.06,
+    };
+    const sizeKey = fontSize || 'medium';
+    const profiles = {
+      [TEMPLATE_SLUGS.CLASSIC_PROFESSIONAL]: {
+        small: { summaryCharsBase: 130, experienceCharsBase: 105, projectsCharsBase: 155, paddingAdjust: { summary: -2, projects: -4, skills: -4, experience: -2 }, projectSpacingMult: conservative ? 4 : 3, experienceSpacing: 7, pullUpSlack: 1.1, overflowSlackFirst: 1.08 },
+        medium: { summaryCharsBase: 135, experienceCharsBase: 108, projectsCharsBase: 165, paddingAdjust: { summary: -2, projects: -4, skills: -4, experience: -2 }, projectSpacingMult: conservative ? 4 : 3, experienceSpacing: 7, pullUpSlack: 1.12, overflowSlackFirst: 1.08 },
+        large: { summaryCharsBase: 130, experienceCharsBase: 105, projectsCharsBase: 160, paddingAdjust: { summary: -1, projects: -3, skills: -3, experience: -1 }, projectSpacingMult: conservative ? 4 : 3.5, experienceSpacing: 7, pullUpSlack: 1.12, overflowSlackFirst: 1.07 },
+        'extra-large': { summaryCharsBase: 125, experienceCharsBase: 100, projectsCharsBase: 155, paddingAdjust: { summary: -1, projects: -3, skills: -3, experience: -1 }, projectSpacingMult: conservative ? 4 : 3.5, experienceSpacing: 7, pullUpSlack: 1.12, overflowSlackFirst: 1.06 },
+      },
+      [TEMPLATE_SLUGS.EXECUTIVE_SERIF]: {
+        small: { summaryCharsBase: 110, experienceCharsBase: 95, projectsCharsBase: 145, paddingAdjust: { summary: -1, projects: -2, skills: -2, experience: -2 }, projectSpacingMult: conservative ? 5 : 4, experienceSpacing: 6.5, availableHeightScale: 0.86, pageBufferAdjust: 6, pullUpSlack: 1.08, overflowSlackFirst: 1.04 },
+        medium: { summaryCharsBase: 115, experienceCharsBase: 98, projectsCharsBase: 150, paddingAdjust: { summary: -1, projects: -2, skills: -2, experience: -2 }, projectSpacingMult: conservative ? 5 : 4, experienceSpacing: 6.5, availableHeightScale: 0.86, pageBufferAdjust: 6, pullUpSlack: 1.08, overflowSlackFirst: 1.04 },
+        large: { summaryCharsBase: 110, experienceCharsBase: 95, projectsCharsBase: 145, paddingAdjust: { summary: -1, projects: -2, skills: -2, experience: -2 }, projectSpacingMult: conservative ? 5 : 4, experienceSpacing: 6.5, availableHeightScale: 0.85, pageBufferAdjust: 6, pullUpSlack: 1.08, overflowSlackFirst: 1.04 },
+        'extra-large': { summaryCharsBase: 105, experienceCharsBase: 92, projectsCharsBase: 140, paddingAdjust: { summary: -1, projects: -2, skills: -2, experience: -2 }, projectSpacingMult: conservative ? 5 : 4, experienceSpacing: 6.5, availableHeightScale: 0.84, pageBufferAdjust: 6, pullUpSlack: 1.08, overflowSlackFirst: 1.04 },
+      },
+      [TEMPLATE_SLUGS.ATTORNEY_TEMPLATE]: {
+        small: { summaryCharsBase: 115, experienceCharsBase: 95, projectsCharsBase: 145, experienceSpacing: 7, availableHeightScale: 1.0, pullUpSlack: 1.04, overflowSlackFirst: 1.04 },
+        medium: { summaryCharsBase: 115, experienceCharsBase: 95, projectsCharsBase: 145, experienceSpacing: 7, availableHeightScale: 1.0, pullUpSlack: 1.04, overflowSlackFirst: 1.04 },
+        large: { summaryCharsBase: 110, experienceCharsBase: 90, projectsCharsBase: 140, experienceSpacing: 7, availableHeightScale: 1.0, pullUpSlack: 1.04, overflowSlackFirst: 1.04 },
+        'extra-large': { summaryCharsBase: 105, experienceCharsBase: 88, projectsCharsBase: 135, experienceSpacing: 7, availableHeightScale: 0.98, pullUpSlack: 1.04, overflowSlackFirst: 1.04 },
+      },
+    };
+    const tpl = profiles[templateId];
+    const chosen = tpl ? (tpl[sizeKey] || tpl.medium) : null;
+    if (!chosen) {
+      return base;
+    }
+    return {
+      ...base,
+      ...chosen,
+      paddingAdjust: { ...base.paddingAdjust, ...(chosen.paddingAdjust || {}) },
+    };
+  };
+  const fontSizeKey = data.selectedFontSize || 'medium';
+  const pagingProfile = useMemo(
+    () => getPagingProfile(selectedFormat, fontSizeKey, useConservativePaging),
+    [selectedFormat, fontSizeKey, useConservativePaging]
+  );
   // Estimate height for different content types (more realistic estimates)
   const estimateSectionHeight = (content, type) => {
     if (!content) return 0;
@@ -444,7 +500,8 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
       case 'summary': {
         // Much more conservative estimation
         const contentText = toText(content);
-        const charsPerLine = Math.round(120 / fontScale); // Increased from 100
+        const charsPerLineBase = pagingProfile?.summaryCharsBase || 120;
+        const charsPerLine = Math.round(charsPerLineBase / fontScale); // Increased from 100
         const lines = Math.ceil(contentText.length / charsPerLine);
         const lineHeight = Math.round(14 * fontScale); // Reduced from 16
         const summaryHeight = Math.max(18 * fontScale, lines * lineHeight);
@@ -459,7 +516,8 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
               const rawLines = String(exp.description).split(/\n+/).filter((line) => line.trim());
               // More conservative line width so long bullets near the bottom
               // of the page don't get clipped.
-              const descCharsPerLine = Math.round(100 / fontScale);
+              const descCharsPerLineBase = pagingProfile?.experienceCharsBase || 100;
+              const descCharsPerLine = Math.max(24, Math.round(descCharsPerLineBase / fontScale));
               const lineHeightPx = Math.round(14 * fontScale);
               let descLines = 0;
               for (const rawLine of rawLines.length ? rawLines : [String(exp.description)]) {
@@ -472,8 +530,9 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
                 height += Math.round(Math.min(8, 3 * fontScale));
               }
             }
+            const expSpacing = pagingProfile?.experienceSpacing ?? 8;
             // Slightly larger spacing between roles
-            return total + height + Math.round(8 * fontScale);
+            return total + height + Math.round(expSpacing * fontScale);
           }, 0);
           return applyFormatAdjustment(totalHeight, 'experience');
         }
@@ -519,10 +578,11 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
               const lines = project.description.split('\n').filter(l => l.trim());
               // Most bullet points fit on one line at preview scale
               let totalLines = lines.length;
-              const descCharsPerLine = Math.round(140 / fontScale); // Increased - more chars fit per line
+              const descCharsPerLineBase = pagingProfile?.projectsCharsBase || 140;
+              const descCharsPerLine = Math.max(24, Math.round(descCharsPerLineBase / fontScale)); // Increased - more chars fit per line
               // Only count extra lines for very long bullet points
               for (const line of lines) {
-                const cleanLine = line.replace('•', '').trim();
+                const cleanLine = line.replace(/[•\u2022-]+/g, '').trim();
                 if (cleanLine.length > descCharsPerLine) {
                   totalLines += Math.floor(cleanLine.length / descCharsPerLine);
                 }
@@ -534,7 +594,8 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
               height += Math.round(12 * fontScale);
             }
             if (project.projectUrl) height += Math.round(12 * fontScale);
-            return total + height + Math.round(5 * fontScale); // Reduced spacing
+            const spacingMult = pagingProfile?.projectSpacingMult ?? 5;
+            return total + height + Math.round(spacingMult * fontScale); // Reduced spacing
           }, 0);
           return applyFormatAdjustment(projectHeight, 'projects');
         }
@@ -599,6 +660,7 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
   // Split content into pages based on estimated heights
   const splitContentIntoPages = () => {
     const fontScale = getFontSizeScaleFactor();
+    const pageProfile = pagingProfile;
     const baseUtilization = fontScale <= 1.0 ? 1.0 :
                            fontScale <= 1.2 ? 0.99 :
                            fontScale <= 1.5 ? 0.97 :
@@ -606,9 +668,11 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
     const pageUtilization = useConservativePaging
       ? Math.min(baseUtilization, 0.96)
       : baseUtilization;
-    const basePageBuffer = useConservativePaging ? 32 : 24;
+    const pageBufferAdjust = pagingProfile?.pageBufferAdjust || 0;
+    const basePageBuffer = Math.max(8, (useConservativePaging ? 32 : 24) + pageBufferAdjust);
+    const availableScale = pagingProfile?.availableHeightScale || 1;
     let effectiveAvailableHeight = Math.min(
-      AVAILABLE_HEIGHT * pageUtilization,
+      AVAILABLE_HEIGHT * pageUtilization * availableScale,
       AVAILABLE_HEIGHT - basePageBuffer
     );
 
@@ -617,7 +681,7 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
       effectiveAvailableHeight = Math.min(effectiveAvailableHeight, marginLimit);
     }
 
-    const sectionPadding = {
+    const baseSectionPadding = {
       header: useConservativePaging ? 10 : 12,
       summary: useConservativePaging ? 12 : 16,
       experience: useConservativePaging ? 14 : 18,
@@ -627,12 +691,55 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
       default: useConservativePaging ? 10 : 14,
     };
 
-    const getSectionPadding = (type) => sectionPadding[type] ?? sectionPadding.default;
+    const getSectionPadding = (type) => {
+      const base = baseSectionPadding[type] ?? baseSectionPadding.default;
+      const adjust = pageProfile?.paddingAdjust?.[type] ?? 0;
+      return Math.max(0, base + adjust);
+    };
 
     const addBuffer = (height, type) => Math.max(0, height || 0) + getSectionPadding(type);
 
-
     const allSections = [];
+
+    const splitArraySection = (section) => {
+      const items = Array.isArray(section.content) ? section.content : [];
+      if (!items.length) {
+        return [section];
+      }
+      const type = section.type;
+      const titleHeight = section.titleHeight || 0;
+      const splitSections = [];
+      let group = [];
+      items.forEach((item, index) => {
+        const tentativeGroup = [...group, item];
+        const estimated = estimateSectionHeight(tentativeGroup, type) + titleHeight;
+        const buffered = addBuffer(estimated, type);
+        const fits = buffered <= effectiveAvailableHeight || group.length === 0;
+        if (fits) {
+          group = tentativeGroup;
+        } else {
+          const chunkHeight = estimateSectionHeight(group, type) + titleHeight;
+          splitSections.push({
+            ...section,
+            content: [...group],
+            estimatedHeight: chunkHeight,
+            isContinuation: splitSections.length > 0,
+          });
+          group = [item];
+        }
+        const isLast = index === items.length - 1;
+        if (isLast && group.length > 0) {
+          const chunkHeight = estimateSectionHeight(group, type) + titleHeight;
+          splitSections.push({
+            ...section,
+            content: [...group],
+            estimatedHeight: chunkHeight,
+            isContinuation: splitSections.length > 0,
+          });
+        }
+      });
+      return splitSections;
+    };
 
     if (data.name || data.email || data.phone) {
       const headerHeight = estimateSectionHeight(data.name, 'header');
@@ -680,6 +787,7 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
         estimatedHeight: projectsHeight,
         priority: 4,
         canSplit: true,
+        titleHeight: sectionTitleHeight,
       });
     }
 
@@ -707,6 +815,7 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
           estimatedHeight: skillsHeight,
           priority: 6,
           canSplit: isIndustryManagerFormat,
+          titleHeight: Math.round(18 * fontScale),
         });
       }
     }
@@ -732,7 +841,20 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
     const sumEstimatedHeight = (sections = []) =>
       sections.reduce((total, item) => total + (item?.estimatedHeight || 0), 0);
 
-    allSections.forEach((section) => {
+    const expandedSections = allSections.flatMap((section) => {
+      const bufferedHeight = addBuffer(section.estimatedHeight, section.type);
+      if (
+        bufferedHeight > effectiveAvailableHeight &&
+        section.canSplit &&
+        Array.isArray(section.content) &&
+        section.content.length > 1
+      ) {
+        return splitArraySection(section);
+      }
+      return [section];
+    });
+
+    expandedSections.forEach((section) => {
       const bufferedHeight = addBuffer(section.estimatedHeight, section.type);
       if (currentHeight > 0 && (currentHeight + bufferedHeight) > effectiveAvailableHeight) {
         pushPage();
@@ -892,7 +1014,8 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
         if (description) {
           const rawLines = String(description).split(/\n+/).filter((line) => line.trim());
           const linesToProcess = rawLines.length ? rawLines : [String(description)];
-          const descCharsPerLine = Math.max(32, Math.round(92 / fontScale));
+          const descCharsPerLineBase = pagingProfile?.experienceCharsBase || 92;
+          const descCharsPerLine = Math.max(32, Math.round(descCharsPerLineBase / fontScale));
           const lineHeightPx = Math.round(16 * fontScale);
           for (const rawLine of linesToProcess) {
             const cleanLine = rawLine.replace(/[•\u2022-]+/g, '').trim();
@@ -1081,7 +1204,8 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
           const candidateHeight = candidate.estimatedHeight || 0;
           // Allow a bit of slack above nominal height because the estimator is
           // conservative and we prefer denser first pages.
-          const maxHeightWithSlack = effectiveAvailableHeight * 1.08;
+          const pullUpSlack = pageProfile?.pullUpSlack ?? 1.08;
+          const maxHeightWithSlack = effectiveAvailableHeight * pullUpSlack;
           if (currentHeight + candidateHeight <= maxHeightWithSlack) {
             const moved = { ...candidate, _pageStart: false };
             secondPage.splice(candidateIndex, 1);
@@ -1136,7 +1260,7 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
     const newPages = splitContentIntoPages();
     setPages(newPages);
     logPaginationDiagnostics(newPages);
-  }, [data, useConservativePaging, logPaginationDiagnostics]);
+  }, [data, useConservativePaging, logPaginationDiagnostics, pagingProfile]);
 
   useEffect(() => {
     if (DEBUG_PAGINATION) {
@@ -1160,10 +1284,6 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
     if (isAttorneyFormat) {
       return;
     }
-    if (!pages || pages.length <= 1) {
-      return;
-    }
-
     const nextPages = pages.map((page) => [...page]);
     let changed = false;
 
@@ -1178,7 +1298,8 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
       const actualHeight = contentEl.scrollHeight;
       // Allow a bit more content on the first page (to avoid
       // over-splitting) while keeping later pages stricter.
-      const slackFactor = index === 0 ? 1.06 : 1.0;
+      const firstPageOverflowSlack = pagingProfile?.overflowSlackFirst ?? 1.06;
+      const slackFactor = index === 0 ? firstPageOverflowSlack : 1.0;
       const maxContentHeight = AVAILABLE_HEIGHT * slackFactor;
       if (actualHeight <= maxContentHeight) {
         return;
@@ -1186,10 +1307,47 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
 
       const pageSections = nextPages[index];
       if (!Array.isArray(pageSections) || pageSections.length <= 1) {
+        // If a single (splittable) section overflows, split its content across pages
+        if (
+          Array.isArray(pageSections) &&
+          pageSections.length === 1 &&
+          index < nextPages.length &&
+          pageSections[0]?.canSplit &&
+          Array.isArray(pageSections[0]?.content) &&
+          pageSections[0].content.length > 1
+        ) {
+          const section = pageSections[0];
+          const items = section.content;
+          const ratio = Math.max(0.25, Math.min(0.95, maxContentHeight / Math.max(actualHeight, 1)));
+          const keepCount = Math.max(1, Math.min(items.length - 1, Math.ceil(items.length * ratio)));
+          const firstItems = items.slice(0, keepCount);
+          const remainderItems = items.slice(keepCount);
+          const titleHeight = section.titleHeight || 0;
+          const recomputeHeight = (list) => estimateSectionHeight(list, section.type) + titleHeight;
+          const firstSection = {
+            ...section,
+            content: firstItems,
+            estimatedHeight: recomputeHeight(firstItems),
+            _pageStart: true,
+            _suppressTitle: false,
+          };
+          const remainderSection = {
+            ...section,
+            content: remainderItems,
+            estimatedHeight: recomputeHeight(remainderItems),
+            isContinuation: true,
+            _pageStart: true,
+            _suppressTitle: false,
+          };
+          const existingNext = nextPages[index + 1] ? [...nextPages[index + 1]] : [];
+          nextPages[index] = [firstSection];
+          nextPages[index + 1] = [remainderSection, ...existingNext];
+          changed = true;
+        }
         return;
       }
       if (index >= nextPages.length - 1) {
-        return;
+        nextPages[index + 1] = nextPages[index + 1] ? [...nextPages[index + 1]] : [];
       }
 
       // Move the last non-header section to the next page
@@ -1236,7 +1394,7 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
       });
       logPaginationDiagnostics(nextPages, measuredHeights);
     }
-  }, [pages, isBrowser, isAttorneyFormat, DEBUG_PAGINATION, AVAILABLE_HEIGHT, logPaginationDiagnostics]);
+  }, [pages, isBrowser, isAttorneyFormat, DEBUG_PAGINATION, AVAILABLE_HEIGHT, logPaginationDiagnostics, pagingProfile]);
 
   useEffect(() => {
     const node = contentRef.current;
@@ -2337,13 +2495,14 @@ const renderExperiences = (experiences, styles) => {
         const attorneySecondary = isAttorneyTemplate
           ? [companyName, locationLabel].filter(Boolean).join(' • ')
           : null;
-        const descriptionContent = exp.description
+        const descriptionText = toText(exp.description);
+        const descriptionContent = descriptionText
           ? (
               <div
                 style={{ marginTop: '2px' }}
                 className={experienceFieldClass('description', 'experience-field experience-field-block')}
               >
-                {exp.description.split(/\r?\n/).map((line, lineIdx) =>
+                {descriptionText.split(/\r?\n/).map((line, lineIdx) =>
                   renderBulletLine(line, `${idx}-${lineIdx}`, styles)
                 )}
               </div>
@@ -2745,6 +2904,7 @@ const renderEducation = (education, styles) => {
         const nameText = toText(project.projectName);
         const techText = toText(project.technologies);
         const urlText = toText(project.projectUrl);
+        const descriptionText = toText(project.description);
         const resolvedProjectIndex = resolveSourceIndex(baseProjects, project, idx);
         const projectEntryClass = getSectionHighlightClass(
           `project-${resolvedProjectIndex}`,
@@ -2779,12 +2939,12 @@ const renderEducation = (education, styles) => {
               </div>
             )}
 
-            {project.description && (
+            {descriptionText && (
             <div
               className={projectFieldClass('description', 'project-field project-field-block')}
               style={{ marginTop: '2px' }}
             >
-                {project.description.split('\n').map((line, lineIdx) =>
+                {descriptionText.split(/\r?\n/).map((line, lineIdx) =>
                   renderBulletLine(line, `project-${idx}-${lineIdx}`, styles)
                 )}
               </div>

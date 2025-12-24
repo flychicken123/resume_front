@@ -17,6 +17,7 @@ import { useResume } from '../context/ResumeContext';
 import { TEMPLATE_OPTIONS } from '../constants/templates';
 import { BUILDER_TARGET_STEP_KEY, BUILDER_TARGET_TEMPLATE, BUILDER_TARGET_JOB_MATCHES } from '../constants/builder';
 import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 const INITIAL_MESSAGES = [
   {
@@ -473,7 +474,21 @@ const ChatWidgetInner = () => {
   const launcherPositionRef = React.useRef(launcherPosition);
   const dragStateRef = React.useRef(null);
   const clickSuppressedRef = React.useRef(false);
+  const location = useLocation()
   const notifyBuilderStage = useCallback((stage) => {
+    console.log("path is " + location.pathname);
+    if (location.pathname === "/") {
+      navigate("/builder");
+
+       setTimeout(() => {
+        window.dispatchEvent(
+          new CustomEvent("builder:focus-stage", { detail: { stage } })
+        );
+      }, 0);
+
+      return
+    }
+
     if (typeof window === 'undefined') {
       return;
     }
@@ -481,7 +496,7 @@ const ChatWidgetInner = () => {
       return;
     }
     window.dispatchEvent(new CustomEvent('builder:focus-stage', { detail: { stage } }));
-  }, []);
+  }, [location.pathname, navigate]);
 
 const clampLauncherPosition = useCallback(
     (pos, overrides = {}) => {
