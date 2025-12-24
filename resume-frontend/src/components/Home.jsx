@@ -45,6 +45,7 @@ const HERO_FEATURES = [
 ];
 
 const HOME_EXPERIMENT_KEY = "new-home";
+const HOME_VARIANT_SESSION_KEY = "homeVariantResolved";
 
 const getForcedHomeVariant = () => {
   if (typeof window === "undefined") return "";
@@ -67,13 +68,41 @@ const Home = () => {
   const displayName =
     typeof user === "string" ? user : user?.name || user?.email || "";
   const forcedHomeVariant = getForcedHomeVariant();
-  const [homeVariant, setHomeVariant] = useState(
-    () =>
-      forcedHomeVariant ||
-      assignments?.[HOME_EXPERIMENT_KEY]?.variant?.variant_key ||
-      assignments?.[HOME_EXPERIMENT_KEY]?.variant?.VariantKey ||
-      "control"
-  );
+
+  const readSessionVariant = () => {
+    if (typeof window === "undefined") return "";
+    try {
+      return window.sessionStorage.getItem(HOME_VARIANT_SESSION_KEY) || "";
+    } catch {
+      return "";
+    }
+  };
+
+  const writeSessionVariant = (value) => {
+    if (typeof window === "undefined") return;
+    try {
+      if (!value) {
+        window.sessionStorage.removeItem(HOME_VARIANT_SESSION_KEY);
+      } else {
+        window.sessionStorage.setItem(HOME_VARIANT_SESSION_KEY, value);
+      }
+    } catch {
+      // ignore
+    }
+  };
+
+  const knownVariant =
+    assignments?.[HOME_EXPERIMENT_KEY]?.variant?.variant_key ||
+    assignments?.[HOME_EXPERIMENT_KEY]?.variant?.VariantKey ||
+    "";
+
+  // Start unresolved (null) to prevent visible UI "jumping" between old/new home
+  // while the experiment assignment loads or resets.
+  const [homeVariant, setHomeVariant] = useState(() => {
+    const initial = forcedHomeVariant || readSessionVariant() || knownVariant;
+    return initial ? initial : null;
+  });
+  const variantRequestedRef = useRef(false);
 
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [pendingBuilderStep, setPendingBuilderStep] = useState(null);
@@ -133,38 +162,51 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    if (forcedHomeVariant && homeVariant !== forcedHomeVariant) {
-      setHomeVariant(forcedHomeVariant);
+    if (forcedHomeVariant) {
+      if (homeVariant !== forcedHomeVariant) {
+        setHomeVariant(forcedHomeVariant);
+      }
+      writeSessionVariant(forcedHomeVariant);
       return;
     }
 
-    const knownVariant =
-      assignments?.[HOME_EXPERIMENT_KEY]?.variant?.variant_key ||
-      assignments?.[HOME_EXPERIMENT_KEY]?.variant?.VariantKey;
+    // Once resolved for this session, keep it stable to avoid oscillation
+    // (e.g., React dev StrictMode double effects or assignment cache resets).
+    if (homeVariant) {
+      writeSessionVariant(homeVariant);
+      return;
+    }
 
-    if (knownVariant && knownVariant !== homeVariant) {
+    if (knownVariant) {
       setHomeVariant(knownVariant);
+      writeSessionVariant(knownVariant);
       return;
     }
+
+    if (variantRequestedRef.current) {
+      return;
+    }
+    variantRequestedRef.current = true;
 
     let isMounted = true;
-    if (!knownVariant) {
-      assignVariant(HOME_EXPERIMENT_KEY, { requestPath: "/" })
-        .then((result) => {
-          if (!isMounted) return;
-          const variantKey =
-            result?.variant?.variant_key || result?.variant?.VariantKey;
-          if (variantKey) {
-            setHomeVariant(variantKey);
-          }
-        })
-        .catch(() => {});
-    }
+    assignVariant(HOME_EXPERIMENT_KEY, { requestPath: "/" })
+      .then((result) => {
+        if (!isMounted) return;
+        const variantKey = result?.variant?.variant_key || result?.variant?.VariantKey;
+        const nextVariant = variantKey || "control";
+        setHomeVariant(nextVariant);
+        writeSessionVariant(nextVariant);
+      })
+      .catch(() => {
+        if (!isMounted) return;
+        setHomeVariant("control");
+        writeSessionVariant("control");
+      });
 
     return () => {
       isMounted = false;
     };
-  }, [assignVariant, assignments, forcedHomeVariant, homeVariant]);
+  }, [assignVariant, forcedHomeVariant, homeVariant, knownVariant]);
 
   const trackHomeEvent = (eventName, metadata = {}) => {
     trackEvent(HOME_EXPERIMENT_KEY, eventName, {
@@ -269,6 +311,28 @@ const Home = () => {
     normalizedHomeVariant === "new-home" ||
     normalizedHomeVariant === "newlayout" ||
     normalizedHomeVariant.startsWith("new-");
+
+  if (!forcedHomeVariant && !homeVariant) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "grid",
+          placeItems: "center",
+          background: "#0b1220",
+          color: "#e2e8f0",
+          padding: "24px",
+        }}
+      >
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontWeight: 700, fontSize: "1.05rem" }}>Loading…</div>
+          <div style={{ marginTop: 8, color: "#94a3b8", fontSize: "0.95rem" }}>
+            Preparing your homepage.
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleLogout = () => {
     localStorage.removeItem("resumeUser");
