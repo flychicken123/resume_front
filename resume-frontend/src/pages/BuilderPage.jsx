@@ -761,7 +761,7 @@ const CHAT_STAGE_TO_STEP = {
 };
 
 function BuilderPage() {
-  const [step, setStep] = useState(STEP_IDS.FORMAT);
+  const [step, setStep] = useState(STEP_IDS.IMPORT);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
