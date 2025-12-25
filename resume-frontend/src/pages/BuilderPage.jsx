@@ -1621,7 +1621,7 @@ function BuilderPage() {
         window.localStorage.setItem('resumeImportSeen', 'true');
       }
       setUserRequestedImport(false);
-      setStep(STEP_IDS.PERSONAL);
+      setStep(STEP_IDS.IMPORT);
     }
   }, [step, hasExistingResumeData, userRequestedImport]);
 
@@ -1979,7 +1979,7 @@ function BuilderPage() {
       window.localStorage.setItem('resumeImportSeen', 'true');
     }
     setUserRequestedImport(false);
-    setStep(STEP_IDS.PERSONAL);
+    setStep(STEP_IDS.IMPORT);
     scrollBuilderIntoView();
   };
   const handleStepChange = (nextStep) => {
