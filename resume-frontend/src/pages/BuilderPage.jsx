@@ -1979,7 +1979,7 @@ function BuilderPage() {
       window.localStorage.setItem('resumeImportSeen', 'true');
     }
     setUserRequestedImport(false);
-    setStep(STEP_IDS.IMPORT);
+    setStep(STEP_IDS.FORMAT);
     scrollBuilderIntoView();
   };
   const handleStepChange = (nextStep) => {
