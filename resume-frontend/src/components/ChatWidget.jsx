@@ -1081,7 +1081,9 @@ const clampLauncherPosition = useCallback(
       }
 
       try {
-        const payload = await parseExperienceAI(trimmed);
+        // Pass existing resume experiences to enable partial updates
+        const existingData = resumeData?.experiences ? { experiences: resumeData.experiences } : null;
+        const payload = await parseExperienceAI(trimmed, existingData);
         const parsedExperiences = Array.isArray(payload.experiences) ? payload.experiences : [];
         if (!parsedExperiences.length) {
           if (promptIfEmpty) {
