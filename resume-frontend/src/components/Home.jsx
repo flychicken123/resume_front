@@ -100,7 +100,7 @@ const Home = () => {
   // while the experiment assignment loads or resets.
   const [homeVariant, setHomeVariant] = useState(() => {
     const initial = forcedHomeVariant || readSessionVariant() || knownVariant;
-    return initial ? initial : null;
+    return initial ? initial : "control"; // Default to "control" instead of null
   });
   const variantRequestedRef = useRef(false);
 
