@@ -961,7 +961,15 @@ const clampLauncherPosition = useCallback(
 
   const inferPersonalDetailsAI = useCallback(async (text) => {
     try {
-      const response = await parsePersonalDetailsAI(text);
+      // Pass existing resume data to enable partial updates (only update mentioned fields)
+      const existingData = {
+        name: resumeData?.name || '',
+        email: resumeData?.email || '',
+        phone: resumeData?.phone || '',
+        summary: resumeData?.summary || ''
+      };
+
+      const response = await parsePersonalDetailsAI(text, existingData);
       if (response && typeof response === 'object') {
         const normalized = {};
         if (typeof response.name === 'string' && response.name.trim()) {
@@ -983,7 +991,7 @@ const clampLauncherPosition = useCallback(
       console.error('AI personal info parse failed', error);
     }
     return {};
-  }, []);
+  }, [resumeData]);
 
   const applyPersonalDetailsFromAI = useCallback(
     async (inputText, options = {}) => {
