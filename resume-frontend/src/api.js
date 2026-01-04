@@ -268,13 +268,25 @@ export async function categorizeSkillsAI(skillsText, jobDescription = '') {
   return skillsText || '';
 }
 
-export async function parsePersonalDetailsAI(text) {
+export async function parsePersonalDetailsAI(text, existingData = null) {
+  const payload = { text };
+
+  // Include existing data if provided to enable partial updates
+  if (existingData) {
+    payload.existing = {
+      name: existingData.name || '',
+      email: existingData.email || '',
+      phone: existingData.phone || '',
+      summary: existingData.summary || ''
+    };
+  }
+
   const res = await fetch(`${API_BASE_URL}/api/assistant/personal-info`, {
     method: "POST",
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ text }),
+    body: JSON.stringify(payload),
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
