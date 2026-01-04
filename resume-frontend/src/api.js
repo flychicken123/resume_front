@@ -171,11 +171,18 @@ export async function generateExperienceAI(experience, jobDescription = '') {
   return payload.optimizedExperience || "";
 }
 
-export async function generateEducationAI(education) {
+export async function generateEducationAI(education, existingEducation = null) {
+  const payload = { education };
+
+  // Include existing education if provided to enable partial updates
+  if (existingEducation && typeof existingEducation === 'string' && existingEducation.trim()) {
+    payload.existingEducation = existingEducation.trim();
+  }
+
   const res = await fetchWithAuth(`${API_BASE_URL}/api/ai/education`, {
     method: "POST",
     headers: getAuthHeaders(),
-    body: JSON.stringify({ education }),
+    body: JSON.stringify(payload),
   });
   if (!res.ok) {
     const err = await res.json();
@@ -185,11 +192,18 @@ export async function generateEducationAI(education) {
   return data.education;
 }
 
-export async function generateSummaryAI({ experience, education, skills }) {
+export async function generateSummaryAI({ experience, education, skills, existingSummary = null }) {
+  const payload = { experience, education, skills };
+
+  // Include existing summary if provided to enable partial updates
+  if (existingSummary && typeof existingSummary === 'string' && existingSummary.trim()) {
+    payload.existingSummary = existingSummary.trim();
+  }
+
   const res = await fetchWithAuth(`${API_BASE_URL}/api/ai/summary`, {
     method: "POST",
     headers: getAuthHeaders(),
-    body: JSON.stringify({ experience, education, skills }),
+    body: JSON.stringify(payload),
   });
   if (!res.ok) {
     const err = await res.json();
@@ -212,16 +226,23 @@ export async function getJobById(id) {
 }
 
 // Auto-generate a comma-separated skills list from the in-progress resume data.
-export async function autoGenerateSkillsAI(resumeData, jobDescription = '') {
+export async function autoGenerateSkillsAI(resumeData, jobDescription = '', existingSkills = null) {
+  const payload = {
+    resumeData,
+    jobDescription,
+  };
+
+  // Include existing skills if provided to enable partial updates
+  if (existingSkills && Array.isArray(existingSkills) && existingSkills.length > 0) {
+    payload.existingSkills = existingSkills;
+  }
+
   const res = await fetchWithAuth(`${API_BASE_URL}/api/skills/auto-generate`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      resumeData,
-      jobDescription,
-    }),
+    body: JSON.stringify(payload),
   });
 
   const raw = await res.json().catch(() => ({}));
@@ -331,16 +352,23 @@ export async function improveExperienceGrammarAI(experience) {
   return payload.improvedExperience || "";
 }
 
-export async function optimizeProjectAI(projectData, jobDescription = '') {
+export async function optimizeProjectAI(projectData, jobDescription = '', existingProject = null) {
+  const payload = {
+    projectData,
+    jobDescription,
+  };
+
+  // Include existing project if provided to enable partial updates
+  if (existingProject && typeof existingProject === 'string' && existingProject.trim()) {
+    payload.existingProject = existingProject.trim();
+  }
+
   const res = await fetchWithAuth(`${API_BASE_URL}/api/project/optimize`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      projectData,
-      jobDescription,
-    }),
+    body: JSON.stringify(payload),
   });
 
   const raw = await res.json().catch(() => ({}));
