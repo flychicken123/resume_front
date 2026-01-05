@@ -1301,6 +1301,7 @@ function BuilderPage() {
     const popoverRef = useRef(null);
     const [verticalOffset, setVerticalOffset] = useState(0);
     const [aiReasons, setAiReasons] = useState(null);
+    const [aiReasonsSource, setAiReasonsSource] = useState('unknown');
     const [isLoadingReasons, setIsLoadingReasons] = useState(false);
     const [hasTriedAI, setHasTriedAI] = useState(false);
 
@@ -1325,14 +1326,16 @@ function BuilderPage() {
         try {
           setIsLoadingReasons(true);
           setHasTriedAI(true);
-          const reasons = await explainJobFit(data, match);
+          const response = await explainJobFit(data, match);
           if (!cancelled) {
-            setAiReasons(reasons);
+            setAiReasons(response.reasons);
+            setAiReasonsSource(response.source || 'unknown');
           }
         } catch (_) {
           // Swallow errors; fallbackReasons will be shown instead.
           if (!cancelled) {
             setAiReasons(null);
+            setAiReasonsSource('error');
           }
         } finally {
           if (!cancelled) {
@@ -1405,8 +1408,24 @@ function BuilderPage() {
           willChange: 'transform',
         }}
       >
-        <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.35rem' }}>
-          Why it's a fit
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.35rem' }}>
+          <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            Why it's a fit
+          </span>
+          {hasTriedAI && !isLoadingReasons && (
+            <span
+              style={{
+                fontSize: '0.68rem',
+                fontWeight: 600,
+                color: aiReasonsSource === 'langchain' ? '#0f172a' : '#6b7280',
+                background: aiReasonsSource === 'langchain' ? '#e0f2fe' : '#f1f5f9',
+                borderRadius: '999px',
+                padding: '0.15rem 0.45rem',
+              }}
+            >
+              {aiReasonsSource === 'langchain' ? 'AI-generated' : 'Standard'}
+            </span>
+          )}
         </div>
         {isLoadingReasons && (
           <div style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: '0.35rem' }}>
