@@ -649,31 +649,39 @@ export async function fetchResumeHistoryList() {
 export async function explainJobFit(resumeData, match, options = {}) {
   const timeoutMs = typeof options.timeoutMs === 'number' && options.timeoutMs > 0 ? options.timeoutMs : 8000;
   const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
-  const timer = controller
-    ? setTimeout(() => {
+  let timeoutId;
+  const timeoutPromise = new Promise((_, reject) => {
+    timeoutId = setTimeout(() => {
+      if (controller) {
         controller.abort();
-      }, timeoutMs)
-    : null;
+      }
+      reject(new Error('Job fit explanation timed out.'));
+    }, timeoutMs);
+  });
 
   try {
-    const res = await fetchWithAuth(`${API_BASE_URL}/api/jobs/explain-fit`, {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify({ resumeData, match }),
-      signal: controller ? controller.signal : undefined,
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) {
-      throw new Error(data?.error || 'Failed to explain job fit.');
-    }
-    const payload = data && typeof data === 'object' ? data.data || data : {};
-    return {
-      reasons: Array.isArray(payload.reasons) ? payload.reasons : [],
-      source: typeof payload.source === 'string' ? payload.source : 'unknown',
-    };
+    const fetchPromise = (async () => {
+      const res = await fetchWithAuth(`${API_BASE_URL}/api/jobs/explain-fit`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ resumeData, match }),
+        signal: controller ? controller.signal : undefined,
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data?.error || 'Failed to explain job fit.');
+      }
+      const payload = data && typeof data === 'object' ? data.data || data : {};
+      return {
+        reasons: Array.isArray(payload.reasons) ? payload.reasons : [],
+        source: typeof payload.source === 'string' ? payload.source : 'unknown',
+      };
+    })();
+
+    return await Promise.race([fetchPromise, timeoutPromise]);
   } finally {
-    if (timer) {
-      clearTimeout(timer);
+    if (timeoutId) {
+      clearTimeout(timeoutId);
     }
   }
 }
