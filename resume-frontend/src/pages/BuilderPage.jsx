@@ -719,6 +719,7 @@ const POPULAR_LOCATION_GROUPS = [
 const POPULAR_LOCATION_VALUES = POPULAR_LOCATION_GROUPS.flatMap((group) => group.options);
 
 const TEMPLATE_SECTION_HASHES = new Set(['#template', '#format', '#template-format']);
+const BUILDER_LAST_STEP_KEY = 'builderLastStep';
 
 const steps = [
   "Import Resume",
@@ -849,6 +850,14 @@ function BuilderPage() {
       urlUpdated = true;
     }
 
+    if (!shouldNavigateToJobs && !targetStep) {
+      const savedStepRaw = window.localStorage.getItem(BUILDER_LAST_STEP_KEY);
+      const savedStep = Number.parseInt(savedStepRaw, 10);
+      if (Number.isFinite(savedStep) && savedStep >= STEP_IDS.IMPORT && savedStep <= steps.length) {
+        targetStep = savedStep;
+      }
+    }
+
     if (shouldNavigateToJobs) {
       setNavigateToJobMatchesPending(true);
     }
@@ -856,6 +865,11 @@ function BuilderPage() {
     if (targetStep === STEP_IDS.FORMAT) {
       focusTemplateStep();
     } else if (targetStep) {
+      if (targetStep === STEP_IDS.IMPORT) {
+        setUserRequestedImport(true);
+      } else {
+        setUserRequestedImport(false);
+      }
       setStep(targetStep);
     }
 
@@ -864,7 +878,16 @@ function BuilderPage() {
       const cleanedUrl = `${currentUrl.pathname}${searchString ? `?${searchString}` : ''}${currentUrl.hash}`;
       window.history.replaceState({}, document.title, cleanedUrl);
     }
-  }, [focusTemplateStep]);
+  }, [focusTemplateStep, setStep, setUserRequestedImport]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    if (typeof step === 'number') {
+      window.localStorage.setItem(BUILDER_LAST_STEP_KEY, step.toString());
+    }
+  }, [step]);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
