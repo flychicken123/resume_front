@@ -10,6 +10,8 @@ import {
   inferTemplatePreference,
   inferJobIntent,
   parseExperienceAI,
+  parseProjectsAI,
+  parseEducationAI,
 } from '../api';
 import { setLastStep } from '../utils/exitTracking';
 import { useAuth } from '../context/AuthContext';
@@ -1222,6 +1224,173 @@ const clampLauncherPosition = useCallback(
     [appendBotMessage, parseExperienceAI, setLastStep, setResumeFlowState, updateResume]
   );
 
+  const applyProjectsFromAI = useCallback(
+    async (inputText, options = {}) => {
+      const { promptIfEmpty = true } = options;
+      const trimmed = (inputText || '').trim();
+      if (!trimmed) {
+        return false;
+      }
+
+      try {
+        const existingData = resumeData?.projects ? { projects: resumeData.projects } : null;
+        const payload = await parseProjectsAI(trimmed, existingData);
+        const parsedProjects = Array.isArray(payload.projects) ? payload.projects : [];
+        if (!parsedProjects.length) {
+          if (promptIfEmpty) {
+            appendBotMessage(
+              'I can help structure your projects. Try something like: "I built a task manager app using React and Node.js" or "Add project called E-commerce Platform with Python and Django".'
+            );
+          }
+          return false;
+        }
+
+        updateResume((prev) => {
+          const existing = Array.isArray(prev.projects) ? prev.projects.filter(Boolean) : [];
+          const next = [...existing];
+
+          parsedProjects.forEach((incoming) => {
+            if (!incoming) return;
+            const incomingNameKey = (incoming.projectName || '').trim().toLowerCase();
+            let merged = false;
+
+            if (incomingNameKey) {
+              const existingIndex = next.findIndex((proj) => {
+                if (!proj) return false;
+                const key = (proj.projectName || '').trim().toLowerCase();
+                return key && key === incomingNameKey;
+              });
+
+              if (existingIndex !== -1) {
+                const current = next[existingIndex] || {};
+                next[existingIndex] = {
+                  ...current,
+                  projectName: incoming.projectName || current.projectName || '',
+                  description: incoming.description || current.description || '',
+                  technologies: incoming.technologies || current.technologies || '',
+                  projectUrl: incoming.projectUrl || current.projectUrl || '',
+                  startDate: incoming.startDate || current.startDate || '',
+                  endDate: incoming.endDate || current.endDate || '',
+                };
+                merged = true;
+              }
+            }
+
+            if (!merged) {
+              next.push(incoming);
+            }
+          });
+
+          return { ...prev, projects: next };
+        });
+
+        setResumeFlowState((prev) => ({
+          ...prev,
+          data: { ...prev.data, projects: trimmed },
+        }));
+
+        const summaryLines = parsedProjects.map((proj) => proj.projectName || 'Unnamed Project');
+        const confirmation = `Got it! I added ${summaryLines.length} project${summaryLines.length === 1 ? '' : 's'}: ${summaryLines.join(', ')}`;
+        appendBotMessage(confirmation);
+        setLastStep('chat_resume_flow_projects_saved');
+        return true;
+      } catch (error) {
+        console.error('AI projects parse failed', error);
+        if (promptIfEmpty) {
+          appendBotMessage("I couldn't parse that into a project. Try describing your project with a name and technologies used.");
+        }
+        return false;
+      }
+    },
+    [appendBotMessage, resumeData, setLastStep, setResumeFlowState, updateResume]
+  );
+
+  const applyEducationFromAI = useCallback(
+    async (inputText, options = {}) => {
+      const { promptIfEmpty = true } = options;
+      const trimmed = (inputText || '').trim();
+      if (!trimmed) {
+        return false;
+      }
+
+      try {
+        const existingData = resumeData?.education ? { education: resumeData.education } : null;
+        const payload = await parseEducationAI(trimmed, existingData);
+        const parsedEducation = Array.isArray(payload.education) ? payload.education : [];
+        if (!parsedEducation.length) {
+          if (promptIfEmpty) {
+            appendBotMessage(
+              'I can help structure your education. Try something like: "I have a Bachelor\'s in Computer Science from MIT, graduated 2020" or "Master\'s in AI from Stanford".'
+            );
+          }
+          return false;
+        }
+
+        updateResume((prev) => {
+          const existing = Array.isArray(prev.education) ? prev.education.filter(Boolean) : [];
+          const next = [...existing];
+
+          parsedEducation.forEach((incoming) => {
+            if (!incoming) return;
+            const incomingSchoolKey = (incoming.school || '').trim().toLowerCase();
+            let merged = false;
+
+            if (incomingSchoolKey) {
+              const existingIndex = next.findIndex((edu) => {
+                if (!edu) return false;
+                const key = (edu.school || '').trim().toLowerCase();
+                return key && key === incomingSchoolKey;
+              });
+
+              if (existingIndex !== -1) {
+                const current = next[existingIndex] || {};
+                next[existingIndex] = {
+                  ...current,
+                  degree: incoming.degree || current.degree || '',
+                  field: incoming.field || current.field || '',
+                  school: incoming.school || current.school || '',
+                  city: incoming.city || current.city || '',
+                  state: incoming.state || current.state || '',
+                  graduationYear: incoming.graduationYear || current.graduationYear || '',
+                  gpa: incoming.gpa || current.gpa || '',
+                  honors: incoming.honors || current.honors || '',
+                };
+                merged = true;
+              }
+            }
+
+            if (!merged) {
+              next.push(incoming);
+            }
+          });
+
+          return { ...prev, education: next };
+        });
+
+        setResumeFlowState((prev) => ({
+          ...prev,
+          data: { ...prev.data, education: trimmed },
+        }));
+
+        const summaryLines = parsedEducation.map((edu) => {
+          const parts = [edu.degree, edu.field, edu.school].filter(Boolean);
+          return parts.join(' in ') || 'Education entry';
+        });
+        const confirmation = `Got it! I added ${summaryLines.length} education entr${summaryLines.length === 1 ? 'y' : 'ies'}: ${summaryLines.join('; ')}`;
+        appendBotMessage(confirmation);
+        setLastStep('chat_resume_flow_education_saved');
+        return true;
+      } catch (error) {
+        console.error('AI education parse failed', error);
+        if (promptIfEmpty) {
+          appendBotMessage("I couldn't parse that into education. Try describing your degree, field of study, and school.");
+        }
+        return false;
+      }
+    },
+    [appendBotMessage, resumeData, setLastStep, setResumeFlowState, updateResume]
+  );
+
   const applyJobDescriptionFromChat = useCallback(
     async (inputText) => {
       const trimmed = (inputText || '').trim();
@@ -1645,8 +1814,36 @@ const clampLauncherPosition = useCallback(
       return;
     }
 
+    // Personal details are handled by backend LangChain agent
     if (looksLikePersonalInfoMessage(trimmed) && resumeFlowState.stage !== 'personal') {
       const updated = await applyPersonalDetailsFromAI(trimmed, { promptIfEmpty: true });
+      if (updated) {
+        setIsLoading(false);
+        return;
+      }
+    }
+
+    // Experience is handled by backend LangChain agent
+    if (looksLikeExperienceMessage(trimmed) && resumeFlowState.stage !== 'experience') {
+      const updated = await applyExperienceFromAI(trimmed, { promptIfEmpty: true });
+      if (updated) {
+        setIsLoading(false);
+        return;
+      }
+    }
+
+    // Projects are handled by backend LangChain agent
+    if (looksLikeProjectsMessage(trimmed) && resumeFlowState.stage !== 'projects') {
+      const updated = await applyProjectsFromAI(trimmed, { promptIfEmpty: true });
+      if (updated) {
+        setIsLoading(false);
+        return;
+      }
+    }
+
+    // Education is handled by backend LangChain agent
+    if (looksLikeEducationMessage(trimmed) && resumeFlowState.stage !== 'education') {
+      const updated = await applyEducationFromAI(trimmed, { promptIfEmpty: true });
       if (updated) {
         setIsLoading(false);
         return;
@@ -2071,6 +2268,8 @@ const buildSectionResponse = (sectionKey) => {
       setIsLoading(false);
       return;
     }
+
+    // Personal details are handled by looksLikePersonalInfoMessage -> applyPersonalDetailsFromAI
 
     if (hasInterviewProcessIntent(trimmed)) {
       appendBotMessage(
@@ -2698,43 +2897,7 @@ const extractDateOfBirth = (text) => {
   return '';
 };
 
-const parsePersonalDetails = (text) => {
-  if (!text) {
-    return { name: '', email: '', phone: '', dateOfBirth: '' };
-  }
-  const emailMatch = text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
-  const loosePhoneMatch = text.match(/(\+?\d[\d\s().-]{4,}\d)/);
-  const phoneFromLabel = parseKeyValue(text, 'phone') || parseKeyValue(text, 'phone number');
-  const phonePhraseMatch = text.match(/phone(?: number)?(?: is| was|=|:)?\s*([+\d][\d\s().-]*)/i);
-  const nameFromLabel = parseKeyValue(text, 'name');
-  const naturalName = extractNameFromNaturalText(text);
-  const firstSegment = text.split(/[\n;.]/)[0]?.replace(/^(hi|hello|it'?s)\s+/i, '').trim();
-  const dateOfBirth = extractDateOfBirth(text);
-
-  const selectPhoneCandidate = (...candidates) => {
-    for (const candidate of candidates) {
-      if (!candidate) continue;
-      const digits = candidate.replace(/\D+/g, '');
-      if (digits.length >= 6) {
-        return candidate;
-      }
-    }
-    return '';
-  };
-
-  const phoneValue = selectPhoneCandidate(
-    loosePhoneMatch ? loosePhoneMatch[0] : '',
-    phonePhraseMatch ? phonePhraseMatch[1] : '',
-    phoneFromLabel
-  );
-
-  return {
-    name: cleanCapturedName(normalizeCapturedValue(nameFromLabel || naturalName || firstSegment || '')),
-    email: normalizeCapturedValue(emailMatch ? emailMatch[0] : parseKeyValue(text, 'email')),
-    phone: normalizeCapturedValue(phoneValue || ''),
-    dateOfBirth,
-  };
-};
+// parsePersonalDetails removed - all personal details parsing is now handled by backend LangChain agent
 
 const handleSectionUpdateIntent = ({
   key,
@@ -2793,124 +2956,7 @@ const handleSectionUpdateIntent = ({
       }));
       return { success: true, message: `Job description updated:\n${value}` };
     }
-    case 'personal': {
-      const parsed = parsePersonalDetails(value);
-      if (!parsed.name && !parsed.email && !parsed.phone && !parsed.dateOfBirth) {
-        return respond('I could not find personal details in that message.');
-      }
-      updateResume((prev) => ({
-        ...prev,
-        name: parsed.name || prev.name,
-        email: parsed.email || prev.email,
-        phone: parsed.phone || prev.phone,
-      }));
-      setResumeFlowState((prev) => ({
-        ...prev,
-        data: {
-          ...prev.data,
-          personal: {
-            name: parsed.name || prev.data.personal?.name || '',
-            email: parsed.email || prev.data.personal?.email || '',
-            phone: parsed.phone || prev.data.personal?.phone || '',
-            dateOfBirth: parsed.dateOfBirth || prev.data.personal?.dateOfBirth || '',
-          },
-        },
-      }));
-      const confirmation = [
-        parsed.name ? `Name: ${parsed.name}` : null,
-        parsed.email ? `Email: ${parsed.email}` : null,
-        parsed.phone ? `Phone: ${parsed.phone}` : null,
-        parsed.dateOfBirth ? `Date of birth: ${parsed.dateOfBirth}` : null,
-      ]
-        .filter(Boolean)
-        .join('\n');
-      return {
-        success: true,
-        message: confirmation ? `Personal details updated:\n${confirmation}` : 'Personal details updated!',
-      };
-    }
-    case 'experience': {
-      const parsed = parseExperienceDetails(value);
-      if (!parsed.jobTitle && !parsed.company && !parsed.description) {
-        return respond('Please include job title, company, or highlights.');
-      }
-      updateResume((prev) => {
-        const experiences =
-          Array.isArray(prev.experiences) && prev.experiences.length > 0
-            ? prev.experiences.map((exp, index) =>
-                index === 0 ? { ...exp, ...parsed } : exp
-              )
-            : [{ ...createEmptyExperience(), ...parsed }];
-        return { ...prev, experiences };
-      });
-      setResumeFlowState((prev) => ({
-        ...prev,
-        data: { ...prev.data, experience: parsed },
-      }));
-      const header = [parsed.jobTitle, parsed.company].filter(Boolean).join(' at ');
-      const detail = [header, parsed.description].filter(Boolean).join('\n');
-      return {
-        success: true,
-        message: detail ? `Experience updated:\n${detail}` : 'Experience updated!',
-      };
-    }
-    case 'projects': {
-      const parsed = parseProjectDetails(value);
-      if (!parsed.projectName && !parsed.description) {
-        return respond('Please include a project name or description.');
-      }
-      updateResume((prev) => {
-        const projects =
-          Array.isArray(prev.projects) && prev.projects.length > 0
-            ? prev.projects.map((proj, index) =>
-                index === 0 ? { ...proj, ...parsed } : proj
-              )
-            : [{ ...createEmptyProject(), ...parsed }];
-        return { ...prev, projects };
-      });
-      setResumeFlowState((prev) => ({
-        ...prev,
-        data: { ...prev.data, projects: parsed },
-      }));
-      const detail = [parsed.projectName ? `Project: ${parsed.projectName}` : null, parsed.description]
-        .filter(Boolean)
-        .join('\n');
-      return {
-        success: true,
-        message: detail ? `Project updated:\n${detail}` : 'Project updated!',
-      };
-    }
-    case 'education': {
-      const parsed = parseEducationDetails(value);
-      if (!parsed.degree && !parsed.school) {
-        return respond('Please include the degree or school name.');
-      }
-      updateResume((prev) => {
-        const education =
-          Array.isArray(prev.education) && prev.education.length > 0
-            ? prev.education.map((ed, index) =>
-                index === 0 ? { ...ed, ...parsed } : ed
-              )
-            : [{ ...createEmptyEducation(), ...parsed }];
-        return { ...prev, education };
-      });
-      setResumeFlowState((prev) => ({
-        ...prev,
-        data: { ...prev.data, education: parsed },
-      }));
-      const detail = [
-        parsed.degree ? `Degree: ${parsed.degree}` : null,
-        parsed.field ? `Field: ${parsed.field}` : null,
-        parsed.school ? `School: ${parsed.school}` : null,
-        parsed.graduationYear ? `Year: ${parsed.graduationYear}` : null,
-      ]
-        .filter(Boolean)
-        .join('\n');
-      return {
-        success: true,
-        message: detail ? `Education updated:\n${detail}` : 'Education updated!',
-      };
-    }
+    // 'personal', 'experience', 'projects', and 'education' cases are handled by backend LangChain agents
     default:
       return respond("I couldn't figure out which section to update.");
   }
@@ -2932,90 +2978,7 @@ const trimTrailingDatePhrase = (value) => {
   return value.replace(/\s+(?:from|since)\b.*$/i, '').trim();
 };
 
-const parseExperienceDetails = (text) => {
-  if (!text) return createEmptyExperience();
-  const jobTitle =
-    parseKeyValue(text, 'title') ||
-    parseKeyValue(text, 'role') ||
-    captureFirstMatch(text, [
-      /\b(?:as|as a|worked as|serving as|role of|position of)\s+([^.,\n]+?)(?:\s+at|\s+for|\s+with|$)/i,
-      /\b(?:i work|i worked|current role is)\s+as\s+([^.,\n]+)/i,
-    ]);
-
-  const company =
-    parseKeyValue(text, 'company') ||
-    captureFirstMatch(text, [
-      /\b(?:at|for|with)\s+([A-Za-z0-9&.,\-\s]+?)(?:\s+as|\s+since|\s+from|$)/i,
-    ]);
-
-  const descriptionLabel =
-    parseKeyValue(text, 'highlights') ||
-    parseKeyValue(text, 'impact') ||
-    parseKeyValue(text, 'responsibilities');
-
-  const lines = text.split(/\n|\. /).map((line) => line.trim());
-  const fallbackDescription = lines.slice(1).join('\n').trim();
-
-  return {
-    ...createEmptyExperience(),
-    jobTitle: trimTrailingDatePhrase(jobTitle) || trimTrailingDatePhrase(lines[0]) || '',
-    company,
-    description: descriptionLabel || fallbackDescription || text,
-  };
-};
-
-const parseProjectDetails = (text) => {
-  if (!text) return createEmptyProject();
-  const projectName =
-    parseKeyValue(text, 'project') ||
-    parseKeyValue(text, 'name') ||
-    captureFirstMatch(text, [
-      /\bproject(?: called| named)?\s+([^.,\n]+)/i,
-      /\bbuilt\s+([^.,\n]+)/i,
-    ]);
-
-  const technologies =
-    parseKeyValue(text, 'tech') ||
-    parseKeyValue(text, 'stack') ||
-    captureFirstMatch(text, [/\busing\s+([^.,\n]+)/i, /\bwith\s+([^.,\n]+)/i]);
-
-  const url = parseKeyValue(text, 'url') || parseKeyValue(text, 'link');
-  const description =
-    parseKeyValue(text, 'description') || text.replace(projectName || '', '').trim();
-
-  return {
-    ...createEmptyProject(),
-    projectName: projectName || 'Key Project',
-    description: description || text,
-    technologies,
-    projectUrl: url,
-  };
-};
-
-const parseEducationDetails = (text) => {
-  if (!text) return createEmptyEducation();
-  const degree =
-    parseKeyValue(text, 'degree') ||
-    captureFirstMatch(text, [
-      /\b(bachelor|master|associate|ph\.?d\.?|mba)\b[^.,\n]*/i,
-    ]);
-  const school =
-    parseKeyValue(text, 'school') ||
-    parseKeyValue(text, 'university') ||
-    captureFirstMatch(text, [/\bat\s+([A-Za-z0-9&.,\-\s]+?)(?:\s+in|\s+major|\s+graduated|$)/i]);
-  const field =
-    parseKeyValue(text, 'field') ||
-    parseKeyValue(text, 'major') ||
-    captureFirstMatch(text, [/\bmajor(?:ed)?\s+in\s+([^.,\n]+)/i]);
-  const graduationYearMatch = text.match(/\b(20\d{2}|19\d{2})\b/);
-  return {
-    ...createEmptyEducation(),
-    degree: degree || text,
-    school,
-    field,
-    graduationYear: graduationYearMatch ? graduationYearMatch[0] : '',
-  };
-};
+// parseExperienceDetails, parseProjectDetails, parseEducationDetails removed - handled by backend LangChain agents
 
 const getStoredJobDescription = () => {
   try {
@@ -3247,8 +3210,7 @@ const SECTION_UPDATE_PATTERNS = [
   { key: 'summary', regex: /(update|change|set)\s+(?:my\s+)?summary\s+(?:to|as|=)?\s*([\s\S]+)/i },
   { key: 'skills', regex: /(update|change|set)\s+(?:my\s+)?skills?\s+(?:to|as|=)?\s*([\s\S]+)/i },
   { key: 'jobDescription', regex: /(update|change|set)\s+(?:my\s+)?(?:job\s+description|target\s+job|target\s+role)\s+(?:to|as|=)?\s*([\s\S]+)/i },
-  { key: 'personal', regex: /(update|change|set)\s+(?:my\s+)?(?:personal\s+details?|contact\s+info|name|email|phone|phone number|date of birth)\s+(?:to|as|=)?\s*([\s\S]+)/i },
-  { key: 'experience', regex: /(update|change|set)\s+(?:my\s+)?experience\s+(?:to|as|=)?\s*([\s\S]+)/i },
+  // 'personal' and 'experience' removed - handled by backend LangChain agents
   { key: 'projects', regex: /(update|change|set)\s+(?:my\s+)?projects?\s+(?:to|as|=)?\s*([\s\S]+)/i },
   { key: 'education', regex: /(update|change|set)\s+(?:my\s+)?education\s+(?:to|as|=)?\s*([\s\S]+)/i },
 ];
@@ -3272,4 +3234,60 @@ const looksLikePersonalInfoMessage = (text = '') => {
   if (!text) return false;
   const normalized = text.toLowerCase();
   return PERSONAL_INFO_KEYWORDS.some((keyword) => normalized.includes(keyword));
+};
+
+const EXPERIENCE_KEYWORDS = [
+  'experience',
+  'worked at',
+  'work at',
+  'working at',
+  'job title',
+  'my role',
+  'my position',
+  'employer',
+  'company',
+  'employed',
+];
+
+const looksLikeExperienceMessage = (text = '') => {
+  if (!text) return false;
+  const normalized = text.toLowerCase();
+  return EXPERIENCE_KEYWORDS.some((keyword) => normalized.includes(keyword));
+};
+
+const PROJECTS_KEYWORDS = [
+  'project',
+  'built',
+  'developed',
+  'created',
+  'portfolio',
+  'side project',
+  'personal project',
+  'open source',
+];
+
+const looksLikeProjectsMessage = (text = '') => {
+  if (!text) return false;
+  const normalized = text.toLowerCase();
+  return PROJECTS_KEYWORDS.some((keyword) => normalized.includes(keyword));
+};
+
+const EDUCATION_KEYWORDS = [
+  'education',
+  'degree',
+  'bachelor',
+  'master',
+  'phd',
+  'university',
+  'college',
+  'school',
+  'graduated',
+  'major',
+  'studied',
+];
+
+const looksLikeEducationMessage = (text = '') => {
+  if (!text) return false;
+  const normalized = text.toLowerCase();
+  return EDUCATION_KEYWORDS.some((keyword) => normalized.includes(keyword));
 };
