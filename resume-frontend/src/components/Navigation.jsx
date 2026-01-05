@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { setLastStep } from '../utils/exitTracking';
 import './Navigation.css';
-import { BUILDER_TARGET_STEP_KEY, BUILDER_TARGET_JOB_MATCHES } from '../constants/builder';
+import { BUILDER_TARGET_STEP_KEY, BUILDER_TARGET_JOB_MATCHES, BUILDER_TARGET_IMPORT } from '../constants/builder';
 
 const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setShowIntegratedModal }) => {
   const navigate = useNavigate();
@@ -76,7 +76,7 @@ const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setS
           </button>
           <button
             className="nav-link nav-button"
-            onClick={() => openBuilder('nav_builder_cta')}
+            onClick={() => openBuilder('nav_builder_cta', { targetStep: BUILDER_TARGET_IMPORT })}
           >
             Builder
           </button>
@@ -198,7 +198,7 @@ const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setS
               className="mobile-nav-link"
               onClick={() => {
                 setShowMobileMenu(false);
-                openBuilder('nav_mobile_builder_cta');
+                openBuilder('nav_mobile_builder_cta', { targetStep: BUILDER_TARGET_IMPORT });
               }}
             >
               Builder
