@@ -220,6 +220,32 @@
   border-color: rgba(255, 255, 255, 0.7);
 }
 
+.chat-header-icon--toggle-size {
+  border: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  padding: 0;
+}
+
+.chat-header-icon--toggle-size:hover {
+  border-color: transparent;
+}
+
+.chat-header-caret {
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 6px solid currentColor;
+  display: inline-block;
+  transform-origin: 2px 5px;
+}
+
+.chat-header-caret--expanded {
+  transform: rotate(90deg);
+}
+
 .chat-messages {
   flex: 1;
   padding: 16px;
