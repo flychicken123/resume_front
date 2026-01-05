@@ -1496,10 +1496,13 @@ const clampLauncherPosition = useCallback(
 
           window.localStorage.setItem('jobDescriptions', JSON.stringify(sanitizedList));
 
-          // Set the primary job description text
+          // Set or clear the primary job description text
           const primaryText = sanitizedList.length > 0 ? sanitizedList[0].text : '';
           if (primaryText) {
             window.localStorage.setItem('jobDescription', primaryText);
+          } else {
+            // Clear job description when all entries are removed
+            window.localStorage.removeItem('jobDescription');
           }
 
           window.dispatchEvent(new Event('builder:reload-job-descriptions'));
@@ -1514,7 +1517,7 @@ const clampLauncherPosition = useCallback(
         ...prev,
         data: {
           ...prev.data,
-          jobDescription: primaryText || prev.data.jobDescription || '',
+          jobDescription: action === 'remove_all' ? '' : (primaryText || prev.data.jobDescription || ''),
         },
       }));
 
@@ -1522,7 +1525,10 @@ const clampLauncherPosition = useCallback(
       const hasUrl = !!url;
       const hasText = !!(text || extractedFromUrl);
 
-      if (action === 'remove') {
+      if (action === 'remove_all') {
+        appendBotMessage(message || 'Got it! I have removed all job descriptions.');
+        setLastStep('chat_job_description_removed_all');
+      } else if (action === 'remove') {
         appendBotMessage(message || 'Got it! I have removed the job description.');
         setLastStep('chat_job_description_removed');
       } else if (action === 'modify') {
