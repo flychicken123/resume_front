@@ -1816,7 +1816,8 @@ const clampLauncherPosition = useCallback(
     }
 
     // Personal details are handled by backend LangChain agent
-    if (looksLikePersonalInfoMessage(trimmed) && resumeFlowState.stage !== 'personal') {
+    // Always route to AI handler - no stage restriction since summary/removal needs this
+    if (looksLikePersonalInfoMessage(trimmed)) {
       const updated = await applyPersonalDetailsFromAI(trimmed, { promptIfEmpty: true });
       if (updated) {
         setIsLoading(false);
@@ -1825,7 +1826,7 @@ const clampLauncherPosition = useCallback(
     }
 
     // Experience is handled by backend LangChain agent
-    if (looksLikeExperienceMessage(trimmed) && resumeFlowState.stage !== 'experience') {
+    if (looksLikeExperienceMessage(trimmed)) {
       const updated = await applyExperienceFromAI(trimmed, { promptIfEmpty: true });
       if (updated) {
         setIsLoading(false);
@@ -1834,7 +1835,7 @@ const clampLauncherPosition = useCallback(
     }
 
     // Projects are handled by backend LangChain agent
-    if (looksLikeProjectsMessage(trimmed) && resumeFlowState.stage !== 'projects') {
+    if (looksLikeProjectsMessage(trimmed)) {
       const updated = await applyProjectsFromAI(trimmed, { promptIfEmpty: true });
       if (updated) {
         setIsLoading(false);
@@ -1843,7 +1844,7 @@ const clampLauncherPosition = useCallback(
     }
 
     // Education is handled by backend LangChain agent
-    if (looksLikeEducationMessage(trimmed) && resumeFlowState.stage !== 'education') {
+    if (looksLikeEducationMessage(trimmed)) {
       const updated = await applyEducationFromAI(trimmed, { promptIfEmpty: true });
       if (updated) {
         setIsLoading(false);
