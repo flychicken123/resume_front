@@ -37,7 +37,6 @@ import {
   generateExperienceAI,
   optimizeProjectAI,
   generateSummaryAI,
-  explainJobFit,
   getJobById,
 } from '../api';
 import './BuilderPage.css';
@@ -1308,7 +1307,9 @@ function BuilderPage() {
       if (score !== null && score >= 0) {
         const qualifier = score >= 85 ? 'exceptional' : score >= 70 ? 'strong' : 'solid';
         reasons.push(
-          `AI match score of ${score.toFixed(1)} is ${qualifier}, signaling recruiters will quickly see how your achievements map to this opening.`
+          `AI match score of ${score.toFixed(
+            1
+          )} is ${qualifier}, signaling recruiters will quickly see how your achievements map to this opening.`
         );
       }
 
@@ -1321,11 +1322,13 @@ function BuilderPage() {
 
       if (skillHits.length > 0) {
         reasons.push(
-          `You already lead with ${formatListForSentence(skillHits)}, the exact stack cited in the description—zero retooling required.`
+          `You already lead with ${formatListForSentence(skillHits)}, the exact stack cited in the description - zero retooling required.`
         );
       } else if (fallbackSkills.length > 0) {
         reasons.push(
-          `Signature strengths like ${formatListForSentence(fallbackSkills)} give you punchy talking points for the hiring panel even before tailoring.`
+          `Signature strengths like ${formatListForSentence(
+            fallbackSkills
+          )} give you punchy talking points for the hiring panel even before tailoring.`
         );
       }
 
@@ -1392,7 +1395,7 @@ function BuilderPage() {
         const experienceLead = latestLabel ? `${latestLabel} experience` : 'Your recent experience';
         let experienceSentence = `${experienceLead} mirrors the scope this team owns`;
         if (latestImpactSnippet) {
-          experienceSentence = `${experienceSentence} — for example, ${latestImpactSnippet}`;
+          experienceSentence = `${experienceSentence} - for example, ${latestImpactSnippet}`;
           impactSnippetUsed = true;
         }
         reasons.push(`${experienceSentence}.`);
@@ -1412,54 +1415,10 @@ function BuilderPage() {
     },
     [effectiveLocation, resumeSkills, targetPosition, latestRoleInfo, latestImpactSnippet, quantifiedSummary]
   );
-  const MatchReasonPopover = ({ match, fallbackReasons }) => {
+  const MatchReasonPopover = ({ fallbackReasons }) => {
     const popoverRef = useRef(null);
     const [verticalOffset, setVerticalOffset] = useState(0);
-    const [aiReasons, setAiReasons] = useState(null);
-    const [isLoadingReasons, setIsLoadingReasons] = useState(false);
-    const [hasTriedAI, setHasTriedAI] = useState(false);
-
-    const effectiveReasons = Array.isArray(aiReasons) && aiReasons.length > 0 ? aiReasons : fallbackReasons;
-
-    useEffect(() => {
-      let cancelled = false;
-      const shouldCallAI =
-        !hasTriedAI &&
-        match &&
-        typeof match === 'object' &&
-        data &&
-        typeof data === 'object';
-
-      if (!shouldCallAI) {
-        return undefined;
-      }
-
-      const load = async () => {
-        try {
-          setIsLoadingReasons(true);
-          setHasTriedAI(true);
-          const reasons = await explainJobFit(data, match);
-          if (!cancelled) {
-            setAiReasons(reasons);
-          }
-        } catch (_) {
-          // Swallow errors; fallbackReasons will be shown instead.
-          if (!cancelled) {
-            setAiReasons(null);
-          }
-        } finally {
-          if (!cancelled) {
-            setIsLoadingReasons(false);
-          }
-        }
-      };
-
-      load();
-
-      return () => {
-        cancelled = true;
-      };
-    }, [data, match, hasTriedAI]);
+    const effectiveReasons = Array.isArray(fallbackReasons) ? fallbackReasons : [];
 
     useLayoutEffect(() => {
       if (!Array.isArray(effectiveReasons) || effectiveReasons.length === 0) {
@@ -1519,11 +1478,6 @@ function BuilderPage() {
         <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.35rem' }}>
           Why it's a fit
         </div>
-        {isLoadingReasons && (
-          <div style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: '0.35rem' }}>
-            Thinking through your fit for this role...
-          </div>
-        )}
         <ul style={{ margin: 0, paddingLeft: '1rem', color: '#0f172a', fontSize: '0.85rem', lineHeight: 1.45 }}>
           {effectiveReasons.map((reason, idx) => (
             <li key={`reason-${idx}`} style={{ marginBottom: '0.25rem' }}>
@@ -3587,10 +3541,7 @@ function BuilderPage() {
                       onMouseLeave={() => setHoveredMatchKey(null)}
                     >
                       {hoveredMatchKey === topMatchKey && (
-                        <MatchReasonPopover
-                          match={topMatch}
-                          fallbackReasons={buildJobFitReasons(topMatch)}
-                        />
+                        <MatchReasonPopover fallbackReasons={buildJobFitReasons(topMatch)} />
                       )}
                       <span style={{ fontSize: '0.75rem', color: '#0ea5e9', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Top match</span>
                       <h4 style={{ margin: 0, fontSize: '1.1rem', color: '#0f172a' }}>{topMatch.job_title || 'Role'}</h4>
@@ -3672,10 +3623,7 @@ function BuilderPage() {
                             onMouseLeave={() => setHoveredMatchKey(null)}
                           >
                             {hoveredMatchKey === matchKey && (
-                              <MatchReasonPopover
-                                match={match}
-                                fallbackReasons={buildJobFitReasons(match)}
-                              />
+                              <MatchReasonPopover fallbackReasons={buildJobFitReasons(match)} />
                             )}
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '0.5rem' }}>
                               <strong style={{ color: '#1e293b', fontSize: '0.95rem' }}>{match.job_title || 'Role'}</strong>
