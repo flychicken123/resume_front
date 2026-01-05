@@ -1220,11 +1220,19 @@ function BuilderPage() {
         const serializedList = window.localStorage.getItem('jobDescriptions');
         if (serializedList) {
           const parsed = JSON.parse(serializedList);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            setJobDescriptions(ensureJobDescriptionList(parsed));
+          if (Array.isArray(parsed)) {
+            // Handle both populated and empty arrays (for remove all)
+            if (parsed.length > 0) {
+              setJobDescriptions(ensureJobDescriptionList(parsed));
+            } else {
+              // Clear all job descriptions
+              setJobDescriptions(ensureJobDescriptionList([]));
+            }
             return;
           }
         }
+        // If no valid data, reset to empty
+        setJobDescriptions(ensureJobDescriptionList([]));
       } catch (err) {
         console.error('Failed to reload job descriptions from event', err);
       }
