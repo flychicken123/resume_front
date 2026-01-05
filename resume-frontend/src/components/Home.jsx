@@ -20,7 +20,7 @@ import { setLastStep } from "../utils/exitTracking";
 import SEO from "./SEO";
 import { trackReferrer, trackBuilderStart, trackCTAClick } from "./Analytics";
 import TRUSTED_COMPANIES from "../constants/trustedCompanies";
-import { BUILDER_TARGET_STEP_KEY, BUILDER_TARGET_JOB_MATCHES } from "../constants/builder";
+import { BUILDER_TARGET_STEP_KEY, BUILDER_TARGET_JOB_MATCHES, BUILDER_TARGET_IMPORT } from "../constants/builder";
 import geoGuides from "../constants/geoGuides";
 
 const HERO_FEATURES = [
@@ -238,11 +238,11 @@ const Home = () => {
 
   const handleStartBuilding = () => {
     // Track referrer and builder start when user clicks the button
-    triggerBuilderCta("home_primary_cta", { stepId: "home_builder_cta" });
+    triggerBuilderCta("home_primary_cta", { stepId: "home_builder_cta", targetStep: BUILDER_TARGET_IMPORT });
   };
 
   const handleNavbarStart = () => {
-    triggerBuilderCta("home_nav_primary_cta");
+    triggerBuilderCta("home_nav_primary_cta", { targetStep: BUILDER_TARGET_IMPORT });
   };
 
   const handleNavbarJobs = () => {
@@ -355,7 +355,7 @@ const Home = () => {
           hasResume={!!hasResume}
           variantKey={homeVariant}
           onPrimaryCta={() =>
-            triggerBuilderCta("new_home_primary", { stepId: "home_builder_cta" })
+            triggerBuilderCta("new_home_primary", { stepId: "home_builder_cta", targetStep: BUILDER_TARGET_IMPORT })
           }
           onSecondaryCta={() =>
             triggerBuilderCta("new_home_jobs", {
@@ -440,7 +440,7 @@ const Home = () => {
                   style={{ border: "none" }}
                   onClick={() => {
                     setShowResumePrompt(false);
-                    triggerBuilderCta("new_home_resume_prompt", { stepId: "home_builder_cta" });
+                    triggerBuilderCta("new_home_resume_prompt", { stepId: "home_builder_cta", targetStep: BUILDER_TARGET_IMPORT });
                   }}
                 >
                   Start my resume
@@ -917,7 +917,7 @@ const Home = () => {
         onCreateClick={() => {
           trackBuilderStart("create_resume");
 
-          openBuilderFrom("home_create_cta");
+          openBuilderFrom("home_create_cta", { targetStep: BUILDER_TARGET_IMPORT });
         }}
       />
 

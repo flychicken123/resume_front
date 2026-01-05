@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useResume } from '../context/ResumeContext';
 import { useFeedback } from '../context/FeedbackContext';
 import { setLastStep } from '../utils/exitTracking';
-import { BUILDER_TARGET_STEP_KEY, BUILDER_TARGET_JOB_MATCHES, BUILDER_TARGET_TEMPLATE } from '../constants/builder';
+import { BUILDER_TARGET_STEP_KEY, BUILDER_TARGET_JOB_MATCHES, BUILDER_TARGET_TEMPLATE, BUILDER_TARGET_IMPORT } from '../constants/builder';
 import {
   createJobDescriptionEntry,
   ensureJobDescriptionList,
@@ -760,8 +760,20 @@ const CHAT_STAGE_TO_STEP = {
   summary: STEP_IDS.SUMMARY,
 };
 
+const getInitialStep = () => {
+  if (typeof window === 'undefined') {
+    return STEP_IDS.IMPORT;
+  }
+  const savedStepRaw = window.localStorage.getItem(BUILDER_LAST_STEP_KEY);
+  const savedStep = Number.parseInt(savedStepRaw, 10);
+  if (Number.isFinite(savedStep) && savedStep >= STEP_IDS.IMPORT && savedStep <= steps.length) {
+    return savedStep;
+  }
+  return STEP_IDS.IMPORT;
+};
+
 function BuilderPage() {
-  const [step, setStep] = useState(STEP_IDS.IMPORT);
+  const [step, setStep] = useState(getInitialStep);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
@@ -818,7 +830,10 @@ function BuilderPage() {
     let targetStep = null;
     let urlUpdated = false;
 
-    if (storedTarget === BUILDER_TARGET_JOB_MATCHES) {
+    if (storedTarget === BUILDER_TARGET_IMPORT) {
+      targetStep = STEP_IDS.IMPORT;
+      window.localStorage.removeItem(BUILDER_TARGET_STEP_KEY);
+    } else if (storedTarget === BUILDER_TARGET_JOB_MATCHES) {
       shouldNavigateToJobs = true;
       window.localStorage.removeItem(BUILDER_TARGET_STEP_KEY);
     } else if (storedTarget === BUILDER_TARGET_TEMPLATE) {
@@ -848,14 +863,6 @@ function BuilderPage() {
       targetStep = STEP_IDS.FORMAT;
       currentUrl.searchParams.delete('view');
       urlUpdated = true;
-    }
-
-    if (!shouldNavigateToJobs && !targetStep) {
-      const savedStepRaw = window.localStorage.getItem(BUILDER_LAST_STEP_KEY);
-      const savedStep = Number.parseInt(savedStepRaw, 10);
-      if (Number.isFinite(savedStep) && savedStep >= STEP_IDS.IMPORT && savedStep <= steps.length) {
-        targetStep = savedStep;
-      }
     }
 
     if (shouldNavigateToJobs) {
