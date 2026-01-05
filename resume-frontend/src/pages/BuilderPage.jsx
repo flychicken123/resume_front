@@ -37,7 +37,6 @@ import {
   generateExperienceAI,
   optimizeProjectAI,
   generateSummaryAI,
-  explainJobFit,
   getJobById,
 } from '../api';
 import './BuilderPage.css';
@@ -1273,83 +1272,153 @@ function BuilderPage() {
   }, [user, autoLocation]);
 
   const effectiveLocation = (jobMatchesLocation && jobMatchesLocation.trim()) || autoLocation || '';
-  const buildJobFitReasons = useCallback((match) => {
-    if (!match || typeof match !== 'object') {
-      return [];
-    }
+  const buildJobFitReasons = useCallback(
+    (match) => {
+      if (!match || typeof match !== 'object') {
+        return [];
+      }
+      const reasons = [];
+      const score = typeof match.match_score === 'number' ? match.match_score : null;
+      const jobDepartment = typeof match.job_department === 'string' ? match.job_department.trim() : '';
+      const jobRemoteType = typeof match.job_remote_type === 'string' ? match.job_remote_type.trim() : '';
+      const jobLocation = typeof match.job_location === 'string' ? match.job_location.trim() : '';
+      const companyName = typeof match.company_name === 'string' ? match.company_name.trim() : '';
+      const jobTitle = typeof match.job_title === 'string' ? match.job_title.trim() : '';
+      const employmentType = typeof match.job_employment_type === 'string' ? match.job_employment_type.trim() : '';
+      const jobHighlight = extractJobDescriptionHighlight(match.job_description);
+      const jobTextLower = typeof match.job_description === 'string' ? match.job_description.toLowerCase() : '';
+      const normalizedResumeSkills = Array.isArray(resumeSkills)
+        ? resumeSkills
+            .map((skill) => (typeof skill === 'string' ? skill.trim() : ''))
+            .filter((skill) => Boolean(skill))
+        : [];
+      const skillHits = jobTextLower
+        ? normalizedResumeSkills.filter((skill) => jobTextLower.includes(skill.toLowerCase())).slice(0, 3)
+        : [];
+      const fallbackSkills = normalizedResumeSkills.slice(0, 3);
 
-    const reasons = [];
-    const jobTitle = typeof match.job_title === 'string' ? match.job_title.trim() : '';
-    const companyName = typeof match.company_name === 'string' ? match.company_name.trim() : '';
-    const jobHighlight = extractJobDescriptionHighlight(match.job_description);
-    const roleLabel = jobTitle || 'this role';
-    const companyLabel = companyName || 'the hiring team';
+      const formatLabel = (value) =>
+        value
+          .split(/[\s_]+/)
+          .filter(Boolean)
+          .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1).toLowerCase())
+          .join(' ');
 
-    if (jobHighlight) {
-      reasons.push(`Role emphasizes "${jobHighlight}", already reflected in your resume.`);
-    }
-
-    reasons.push(`Your background aligns with what ${companyLabel} expects from ${roleLabel}.`);
-
-    if (!reasons.length) {
-      reasons.push('Your resume aligns with the core requirements of this opening.');
-    }
-
-    return reasons;
-  }, []);
-  const MatchReasonPopover = ({ match, fallbackReasons }) => {
-    const popoverRef = useRef(null);
-    const [verticalOffset, setVerticalOffset] = useState(0);
-    const [aiReasons, setAiReasons] = useState(null);
-    const [aiReasonsSource, setAiReasonsSource] = useState('unknown');
-    const [isLoadingReasons, setIsLoadingReasons] = useState(false);
-    const [hasTriedAI, setHasTriedAI] = useState(false);
-
-    const hasAIReasons = Array.isArray(aiReasons) && aiReasons.length > 0;
-    const shouldShowFallback = !isLoadingReasons && hasTriedAI && !hasAIReasons;
-    const effectiveReasons = hasAIReasons ? aiReasons : shouldShowFallback ? fallbackReasons : [];
-
-    useEffect(() => {
-      let cancelled = false;
-      const shouldCallAI =
-        !hasTriedAI &&
-        match &&
-        typeof match === 'object' &&
-        data &&
-        typeof data === 'object';
-
-      if (!shouldCallAI) {
-        return undefined;
+      if (score !== null && score >= 0) {
+        const qualifier = score >= 85 ? 'exceptional' : score >= 70 ? 'strong' : 'solid';
+        reasons.push(
+          `AI match score of ${score.toFixed(
+            1
+          )} is ${qualifier}, signaling recruiters will quickly see how your achievements map to this opening.`
+        );
       }
 
-      const load = async () => {
-        try {
-          setIsLoadingReasons(true);
-          setHasTriedAI(true);
-          const response = await explainJobFit(data, match);
-          if (!cancelled) {
-            setAiReasons(response.reasons);
-            setAiReasonsSource(response.source || 'unknown');
-          }
-        } catch (_) {
-          // Swallow errors; fallbackReasons will be shown instead.
-          if (!cancelled) {
-            setAiReasons(null);
-            setAiReasonsSource('error');
-          }
-        } finally {
-          if (!cancelled) {
-            setIsLoadingReasons(false);
-          }
+      if (targetPosition) {
+        const roleLabel = jobTitle || 'this role';
+        reasons.push(
+          `The ${roleLabel} brief keeps you squarely on the ${targetPosition} trajectory you called out, so your resume story stays perfectly aligned.`
+        );
+      }
+
+      if (skillHits.length > 0) {
+        reasons.push(
+          `You already lead with ${formatListForSentence(skillHits)}, the exact stack cited in the description - zero retooling required.`
+        );
+      } else if (fallbackSkills.length > 0) {
+        reasons.push(
+          `Signature strengths like ${formatListForSentence(
+            fallbackSkills
+          )} give you punchy talking points for the hiring panel even before tailoring.`
+        );
+      }
+
+      if (jobDepartment) {
+        reasons.push(
+          `You'll partner with the ${jobDepartment} org, which mirrors the environments you've highlighted across your recent experience.`
+        );
+      }
+
+      if (jobRemoteType) {
+        const remoteLower = jobRemoteType.toLowerCase();
+        let remoteSentence = `Team supports a ${remoteLower} schedule`;
+        if (remoteLower.includes('remote')) {
+          remoteSentence = 'Team already operates fully remote, letting you contribute from wherever you are most effective';
+        } else if (remoteLower.includes('hybrid')) {
+          remoteSentence = 'Hybrid rhythm blends on-site collaboration with deep-focus remote days';
+        } else if (remoteLower.includes('onsite') || remoteLower.includes('on-site')) {
+          remoteSentence = 'On-site environment keeps you close to decision makers and speeds up feedback loops';
         }
-      };
+        if (effectiveLocation) {
+          remoteSentence = `${remoteSentence}, aligning with your preferred location (${effectiveLocation}).`;
+        } else if (jobLocation) {
+          remoteSentence = `${remoteSentence} while staying connected to the ${jobLocation} hub.`;
+        } else {
+          remoteSentence = `${remoteSentence}.`;
+        }
+        reasons.push(remoteSentence);
+      }
 
-      load();
+      if (jobLocation && effectiveLocation) {
+        reasons.push(`Located in ${jobLocation}, so you can chase the role without straying from ${effectiveLocation}.`);
+      } else if (jobLocation) {
+        reasons.push(`Located in ${jobLocation}, giving you immediate visibility with the hiring team.`);
+      }
 
-      return () => {
-        cancelled = true;
-      };
-    }, [data, match, hasTriedAI]);
+      if (employmentType) {
+        const displayEmployment = formatLabel(employmentType);
+        reasons.push(
+          `${displayEmployment} arrangement keeps scope clear and signals the kind of stability recruiters value in senior candidates.`
+        );
+      }
+
+      if (jobHighlight) {
+        reasons.push(
+          `The job description highlights "${jobHighlight}", echoing the impact stories you've already quantified in your resume.`
+        );
+      }
+
+      if (companyName) {
+        const roleLabel = jobTitle || 'this role';
+        reasons.push(
+          `${companyName} is actively scaling ${roleLabel}, so your application addresses a live, high-priority need instead of a passive talent pool.`
+        );
+      } else if (jobTitle) {
+        reasons.push(
+          `Hiring managers are prioritizing the ${jobTitle} seat right now, so your tailored resume lands while the opportunity is hot.`
+        );
+      }
+
+      let impactSnippetUsed = false;
+      if (latestRoleInfo && (latestRoleInfo.title || latestRoleInfo.company || latestRoleInfo.summary)) {
+        const latestLabelParts = [latestRoleInfo.title, latestRoleInfo.company].filter(Boolean);
+        const latestLabel = latestLabelParts.join(' at ');
+        const experienceLead = latestLabel ? `${latestLabel} experience` : 'Your recent experience';
+        let experienceSentence = `${experienceLead} mirrors the scope this team owns`;
+        if (latestImpactSnippet) {
+          experienceSentence = `${experienceSentence} - for example, ${latestImpactSnippet}`;
+          impactSnippetUsed = true;
+        }
+        reasons.push(`${experienceSentence}.`);
+      }
+
+      if (!impactSnippetUsed && quantifiedSummary) {
+        reasons.push(
+          `Your resume already quantifies wins: "${quantifiedSummary}", which gives the recruiter a persuasive proof point before they even open your profile.`
+        );
+      }
+
+      if (!reasons.length) {
+        reasons.push('This role aligns with the experience and skills saved in your resume.');
+      }
+
+      return reasons;
+    },
+    [effectiveLocation, resumeSkills, targetPosition, latestRoleInfo, latestImpactSnippet, quantifiedSummary]
+  );
+  const MatchReasonPopover = ({ fallbackReasons }) => {
+    const popoverRef = useRef(null);
+    const [verticalOffset, setVerticalOffset] = useState(0);
+    const effectiveReasons = Array.isArray(fallbackReasons) ? fallbackReasons : [];
 
     useLayoutEffect(() => {
       if (!Array.isArray(effectiveReasons) || effectiveReasons.length === 0) {
@@ -1379,9 +1448,7 @@ function BuilderPage() {
       };
     }, [effectiveReasons]);
 
-    const shouldRender =
-      isLoadingReasons || (Array.isArray(effectiveReasons) && effectiveReasons.length > 0);
-    if (!shouldRender) {
+    if (!Array.isArray(effectiveReasons) || effectiveReasons.length === 0) {
       return null;
     }
 
@@ -1408,39 +1475,16 @@ function BuilderPage() {
           willChange: 'transform',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.35rem' }}>
-          <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-            Why it's a fit
-          </span>
-          {hasTriedAI && !isLoadingReasons && (
-            <span
-              style={{
-                fontSize: '0.68rem',
-                fontWeight: 600,
-                color: aiReasonsSource === 'langchain' ? '#0f172a' : '#6b7280',
-                background: aiReasonsSource === 'langchain' ? '#e0f2fe' : '#f1f5f9',
-                borderRadius: '999px',
-                padding: '0.15rem 0.45rem',
-              }}
-            >
-              {aiReasonsSource === 'langchain' ? 'AI-generated' : 'Standard'}
-            </span>
-          )}
+        <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.35rem' }}>
+          Why it's a fit
         </div>
-        {isLoadingReasons && (
-          <div style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: '0.35rem' }}>
-            Thinking through your fit for this role...
-          </div>
-        )}
-        {Array.isArray(effectiveReasons) && effectiveReasons.length > 0 && (
-          <ul style={{ margin: 0, paddingLeft: '1rem', color: '#0f172a', fontSize: '0.85rem', lineHeight: 1.45 }}>
-            {effectiveReasons.map((reason, idx) => (
-              <li key={`reason-${idx}`} style={{ marginBottom: '0.25rem' }}>
-                {reason}
-              </li>
-            ))}
-          </ul>
-        )}
+        <ul style={{ margin: 0, paddingLeft: '1rem', color: '#0f172a', fontSize: '0.85rem', lineHeight: 1.45 }}>
+          {effectiveReasons.map((reason, idx) => (
+            <li key={`reason-${idx}`} style={{ marginBottom: '0.25rem' }}>
+              {reason}
+            </li>
+          ))}
+        </ul>
       </div>
     );
   };
@@ -3497,10 +3541,7 @@ function BuilderPage() {
                       onMouseLeave={() => setHoveredMatchKey(null)}
                     >
                       {hoveredMatchKey === topMatchKey && (
-                        <MatchReasonPopover
-                          match={topMatch}
-                          fallbackReasons={buildJobFitReasons(topMatch)}
-                        />
+                        <MatchReasonPopover fallbackReasons={buildJobFitReasons(topMatch)} />
                       )}
                       <span style={{ fontSize: '0.75rem', color: '#0ea5e9', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Top match</span>
                       <h4 style={{ margin: 0, fontSize: '1.1rem', color: '#0f172a' }}>{topMatch.job_title || 'Role'}</h4>
@@ -3582,10 +3623,7 @@ function BuilderPage() {
                             onMouseLeave={() => setHoveredMatchKey(null)}
                           >
                             {hoveredMatchKey === matchKey && (
-                              <MatchReasonPopover
-                                match={match}
-                                fallbackReasons={buildJobFitReasons(match)}
-                              />
+                              <MatchReasonPopover fallbackReasons={buildJobFitReasons(match)} />
                             )}
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '0.5rem' }}>
                               <strong style={{ color: '#1e293b', fontSize: '0.95rem' }}>{match.job_title || 'Role'}</strong>
