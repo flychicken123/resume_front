@@ -2413,7 +2413,7 @@ const buildSectionResponse = (sectionKey) => {
               </button>
               <button
                 type="button"
-                className="chat-header-icon"
+                className="chat-header-icon chat-header-icon--minimize"
                 onClick={minimizeChat}
                 aria-label="Minimize chat"
               >
