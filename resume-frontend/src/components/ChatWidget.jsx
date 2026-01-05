@@ -1085,6 +1085,53 @@ const clampLauncherPosition = useCallback(
       }
 
       try {
+        const loweredInput = trimmed.toLowerCase();
+        const allowEmptyOverride = ['remove', 'delete', 'clear'].some((keyword) =>
+          loweredInput.includes(keyword)
+        );
+
+        const normalizeToken = (value) => {
+          if (!value || typeof value !== 'string') {
+            return '';
+          }
+          const lowered = value.toLowerCase();
+          let out = '';
+          for (const char of lowered) {
+            if ((char >= 'a' && char <= 'z') || (char >= '0' && char <= '9')) {
+              out += char;
+            }
+          }
+          return out;
+        };
+
+        const matchesKey = (left, right) => {
+          if (!left || !right) {
+            return false;
+          }
+          return left === right || left.includes(right) || right.includes(left);
+        };
+
+        const resolveStringField = (currentValue, incomingValue) => {
+          const incomingTrimmed = typeof incomingValue === 'string' ? incomingValue.trim() : '';
+          if (incomingTrimmed) {
+            return incomingTrimmed;
+          }
+          if (allowEmptyOverride && typeof incomingValue === 'string') {
+            return '';
+          }
+          return typeof currentValue === 'string' ? currentValue : '';
+        };
+
+        const resolveBooleanField = (currentValue, incomingValue) => {
+          if (typeof incomingValue === 'boolean') {
+            return incomingValue;
+          }
+          if (typeof currentValue === 'boolean') {
+            return currentValue;
+          }
+          return false;
+        };
+
         // Pass existing resume experiences to enable partial updates
         const existingData = resumeData?.experiences ? { experiences: resumeData.experiences } : null;
         const payload = await parseExperienceAI(trimmed, existingData);
@@ -1105,70 +1152,64 @@ const clampLauncherPosition = useCallback(
           parsedExperiences.forEach((incoming) => {
             if (!incoming) return;
 
-            const incomingCompanyKey = (incoming.company || '').trim().toLowerCase();
+            const incomingCompanyKey = normalizeToken(incoming.company);
+            const incomingTitleKey = normalizeToken(incoming.jobTitle);
             let merged = false;
 
-            if (incomingCompanyKey) {
-              const existingIndex = next.findIndex((exp) => {
-                if (!exp) return false;
-                const key = (exp.company || '').trim().toLowerCase();
-                return key && key === incomingCompanyKey;
-              });
-
-              if (existingIndex !== -1) {
-                const current = next[existingIndex] || {};
-
-                const mergeDescriptions = (a, b) => {
-                  const first = (a || '').trim();
-                  const second = (b || '').trim();
-                  if (!first) return second;
-                  if (!second) return first;
-                  if (first.includes(second)) return first;
-                  return `${first}\n\n${second}`;
-                };
-
-                const mergeProjects = (currentProjects, incomingProjects) => {
-                  const base = Array.isArray(currentProjects) ? currentProjects.filter(Boolean) : [];
-                  const incomingList = Array.isArray(incomingProjects) ? incomingProjects.filter(Boolean) : [];
-                  if (!incomingList.length) return base;
-
-                  const seen = new Set(
-                    base
-                      .map((p) => (p && p.projectName ? p.projectName.trim().toLowerCase() : ''))
-                      .filter(Boolean)
-                  );
-
-                  const mergedList = [...base];
-                  incomingList.forEach((proj) => {
-                    if (!proj) return;
-                    const nameKey = (proj.projectName || '').trim().toLowerCase();
-                    if (nameKey && seen.has(nameKey)) {
-                      return;
-                    }
-                    if (nameKey) {
-                      seen.add(nameKey);
-                    }
-                    mergedList.push(proj);
-                  });
-
-                  return mergedList;
-                };
-
-                next[existingIndex] = {
-                  ...current,
-                  jobTitle: current.jobTitle || incoming.jobTitle || '',
-                  company: current.company || incoming.company || '',
-                  city: current.city || incoming.city || '',
-                  state: current.state || incoming.state || '',
-                  startDate: current.startDate || incoming.startDate || '',
-                  endDate: current.endDate || incoming.endDate || '',
-                  currentlyWorking: current.currentlyWorking || incoming.currentlyWorking || false,
-                  description: mergeDescriptions(current.description, incoming.description),
-                  projectsForRole: mergeProjects(current.projectsForRole, incoming.projectsForRole),
-                };
-
-                merged = true;
+            const existingIndex = next.findIndex((exp) => {
+              if (!exp) return false;
+              const existingCompanyKey = normalizeToken(exp.company);
+              if (incomingCompanyKey && existingCompanyKey) {
+                return matchesKey(existingCompanyKey, incomingCompanyKey);
               }
+              const existingTitleKey = normalizeToken(exp.jobTitle);
+              return incomingTitleKey && existingTitleKey && matchesKey(existingTitleKey, incomingTitleKey);
+            });
+
+            if (existingIndex !== -1) {
+              const current = next[existingIndex] || {};
+
+              const mergeProjects = (currentProjects, incomingProjects) => {
+                const base = Array.isArray(currentProjects) ? currentProjects.filter(Boolean) : [];
+                const incomingList = Array.isArray(incomingProjects) ? incomingProjects.filter(Boolean) : [];
+                if (!incomingList.length) return base;
+
+                const seen = new Set(
+                  base
+                    .map((p) => (p && p.projectName ? p.projectName.trim().toLowerCase() : ''))
+                    .filter(Boolean)
+                );
+
+                const mergedList = [...base];
+                incomingList.forEach((proj) => {
+                  if (!proj) return;
+                  const nameKey = (proj.projectName || '').trim().toLowerCase();
+                  if (nameKey && seen.has(nameKey)) {
+                    return;
+                  }
+                  if (nameKey) {
+                    seen.add(nameKey);
+                  }
+                  mergedList.push(proj);
+                });
+
+                return mergedList;
+              };
+
+              next[existingIndex] = {
+                ...current,
+                jobTitle: resolveStringField(current.jobTitle, incoming.jobTitle),
+                company: resolveStringField(current.company, incoming.company),
+                city: resolveStringField(current.city, incoming.city),
+                state: resolveStringField(current.state, incoming.state),
+                startDate: resolveStringField(current.startDate, incoming.startDate),
+                endDate: resolveStringField(current.endDate, incoming.endDate),
+                currentlyWorking: resolveBooleanField(current.currentlyWorking, incoming.currentlyWorking),
+                description: resolveStringField(current.description, incoming.description),
+                projectsForRole: mergeProjects(current.projectsForRole, incoming.projectsForRole),
+              };
+
+              merged = true;
             }
 
             if (!merged) {
