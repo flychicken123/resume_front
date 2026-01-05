@@ -12,6 +12,7 @@ import {
   parseExperienceAI,
   parseProjectsAI,
   parseEducationAI,
+  parseJobDescriptionAI,
 } from '../api';
 import { setLastStep } from '../utils/exitTracking';
 import { useAuth } from '../context/AuthContext';
@@ -1401,11 +1402,33 @@ const clampLauncherPosition = useCallback(
         return { hasUrl: false, hasText: false };
       }
 
-      let intent;
+      // Get existing job descriptions from localStorage
+      let existingEntries = [];
       try {
-        intent = await inferJobIntent(trimmed);
+        if (typeof window !== 'undefined') {
+          const existingRaw = window.localStorage.getItem('jobDescriptions');
+          if (existingRaw) {
+            const parsed = JSON.parse(existingRaw);
+            if (Array.isArray(parsed)) {
+              existingEntries = parsed.map((entry) => ({
+                id: entry.id || '',
+                title: entry.title || '',
+                text: entry.text || '',
+                url: entry.url || '',
+              }));
+            }
+          }
+        }
       } catch (error) {
-        console.error('Job intent parse failed', error);
+        console.error('Failed to parse existing job descriptions', error);
+      }
+
+      // Use backend LangChain to determine action (add/modify/remove)
+      let result;
+      try {
+        result = await parseJobDescriptionAI(trimmed, existingEntries);
+      } catch (error) {
+        console.error('Job description parse failed', error);
         appendBotMessage(
           "I couldn't understand that job posting yet. Please paste the job URL or the full job description text again."
         );
@@ -1413,32 +1436,29 @@ const clampLauncherPosition = useCallback(
         return { hasUrl: false, hasText: false };
       }
 
-      const rawUrl =
-        typeof intent?.url === 'string'
-          ? intent.url.trim()
-          : '';
-      const textFromUser =
-        typeof intent?.job_description_from_text === 'string'
-          ? intent.job_description_from_text.trim()
-          : '';
+      const { action, entries, message, url, text } = result;
 
-      let finalUrl = rawUrl;
-      let finalText = textFromUser;
+      // If action is "none" and no content detected, prompt user
+      if (action === 'none' && !url && !text) {
+        appendBotMessage(
+          "I couldn't find a job posting URL or description to save. Please paste a job URL or the job description text."
+        );
+        setLastStep('chat_job_description_nothing_detected');
+        return { hasUrl: false, hasText: false };
+      }
+
+      // For URLs, try to extract job description from the URL
+      let finalEntries = entries || [];
       let extractedFromUrl = '';
-
-      if (rawUrl) {
+      if (url) {
         try {
           const response = await fetch(`${apiBaseUrl}/api/job/extract`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url: rawUrl }),
+            body: JSON.stringify({ url }),
           });
           const data = await response.json().catch(() => ({}));
-          if (!response.ok) {
-            throw new Error(data?.error || 'Failed to fetch job description from URL.');
-          }
-
-          if (data && typeof data.description === 'string' && data.description.trim()) {
+          if (response.ok && data && typeof data.description === 'string' && data.description.trim()) {
             let formatted = '';
             if (data.title) {
               formatted += `Position: ${data.title}\n`;
@@ -1448,71 +1468,38 @@ const clampLauncherPosition = useCallback(
             }
             formatted += data.description;
             extractedFromUrl = formatted;
+
+            // Update the entry with extracted text
+            if (finalEntries.length > 0) {
+              const targetIdx = action === 'add' ? finalEntries.length - 1 : 0;
+              finalEntries[targetIdx] = {
+                ...finalEntries[targetIdx],
+                text: extractedFromUrl,
+                title: data.title || finalEntries[targetIdx].title || '',
+              };
+            }
           }
         } catch (error) {
           console.error('Job description fetch from URL failed', error);
         }
       }
 
-      if (extractedFromUrl) {
-        finalText = extractedFromUrl;
-      }
-
-      // Update local storage-backed job descriptions so the builder UI stays in sync.
+      // Update local storage with the new entries
       try {
         if (typeof window !== 'undefined') {
-          const existingRaw = window.localStorage.getItem('jobDescriptions');
-          let list = [];
-          if (existingRaw) {
-            try {
-              const parsed = JSON.parse(existingRaw);
-              if (Array.isArray(parsed)) {
-                list = parsed;
-              }
-            } catch (parseErr) {
-              console.error('Failed to parse stored job descriptions in chat', parseErr);
-            }
-          }
-
-          if (!list.length) {
-            list = [
-              {
-                id: `chat-job-${Date.now().toString(36)}`,
-                url: '',
-                text: '',
-              },
-            ];
-          }
-
-          const first = { ...(list[0] || {}) };
-          if (finalUrl) {
-            first.url = finalUrl;
-          }
-          if (finalText) {
-            first.text = finalText;
-          }
-          list[0] = {
-            id:
-              typeof first.id === 'string' && first.id.trim()
-                ? first.id
-                : `chat-job-${Date.now().toString(36)}`,
-            url: typeof first.url === 'string' ? first.url : '',
-            text: typeof first.text === 'string' ? first.text : '',
-          };
-
-          const sanitizedList = list.map((entry) => ({
-            id:
-              typeof entry.id === 'string' && entry.id.trim()
-                ? entry.id
-                : `chat-job-${Date.now().toString(36)}`,
-            url: typeof entry.url === 'string' ? entry.url : '',
-            text: typeof entry.text === 'string' ? entry.text : '',
+          const sanitizedList = finalEntries.map((entry) => ({
+            id: entry.id || `chat-job-${Date.now().toString(36)}`,
+            title: entry.title || '',
+            url: entry.url || '',
+            text: entry.text || '',
           }));
 
           window.localStorage.setItem('jobDescriptions', JSON.stringify(sanitizedList));
 
-          if (finalText) {
-            window.localStorage.setItem('jobDescription', finalText);
+          // Set the primary job description text
+          const primaryText = sanitizedList.length > 0 ? sanitizedList[0].text : '';
+          if (primaryText) {
+            window.localStorage.setItem('jobDescription', primaryText);
           }
 
           window.dispatchEvent(new Event('builder:reload-job-descriptions'));
@@ -1521,41 +1508,40 @@ const clampLauncherPosition = useCallback(
         console.error('Failed to persist job description updates from chat', error);
       }
 
+      // Update resume flow state
+      const primaryText = finalEntries.length > 0 ? finalEntries[0].text : '';
       setResumeFlowState((prev) => ({
         ...prev,
         data: {
           ...prev.data,
-          jobDescription: finalText || prev.data.jobDescription || '',
+          jobDescription: primaryText || prev.data.jobDescription || '',
         },
       }));
 
-      const hasUrl = !!finalUrl;
-      const hasText = !!finalText;
-      const hasExtractedText = !!extractedFromUrl;
+      // Show appropriate message based on action
+      const hasUrl = !!url;
+      const hasText = !!(text || extractedFromUrl);
 
-      if (hasUrl && hasExtractedText) {
-        appendBotMessage(
-          'Got it! I saved the job posting URL and imported the job description into your Job Description step.'
-        );
-        setLastStep('chat_job_description_url_and_text_imported');
-      } else if (hasUrl && hasText && !hasExtractedText) {
-        appendBotMessage(
-          'Got it! I saved the job posting URL and updated your job description text. I was not able to auto-extract details from the site, so I used the text you provided.'
-        );
-        setLastStep('chat_job_description_url_and_user_text_saved');
-      } else if (hasUrl && !hasText) {
-        appendBotMessage(
-          "I saved the job posting URL, but I couldn't extract the job description from that site. Please paste the job description text into the Job Description field."
-        );
-        setLastStep('chat_job_description_url_only_no_extract');
-      } else if (!hasUrl && hasText) {
-        appendBotMessage('Got it! I have updated your job description text.');
-        setLastStep('chat_job_description_text_only_saved');
+      if (action === 'remove') {
+        appendBotMessage(message || 'Got it! I have removed the job description.');
+        setLastStep('chat_job_description_removed');
+      } else if (action === 'modify') {
+        if (hasUrl && extractedFromUrl) {
+          appendBotMessage(message || 'Got it! I updated the job description with content from the URL.');
+        } else {
+          appendBotMessage(message || 'Got it! I have updated your job description.');
+        }
+        setLastStep('chat_job_description_modified');
+      } else if (action === 'add') {
+        if (hasUrl && extractedFromUrl) {
+          appendBotMessage(message || 'Got it! I added a new job description with content from the URL.');
+        } else {
+          appendBotMessage(message || 'Got it! I have added your job description.');
+        }
+        setLastStep('chat_job_description_added');
       } else {
-        appendBotMessage(
-          "I couldn't find a job posting URL or description to save. Please paste a job URL or the job description text."
-        );
-        setLastStep('chat_job_description_nothing_detected');
+        appendBotMessage(message || 'Got it! I have saved your job description.');
+        setLastStep('chat_job_description_saved');
       }
 
       return { hasUrl, hasText };

@@ -522,6 +522,32 @@ export async function parseEducationAI(text, existingData = null) {
   return payload_result;
 }
 
+// Job description parsing via LangChain backend
+export async function parseJobDescriptionAI(text, existingEntries = []) {
+  const payload = { text };
+
+  // Include existing job descriptions if provided to enable smart add/modify/remove
+  if (existingEntries && existingEntries.length > 0) {
+    payload.existing = existingEntries;
+  }
+
+  const res = await fetch(`${API_BASE_URL}/api/assistant/job-description`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error || 'Failed to parse job description with AI.');
+  }
+
+  const payload_result = data && typeof data === 'object' ? data.data || data : {};
+  return payload_result;
+}
+
 export async function generateCoverLetterAI(resumeData, jobDescription = '', companyName = '') {
   const res = await fetchWithAuth(`${API_BASE_URL}/api/cover-letter/generate`, {
     method: "POST",
