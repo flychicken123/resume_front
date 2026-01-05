@@ -2405,7 +2405,9 @@ const buildSectionResponse = (sectionKey) => {
                 aria-label={isLarge ? 'Reduce chat size' : 'Enlarge chat'}
               >
                 <span
-                  className={`chat-header-caret${isLarge ? ' chat-header-caret--expanded' : ''}`}
+                  className={`chat-header-window-icon${
+                    isLarge ? ' chat-header-window-icon--restore' : ''
+                  }`}
                   aria-hidden="true"
                 />
               </button>

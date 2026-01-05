@@ -222,8 +222,6 @@
 
 .chat-header-icon--toggle-size {
   border: none;
-  width: 22px;
-  height: 22px;
   border-radius: 4px;
   padding: 0;
 }
@@ -232,18 +230,30 @@
   border-color: transparent;
 }
 
-.chat-header-caret {
-  width: 0;
-  height: 0;
-  border-top: 5px solid transparent;
-  border-bottom: 5px solid transparent;
-  border-left: 6px solid currentColor;
+.chat-header-window-icon {
+  position: relative;
+  width: 12px;
+  height: 12px;
+  border: 1.6px solid currentColor;
+  border-radius: 1px;
+  box-sizing: border-box;
   display: inline-block;
-  transform-origin: 2px 5px;
 }
 
-.chat-header-caret--expanded {
-  transform: rotate(90deg);
+.chat-header-window-icon--restore::before {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border: 1.6px solid currentColor;
+  border-radius: 1px;
+  top: -4px;
+  left: 4px;
+  box-sizing: border-box;
+}
+
+.chat-header-window-icon--restore {
+  transform: translate(-2px, 2px);
 }
 
 .chat-messages {
