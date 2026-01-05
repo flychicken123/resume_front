@@ -464,6 +464,7 @@ const ChatWidgetInner = () => {
 
   const [isOpen, setIsOpen] = useState(false);
   const [isLarge, setIsLarge] = useState(false);
+  const [aiEnhanced, setAiEnhanced] = useState(true);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
   const [isLoading, setIsLoading] = useState(false);
@@ -2394,6 +2395,15 @@ const buildSectionResponse = (sectionKey) => {
           <div className="chat-header" onPointerDown={handleDialogHeaderPointerDown}>
             <span className="chat-title">HiHired Assistant</span>
             <div className="chat-header-actions">
+              <label className="ai-enhanced-toggle">
+                <input
+                  type="checkbox"
+                  checked={aiEnhanced}
+                  onChange={(e) => setAiEnhanced(e.target.checked)}
+                />
+                <span className="toggle-slider"></span>
+                <span className="toggle-label">AI Enhanced</span>
+              </label>
               <button
                 type="button"
                 className="chat-header-btn"

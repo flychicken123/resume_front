@@ -152,6 +152,53 @@
   border-color: rgba(255, 255, 255, 0.55);
 }
 
+.ai-enhanced-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.ai-enhanced-toggle input {
+  display: none;
+}
+
+.ai-enhanced-toggle .toggle-slider {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+.ai-enhanced-toggle .toggle-slider::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+}
+
+.ai-enhanced-toggle input:checked + .toggle-slider {
+  background: #4ade80;
+}
+
+.ai-enhanced-toggle input:checked + .toggle-slider::after {
+  transform: translateX(16px);
+}
+
+.ai-enhanced-toggle .toggle-label {
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
 .chat-header-icon {
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.45);
