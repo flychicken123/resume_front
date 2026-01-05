@@ -656,7 +656,8 @@ export async function explainJobFit(resumeData, match) {
   if (!res.ok) {
     throw new Error(data?.error || 'Failed to explain job fit.');
   }
-  return Array.isArray(data.reasons) ? data.reasons : [];
+  const payload = data && typeof data === 'object' ? data.data || data : {};
+  return Array.isArray(payload.reasons) ? payload.reasons : [];
 }
 
 // Job Application API functions

@@ -1273,145 +1273,30 @@ function BuilderPage() {
   }, [user, autoLocation]);
 
   const effectiveLocation = (jobMatchesLocation && jobMatchesLocation.trim()) || autoLocation || '';
-  const buildJobFitReasons = useCallback(
-    (match) => {
-      if (!match || typeof match !== 'object') {
-        return [];
-      }
-      const reasons = [];
-      const score = typeof match.match_score === 'number' ? match.match_score : null;
-      const jobDepartment = typeof match.job_department === 'string' ? match.job_department.trim() : '';
-      const jobRemoteType = typeof match.job_remote_type === 'string' ? match.job_remote_type.trim() : '';
-      const jobLocation = typeof match.job_location === 'string' ? match.job_location.trim() : '';
-      const companyName = typeof match.company_name === 'string' ? match.company_name.trim() : '';
-      const jobTitle = typeof match.job_title === 'string' ? match.job_title.trim() : '';
-      const employmentType = typeof match.job_employment_type === 'string' ? match.job_employment_type.trim() : '';
-      const jobHighlight = extractJobDescriptionHighlight(match.job_description);
-      const jobTextLower = typeof match.job_description === 'string' ? match.job_description.toLowerCase() : '';
-      const normalizedResumeSkills = Array.isArray(resumeSkills)
-        ? resumeSkills
-            .map((skill) => (typeof skill === 'string' ? skill.trim() : ''))
-            .filter((skill) => Boolean(skill))
-        : [];
-      const skillHits = jobTextLower
-        ? normalizedResumeSkills.filter((skill) => jobTextLower.includes(skill.toLowerCase())).slice(0, 3)
-        : [];
-      const fallbackSkills = normalizedResumeSkills.slice(0, 3);
+  const buildJobFitReasons = useCallback((match) => {
+    if (!match || typeof match !== 'object') {
+      return [];
+    }
 
-      const formatLabel = (value) =>
-        value
-          .split(/[\s_]+/)
-          .filter(Boolean)
-          .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1).toLowerCase())
-          .join(' ');
+    const reasons = [];
+    const jobTitle = typeof match.job_title === 'string' ? match.job_title.trim() : '';
+    const companyName = typeof match.company_name === 'string' ? match.company_name.trim() : '';
+    const jobHighlight = extractJobDescriptionHighlight(match.job_description);
+    const roleLabel = jobTitle || 'this role';
+    const companyLabel = companyName || 'the hiring team';
 
-      if (score !== null && score >= 0) {
-        const qualifier = score >= 85 ? 'exceptional' : score >= 70 ? 'strong' : 'solid';
-        reasons.push(
-          `AI match score of ${score.toFixed(1)} is ${qualifier}, signaling recruiters will quickly see how your achievements map to this opening.`
-        );
-      }
+    if (jobHighlight) {
+      reasons.push(`Role emphasizes "${jobHighlight}", already reflected in your resume.`);
+    }
 
-      if (targetPosition) {
-        const roleLabel = jobTitle || 'this role';
-        reasons.push(
-          `The ${roleLabel} brief keeps you squarely on the ${targetPosition} trajectory you called out, so your resume story stays perfectly aligned.`
-        );
-      }
+    reasons.push(`Your background aligns with what ${companyLabel} expects from ${roleLabel}.`);
 
-      if (skillHits.length > 0) {
-        reasons.push(
-          `You already lead with ${formatListForSentence(skillHits)}, the exact stack cited in the description—zero retooling required.`
-        );
-      } else if (fallbackSkills.length > 0) {
-        reasons.push(
-          `Signature strengths like ${formatListForSentence(fallbackSkills)} give you punchy talking points for the hiring panel even before tailoring.`
-        );
-      }
+    if (!reasons.length) {
+      reasons.push('Your resume aligns with the core requirements of this opening.');
+    }
 
-      if (jobDepartment) {
-        reasons.push(
-          `You'll partner with the ${jobDepartment} org, which mirrors the environments you've highlighted across your recent experience.`
-        );
-      }
-
-      if (jobRemoteType) {
-        const remoteLower = jobRemoteType.toLowerCase();
-        let remoteSentence = `Team supports a ${remoteLower} schedule`;
-        if (remoteLower.includes('remote')) {
-          remoteSentence = 'Team already operates fully remote, letting you contribute from wherever you are most effective';
-        } else if (remoteLower.includes('hybrid')) {
-          remoteSentence = 'Hybrid rhythm blends on-site collaboration with deep-focus remote days';
-        } else if (remoteLower.includes('onsite') || remoteLower.includes('on-site')) {
-          remoteSentence = 'On-site environment keeps you close to decision makers and speeds up feedback loops';
-        }
-        if (effectiveLocation) {
-          remoteSentence = `${remoteSentence}, aligning with your preferred location (${effectiveLocation}).`;
-        } else if (jobLocation) {
-          remoteSentence = `${remoteSentence} while staying connected to the ${jobLocation} hub.`;
-        } else {
-          remoteSentence = `${remoteSentence}.`;
-        }
-        reasons.push(remoteSentence);
-      }
-
-      if (jobLocation && effectiveLocation) {
-        reasons.push(`Located in ${jobLocation}, so you can chase the role without straying from ${effectiveLocation}.`);
-      } else if (jobLocation) {
-        reasons.push(`Located in ${jobLocation}, giving you immediate visibility with the hiring team.`);
-      }
-
-      if (employmentType) {
-        const displayEmployment = formatLabel(employmentType);
-        reasons.push(
-          `${displayEmployment} arrangement keeps scope clear and signals the kind of stability recruiters value in senior candidates.`
-        );
-      }
-
-      if (jobHighlight) {
-        reasons.push(
-          `The job description highlights "${jobHighlight}", echoing the impact stories you've already quantified in your resume.`
-        );
-      }
-
-      if (companyName) {
-        const roleLabel = jobTitle || 'this role';
-        reasons.push(
-          `${companyName} is actively scaling ${roleLabel}, so your application addresses a live, high-priority need instead of a passive talent pool.`
-        );
-      } else if (jobTitle) {
-        reasons.push(
-          `Hiring managers are prioritizing the ${jobTitle} seat right now, so your tailored resume lands while the opportunity is hot.`
-        );
-      }
-
-      let impactSnippetUsed = false;
-      if (latestRoleInfo && (latestRoleInfo.title || latestRoleInfo.company || latestRoleInfo.summary)) {
-        const latestLabelParts = [latestRoleInfo.title, latestRoleInfo.company].filter(Boolean);
-        const latestLabel = latestLabelParts.join(' at ');
-        const experienceLead = latestLabel ? `${latestLabel} experience` : 'Your recent experience';
-        let experienceSentence = `${experienceLead} mirrors the scope this team owns`;
-        if (latestImpactSnippet) {
-          experienceSentence = `${experienceSentence} — for example, ${latestImpactSnippet}`;
-          impactSnippetUsed = true;
-        }
-        reasons.push(`${experienceSentence}.`);
-      }
-
-      if (!impactSnippetUsed && quantifiedSummary) {
-        reasons.push(
-          `Your resume already quantifies wins: "${quantifiedSummary}", which gives the recruiter a persuasive proof point before they even open your profile.`
-        );
-      }
-
-      if (!reasons.length) {
-        reasons.push('This role aligns with the experience and skills saved in your resume.');
-      }
-
-      return reasons;
-    },
-    [effectiveLocation, resumeSkills, targetPosition, latestRoleInfo, latestImpactSnippet, quantifiedSummary]
-  );
+    return reasons;
+  }, []);
   const MatchReasonPopover = ({ match, fallbackReasons }) => {
     const popoverRef = useRef(null);
     const [verticalOffset, setVerticalOffset] = useState(0);
@@ -1419,7 +1304,9 @@ function BuilderPage() {
     const [isLoadingReasons, setIsLoadingReasons] = useState(false);
     const [hasTriedAI, setHasTriedAI] = useState(false);
 
-    const effectiveReasons = Array.isArray(aiReasons) && aiReasons.length > 0 ? aiReasons : fallbackReasons;
+    const hasAIReasons = Array.isArray(aiReasons) && aiReasons.length > 0;
+    const shouldShowFallback = !isLoadingReasons && hasTriedAI && !hasAIReasons;
+    const effectiveReasons = hasAIReasons ? aiReasons : shouldShowFallback ? fallbackReasons : [];
 
     useEffect(() => {
       let cancelled = false;
@@ -1489,7 +1376,9 @@ function BuilderPage() {
       };
     }, [effectiveReasons]);
 
-    if (!Array.isArray(effectiveReasons) || effectiveReasons.length === 0) {
+    const shouldRender =
+      isLoadingReasons || (Array.isArray(effectiveReasons) && effectiveReasons.length > 0);
+    if (!shouldRender) {
       return null;
     }
 
@@ -1524,13 +1413,15 @@ function BuilderPage() {
             Thinking through your fit for this role...
           </div>
         )}
-        <ul style={{ margin: 0, paddingLeft: '1rem', color: '#0f172a', fontSize: '0.85rem', lineHeight: 1.45 }}>
-          {effectiveReasons.map((reason, idx) => (
-            <li key={`reason-${idx}`} style={{ marginBottom: '0.25rem' }}>
-              {reason}
-            </li>
-          ))}
-        </ul>
+        {Array.isArray(effectiveReasons) && effectiveReasons.length > 0 && (
+          <ul style={{ margin: 0, paddingLeft: '1rem', color: '#0f172a', fontSize: '0.85rem', lineHeight: 1.45 }}>
+            {effectiveReasons.map((reason, idx) => (
+              <li key={`reason-${idx}`} style={{ marginBottom: '0.25rem' }}>
+                {reason}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     );
   };
