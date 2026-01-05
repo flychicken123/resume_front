@@ -2400,11 +2400,14 @@ const buildSectionResponse = (sectionKey) => {
               </button>
               <button
                 type="button"
-                className="chat-header-icon"
+                className="chat-header-icon chat-header-icon--toggle-size"
                 onClick={toggleSize}
                 aria-label={isLarge ? 'Reduce chat size' : 'Enlarge chat'}
               >
-                {isLarge ? 'Shrink' : 'Expand'}
+                <span
+                  className={`chat-header-caret${isLarge ? ' chat-header-caret--expanded' : ''}`}
+                  aria-hidden="true"
+                />
               </button>
               <button
                 type="button"
