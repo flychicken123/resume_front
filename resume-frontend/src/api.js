@@ -250,13 +250,13 @@ export async function autoGenerateSkillsAI(resumeData, jobDescription = '', exis
     throw new Error(raw?.error || 'AI skills extraction failed.');
   }
 
-  const payload = raw && typeof raw === 'object' ? raw.data || raw : {};
+  const responseData = raw && typeof raw === 'object' ? raw.data || raw : {};
 
-  if (payload && typeof payload.skillsText === 'string') {
-    return payload.skillsText;
+  if (responseData && typeof responseData.skillsText === 'string') {
+    return responseData.skillsText;
   }
-  if (payload && Array.isArray(payload.skills)) {
-    return payload.skills.join(', ');
+  if (responseData && Array.isArray(responseData.skills)) {
+    return responseData.skills.join(', ');
   }
 
   return '';
@@ -376,9 +376,9 @@ export async function optimizeProjectAI(projectData, jobDescription = '', existi
     throw new Error(raw?.error || 'AI project optimization failed.');
   }
 
-  const payload = raw && typeof raw === 'object' ? raw.data || raw : {};
+  const responseData = raw && typeof raw === 'object' ? raw.data || raw : {};
   // Fall back to original text if backend returns nothing
-  return payload.optimizedProject || projectData || '';
+  return responseData.optimizedProject || projectData || '';
 }
 
 export async function improveProjectGrammarAI(projectData) {
@@ -460,6 +460,62 @@ export async function parseExperienceAI(text, existingData = null) {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new Error(data?.error || 'Failed to parse experience with AI.');
+  }
+
+  const payload_result = data && typeof data === 'object' ? data.data || data : {};
+  return payload_result;
+}
+
+// Projects parsing via LangChain backend
+export async function parseProjectsAI(text, existingData = null) {
+  const payload = { text };
+
+  // Include existing projects data if provided to enable partial updates
+  if (existingData && existingData.projects) {
+    payload.existing = {
+      projects: existingData.projects
+    };
+  }
+
+  const res = await fetch(`${API_BASE_URL}/api/assistant/projects`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error || 'Failed to parse projects with AI.');
+  }
+
+  const payload_result = data && typeof data === 'object' ? data.data || data : {};
+  return payload_result;
+}
+
+// Education parsing via LangChain backend
+export async function parseEducationAI(text, existingData = null) {
+  const payload = { text };
+
+  // Include existing education data if provided to enable partial updates
+  if (existingData && existingData.education) {
+    payload.existing = {
+      education: existingData.education
+    };
+  }
+
+  const res = await fetch(`${API_BASE_URL}/api/assistant/education`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error || 'Failed to parse education with AI.');
   }
 
   const payload_result = data && typeof data === 'object' ? data.data || data : {};
