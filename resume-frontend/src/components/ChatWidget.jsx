@@ -1089,6 +1089,24 @@ const clampLauncherPosition = useCallback(
         const allowEmptyOverride = ['remove', 'delete', 'clear'].some((keyword) =>
           loweredInput.includes(keyword)
         );
+        const normalizedInput = loweredInput.split('-').join(' ').split('_').join(' ');
+        const normalizedInputSpaced = normalizedInput.split(' ').filter(Boolean).join(' ');
+
+        const getRemoteIntent = (value) => {
+          if (!value) {
+            return null;
+          }
+          const negativePhrases = ['not remote', 'on site', 'onsite', 'in person', 'hybrid'];
+          if (negativePhrases.some((phrase) => value.includes(phrase))) {
+            return false;
+          }
+          if (value.includes('remote')) {
+            return true;
+          }
+          return null;
+        };
+
+        const remoteIntent = getRemoteIntent(normalizedInputSpaced);
 
         const normalizeToken = (value) => {
           if (!value || typeof value !== 'string') {
@@ -1125,6 +1143,19 @@ const clampLauncherPosition = useCallback(
         const resolveBooleanField = (currentValue, incomingValue) => {
           if (typeof incomingValue === 'boolean') {
             return incomingValue;
+          }
+          if (typeof currentValue === 'boolean') {
+            return currentValue;
+          }
+          return false;
+        };
+
+        const resolveRemoteField = (currentValue) => {
+          if (remoteIntent === true) {
+            return true;
+          }
+          if (remoteIntent === false) {
+            return false;
           }
           if (typeof currentValue === 'boolean') {
             return currentValue;
@@ -1202,6 +1233,7 @@ const clampLauncherPosition = useCallback(
                 company: resolveStringField(current.company, incoming.company),
                 city: resolveStringField(current.city, incoming.city),
                 state: resolveStringField(current.state, incoming.state),
+                remote: resolveRemoteField(current.remote),
                 startDate: resolveStringField(current.startDate, incoming.startDate),
                 endDate: resolveStringField(current.endDate, incoming.endDate),
                 currentlyWorking: resolveBooleanField(current.currentlyWorking, incoming.currentlyWorking),
@@ -1213,7 +1245,10 @@ const clampLauncherPosition = useCallback(
             }
 
             if (!merged) {
-              next.push(incoming);
+              next.push({
+                ...incoming,
+                remote: resolveRemoteField(incoming.remote),
+              });
             }
           });
 
