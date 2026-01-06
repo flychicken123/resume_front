@@ -15,6 +15,7 @@ import {
   parseJobDescriptionAI,
   parseSkillsAI,
   generateSkillsAI,
+  transcribeVoiceAI,
 } from '../api';
 import { setLastStep } from '../utils/exitTracking';
 import { useAuth } from '../context/AuthContext';
@@ -702,47 +703,92 @@ const clampLauncherPosition = useCallback(
     }
   };
 
-  const handleVoiceInput = useCallback(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
+  const mediaRecorderRef = React.useRef(null);
+  const audioChunksRef = React.useRef([]);
+
+  const handleVoiceInput = useCallback(async () => {
+    // If already listening, stop recording
+    if (isListening && mediaRecorderRef.current) {
+      mediaRecorderRef.current.stop();
+      return;
+    }
+
+    // Check for MediaRecorder support
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       appendBotMessage('Voice input is not supported in your browser. Please try Chrome or Edge.');
       return;
     }
 
-    if (isListening) {
-      setIsListening(false);
-      return;
-    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-    const recognition = new SpeechRecognition();
-    recognition.lang = 'en-US';
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
+      // Determine supported mime type
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+        ? 'audio/webm;codecs=opus'
+        : MediaRecorder.isTypeSupported('audio/webm')
+        ? 'audio/webm'
+        : 'audio/mp4';
 
-    recognition.onstart = () => {
+      const mediaRecorder = new MediaRecorder(stream, { mimeType });
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        setIsListening(false);
+        stream.getTracks().forEach((track) => track.stop());
+
+        if (audioChunksRef.current.length === 0) {
+          return;
+        }
+
+        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
+
+        try {
+          appendBotMessage('Transcribing your voice...');
+          const result = await transcribeVoiceAI(audioBlob);
+
+          if (result.success && result.text) {
+            setInput((prev) => (prev ? prev + ' ' + result.text : result.text));
+            // Remove the "Transcribing..." message
+            setMessages((prev) => prev.filter((msg) => msg.text !== 'Transcribing your voice...'));
+          } else if (result.error) {
+            setMessages((prev) => prev.filter((msg) => msg.text !== 'Transcribing your voice...'));
+            appendBotMessage(`Could not transcribe: ${result.error}`);
+          } else {
+            setMessages((prev) => prev.filter((msg) => msg.text !== 'Transcribing your voice...'));
+            appendBotMessage('Could not detect any speech. Please try again.');
+          }
+        } catch (error) {
+          console.error('Voice transcription error:', error);
+          setMessages((prev) => prev.filter((msg) => msg.text !== 'Transcribing your voice...'));
+          appendBotMessage('Failed to transcribe voice. Please try again.');
+        }
+      };
+
+      mediaRecorder.onerror = (event) => {
+        console.error('MediaRecorder error:', event.error);
+        setIsListening(false);
+        stream.getTracks().forEach((track) => track.stop());
+        appendBotMessage('Recording failed. Please try again.');
+      };
+
+      mediaRecorder.start();
       setIsListening(true);
-    };
-
-    recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript;
-      setInput((prev) => (prev ? prev + ' ' + transcript : transcript));
-      setIsListening(false);
-    };
-
-    recognition.onerror = (event) => {
-      console.error('Speech recognition error:', event.error);
-      setIsListening(false);
-      if (event.error === 'not-allowed') {
+    } catch (error) {
+      console.error('Microphone access error:', error);
+      if (error.name === 'NotAllowedError') {
         appendBotMessage('Microphone access was denied. Please allow microphone access to use voice input.');
+      } else {
+        appendBotMessage('Could not access microphone. Please check your settings.');
       }
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
-    };
-
-    recognition.start();
-  }, [isListening, appendBotMessage]);
+    }
+  }, [isListening, appendBotMessage, setMessages]);
 
   const sessionId = useMemo(() => generateSessionId(), []);
 

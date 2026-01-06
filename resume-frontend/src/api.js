@@ -623,6 +623,25 @@ export async function generateSkillsAI(resumeData, existingSkills = []) {
   return payload_result;
 }
 
+export async function transcribeVoiceAI(audioBlob) {
+  const formData = new FormData();
+  formData.append('audio', audioBlob, 'recording.webm');
+  formData.append('mimeType', audioBlob.type || 'audio/webm');
+
+  const res = await fetch(`${API_BASE_URL}/api/assistant/voice/transcribe`, {
+    method: 'POST',
+    body: formData,
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error || 'Failed to transcribe voice.');
+  }
+
+  const payload_result = data && typeof data === 'object' ? data.data || data : {};
+  return payload_result;
+}
+
 export async function generateCoverLetterAI(resumeData, jobDescription = '', companyName = '') {
   const res = await fetchWithAuth(`${API_BASE_URL}/api/cover-letter/generate`, {
     method: "POST",
