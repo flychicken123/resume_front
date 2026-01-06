@@ -20,7 +20,13 @@ import { setLastStep } from "../utils/exitTracking";
 import SEO from "./SEO";
 import { trackReferrer, trackBuilderStart, trackCTAClick } from "./Analytics";
 import TRUSTED_COMPANIES from "../constants/trustedCompanies";
-import { BUILDER_TARGET_STEP_KEY, BUILDER_TARGET_JOB_MATCHES, BUILDER_TARGET_IMPORT } from "../constants/builder";
+import {
+  BUILDER_TARGET_STEP_KEY,
+  BUILDER_TARGET_JOB_MATCHES,
+  BUILDER_TARGET_IMPORT,
+  BUILDER_LAST_STEP_KEY,
+  BUILDER_IMPORT_STEP_ID,
+} from "../constants/builder";
 import geoGuides from "../constants/geoGuides";
 
 const HERO_FEATURES = [
@@ -121,6 +127,9 @@ const Home = () => {
     }
     if (targetStep) {
       window.localStorage.setItem(BUILDER_TARGET_STEP_KEY, targetStep);
+      if (targetStep === BUILDER_TARGET_IMPORT) {
+        window.localStorage.setItem(BUILDER_LAST_STEP_KEY, String(BUILDER_IMPORT_STEP_ID));
+      }
     } else {
       window.localStorage.removeItem(BUILDER_TARGET_STEP_KEY);
     }
