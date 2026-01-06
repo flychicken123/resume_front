@@ -548,6 +548,81 @@ export async function parseJobDescriptionAI(text, existingEntries = []) {
   return payload_result;
 }
 
+export async function parseSkillsAI(text, existingSkills = []) {
+  const payload = { text };
+
+  // Include existing skills if provided to enable add/remove/replace
+  if (existingSkills && existingSkills.length > 0) {
+    payload.existing = existingSkills;
+  }
+
+  const res = await fetch(`${API_BASE_URL}/api/assistant/skills`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error || 'Failed to parse skills with AI.');
+  }
+
+  const payload_result = data && typeof data === 'object' ? data.data || data : {};
+  return payload_result;
+}
+
+export async function generateSkillsAI(resumeData, existingSkills = []) {
+  const payload = {
+    existing: existingSkills,
+  };
+
+  // Extract experience, projects, and education from resumeData
+  if (resumeData?.experiences) {
+    payload.experience = resumeData.experiences.map(exp => ({
+      jobTitle: exp.jobTitle || '',
+      company: exp.company || '',
+      description: exp.description || '',
+      startDate: exp.startDate || '',
+      endDate: exp.endDate || '',
+    }));
+  }
+
+  if (resumeData?.projects) {
+    payload.projects = resumeData.projects.map(proj => ({
+      projectName: proj.projectName || '',
+      description: proj.description || '',
+      technologies: proj.technologies || '',
+    }));
+  }
+
+  if (resumeData?.education) {
+    payload.education = resumeData.education.map(edu => ({
+      degree: edu.degree || '',
+      field: edu.field || '',
+      school: edu.school || '',
+      graduationYear: edu.graduationYear || '',
+    }));
+  }
+
+  const res = await fetch(`${API_BASE_URL}/api/assistant/skills/generate`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error || 'Failed to generate skills with AI.');
+  }
+
+  const payload_result = data && typeof data === 'object' ? data.data || data : {};
+  return payload_result;
+}
+
 export async function generateCoverLetterAI(resumeData, jobDescription = '', companyName = '') {
   const res = await fetchWithAuth(`${API_BASE_URL}/api/cover-letter/generate`, {
     method: "POST",
