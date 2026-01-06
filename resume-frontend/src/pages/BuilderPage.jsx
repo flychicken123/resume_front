@@ -5,7 +5,13 @@ import { useAuth } from '../context/AuthContext';
 import { useResume } from '../context/ResumeContext';
 import { useFeedback } from '../context/FeedbackContext';
 import { setLastStep } from '../utils/exitTracking';
-import { BUILDER_TARGET_STEP_KEY, BUILDER_TARGET_JOB_MATCHES, BUILDER_TARGET_TEMPLATE, BUILDER_TARGET_IMPORT } from '../constants/builder';
+import {
+  BUILDER_TARGET_STEP_KEY,
+  BUILDER_TARGET_JOB_MATCHES,
+  BUILDER_TARGET_TEMPLATE,
+  BUILDER_TARGET_IMPORT,
+  BUILDER_LAST_STEP_KEY,
+} from '../constants/builder';
 import {
   createJobDescriptionEntry,
   ensureJobDescriptionList,
@@ -719,7 +725,6 @@ const POPULAR_LOCATION_GROUPS = [
 const POPULAR_LOCATION_VALUES = POPULAR_LOCATION_GROUPS.flatMap((group) => group.options);
 
 const TEMPLATE_SECTION_HASHES = new Set(['#template', '#format', '#template-format']);
-const BUILDER_LAST_STEP_KEY = 'builderLastStep';
 
 const steps = [
   "Import Resume",

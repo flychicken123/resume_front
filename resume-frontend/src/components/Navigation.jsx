@@ -3,7 +3,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { setLastStep } from '../utils/exitTracking';
 import './Navigation.css';
-import { BUILDER_TARGET_STEP_KEY, BUILDER_TARGET_JOB_MATCHES, BUILDER_TARGET_IMPORT } from '../constants/builder';
+import {
+  BUILDER_TARGET_STEP_KEY,
+  BUILDER_TARGET_JOB_MATCHES,
+  BUILDER_TARGET_IMPORT,
+  BUILDER_LAST_STEP_KEY,
+  BUILDER_IMPORT_STEP_ID,
+} from '../constants/builder';
 
 const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setShowIntegratedModal }) => {
   const navigate = useNavigate();
@@ -25,6 +31,9 @@ const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setS
     if (typeof window !== 'undefined') {
       if (targetStep) {
         window.localStorage.setItem(BUILDER_TARGET_STEP_KEY, targetStep);
+        if (targetStep === BUILDER_TARGET_IMPORT) {
+          window.localStorage.setItem(BUILDER_LAST_STEP_KEY, String(BUILDER_IMPORT_STEP_ID));
+        }
       } else {
         window.localStorage.removeItem(BUILDER_TARGET_STEP_KEY);
       }
