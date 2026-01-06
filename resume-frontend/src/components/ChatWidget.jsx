@@ -13,6 +13,8 @@ import {
   parseProjectsAI,
   parseEducationAI,
   parseJobDescriptionAI,
+  parseSkillsAI,
+  generateSkillsAI,
 } from '../api';
 import { setLastStep } from '../utils/exitTracking';
 import { useAuth } from '../context/AuthContext';
@@ -1469,6 +1471,87 @@ const clampLauncherPosition = useCallback(
     [appendBotMessage, resumeData, setLastStep, setResumeFlowState, updateResume]
   );
 
+  const applySkillsFromAI = useCallback(
+    async (inputText, options = {}) => {
+      const { promptIfEmpty = true } = options;
+      const trimmed = (inputText || '').trim();
+      if (!trimmed) {
+        return false;
+      }
+
+      // Get existing skills as array
+      const existingSkillsStr = resumeData?.skills || '';
+      const existingSkills = existingSkillsStr
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+
+      try {
+        // Use backend LangChain to parse skills
+        const payload = await parseSkillsAI(trimmed, existingSkills);
+
+        // Check if user wants to generate skills from resume data
+        if (payload.action === 'generate') {
+          // Call generate skills endpoint
+          const generatePayload = await generateSkillsAI(resumeData, existingSkills);
+          const normalized = (generatePayload.skills || []).join(', ');
+          updateResume((prev) => ({ ...prev, skills: normalized }));
+          setResumeFlowState((prev) => ({
+            ...prev,
+            data: { ...prev.data, skills: normalized },
+          }));
+          appendBotMessage(generatePayload.message || `Skills generated:\n${normalized}`);
+          setLastStep('chat_resume_flow_skills_generated');
+          return true;
+        }
+
+        // For add/remove/replace actions
+        const skills = payload.skills || [];
+        if (!skills.length && payload.action === 'none') {
+          if (promptIfEmpty) {
+            appendBotMessage(
+              'I can help with your skills. Try something like: "I know Python, JavaScript, and React" or "generate skills from my experience".'
+            );
+          }
+          return false;
+        }
+
+        const normalized = skills.join(', ');
+        updateResume((prev) => ({ ...prev, skills: normalized }));
+        setResumeFlowState((prev) => ({
+          ...prev,
+          data: { ...prev.data, skills: normalized },
+        }));
+        appendBotMessage(payload.message || `Skills updated:\n${normalized}`);
+        setLastStep('chat_resume_flow_skills_saved');
+        return true;
+      } catch (error) {
+        console.error('AI skills parse failed', error);
+        // Fallback to simple comma split
+        const normalized = trimmed
+          .split(',')
+          .map((skill) => skill.trim())
+          .filter(Boolean)
+          .join(', ');
+        if (normalized) {
+          updateResume((prev) => ({ ...prev, skills: normalized }));
+          setResumeFlowState((prev) => ({
+            ...prev,
+            data: { ...prev.data, skills: normalized },
+          }));
+          appendBotMessage(`Skills updated:\n${normalized}`);
+          setLastStep('chat_resume_flow_skills_saved');
+          return true;
+        }
+        if (promptIfEmpty) {
+          appendBotMessage("I couldn't parse that into skills. Try listing your skills separated by commas.");
+        }
+        return false;
+      }
+    },
+    [appendBotMessage, resumeData, setLastStep, setResumeFlowState, updateResume]
+  );
+
   const applyJobDescriptionFromChat = useCallback(
     async (inputText) => {
       const trimmed = (inputText || '').trim();
@@ -2020,6 +2103,16 @@ const clampLauncherPosition = useCallback(
       }
       case 'jobDescription': {
         await applyJobDescriptionFromChat(trimmed);
+        setIsLoading(false);
+        return;
+      }
+      case 'skills': {
+        const updated = await applySkillsFromAI(trimmed, { promptIfEmpty: true });
+        if (!updated) {
+          // applySkillsFromAI already prompted the user.
+          setIsLoading(false);
+          return;
+        }
         setIsLoading(false);
         return;
       }
