@@ -72,7 +72,7 @@ const RESUME_FLOW_PROMPTS = {
   education:
     'Fill in the Education section with degree, school, location, and graduation info. Or tell me about your education in a sentence or two here and I’ll help map it into the Education section.',
   skills:
-    'List your core skills and tools in the Skills section (separate them with commas). You can also paste a rough skills list into chat and I’ll tidy it into a clean, structured list for you.',
+    'Tell me your skills (e.g., "I know Python, React, and AWS") or say "generate skills from my experience" and I\'ll create a list based on your resume.',
   summary:
     'Write a concise Summary/Elevator Pitch at the top (2-3 sentences). Or describe your background in your own words here and I’ll help you turn it into a polished summary using AI.',
 };
@@ -93,7 +93,7 @@ const RESUME_FLOW_STEP_RESPONSES = {
   education:
     'Share your degree, school, and graduation details in a sentence or two and I’ll help shape them into a structured Education entry.',
   skills:
-    'Paste or type your skills in any rough format (comma separated, lines, or a paragraph) and I’ll clean them up into a tidy Skills list.',
+    'List your skills naturally (e.g., "I know Python, React, AWS") or ask me to generate them from your experience and projects.',
   summary:
     'Tell me about your background, strengths, and target role in natural language and I’ll help you craft a concise, polished summary.',
 };
@@ -1544,7 +1544,7 @@ const clampLauncherPosition = useCallback(
           return true;
         }
         if (promptIfEmpty) {
-          appendBotMessage("I couldn't parse that into skills. Try listing your skills separated by commas.");
+          appendBotMessage("I couldn't parse that into skills. Try something like \"I know Python, React, and AWS\" or \"generate skills from my experience\".");
         }
         return false;
       }
