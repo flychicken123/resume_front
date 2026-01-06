@@ -1780,6 +1780,7 @@ const clampLauncherPosition = useCallback(
       {
         sender: 'bot',
         text: "You're all set! You finished the resume build process in chat. Keep working inside the builder, and let me know if there's anything else I can help with.",
+        buttons: [{ label: 'Start New Session', value: 'start_new_session' }],
       },
     ]);
     setLastStep('chat_resume_flow_complete');
@@ -2408,6 +2409,10 @@ const buildSectionResponse = (sectionKey) => {
 
   const handleMessageButtonClick = (btn) => {
     if (!btn) {
+      return;
+    }
+    if (btn.value === 'start_new_session') {
+      handleStartNewSession();
       return;
     }
     if (btn.value === 'resume_flow_next') {
