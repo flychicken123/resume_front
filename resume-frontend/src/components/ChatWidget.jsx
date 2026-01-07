@@ -480,6 +480,7 @@ const ChatWidgetInner = () => {
   const [launcherPosition, setLauncherPosition] = useState({ top: 24, left: 24 });
   const apiBaseUrl = useMemo(() => getAPIBaseURL(), []);
   const inputRef = React.useRef(null);
+  const messagesEndRef = React.useRef(null);
   const launcherPositionRef = React.useRef(launcherPosition);
   const dragStateRef = React.useRef(null);
   const clickSuppressedRef = React.useRef(false);
@@ -546,6 +547,13 @@ const clampLauncherPosition = useCallback(
   React.useEffect(() => {
     launcherPositionRef.current = launcherPosition;
   }, [launcherPosition]);
+
+  // Auto-scroll to bottom when messages change
+  React.useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
 
   React.useEffect(() => {
     if (typeof window === 'undefined') {
@@ -2830,6 +2838,7 @@ const buildSectionResponse = (sectionKey) => {
               );
             })}
             {isLoading && <div className="chat-message bot typing">HiHired assistant is typing...</div>}
+            <div ref={messagesEndRef} />
           </div>
           <form className="chat-input" onSubmit={handleSubmit}>
             <textarea
