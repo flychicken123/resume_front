@@ -2570,6 +2570,7 @@ const buildSectionResponse = (sectionKey) => {
           session_id: sessionId,
           page_path: pagePath,
           user_email: user?.email || userEmail || '',
+          resume_data: resumeData || {},
         }),
       });
 
