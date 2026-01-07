@@ -92,8 +92,8 @@
 }
 
 .chat-panel {
-  width: min(420px, calc(100vw - 32px));
-  height: 520px;
+  width: min(500px, calc(100vw - 32px));
+  height: 620px;
   background: #fff;
   border-radius: 18px;
   box-shadow: 0 20px 60px rgba(15, 23, 42, 0.25);
@@ -102,13 +102,13 @@
   overflow: hidden;
   margin-bottom: 12px;
   resize: both;
-  min-width: 280px;
-  min-height: 320px;
+  min-width: 320px;
+  min-height: 400px;
 }
 
 .chat-panel.chat-panel--large {
-  width: min(620px, calc(100vw - 32px));
-  height: 640px;
+  width: min(720px, calc(100vw - 32px));
+  height: 750px;
 }
 
 .chat-header {
