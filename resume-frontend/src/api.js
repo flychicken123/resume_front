@@ -623,6 +623,27 @@ export async function generateSkillsAI(resumeData, existingSkills = []) {
   return payload_result;
 }
 
+export async function analyzeResumeModification(text, existingData = {}) {
+  const res = await fetch(`${API_BASE_URL}/api/assistant/resume/modify`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      text,
+      existingData,
+    }),
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error || 'Failed to analyze modification request.');
+  }
+
+  const payload_result = data && typeof data === 'object' ? data.data || data : {};
+  return payload_result;
+}
+
 export async function transcribeVoiceAI(audioBlob) {
   const formData = new FormData();
   formData.append('audio', audioBlob, 'recording.webm');
