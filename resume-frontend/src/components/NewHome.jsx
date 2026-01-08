@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import './NewHome.css';
 import newHomeContent from '../constants/newHomeContent';
 import TRUSTED_COMPANIES from '../constants/trustedCompanies';
+import TeamSection from './TeamSection';
 
 const NewHome = ({
   user,
