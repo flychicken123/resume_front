@@ -14,6 +14,7 @@ const teamMembers = [
     role: "Co-Founder & CTO",
     summary: "Leads product engineering and AI systems.",
     highlights: ["Focus on resume intelligence", "Tech Lead in Microsoft's infrastructure team"],
+    linkedin: "https://www.linkedin.com/in/h-w-b0b10317a/",
   },
 ];
 
