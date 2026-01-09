@@ -336,7 +336,7 @@ export const ResumeProvider = ({ children }) => {
           projectsForRole: Array.isArray(e.projectsForRole)
             ? e.projectsForRole.map((p) => ({
                 projectName: p.projectName || '',
-                description: p.description || '',
+                description: Array.isArray(p.bullets) ? p.bullets.join('\n') : (p.description || ''),
                 technologies: p.technologies || '',
                 projectUrl: p.projectUrl || ''
               }))
