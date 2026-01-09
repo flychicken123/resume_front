@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import SEO from './components/SEO';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthProvider } from './context/AuthContext';
 import { ResumeProvider } from './context/ResumeContext';
 import { FeedbackProvider } from './context/FeedbackContext';
 import { ExperimentProvider } from './context/ExperimentContext';
@@ -33,56 +33,12 @@ function ExitTrackingBridge() {
 }
 
 function ChatWidgetGate() {
-  const { user, userEmail, token } = useAuth();
-
-  const normalizedEmail = (userEmail || '').trim().toLowerCase();
-
-  // Diagnostic logging to understand why the chat widget might be hidden in production
-  try {
-    // eslint-disable-next-line no-console
-    console.log('[ChatWidgetGate] state', {
-      CHAT_WIDGET_ENABLED,
-      userEmail,
-      normalizedEmail,
-      hasToken: !!token,
-      user,
-      location: typeof window !== 'undefined' ? window.location.href : 'no-window',
-    });
-  } catch (_) {
-    // ignore logging errors
-  }
-
   if (!CHAT_WIDGET_ENABLED) {
-    try {
-      // eslint-disable-next-line no-console
-      console.log('[ChatWidgetGate] widget disabled by flag');
-    } catch (_) {}
     return null;
   }
 
-  if (!userEmail) {
-    try {
-      // eslint-disable-next-line no-console
-      console.log('[ChatWidgetGate] no userEmail available; chat hidden');
-    } catch (_) {}
-    return null;
-  }
-
-  const allowedEmails = ['harwtalk@gmail.com', 'flychicken1991@gmail.com'];
-
-  if (!allowedEmails.includes(normalizedEmail)) {
-    try {
-      // eslint-disable-next-line no-console
-      console.log('[ChatWidgetGate] email not in allowlist; got', normalizedEmail);
-    } catch (_) {}
-    return null;
-  }
-
-  try {
-    // eslint-disable-next-line no-console
-    console.log('[ChatWidgetGate] conditions satisfied; rendering ChatWidget');
-  } catch (_) {}
-
+  // Chatbot is now visible to all users (logged in or not)
+  // The ChatWidget handles prompting login when needed
   return <ChatWidget />;
 }
 
