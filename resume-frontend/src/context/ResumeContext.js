@@ -332,7 +332,15 @@ export const ResumeProvider = ({ children }) => {
           startDate: e.startDate || '',
           endDate: e.endDate || '',
           currentlyWorking: (e.endDate || '').toLowerCase() === 'present',
-          description: Array.isArray(e.bullets) ? e.bullets.join('\n') : (e.description || '')
+          description: Array.isArray(e.bullets) ? e.bullets.join('\n') : (e.description || ''),
+          projectsForRole: Array.isArray(e.projectsForRole)
+            ? e.projectsForRole.map((p) => ({
+                projectName: p.projectName || '',
+                description: p.description || '',
+                technologies: p.technologies || '',
+                projectUrl: p.projectUrl || ''
+              }))
+            : []
         }));
       }
 
