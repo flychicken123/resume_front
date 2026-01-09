@@ -13,7 +13,9 @@ import Login from "./auth/Login";
 import ResumeHistory from "./ResumeHistory";
 import NewHome from "./NewHome";
 import SimpleHero from "./SimpleHero";
+import About from "./About";
 import ProductOverview from "./ProductOverview";
+import TeamSection from "./TeamSection";
 import { setLastStep } from "../utils/exitTracking";
 import SEO from "./SEO";
 import { trackReferrer, trackBuilderStart, trackCTAClick } from "./Analytics";
@@ -630,6 +632,16 @@ const Home = () => {
           <Link to="/contact" className="home-nav-link">
             Contact
           </Link>
+          <a
+            href="#team"
+            className="home-nav-link"
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById("team")?.scrollIntoView({ behavior: "smooth" });
+            }}
+          >
+            About Us
+          </a>
         </div>
 
         <div className="home-navbar-right">
@@ -914,6 +926,17 @@ const Home = () => {
             >
               Contact
             </Link>
+            <a
+              href="#team"
+              className="mobile-nav-link"
+              onClick={(e) => {
+                e.preventDefault();
+                setShowMobileMenu(false);
+                document.getElementById("team")?.scrollIntoView({ behavior: "smooth" });
+              }}
+            >
+              About Us
+            </a>
           </div>
         </div>
       )}
@@ -1506,6 +1529,12 @@ const Home = () => {
         <ResumeHistory onClose={() => setShowResumeHistory(false)} />
       )}
 
+      {/* About Section */}
+
+      <About />
+
+      <TeamSection />
+
       <footer
         style={{
           marginTop: '60px',
@@ -1519,9 +1548,24 @@ const Home = () => {
         <div style={{ maxWidth: '960px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
           <span>© {new Date().getFullYear()} HiHired. All rights reserved.</span>
           <nav className="footer-menu">
-            <Link to="/contact">
-              Contact
-            </Link>
+            <a
+              href="#about"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById("about-what-we-are-building")?.scrollIntoView({ behavior: "smooth" });
+              }}
+            >
+              About Us
+            </a>
+            <a
+              href="#team"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById("team")?.scrollIntoView({ behavior: "smooth" });
+              }}
+            >
+              Team
+            </a>
             <Link to="/terms">
               Terms of Service
             </Link>
