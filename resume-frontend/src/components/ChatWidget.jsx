@@ -484,6 +484,7 @@ const ChatWidgetInner = () => {
   const launcherPositionRef = React.useRef(launcherPosition);
   const dragStateRef = React.useRef(null);
   const clickSuppressedRef = React.useRef(false);
+  const prevUserRef = React.useRef(user);
   const location = useLocation();
   const notifyBuilderStage = useCallback((stage) => {
     if (location.pathname === "/") {
@@ -700,8 +701,19 @@ const clampLauncherPosition = useCallback(
   }, [messages, isOpen, isLarge, resumeFlowState, awaitingJobMatchAnswer]);
 
   React.useEffect(() => {
+    const prevUser = prevUserRef.current;
+    prevUserRef.current = user;
+
+    // Reset chat when user logs out
     if (!user) {
       resetChatState();
+      return;
+    }
+
+    // Reset chat when user logs in (was logged out, now logged in)
+    // This clears the "please login" message
+    if (!prevUser && user) {
+      resetChatState({ keepOpen: true });
     }
   }, [user, resetChatState]);
 
