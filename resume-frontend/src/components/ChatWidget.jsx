@@ -2478,10 +2478,7 @@ const buildSectionResponse = (sectionKey) => {
         ...prev,
         {
           sender: 'bot',
-          text: "Hi there! To chat with me and use our AI-powered features, please sign in first. It only takes a few seconds!",
-          buttons: [
-            { label: 'Sign In', value: '__login__' },
-          ],
+          text: "Hi there! To chat with me and use our AI-powered features, please sign in first using the Login button at the top of the page.",
         },
       ]);
       return;
@@ -2701,10 +2698,6 @@ const buildSectionResponse = (sectionKey) => {
 
   const handleMessageButtonClick = (btn) => {
     if (!btn) {
-      return;
-    }
-    if (btn.value === '__login__') {
-      navigate('/login');
       return;
     }
     if (btn.value === 'start_new_session') {
