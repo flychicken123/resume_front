@@ -2697,6 +2697,12 @@ const buildSectionResponse = (sectionKey) => {
 
       const data = await response.json();
       const reply = (data.reply || '').trim() || FALLBACK_REPLY;
+
+      // Handle polish action - update resume data with polished content
+      if (data.isPolishAction && data.updatedResumeData) {
+        updateResume(data.updatedResumeData);
+      }
+
       setMessages((prev) => [...prev, { sender: 'bot', text: reply }]);
       setLastStep('chat_response_received');
     } catch (err) {
