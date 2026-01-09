@@ -2466,6 +2466,27 @@ const buildSectionResponse = (sectionKey) => {
     if (!trimmed || isLoading) {
       return;
     }
+
+    // If user is not logged in, prompt them to log in
+    if (!user || !token) {
+      const userMessage = { sender: 'user', text: displayText };
+      setMessages((prev) => [...prev, userMessage]);
+      if (overrideText === null) {
+        setInput('');
+      }
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: 'bot',
+          text: "Hi there! To chat with me and use our AI-powered features, please sign in first. It only takes a few seconds!",
+          buttons: [
+            { label: 'Sign In', value: '__login__' },
+          ],
+        },
+      ]);
+      return;
+    }
+
     const normalized = trimmed.toLowerCase();
     const intent = options?.intent || null;
 
@@ -2680,6 +2701,10 @@ const buildSectionResponse = (sectionKey) => {
 
   const handleMessageButtonClick = (btn) => {
     if (!btn) {
+      return;
+    }
+    if (btn.value === '__login__') {
+      navigate('/login');
       return;
     }
     if (btn.value === 'start_new_session') {
