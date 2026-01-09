@@ -83,6 +83,11 @@ const TeamSection = () => {
             <a href="mailto:hyu@hihired.org">hyu@hihired.org</a>
             .
           </p>
+          <p>
+            Product, design can be reached at{" "}
+            <a href="mailto:xw@hihired.org">xw@hihired.org</a>
+            .
+          </p>
         </div>
 
         <div className="team-supporting">
