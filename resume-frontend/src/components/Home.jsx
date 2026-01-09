@@ -632,6 +632,16 @@ const Home = () => {
           <Link to="/contact" className="home-nav-link">
             Contact
           </Link>
+          <a
+            href="#team"
+            className="home-nav-link"
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById("team")?.scrollIntoView({ behavior: "smooth" });
+            }}
+          >
+            About Us
+          </a>
         </div>
 
         <div className="home-navbar-right">
@@ -916,6 +926,17 @@ const Home = () => {
             >
               Contact
             </Link>
+            <a
+              href="#team"
+              className="mobile-nav-link"
+              onClick={(e) => {
+                e.preventDefault();
+                setShowMobileMenu(false);
+                document.getElementById("team")?.scrollIntoView({ behavior: "smooth" });
+              }}
+            >
+              About Us
+            </a>
           </div>
         </div>
       )}
