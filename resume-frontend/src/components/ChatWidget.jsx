@@ -2706,11 +2706,17 @@ const buildSectionResponse = (sectionKey) => {
       }
 
       const data = await response.json();
-      const reply = (data.reply || '').trim() || FALLBACK_REPLY;
+      let reply = (data.reply || '').trim() || FALLBACK_REPLY;
 
       // Handle polish action - update resume data with polished content
       if (data.isPolishAction && data.updatedResumeData) {
         updateResume(data.updatedResumeData);
+
+        // Show the polished content in the chat
+        const polishedPreview = formatPolishedContent(data.polishedContent, data.section);
+        if (polishedPreview) {
+          reply = `${reply}\n\n**Polished Content:**\n${polishedPreview}`;
+        }
       }
 
       setMessages((prev) => [...prev, { sender: 'bot', text: reply }]);
@@ -3305,6 +3311,55 @@ const extractDateOfBirth = (text) => {
 };
 
 // parsePersonalDetails removed - all personal details parsing is now handled by backend LangChain agent
+
+// Format polished content for display in chat
+const formatPolishedContent = (polishedContent, section) => {
+  if (!polishedContent) return '';
+
+  // Handle string content (e.g., summary)
+  if (typeof polishedContent === 'string') {
+    return polishedContent;
+  }
+
+  // Handle array content (e.g., experiences, education, projects)
+  if (Array.isArray(polishedContent)) {
+    return polishedContent.map((item) => {
+      if (section === 'experience' || section === 'experiences') {
+        const title = item.title || item.position || 'Position';
+        const company = item.company || 'Company';
+        const bullets = item.bullets || item.responsibilities || [];
+        const bulletText = Array.isArray(bullets) ? bullets.map(b => `  • ${b}`).join('\n') : '';
+        return `**${title}** at ${company}\n${bulletText}`;
+      }
+      if (section === 'education') {
+        const degree = item.degree || 'Degree';
+        const school = item.school || item.institution || 'School';
+        return `**${degree}** - ${school}`;
+      }
+      if (section === 'projects') {
+        const name = item.name || item.title || 'Project';
+        const description = item.description || '';
+        return `**${name}**\n${description}`;
+      }
+      // Generic fallback
+      return JSON.stringify(item, null, 2);
+    }).join('\n\n');
+  }
+
+  // Handle single object
+  if (typeof polishedContent === 'object') {
+    if (section === 'experience' || section === 'experiences') {
+      const title = polishedContent.title || polishedContent.position || 'Position';
+      const company = polishedContent.company || 'Company';
+      const bullets = polishedContent.bullets || polishedContent.responsibilities || [];
+      const bulletText = Array.isArray(bullets) ? bullets.map(b => `  • ${b}`).join('\n') : '';
+      return `**${title}** at ${company}\n${bulletText}`;
+    }
+    return JSON.stringify(polishedContent, null, 2);
+  }
+
+  return String(polishedContent);
+};
 
 const handleSectionUpdateIntent = ({
   key,
