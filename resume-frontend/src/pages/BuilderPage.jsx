@@ -1331,16 +1331,14 @@ function BuilderPage() {
       const jobTitle = typeof match.job_title === 'string' ? match.job_title.trim() : '';
       const employmentType = typeof match.job_employment_type === 'string' ? match.job_employment_type.trim() : '';
       const jobHighlight = extractJobDescriptionHighlight(match.job_description);
-      const jobTextLower = typeof match.job_description === 'string' ? match.job_description.toLowerCase() : '';
-      const normalizedResumeSkills = Array.isArray(resumeSkills)
-        ? resumeSkills
-            .map((skill) => (typeof skill === 'string' ? skill.trim() : ''))
-            .filter((skill) => Boolean(skill))
-        : [];
-      const skillHits = jobTextLower
-        ? normalizedResumeSkills.filter((skill) => jobTextLower.includes(skill.toLowerCase())).slice(0, 3)
-        : [];
-      const fallbackSkills = normalizedResumeSkills.slice(0, 3);
+
+      // Use skill gap data if available
+      const matchedSkills = Array.isArray(match.matched_skills) ? match.matched_skills : [];
+      const missingSkills = Array.isArray(match.missing_skills) ? match.missing_skills : [];
+      const requiredSkills = Array.isArray(match.required_skills) ? match.required_skills : [];
+      const skillFitPercent = requiredSkills.length > 0
+        ? Math.round((matchedSkills.length / requiredSkills.length) * 100)
+        : null;
 
       const formatLabel = (value) =>
         value
@@ -1349,31 +1347,76 @@ function BuilderPage() {
           .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1).toLowerCase())
           .join(' ');
 
+      // Skill fit analysis (prioritize this over generic score)
+      if (skillFitPercent !== null && requiredSkills.length > 0) {
+        if (skillFitPercent >= 80) {
+          reasons.push(
+            `Excellent skill alignment - you match ${matchedSkills.length} of ${requiredSkills.length} core requirements (${skillFitPercent}%). Your expertise in ${formatListForSentence(matchedSkills.slice(0, 4))} directly addresses what they're seeking.`
+          );
+        } else if (skillFitPercent >= 60) {
+          reasons.push(
+            `Strong skill foundation - you cover ${matchedSkills.length} of ${requiredSkills.length} required skills (${skillFitPercent}%), including ${formatListForSentence(matchedSkills.slice(0, 3))}.`
+          );
+          if (missingSkills.length > 0) {
+            reasons.push(
+              `Growth opportunity: Highlighting experience with ${formatListForSentence(missingSkills.slice(0, 3))} would strengthen your application.`
+            );
+          }
+        } else if (skillFitPercent >= 40) {
+          reasons.push(
+            `Partial skill match (${skillFitPercent}%) - you bring ${formatListForSentence(matchedSkills.slice(0, 3))} which covers the essentials.`
+          );
+          if (missingSkills.length > 0) {
+            reasons.push(
+              `To improve fit: Consider adding ${formatListForSentence(missingSkills.slice(0, 4))} to your skills section or highlighting related experience.`
+            );
+          }
+        } else {
+          reasons.push(
+            `This role emphasizes skills like ${formatListForSentence(missingSkills.slice(0, 4))} - a stretch role that could expand your expertise.`
+          );
+          if (matchedSkills.length > 0) {
+            reasons.push(
+              `Your foundation in ${formatListForSentence(matchedSkills)} provides a starting point for this transition.`
+            );
+          }
+        }
+      } else {
+        // Fallback to original skill matching if no skill gap data
+        const jobTextLower = typeof match.job_description === 'string' ? match.job_description.toLowerCase() : '';
+        const normalizedResumeSkills = Array.isArray(resumeSkills)
+          ? resumeSkills
+              .map((skill) => (typeof skill === 'string' ? skill.trim() : ''))
+              .filter((skill) => Boolean(skill))
+          : [];
+        const skillHits = jobTextLower
+          ? normalizedResumeSkills.filter((skill) => jobTextLower.includes(skill.toLowerCase())).slice(0, 3)
+          : [];
+        const fallbackSkills = normalizedResumeSkills.slice(0, 3);
+
+        if (skillHits.length > 0) {
+          reasons.push(
+            `You already lead with ${formatListForSentence(skillHits)}, the exact stack cited in the description.`
+          );
+        } else if (fallbackSkills.length > 0) {
+          reasons.push(
+            `Signature strengths like ${formatListForSentence(fallbackSkills)} give you talking points for the hiring panel.`
+          );
+        }
+      }
+
+      // Match score context
       if (score !== null && score >= 0) {
         const qualifier = score >= 85 ? 'exceptional' : score >= 70 ? 'strong' : 'solid';
         reasons.push(
-          `AI match score of ${score.toFixed(
-            1
-          )} is ${qualifier}, signaling recruiters will quickly see how your achievements map to this opening.`
+          `AI match score of ${score.toFixed(1)} (${qualifier}) - recruiters will quickly see how your achievements map to this opening.`
         );
       }
 
       if (targetPosition) {
         const roleLabel = jobTitle || 'this role';
         reasons.push(
-          `The ${roleLabel} brief keeps you squarely on the ${targetPosition} trajectory you called out, so your resume story stays perfectly aligned.`
-        );
-      }
-
-      if (skillHits.length > 0) {
-        reasons.push(
-          `You already lead with ${formatListForSentence(skillHits)}, the exact stack cited in the description - zero retooling required.`
-        );
-      } else if (fallbackSkills.length > 0) {
-        reasons.push(
-          `Signature strengths like ${formatListForSentence(
-            fallbackSkills
-          )} give you punchy talking points for the hiring panel even before tailoring.`
+          `The ${roleLabel} aligns with your ${targetPosition} career trajectory.`
         );
       }
 
