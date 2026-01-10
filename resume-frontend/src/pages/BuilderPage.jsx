@@ -2091,14 +2091,13 @@ function BuilderPage() {
     if (isResumeGenerating) {
       return;
     }
-    if (jobMatchesLoading) {
-      return;
-    }
+    // Navigate to Job Matches immediately after PDF is done, even if job matches are still loading.
+    // The Job Matches section will show a loading state while matches are being computed.
     if (step !== STEP_IDS.JOB_MATCHES) {
       setStep(STEP_IDS.JOB_MATCHES);
     }
     setNavigateToJobMatchesPending(false);
-  }, [navigateToJobMatchesPending, isResumeGenerating, jobMatchesLoading, step]);
+  }, [navigateToJobMatchesPending, isResumeGenerating, step]);
 
   const handleImportComplete = () => {
     if (typeof window !== 'undefined') {
@@ -3687,6 +3686,42 @@ function BuilderPage() {
                   {tailorNotice && (
                     <div style={{ background: '#ecfdf5', border: '1px solid #34d399', color: '#065f46', padding: '0.75rem 1rem', borderRadius: '8px', marginBottom: '0.75rem' }}>
                       {tailorNotice}
+                    </div>
+                  )}
+
+                  {user && jobMatchesLoading && (
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '2rem 1rem',
+                      background: '#f8fafc',
+                      borderRadius: '12px',
+                      border: '1px solid #e2e8f0',
+                      gap: '1rem'
+                    }}>
+                      <div style={{
+                        width: '40px',
+                        height: '40px',
+                        border: '3px solid #e2e8f0',
+                        borderTopColor: '#3b82f6',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite'
+                      }} />
+                      <div style={{ textAlign: 'center' }}>
+                        <p style={{ color: '#1e293b', fontSize: '1rem', fontWeight: 600, margin: '0 0 0.25rem 0' }}>
+                          Finding matching jobs...
+                        </p>
+                        <p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>
+                          Analyzing your resume to find the best opportunities
+                        </p>
+                      </div>
+                      <style>{`
+                        @keyframes spin {
+                          to { transform: rotate(360deg); }
+                        }
+                      `}</style>
                     </div>
                   )}
 
