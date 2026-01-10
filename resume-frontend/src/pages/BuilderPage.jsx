@@ -3606,9 +3606,16 @@ function BuilderPage() {
                       <div style={{ color: '#1e293b', fontSize: '0.9rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                         <span>{topMatch.company_name || 'Hiring company'}</span>
                         <span>{[topMatch.job_location, topMatch.job_remote_type].filter(Boolean).join(' • ')}</span>
-                        {typeof topMatch.match_score === 'number' && (
-                          <span style={{ fontWeight: 600, color: '#0284c7' }}>Match score: {topMatch.match_score.toFixed(1)}</span>
-                        )}
+                        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                          {typeof topMatch.match_score === 'number' && (
+                            <span style={{ fontWeight: 600, color: '#0284c7' }}>Match score: {topMatch.match_score.toFixed(1)}</span>
+                          )}
+                          {topMatch.required_skills?.length > 0 && (
+                            <span style={{ fontWeight: 600, color: topMatch.matched_skills?.length / topMatch.required_skills.length >= 0.7 ? '#16a34a' : topMatch.matched_skills?.length / topMatch.required_skills.length >= 0.4 ? '#ea580c' : '#dc2626' }}>
+                              Skill fit: {Math.round((topMatch.matched_skills?.length || 0) / topMatch.required_skills.length * 100)}%
+                            </span>
+                          )}
+                        </div>
                       </div>
                       {/* Skill Gaps for Top Match */}
                       {(topMatch.matched_skills?.length > 0 || topMatch.missing_skills?.length > 0) && (
@@ -3737,9 +3744,23 @@ function BuilderPage() {
                             )}
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '0.5rem' }}>
                               <strong style={{ color: '#1e293b', fontSize: '0.95rem' }}>{match.job_title || 'Role'}</strong>
-                              {typeof match.match_score === 'number' && (
-                                <span style={{ fontSize: '0.75rem', color: '#0284c7', fontWeight: 600 }}>{match.match_score.toFixed(1)}</span>
-                              )}
+                              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                {match.required_skills?.length > 0 && (
+                                  <span style={{
+                                    fontSize: '0.7rem',
+                                    fontWeight: 600,
+                                    padding: '0.15rem 0.4rem',
+                                    borderRadius: '4px',
+                                    background: (match.matched_skills?.length || 0) / match.required_skills.length >= 0.7 ? '#dcfce7' : (match.matched_skills?.length || 0) / match.required_skills.length >= 0.4 ? '#ffedd5' : '#fee2e2',
+                                    color: (match.matched_skills?.length || 0) / match.required_skills.length >= 0.7 ? '#166534' : (match.matched_skills?.length || 0) / match.required_skills.length >= 0.4 ? '#c2410c' : '#dc2626',
+                                  }}>
+                                    {Math.round((match.matched_skills?.length || 0) / match.required_skills.length * 100)}% fit
+                                  </span>
+                                )}
+                                {typeof match.match_score === 'number' && (
+                                  <span style={{ fontSize: '0.75rem', color: '#0284c7', fontWeight: 600 }}>{match.match_score.toFixed(1)}</span>
+                                )}
+                              </div>
                             </div>
                             <span style={{ color: '#334155', fontSize: '0.85rem' }}>
                               {[match.company_name, match.job_location].filter(Boolean).join(' — ')}
