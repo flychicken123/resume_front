@@ -3723,18 +3723,21 @@ function BuilderPage() {
                       {paginatedMatches.map((match, index) => {
                         const matchKey = getMatchKey(match) || `match-${index}`;
                         const canTailorMatch = Boolean(((match.job_description || '').trim()) || trimmedJobDescription);
+                        // Top 5 highlight: on page 0, indices 0-3 are positions 2-5 (topMatch is position 1)
+                        const isTopFive = jobMatchesPage === 0 && index < 4;
                         return (
                           <li
                             key={`${match.id || match.job_posting_id || index}`}
                             style={{
                               padding: '0.85rem',
                               borderRadius: '10px',
-                              border: '1px solid #dbeafe',
-                              background: '#ffffff',
+                              border: isTopFive ? '2px solid #60a5fa' : '1px solid #dbeafe',
+                              background: isTopFive ? '#eff6ff' : '#ffffff',
                               display: 'flex',
                               flexDirection: 'column',
                               gap: '0.4rem',
                               position: 'relative',
+                              boxShadow: isTopFive ? '0 4px 8px rgba(59, 130, 246, 0.15)' : 'none',
                             }}
                             onMouseEnter={() => setHoveredMatchKey(matchKey)}
                             onMouseLeave={() => setHoveredMatchKey(null)}
@@ -3743,7 +3746,23 @@ function BuilderPage() {
                               <MatchReasonPopover fallbackReasons={buildJobFitReasons(match)} />
                             )}
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '0.5rem' }}>
-                              <strong style={{ color: '#1e293b', fontSize: '0.95rem' }}>{match.job_title || 'Role'}</strong>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                {isTopFive && (
+                                  <span style={{
+                                    fontSize: '0.65rem',
+                                    fontWeight: 700,
+                                    padding: '0.15rem 0.4rem',
+                                    borderRadius: '4px',
+                                    background: '#2563eb',
+                                    color: '#ffffff',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.05em',
+                                  }}>
+                                    Top Match
+                                  </span>
+                                )}
+                                <strong style={{ color: '#1e293b', fontSize: '0.95rem' }}>{match.job_title || 'Role'}</strong>
+                              </div>
                               <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                                 {match.required_skills?.length > 0 && (
                                   <span style={{
