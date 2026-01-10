@@ -805,6 +805,8 @@ function BuilderPage() {
   const [tailorNotice, setTailorNotice] = useState(null);
   const [tailorError, setTailorError] = useState(null);
   const [hoveredMatchKey, setHoveredMatchKey] = useState(null);
+  const [jobMatchesPage, setJobMatchesPage] = useState(0);
+  const JOBS_PER_PAGE = 25;
   const scrollBuilderIntoView = useCallback(() => {
     if (typeof window === 'undefined') {
       return;
@@ -1602,6 +1604,19 @@ function BuilderPage() {
   }, [locationFilteredCount, keywordFilteredCount]);
   const topMatch = filteredJobMatches.length > 0 ? filteredJobMatches[0] : null;
   const secondaryMatches = filteredJobMatches.length > 1 ? filteredJobMatches.slice(1) : [];
+
+  // Pagination for secondary matches
+  const totalPages = Math.ceil(secondaryMatches.length / JOBS_PER_PAGE);
+  const paginatedMatches = secondaryMatches.slice(
+    jobMatchesPage * JOBS_PER_PAGE,
+    (jobMatchesPage + 1) * JOBS_PER_PAGE
+  );
+
+  // Reset page when matches change
+  useEffect(() => {
+    setJobMatchesPage(0);
+  }, [filteredJobMatches.length]);
+
   const topMatchKey = topMatch ? getMatchKey(topMatch) : '';
   const trimmedJobDescription = combinedJobDescription.trim();
   const topMatchHasDescription = topMatch
@@ -3645,8 +3660,9 @@ function BuilderPage() {
                   )}
 
                   {user && secondaryMatches.length > 0 && (
+                    <>
                     <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: '0.75rem' }}>
-                      {secondaryMatches.map((match, index) => {
+                      {paginatedMatches.map((match, index) => {
                         const matchKey = getMatchKey(match) || `match-${index}`;
                         const canTailorMatch = Boolean(((match.job_description || '').trim()) || trimmedJobDescription);
                         return (
@@ -3723,6 +3739,62 @@ function BuilderPage() {
                         );
                       })}
                     </ul>
+
+                    {/* Pagination Navigation */}
+                    {totalPages > 1 && (
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          gap: '1rem',
+                          marginTop: '1.25rem',
+                          padding: '0.75rem',
+                          background: '#f8fafc',
+                          borderRadius: '10px',
+                          border: '1px solid #e2e8f0',
+                        }}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => setJobMatchesPage((p) => Math.max(0, p - 1))}
+                          disabled={jobMatchesPage === 0}
+                          style={{
+                            padding: '0.5rem 1rem',
+                            borderRadius: '8px',
+                            border: '1px solid #cbd5e1',
+                            background: jobMatchesPage === 0 ? '#f1f5f9' : '#ffffff',
+                            color: jobMatchesPage === 0 ? '#94a3b8' : '#1e293b',
+                            fontWeight: 600,
+                            cursor: jobMatchesPage === 0 ? 'not-allowed' : 'pointer',
+                            fontSize: '0.875rem',
+                          }}
+                        >
+                          Previous
+                        </button>
+                        <span style={{ color: '#475569', fontSize: '0.9rem', fontWeight: 500 }}>
+                          Page {jobMatchesPage + 1} of {totalPages}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setJobMatchesPage((p) => Math.min(totalPages - 1, p + 1))}
+                          disabled={jobMatchesPage >= totalPages - 1}
+                          style={{
+                            padding: '0.5rem 1rem',
+                            borderRadius: '8px',
+                            border: '1px solid #cbd5e1',
+                            background: jobMatchesPage >= totalPages - 1 ? '#f1f5f9' : '#ffffff',
+                            color: jobMatchesPage >= totalPages - 1 ? '#94a3b8' : '#1e293b',
+                            fontWeight: 600,
+                            cursor: jobMatchesPage >= totalPages - 1 ? 'not-allowed' : 'pointer',
+                            fontSize: '0.875rem',
+                          }}
+                        >
+                          Next
+                        </button>
+                      </div>
+                    )}
+                    </>
                   )}
                 </div>
               </section>
