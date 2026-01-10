@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef, useLayoutEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Helmet } from 'react-helmet';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -805,6 +806,7 @@ function BuilderPage() {
   const [tailorNotice, setTailorNotice] = useState(null);
   const [tailorError, setTailorError] = useState(null);
   const [hoveredMatchKey, setHoveredMatchKey] = useState(null);
+  const [hoveredMatchAnchor, setHoveredMatchAnchor] = useState(null);
   const [jobMatchesPage, setJobMatchesPage] = useState(0);
   const JOBS_PER_PAGE = 25;
   const scrollBuilderIntoView = useCallback(() => {
@@ -1503,28 +1505,46 @@ function BuilderPage() {
     },
     [effectiveLocation, resumeSkills, targetPosition, latestRoleInfo, latestImpactSnippet, quantifiedSummary]
   );
-  const MatchReasonPopover = ({ fallbackReasons }) => {
+  const MatchReasonPopover = ({ fallbackReasons, anchorElement }) => {
     const popoverRef = useRef(null);
-    const [verticalOffset, setVerticalOffset] = useState(0);
+    const [position, setPosition] = useState({ top: 0, left: 0 });
     const effectiveReasons = Array.isArray(fallbackReasons) ? fallbackReasons : [];
 
     useLayoutEffect(() => {
-      if (!Array.isArray(effectiveReasons) || effectiveReasons.length === 0) {
-        setVerticalOffset(0);
+      if (!Array.isArray(effectiveReasons) || effectiveReasons.length === 0 || !anchorElement) {
         return undefined;
       }
       if (typeof window === 'undefined') {
         return undefined;
       }
       const reposition = () => {
-        if (!popoverRef.current) {
-          return;
+        if (!anchorElement) return;
+
+        const parentRect = anchorElement.getBoundingClientRect();
+        const popoverWidth = 320;
+        const gap = 12;
+
+        // Determine if we should show on left or right
+        const spaceOnRight = window.innerWidth - parentRect.right - gap;
+        const showOnLeft = spaceOnRight < popoverWidth;
+
+        let left;
+        if (showOnLeft) {
+          left = parentRect.left - popoverWidth - gap;
+          // Ensure it doesn't go off-screen left
+          if (left < 8) left = 8;
+        } else {
+          left = parentRect.right + gap;
         }
-        const rect = popoverRef.current.getBoundingClientRect();
-        const viewportBottom = window.innerHeight - 16;
-        const overflow = rect.bottom - viewportBottom;
-        const nextOffset = overflow > 0 ? -overflow : 0;
-        setVerticalOffset((prev) => (prev === nextOffset ? prev : nextOffset));
+
+        let top = parentRect.top;
+        // Adjust vertical position if it would go below viewport
+        const popoverHeight = popoverRef.current?.offsetHeight || 200;
+        if (top + popoverHeight > window.innerHeight - 16) {
+          top = Math.max(16, window.innerHeight - popoverHeight - 16);
+        }
+
+        setPosition({ top, left });
       };
 
       reposition();
@@ -1534,22 +1554,21 @@ function BuilderPage() {
         window.removeEventListener('scroll', reposition, true);
         window.removeEventListener('resize', reposition);
       };
-    }, [effectiveReasons]);
+    }, [effectiveReasons, anchorElement]);
 
-    if (!Array.isArray(effectiveReasons) || effectiveReasons.length === 0) {
+    if (!Array.isArray(effectiveReasons) || effectiveReasons.length === 0 || !anchorElement) {
       return null;
     }
 
-    return (
+    return createPortal(
       <div
         ref={popoverRef}
         style={{
-          position: 'absolute',
-          top: 0,
-          left: 'calc(100% + 12px)',
-          right: 'auto',
+          position: 'fixed',
+          top: position.top,
+          left: position.left,
           width: '320px',
-          maxWidth: 'min(320px, 60vw)',
+          maxWidth: 'calc(100vw - 32px)',
           maxHeight: 'calc(100vh - 32px)',
           overflowY: 'auto',
           background: '#ffffff',
@@ -1557,10 +1576,7 @@ function BuilderPage() {
           boxShadow: '0 15px 35px rgba(15, 23, 42, 0.25)',
           borderRadius: '14px',
           padding: '0.85rem 1rem',
-          zIndex: 40,
-          transform: verticalOffset ? `translateY(${verticalOffset}px)` : undefined,
-          transition: 'transform 0.12s ease-out',
-          willChange: 'transform',
+          zIndex: 9999,
         }}
       >
         <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.35rem' }}>
@@ -1573,7 +1589,8 @@ function BuilderPage() {
             </li>
           ))}
         </ul>
-      </div>
+      </div>,
+      document.body
     );
   };
   const isUSPreferredLocation = useMemo(() => isLikelyUSLocation(effectiveLocation), [effectiveLocation]);
@@ -3640,11 +3657,11 @@ function BuilderPage() {
                         gap: '0.5rem',
                         position: 'relative',
                       }}
-                      onMouseEnter={() => setHoveredMatchKey(topMatchKey)}
-                      onMouseLeave={() => setHoveredMatchKey(null)}
+                      onMouseEnter={(e) => { setHoveredMatchKey(topMatchKey); setHoveredMatchAnchor(e.currentTarget); }}
+                      onMouseLeave={() => { setHoveredMatchKey(null); setHoveredMatchAnchor(null); }}
                     >
                       {hoveredMatchKey === topMatchKey && (
-                        <MatchReasonPopover fallbackReasons={buildJobFitReasons(topMatch)} />
+                        <MatchReasonPopover fallbackReasons={buildJobFitReasons(topMatch)} anchorElement={hoveredMatchAnchor} />
                       )}
                       <span style={{ fontSize: '0.75rem', color: '#0ea5e9', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Top match</span>
                       <h4 style={{ margin: 0, fontSize: '1.1rem', color: '#0f172a' }}>{topMatch.job_title || 'Role'}</h4>
@@ -3784,11 +3801,11 @@ function BuilderPage() {
                               position: 'relative',
                               boxShadow: isTopFive ? '0 4px 8px rgba(59, 130, 246, 0.15)' : 'none',
                             }}
-                            onMouseEnter={() => setHoveredMatchKey(matchKey)}
-                            onMouseLeave={() => setHoveredMatchKey(null)}
+                            onMouseEnter={(e) => { setHoveredMatchKey(matchKey); setHoveredMatchAnchor(e.currentTarget); }}
+                            onMouseLeave={() => { setHoveredMatchKey(null); setHoveredMatchAnchor(null); }}
                           >
                             {hoveredMatchKey === matchKey && (
-                              <MatchReasonPopover fallbackReasons={buildJobFitReasons(match)} />
+                              <MatchReasonPopover fallbackReasons={buildJobFitReasons(match)} anchorElement={hoveredMatchAnchor} />
                             )}
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '0.5rem' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
