@@ -3610,6 +3610,57 @@ function BuilderPage() {
                           <span style={{ fontWeight: 600, color: '#0284c7' }}>Match score: {topMatch.match_score.toFixed(1)}</span>
                         )}
                       </div>
+                      {/* Skill Gaps for Top Match */}
+                      {(topMatch.matched_skills?.length > 0 || topMatch.missing_skills?.length > 0) && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                          {topMatch.matched_skills?.length > 0 && (
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', alignItems: 'center' }}>
+                              <span style={{ fontSize: '0.75rem', color: '#16a34a', fontWeight: 600 }}>Skills match:</span>
+                              {topMatch.matched_skills.slice(0, 6).map((skill) => (
+                                <span
+                                  key={skill}
+                                  style={{
+                                    padding: '0.2rem 0.5rem',
+                                    borderRadius: '5px',
+                                    background: '#dcfce7',
+                                    color: '#166534',
+                                    fontSize: '0.75rem',
+                                    fontWeight: 500,
+                                  }}
+                                >
+                                  {skill}
+                                </span>
+                              ))}
+                              {topMatch.matched_skills.length > 6 && (
+                                <span style={{ fontSize: '0.7rem', color: '#16a34a' }}>+{topMatch.matched_skills.length - 6}</span>
+                              )}
+                            </div>
+                          )}
+                          {topMatch.missing_skills?.length > 0 && (
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', alignItems: 'center' }}>
+                              <span style={{ fontSize: '0.75rem', color: '#ea580c', fontWeight: 600 }}>Skills gap:</span>
+                              {topMatch.missing_skills.slice(0, 6).map((skill) => (
+                                <span
+                                  key={skill}
+                                  style={{
+                                    padding: '0.2rem 0.5rem',
+                                    borderRadius: '5px',
+                                    background: '#ffedd5',
+                                    color: '#c2410c',
+                                    fontSize: '0.75rem',
+                                    fontWeight: 500,
+                                  }}
+                                >
+                                  {skill}
+                                </span>
+                              ))}
+                              {topMatch.missing_skills.length > 6 && (
+                                <span style={{ fontSize: '0.7rem', color: '#ea580c' }}>+{topMatch.missing_skills.length - 6}</span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
                       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                         {topMatch.job_url && (
                           <a
@@ -3695,6 +3746,57 @@ function BuilderPage() {
                             </span>
                             {match.job_department && (
                               <span style={{ color: '#64748b', fontSize: '0.8rem' }}>{match.job_department}</span>
+                            )}
+                            {/* Skill Gaps */}
+                            {(match.matched_skills?.length > 0 || match.missing_skills?.length > 0) && (
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginTop: '0.25rem' }}>
+                                {match.matched_skills?.length > 0 && (
+                                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem', alignItems: 'center' }}>
+                                    <span style={{ fontSize: '0.7rem', color: '#16a34a', fontWeight: 600 }}>Match:</span>
+                                    {match.matched_skills.slice(0, 5).map((skill) => (
+                                      <span
+                                        key={skill}
+                                        style={{
+                                          padding: '0.15rem 0.4rem',
+                                          borderRadius: '4px',
+                                          background: '#dcfce7',
+                                          color: '#166534',
+                                          fontSize: '0.7rem',
+                                          fontWeight: 500,
+                                        }}
+                                      >
+                                        {skill}
+                                      </span>
+                                    ))}
+                                    {match.matched_skills.length > 5 && (
+                                      <span style={{ fontSize: '0.65rem', color: '#16a34a' }}>+{match.matched_skills.length - 5}</span>
+                                    )}
+                                  </div>
+                                )}
+                                {match.missing_skills?.length > 0 && (
+                                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem', alignItems: 'center' }}>
+                                    <span style={{ fontSize: '0.7rem', color: '#ea580c', fontWeight: 600 }}>Gap:</span>
+                                    {match.missing_skills.slice(0, 5).map((skill) => (
+                                      <span
+                                        key={skill}
+                                        style={{
+                                          padding: '0.15rem 0.4rem',
+                                          borderRadius: '4px',
+                                          background: '#ffedd5',
+                                          color: '#c2410c',
+                                          fontSize: '0.7rem',
+                                          fontWeight: 500,
+                                        }}
+                                      >
+                                        {skill}
+                                      </span>
+                                    ))}
+                                    {match.missing_skills.length > 5 && (
+                                      <span style={{ fontSize: '0.65rem', color: '#ea580c' }}>+{match.missing_skills.length - 5}</span>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
                             )}
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', flexWrap: 'wrap' }}>
                               {match.job_url ? (
