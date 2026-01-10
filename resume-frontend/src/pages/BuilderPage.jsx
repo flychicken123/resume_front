@@ -1908,7 +1908,12 @@ function BuilderPage() {
       for (const exp of experiences) {
         if (exp && typeof exp.description === 'string' && exp.description.trim()) {
           try {
-            const optimizedDescription = await generateExperienceAI(exp.description, jobDescriptionSource);
+            const optimizedDescription = await generateExperienceAI(
+              exp.description, 
+              jobDescriptionSource,
+              match.matched_skills || [],
+              match.missing_skills || []
+            );
             const cleanedDescription = typeof optimizedDescription === 'string' ? optimizedDescription.trim() : '';
             if (cleanedDescription) {
               updatedExperiences.push({ ...exp, description: optimizedDescription });
@@ -1929,7 +1934,13 @@ function BuilderPage() {
       for (const project of projects) {
         if (project && (project.description?.trim() || project.projectName)) {
           try {
-            const optimizedProject = await optimizeProjectAI(project, jobDescriptionSource);
+            const optimizedProject = await optimizeProjectAI(
+              project, 
+              jobDescriptionSource, 
+              null,
+              match.matched_skills || [],
+              match.missing_skills || []
+            );
             if (optimizedProject && typeof optimizedProject === 'object') {
               const mergedProject = { ...project };
               Object.entries(optimizedProject).forEach(([key, value]) => {

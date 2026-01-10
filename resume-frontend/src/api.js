@@ -151,16 +151,26 @@ export async function getJobMatches(params = {}) {
 }
 
 // AI assistant endpoints
-export async function generateExperienceAI(experience, jobDescription = '') {
+export async function generateExperienceAI(experience, jobDescription = '', matchedSkills = [], missingSkills = []) {
+  const payload = { 
+    userExperience: experience,
+    jobDescription: jobDescription 
+  };
+  
+  // Include skill gaps for better context
+  if (matchedSkills && matchedSkills.length > 0) {
+    payload.matchedSkills = matchedSkills;
+  }
+  if (missingSkills && missingSkills.length > 0) {
+    payload.missingSkills = missingSkills;
+  }
+  
   const res = await fetchWithAuth(`${API_BASE_URL}/api/experience/optimize`, {
     method: "POST",
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ 
-      userExperience: experience,
-      jobDescription: jobDescription 
-    }),
+    body: JSON.stringify(payload),
   });
   if (!res.ok) {
     const err = await res.json();
@@ -192,12 +202,23 @@ export async function generateEducationAI(education, existingEducation = null) {
   return data.education;
 }
 
-export async function generateSummaryAI({ experience, education, skills, existingSummary = null }) {
+export async function generateSummaryAI({ experience, education, skills, existingSummary = null, jobDescription = '', matchedSkills = [], missingSkills = [] }) {
   const payload = { experience, education, skills };
 
   // Include existing summary if provided to enable partial updates
   if (existingSummary && typeof existingSummary === 'string' && existingSummary.trim()) {
     payload.existingSummary = existingSummary.trim();
+  }
+  
+  // Include job context and skill gaps for better targeting
+  if (jobDescription && jobDescription.trim()) {
+    payload.jobDescription = jobDescription.trim();
+  }
+  if (matchedSkills && matchedSkills.length > 0) {
+    payload.matchedSkills = matchedSkills;
+  }
+  if (missingSkills && missingSkills.length > 0) {
+    payload.missingSkills = missingSkills;
   }
 
   const res = await fetchWithAuth(`${API_BASE_URL}/api/ai/summary`, {
@@ -352,7 +373,7 @@ export async function improveExperienceGrammarAI(experience) {
   return payload.improvedExperience || "";
 }
 
-export async function optimizeProjectAI(projectData, jobDescription = '', existingProject = null) {
+export async function optimizeProjectAI(projectData, jobDescription = '', existingProject = null, matchedSkills = [], missingSkills = []) {
   const payload = {
     projectData,
     jobDescription,
@@ -361,6 +382,14 @@ export async function optimizeProjectAI(projectData, jobDescription = '', existi
   // Include existing project if provided to enable partial updates
   if (existingProject && typeof existingProject === 'string' && existingProject.trim()) {
     payload.existingProject = existingProject.trim();
+  }
+  
+  // Include skill gaps for better context
+  if (matchedSkills && matchedSkills.length > 0) {
+    payload.matchedSkills = matchedSkills;
+  }
+  if (missingSkills && missingSkills.length > 0) {
+    payload.missingSkills = missingSkills;
   }
 
   const res = await fetchWithAuth(`${API_BASE_URL}/api/project/optimize`, {
