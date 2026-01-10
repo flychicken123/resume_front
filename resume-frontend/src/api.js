@@ -177,8 +177,8 @@ export async function generateExperienceAI(experience, jobDescription = '', matc
     throw new Error(err.error || "AI experience optimization failed.");
   }
   const data = await res.json();
-  const payload = data && typeof data === "object" ? (data.data || data) : {};
-  return payload.optimizedExperience || "";
+  const result = data && typeof data === "object" ? (data.data || data) : {};
+  return result.optimizedExperience || "";
 }
 
 export async function generateEducationAI(education, existingEducation = null) {
