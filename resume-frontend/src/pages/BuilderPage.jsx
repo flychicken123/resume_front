@@ -1822,7 +1822,7 @@ function BuilderPage() {
       skills,
       htmlContent: '',
       candidateJobLimit: 400,
-      maxResults: 25,
+      maxResults: 50,
     };
   }, [data, trimmedJobDescription, jobMatchesLocation, autoLocation, targetPosition, resumeSkills]);
 
