@@ -1291,7 +1291,7 @@ function BuilderPage() {
 
     let cancelled = false;
     setJobMatchesLoading(true);
-    getJobMatches({ limit: 20 })
+    getJobMatches({ limit: 50 })
       .then((response) => {
         if (cancelled) return;
         const matches = Array.isArray(response.matches) ? response.matches : [];
