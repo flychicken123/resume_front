@@ -2562,8 +2562,18 @@ const buildSectionResponse = (sectionKey) => {
       return;
     }
 
+    // Check if this is a polish/optimize request - skip modify check and go straight to chat
+    const polishKeywords = ['polish', 'improve', 'enhance', 'optimize', 'rewrite', 'refine', 'make better'];
+    const isPolishRequest = polishKeywords.some(kw => trimmed.toLowerCase().includes(kw));
+
     // Check for AI-powered resume modification intent (works outside resume flow too)
+    // Skip this for polish requests - they should go to the chat endpoint
     try {
+      if (isPolishRequest) {
+        // Skip modify check - go straight to chat for polish requests
+        throw new Error('Skip to chat for polish request');
+      }
+
       const modifyResult = await analyzeResumeModification(trimmed, resumeData || {});
 
       if (modifyResult.isModification) {
