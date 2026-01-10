@@ -792,6 +792,7 @@ function BuilderPage() {
   const [jobMatches, setJobMatches] = useState([]);
   const [jobMatchesHash, setJobMatchesHash] = useState(null);
   const [jobMatchesLoading, setJobMatchesLoading] = useState(false);
+  const [jobMatchesRefining, setJobMatchesRefining] = useState(false); // AI filter running in background
   const [jobMatchesError, setJobMatchesError] = useState(null);
   const [jobMatchesLocation, setJobMatchesLocation] = useState('');
   const [jobDislikeInput, setJobDislikeInput] = useState('');
@@ -1843,7 +1844,7 @@ function BuilderPage() {
     };
   }, [data, trimmedJobDescription, jobMatchesLocation, autoLocation, targetPosition, resumeSkills]);
 
-  const fetchJobMatches = useCallback(async () => {
+  const fetchJobMatches = useCallback(async (useQuickMode = true) => {
     if (!user) {
       setJobMatchesError('Log in to see matching jobs.');
       return;
@@ -1855,6 +1856,9 @@ function BuilderPage() {
       return;
     }
 
+    // Add quickMode for faster initial results
+    payload.quickMode = useQuickMode;
+
     setJobMatchesLoading(true);
     setJobMatchesError(null);
 
@@ -1863,6 +1867,14 @@ function BuilderPage() {
       const matches = Array.isArray(response.matches) ? response.matches : [];
       setJobMatches(matches);
       setJobMatchesHash(response.resumeHash || null);
+
+      // If AI filter is pending, start polling for refined results
+      if (response.aiFilterPending && response.resumeHash) {
+        setJobMatchesRefining(true);
+        pollForRefinedMatches(response.resumeHash);
+      } else {
+        setJobMatchesRefining(false);
+      }
     } catch (error) {
       console.error('Failed to compute job matches', error);
       setJobMatchesError(error.message || 'Unable to compute job matches.');
@@ -1870,6 +1882,37 @@ function BuilderPage() {
       setJobMatchesLoading(false);
     }
   }, [user, buildMatchPayload]);
+
+  // Poll for refined job matches after AI filter completes
+  const pollForRefinedMatches = useCallback(async (resumeHash) => {
+    const maxAttempts = 10;
+    const pollInterval = 2000; // 2 seconds
+
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      await new Promise(resolve => setTimeout(resolve, pollInterval));
+
+      try {
+        const response = await getJobMatches({ resumeHash, limit: 50 });
+        const matches = Array.isArray(response.matches) ? response.matches : [];
+
+        // Update with refined results
+        setJobMatches(matches);
+
+        // Check if refinement is complete (no more aiFilterPending or matches changed)
+        if (!response.aiFilterPending) {
+          setJobMatchesRefining(false);
+          console.log('Job matches refined successfully');
+          return;
+        }
+      } catch (error) {
+        console.error('Failed to poll for refined matches', error);
+      }
+    }
+
+    // Max attempts reached, stop refining
+    setJobMatchesRefining(false);
+    console.log('Job match refinement polling completed');
+  }, []);
 
   const handleAuthModalClose = useCallback(() => {
     if (user) {
@@ -3221,7 +3264,8 @@ function BuilderPage() {
                       )}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      {jobMatchesLoading && <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Updating...</span>}
+                      {jobMatchesLoading && <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Loading...</span>}
+                      {jobMatchesRefining && !jobMatchesLoading && <span style={{ fontSize: '0.8rem', color: '#f59e0b' }}>Refining results...</span>}
                       <button
                         type="button"
                         onClick={() => fetchJobMatches()}
