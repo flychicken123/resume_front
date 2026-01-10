@@ -3109,7 +3109,7 @@ function BuilderPage() {
         keywords="build resume, create resume, resume builder, AI resume builder, professional resume, resume maker, write resume, resume template"
         canonical="https://hihired.org/builder"
       />
-      <div style={{ display: 'flex', minHeight: '100vh', width: '100%' }}>
+      <div style={{ display: 'flex', height: '100vh', width: '100%' }}>
         {/* Left Side - Resume Builder */}
         <div
           style={{
@@ -3120,6 +3120,8 @@ function BuilderPage() {
             background: '#f8fafc',
             position: 'relative',
             zIndex: 2,
+            overflowY: 'auto',
+            overflowX: 'hidden',
           }}
         >
           <div className="site-header" style={{ width: '100%', paddingTop: '2.5rem', paddingBottom: '1.5rem', textAlign: 'center', background: 'transparent', position: 'relative' }}>
@@ -4107,120 +4109,17 @@ function BuilderPage() {
         </div>
       </div>
 
-      {/* Vertical Step Navigation Scrollbar */}
-      <div
-        style={{
-          width: '48px',
-          background: 'linear-gradient(to bottom, #f8fafc, #f1f5f9)',
-          borderLeft: '1px solid #e5e7eb',
-          borderRight: '1px solid #e5e7eb',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '2rem 0',
-          position: 'relative',
-        }}
-      >
-        {/* Track line */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '2.5rem',
-            bottom: '2.5rem',
-            width: '2px',
-            background: '#e2e8f0',
-            borderRadius: '1px',
-          }}
-        />
-        {/* Progress fill */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '2.5rem',
-            height: `${((step - 1) / (steps.length - 1)) * (100 - 10)}%`,
-            width: '2px',
-            background: 'linear-gradient(to bottom, #3b82f6, #60a5fa)',
-            borderRadius: '1px',
-            transition: 'height 0.3s ease',
-          }}
-        />
-        {/* Step dots */}
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            height: 'calc(100% - 5rem)',
-            position: 'relative',
-            zIndex: 1,
-          }}
-        >
-          {steps.map((stepName, index) => {
-            const stepNumber = index + 1;
-            const isActive = step === stepNumber;
-            const isCompleted = step > stepNumber;
-            return (
-              <button
-                key={stepNumber}
-                onClick={() => handleStepChange(stepNumber)}
-                title={stepName}
-                style={{
-                  width: isActive ? '14px' : '10px',
-                  height: isActive ? '14px' : '10px',
-                  borderRadius: '50%',
-                  border: 'none',
-                  background: isActive
-                    ? '#3b82f6'
-                    : isCompleted
-                      ? '#60a5fa'
-                      : '#cbd5e1',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  boxShadow: isActive ? '0 0 0 3px rgba(59, 130, 246, 0.3)' : 'none',
-                  padding: 0,
-                }}
-                onMouseEnter={(e) => {
-                  if (!isActive) {
-                    e.currentTarget.style.transform = 'scale(1.3)';
-                    e.currentTarget.style.background = '#3b82f6';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isActive) {
-                    e.currentTarget.style.transform = 'scale(1)';
-                    e.currentTarget.style.background = isCompleted ? '#60a5fa' : '#cbd5e1';
-                  }
-                }}
-                aria-label={`Go to ${stepName}`}
-              />
-            );
-          })}
-        </div>
-        {/* Current step indicator */}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '0.5rem',
-            fontSize: '0.65rem',
-            color: '#64748b',
-            fontWeight: 500,
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {step}/{steps.length}
-        </div>
-      </div>
-
       {/* Right Side - Live Resume Preview */}
       <div
         style={{
           flex: 1,
           background: 'white',
+          borderLeft: '1px solid #e5e7eb',
           display: 'flex',
           flexDirection: 'column',
-          minHeight: '100vh',
-          overflow: 'auto',
+          height: '100vh',
+          overflowY: 'auto',
+          overflowX: 'hidden',
           position: 'relative',
           zIndex: 1,
         }}
