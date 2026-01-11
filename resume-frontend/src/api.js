@@ -1219,3 +1219,36 @@ export async function deleteExperiment(key) {
   return data;
 }
 
+// Extract impact keywords from experience and project descriptions using AI
+export async function extractImpactKeywordsAI(experiences) {
+  const payload = {
+    experiences: experiences.map((exp, idx) => ({
+      id: `exp-${idx}`,
+      description: exp.description || '',
+      projects: Array.isArray(exp.projectsForRole)
+        ? exp.projectsForRole.map((proj, projIdx) => ({
+            id: `proj-${idx}-${projIdx}`,
+            name: proj.projectName || '',
+            description: proj.description || '',
+            technologies: proj.technologies || '',
+          }))
+        : [],
+    })),
+  };
+
+  const res = await fetch(`${API_BASE_URL}/api/impact-keywords/extract`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error || 'Failed to extract impact keywords.');
+  }
+
+  return data?.data || data;
+}
+

@@ -301,6 +301,75 @@ const collectExperienceFieldChanges = (previousList = [], nextList = []) => {
     }
     return String(val);
   };
+
+  // Utility function to render text with impact keywords highlighted (bolded)
+  const renderTextWithImpactHighlights = (text, keywords) => {
+    if (!text || !keywords || !Array.isArray(keywords) || keywords.length === 0) {
+      return text;
+    }
+
+    // Sort keywords by length (longest first) to handle overlapping matches
+    const sortedKeywords = [...keywords]
+      .filter((k) => k && typeof k === 'string' && k.trim())
+      .sort((a, b) => b.length - a.length);
+
+    if (sortedKeywords.length === 0) {
+      return text;
+    }
+
+    // Build a regex pattern that matches any of the keywords (case-insensitive)
+    const escapedKeywords = sortedKeywords.map((k) =>
+      k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    );
+    const pattern = new RegExp(`(${escapedKeywords.join('|')})`, 'gi');
+
+    // Split text by the pattern, keeping the matched parts
+    const parts = text.split(pattern);
+
+    if (parts.length === 1) {
+      return text;
+    }
+
+    // Map parts to JSX, bolding the matched keywords
+    return parts.map((part, index) => {
+      if (!part) return null;
+      // Check if this part matches any keyword (case-insensitive)
+      const isKeyword = sortedKeywords.some(
+        (k) => k.toLowerCase() === part.toLowerCase()
+      );
+      if (isKeyword) {
+        return (
+          <strong key={index} style={{ fontWeight: 700 }}>
+            {part}
+          </strong>
+        );
+      }
+      return <Fragment key={index}>{part}</Fragment>;
+    });
+  };
+
+  // Get impact keywords for a specific experience description
+  const getExperienceDescriptionKeywords = (experienceIndex) => {
+    if (!data.highlightImpact || !data.impactKeywords?.experiences) {
+      return [];
+    }
+    const expKey = `exp-${experienceIndex}`;
+    return data.impactKeywords.experiences[expKey]?.description || [];
+  };
+
+  // Get impact keywords for a specific project within an experience
+  const getProjectKeywords = (experienceIndex, projectIndex, field) => {
+    if (!data.highlightImpact || !data.impactKeywords?.experiences) {
+      return [];
+    }
+    const expKey = `exp-${experienceIndex}`;
+    const projKey = `proj-${experienceIndex}-${projectIndex}`;
+    const projects = data.impactKeywords.experiences[expKey]?.projects;
+    if (!projects || !projects[projKey]) {
+      return [];
+    }
+    return projects[projKey][field] || [];
+  };
   const buildContactEntries = (source = {}, options = {}) => {
     const { includeLocation = false } = options;
     const entries = [];
@@ -2068,10 +2137,16 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
          return getFormatStyles(DEFAULT_TEMPLATE_ID, fontSize);
     }
   };
-  const renderBulletLine = (line, key, styles) => {
+  const renderBulletLine = (line, key, styles, impactKeywords = []) => {
     if (!line || !line.trim()) return null;
     const cleaned = line.trim().replace(/^[\u2022\u25AA-]+\s*/, '');
     if (!cleaned) return null;
+
+    // Apply impact keyword highlighting if enabled and keywords provided
+    const highlightedContent = data.highlightImpact && impactKeywords.length > 0
+      ? renderTextWithImpactHighlights(cleaned, impactKeywords)
+      : cleaned;
+
     if (selectedFormat === TEMPLATE_SLUGS.EXECUTIVE_SERIF) {
       // Revert: render marker + text using flex, same as preview
       const containerStyle = styles.bullet || {
@@ -2103,13 +2178,13 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
       return (
         <div key={key} style={containerStyle} className="es-bullet" data-es-indent={indentAttr}>
           <span style={markerStyle} className="es-bullet-marker">{markerChar}</span>
-          <span style={textStyle} className="es-bullet-text">{cleaned}</span>
+          <span style={textStyle} className="es-bullet-text">{highlightedContent}</span>
         </div>
       );
     }
     return (
       <div key={key} style={styles.bullet}>
-        • {cleaned}
+        • {highlightedContent}
       </div>
     );
   };
@@ -2494,11 +2569,12 @@ const renderExperiences = (experiences, styles) => {
         const attorneySecondary = isAttorneyTemplate
           ? [company, location].filter(Boolean).join(' • ')
           : null;
+        const stringExpDescKeywords = getExperienceDescriptionKeywords(resolvedExperienceIndex);
         const descriptionContent = descriptionLines.filter((line) => line.trim()).length > 0
           ? (
               <div style={{ marginTop: '2px' }}>
                 {descriptionLines.map((line, lineIdx) =>
-                  renderBulletLine(line, `${idx}-${lineIdx}`, styles)
+                  renderBulletLine(line, `${idx}-${lineIdx}`, styles, stringExpDescKeywords)
                 )}
               </div>
             )
@@ -2570,6 +2646,7 @@ const renderExperiences = (experiences, styles) => {
         const attorneySecondary = isAttorneyTemplate
           ? [companyName, locationLabel].filter(Boolean).join(' • ')
           : null;
+        const expDescKeywords = getExperienceDescriptionKeywords(resolvedExperienceIndex);
         const descriptionContent = exp.description
           ? (
               <div
@@ -2577,7 +2654,7 @@ const renderExperiences = (experiences, styles) => {
                 className={experienceFieldClass('description', 'experience-field experience-field-block')}
               >
                 {exp.description.split(/\r?\n/).map((line, lineIdx) =>
-                  renderBulletLine(line, `${idx}-${lineIdx}`, styles)
+                  renderBulletLine(line, `${idx}-${lineIdx}`, styles, expDescKeywords)
                 )}
               </div>
             )
@@ -2693,7 +2770,8 @@ const renderExperiences = (experiences, styles) => {
                       ...(styles.company || {}),
                       fontStyle: 'italic',
                     },
-                  }
+                  },
+                  resolvedExperienceIndex
                 )}
               </div>
             )}
@@ -2967,7 +3045,7 @@ const renderEducation = (education, styles) => {
   );
 };
 
-  const renderProjects = (projects, styles) => {
+  const renderProjects = (projects, styles, experienceIndex = null) => {
     if (!projects || projects.length === 0) return null;
     const baseProjects = Array.isArray(data.projects) ? data.projects : [];
     return projects
@@ -2985,6 +3063,12 @@ const renderEducation = (education, styles) => {
         );
         const projectFieldClass = (field, extraClass = 'project-field') =>
           getSectionHighlightClass(`project-${resolvedProjectIndex}-${field}`, extraClass);
+
+        // Get impact keywords for role projects (experienceIndex is provided)
+        const projDescKeywords = experienceIndex !== null
+          ? getProjectKeywords(experienceIndex, idx, 'description')
+          : [];
+
         return (
           <div key={idx} style={styles.item} className={projectEntryClass}>
             {(nameText || urlText) && (
@@ -3018,7 +3102,7 @@ const renderEducation = (education, styles) => {
               style={{ marginTop: '2px' }}
             >
                 {project.description.split('\n').map((line, lineIdx) =>
-                  renderBulletLine(line, `project-${idx}-${lineIdx}`, styles)
+                  renderBulletLine(line, `project-${idx}-${lineIdx}`, styles, projDescKeywords)
                 )}
               </div>
             )}

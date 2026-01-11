@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, Fragment } from 'react';
 import { useResume } from '../context/ResumeContext';
 import { TEMPLATE_SLUGS, DEFAULT_TEMPLATE_ID, normalizeTemplateId } from '../constants/templates';
 
@@ -18,6 +18,75 @@ const StepPreview = ({ onDownload, hideActions = false, dataOverride }) => {
       } catch (e) { return ''; }
     }
     return String(val);
+  };
+
+  // Utility function to render text with impact keywords highlighted (bolded)
+  const renderTextWithImpactHighlights = (text, keywords) => {
+    if (!text || !keywords || !Array.isArray(keywords) || keywords.length === 0) {
+      return text;
+    }
+
+    // Sort keywords by length (longest first) to handle overlapping matches
+    const sortedKeywords = [...keywords]
+      .filter((k) => k && typeof k === 'string' && k.trim())
+      .sort((a, b) => b.length - a.length);
+
+    if (sortedKeywords.length === 0) {
+      return text;
+    }
+
+    // Build a regex pattern that matches any of the keywords (case-insensitive)
+    const escapedKeywords = sortedKeywords.map((k) =>
+      k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    );
+    const pattern = new RegExp(`(${escapedKeywords.join('|')})`, 'gi');
+
+    // Split text by the pattern, keeping the matched parts
+    const parts = text.split(pattern);
+
+    if (parts.length === 1) {
+      return text;
+    }
+
+    // Map parts to JSX, bolding the matched keywords
+    return parts.map((part, index) => {
+      if (!part) return null;
+      // Check if this part matches any keyword (case-insensitive)
+      const isKeyword = sortedKeywords.some(
+        (k) => k.toLowerCase() === part.toLowerCase()
+      );
+      if (isKeyword) {
+        return (
+          <strong key={index} style={{ fontWeight: 700 }}>
+            {part}
+          </strong>
+        );
+      }
+      return <Fragment key={index}>{part}</Fragment>;
+    });
+  };
+
+  // Get impact keywords for a specific experience description
+  const getExperienceDescriptionKeywords = (experienceIndex) => {
+    if (!data.highlightImpact || !data.impactKeywords?.experiences) {
+      return [];
+    }
+    const expKey = `exp-${experienceIndex}`;
+    return data.impactKeywords.experiences[expKey]?.description || [];
+  };
+
+  // Get impact keywords for a specific project within an experience
+  const getProjectKeywords = (experienceIndex, projectIndex, field) => {
+    if (!data.highlightImpact || !data.impactKeywords?.experiences) {
+      return [];
+    }
+    const expKey = `exp-${experienceIndex}`;
+    const projKey = `proj-${experienceIndex}-${projectIndex}`;
+    const projects = data.impactKeywords.experiences[expKey]?.projects;
+    if (!projects || !projects[projKey]) {
+      return [];
+    }
+    return projects[projKey][field] || [];
   };
   
 
@@ -151,15 +220,20 @@ const isAttorneyTemplate = normalizedFormat === TEMPLATE_SLUGS.ATTORNEY_TEMPLATE
           ? metaSegments.join(' • ')
           : [location, dateRange].filter(Boolean).join(' • ');
 
+        const expDescKeywords = getExperienceDescriptionKeywords(idx);
         const descriptionContent = exp.description
           ? (
               <ul className="bullet-points">
                 {exp.description
                   .split(/\r?\n/)
                   .filter((point) => point.trim())
-                  .map((point, pointIdx) => (
-                    <li key={pointIdx}>{point.trim().replace(/^[\u2022\u25AA-]+\s*/, '')}</li>
-                  ))}
+                  .map((point, pointIdx) => {
+                    const cleanedPoint = point.trim().replace(/^[\u2022\u25AA-]+\s*/, '');
+                    const highlightedContent = data.highlightImpact && expDescKeywords.length > 0
+                      ? renderTextWithImpactHighlights(cleanedPoint, expDescKeywords)
+                      : cleanedPoint;
+                    return <li key={pointIdx}>{highlightedContent}</li>;
+                  })}
               </ul>
             )
           : null;
@@ -672,6 +746,7 @@ const isAttorneyTemplate = normalizedFormat === TEMPLATE_SLUGS.ATTORNEY_TEMPLATE
       const end = exp.currentlyWorking ? 'Present' : formatDate(exp.endDate);
       const range = [start, end].filter(Boolean).join(' – ');
       const secondaryLine = [company, location].filter(Boolean).join(' • ');
+      const expDescKeywords = getExperienceDescriptionKeywords(idx);
       return (
         <div key={`exp-${idx}`} style={experienceBlockStyle}>
           <div style={experienceHeaderRowStyle}>
@@ -681,9 +756,13 @@ const isAttorneyTemplate = normalizedFormat === TEMPLATE_SLUGS.ATTORNEY_TEMPLATE
           {secondaryLine && <div style={experienceMetaStyle}>{secondaryLine}</div>}
           {exp.description && (
             <ul style={bulletListStyle}>
-              {exp.description.split(/\r?\n/).filter((line) => line.trim()).map((line, lineIdx) => (
-                <li key={`exp-${idx}-line-${lineIdx}`}>{line.replace(/^[•▪-]+\s*/, '')}</li>
-              ))}
+              {exp.description.split(/\r?\n/).filter((line) => line.trim()).map((line, lineIdx) => {
+                const cleanedLine = line.replace(/^[•▪-]+\s*/, '');
+                const highlightedContent = data.highlightImpact && expDescKeywords.length > 0
+                  ? renderTextWithImpactHighlights(cleanedLine, expDescKeywords)
+                  : cleanedLine;
+                return <li key={`exp-${idx}-line-${lineIdx}`}>{highlightedContent}</li>;
+              })}
             </ul>
           )}
         </div>
