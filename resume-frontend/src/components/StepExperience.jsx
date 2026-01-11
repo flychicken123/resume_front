@@ -6,6 +6,7 @@ import {
   improveExperienceGrammarAI,
   optimizeProjectAI,
   improveProjectGrammarAI,
+  extractImpactKeywordsAI,
 } from '../api';
 import { useLocation } from 'react-router-dom';
 
@@ -169,12 +170,13 @@ const formatDateRange = (exp) => {
 };
 
 const StepExperience = () => {
-  const { data, setData } = useResume();
+  const { data, setData, setHighlightImpact, setImpactKeywords } = useResume();
   const [loadingIndex, setLoadingIndex] = useState(null);
   const [aiMode, setAiMode] = useState({});
   const [projectLoading, setProjectLoading] = useState({});
   const [projectAiMode, setProjectAiMode] = useState({});
   const [bulkLoading, setBulkLoading] = useState(false);
+  const [highlightLoading, setHighlightLoading] = useState(false);
   const location = useLocation();
 
   const experiences = Array.isArray(data?.experiences) ? data.experiences : [];
@@ -322,6 +324,39 @@ const StepExperience = () => {
     } finally {
       setBulkLoading(false);
       setLoadingIndex(null);
+    }
+  };
+
+  const handleHighlightToggle = async (enabled) => {
+    if (!enabled) {
+      setHighlightImpact(false);
+      setImpactKeywords(null);
+      return;
+    }
+
+    // Check if there are any descriptions to analyze
+    const hasContent = experiences.some(
+      (exp) =>
+        (exp.description || '').trim() ||
+        (Array.isArray(exp.projectsForRole) &&
+          exp.projectsForRole.some((p) => (p.description || '').trim()))
+    );
+
+    if (!hasContent) {
+      alert('Add descriptions to your experiences or projects first.');
+      return;
+    }
+
+    try {
+      setHighlightLoading(true);
+      const result = await extractImpactKeywordsAI(experiences);
+      setImpactKeywords(result);
+      setHighlightImpact(true);
+    } catch (err) {
+      console.error('Failed to extract impact keywords:', err);
+      alert('Failed to highlight impact keywords. Please try again.');
+    } finally {
+      setHighlightLoading(false);
     }
   };
 
@@ -501,10 +536,70 @@ const StepExperience = () => {
         <div
           style={{
             display: 'flex',
-            justifyContent: 'flex-end',
+            justifyContent: 'space-between',
+            alignItems: 'center',
             marginBottom: '1.25rem',
+            flexWrap: 'wrap',
+            gap: '1rem',
           }}
         >
+          <label
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              cursor: highlightLoading ? 'wait' : 'pointer',
+              padding: '0.5rem 1rem',
+              background: data.highlightImpact ? '#ecfdf5' : '#f9fafb',
+              border: `1px solid ${data.highlightImpact ? '#10b981' : '#e5e7eb'}`,
+              borderRadius: '8px',
+              transition: 'all 0.2s ease',
+            }}
+            title="When enabled, AI will identify and bold impact-showing keywords in the preview and PDF"
+          >
+            <div
+              style={{
+                position: 'relative',
+                width: '44px',
+                height: '24px',
+                background: data.highlightImpact ? '#10b981' : '#d1d5db',
+                borderRadius: '12px',
+                transition: 'background 0.2s ease',
+                opacity: highlightLoading ? 0.6 : 1,
+              }}
+            >
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '2px',
+                  left: data.highlightImpact ? '22px' : '2px',
+                  width: '20px',
+                  height: '20px',
+                  background: 'white',
+                  borderRadius: '50%',
+                  transition: 'left 0.2s ease',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                }}
+              />
+            </div>
+            <input
+              type="checkbox"
+              checked={data.highlightImpact || false}
+              onChange={(e) => handleHighlightToggle(e.target.checked)}
+              disabled={highlightLoading}
+              style={{ display: 'none' }}
+            />
+            <span
+              style={{
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                color: data.highlightImpact ? '#059669' : '#6b7280',
+              }}
+            >
+              {highlightLoading ? 'Analyzing...' : 'Highlight Impact'}
+            </span>
+          </label>
+
           <button
             onClick={checkAllWithAI}
             disabled={bulkButtonDisabled}

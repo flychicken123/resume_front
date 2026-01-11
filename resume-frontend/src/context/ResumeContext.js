@@ -50,7 +50,10 @@ const createDefaultResumeData = () => ({
   coverLetterText: "",
   coverLetterType: "",
   selectedFormat: DEFAULT_TEMPLATE_ID,
-  selectedFontSize: "medium"
+  selectedFontSize: "medium",
+  // Impact highlighting feature
+  highlightImpact: false,
+  impactKeywords: null // { experiences: { "exp-0": { description: [...], projects: { "proj-0-0": { ... } } } } }
 });
 
 const normalizeResumeData = (resume) => {
@@ -75,6 +78,12 @@ const normalizeResumeData = (resume) => {
   }
   if (typeof next.coverLetterType !== 'string') {
     next.coverLetterType = "";
+  }
+  if (typeof next.highlightImpact !== 'boolean') {
+    next.highlightImpact = false;
+  }
+  if (next.impactKeywords !== null && typeof next.impactKeywords !== 'object') {
+    next.impactKeywords = null;
   }
 
   return next;
@@ -399,8 +408,36 @@ export const ResumeProvider = ({ children }) => {
     }
   }, [user]);
 
+  // Function to toggle impact highlighting
+  const setHighlightImpact = (enabled) => {
+    setData((prev) => ({
+      ...prev,
+      highlightImpact: enabled,
+      // Clear cached keywords when turning off
+      impactKeywords: enabled ? prev.impactKeywords : null,
+    }));
+  };
+
+  // Function to set impact keywords
+  const setImpactKeywords = (keywords) => {
+    setData((prev) => ({
+      ...prev,
+      impactKeywords: keywords,
+    }));
+  };
+
   return (
-    <ResumeContext.Provider value={{ data, setData: updateResume, updateData: updateResume, clearData, loadUserData, saveToDatabaseNow, applyImportedData }}>
+    <ResumeContext.Provider value={{
+      data,
+      setData: updateResume,
+      updateData: updateResume,
+      clearData,
+      loadUserData,
+      saveToDatabaseNow,
+      applyImportedData,
+      setHighlightImpact,
+      setImpactKeywords
+    }}>
       {children}
     </ResumeContext.Provider>
   );
