@@ -5,10 +5,10 @@
       "name": "Free Plan",
       "price": 0.0,
       "currency": "USD",
-      "resume_limit": 1,
+      "resume_limit": 100,
       "resume_period": "weekly",
       "features": [
-        "1 resume per week",
+        "100 resumes per week",
         "PDF export",
         "Email support"
       ]
@@ -18,10 +18,10 @@
       "name": "Premium Plan",
       "price": 7.99,
       "currency": "USD",
-      "resume_limit": 30,
+      "resume_limit": 3000,
       "resume_period": "monthly",
       "features": [
-        "30 resumes per month",
+        "3,000 resumes per month",
         "Advanced templates",
         "Keyword optimization",
         "Priority support"
@@ -32,10 +32,10 @@
       "name": "Ultimate Plan",
       "price": 29.99,
       "currency": "USD",
-      "resume_limit": 300,
+      "resume_limit": 30000,
       "resume_period": "monthly",
       "features": [
-        "300 resumes per month",
+        "30,000 resumes per month",
         "24 hours online support"
       ]
     }
