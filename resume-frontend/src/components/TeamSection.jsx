@@ -9,13 +9,6 @@ const teamMembers = [
     highlights: ["Former Tech Lead at TikTok", "Senior engineer at Twilio & eBay"],
     linkedin: "https://www.linkedin.com/in/han-y-1448344b/",
   },
-  {
-    name: "Xuan Wu",
-    role: "Co-Founder & CTO",
-    summary: "Leads product engineering and AI systems.",
-    highlights: ["Focus on resume intelligence", "Tech Lead in Microsoft's infrastructure team"],
-    linkedin: "https://www.linkedin.com/in/h-w-b0b10317a/",
-  },
 ];
 
 const extendedTeam = [
@@ -82,11 +75,6 @@ const TeamSection = () => {
           <p>
             Seattle-based and available at{" "}
             <a href="mailto:hyu@hihired.org">hyu@hihired.org</a>
-            .
-          </p>
-          <p>
-            Product, design can be reached at{" "}
-            <a href="mailto:xw@hihired.org">xw@hihired.org</a>
             .
           </p>
         </div>
