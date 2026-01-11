@@ -44,27 +44,27 @@ const UpgradeModal = ({ isOpen, onClose, currentPlan = 'free', usage = {} }) => 
   const plans = {
     free: {
       name: 'Free',
-      limit: '100 resumes per week',
+      limit: '50 resumes per week',
       price: '$0',
       period: ''
     },
     premium: {
       name: 'Premium',
-      limit: '3,000 resumes per month',
+      limit: '1,500 resumes per month',
       price: '$7.99',
       period: '/month',
       features: [
-        '3,000 resumes per month',
+        '1,500 resumes per month',
         'AI-generated cover letters included'
       ]
     },
     ultimate: {
       name: 'Ultimate',
-      limit: '30,000 resumes per month',
+      limit: '15,000 resumes per month',
       price: '$29.99',
       period: '/month',
       features: [
-        '30,000 resumes per month',
+        '15,000 resumes per month',
         '24 hours online support'
       ]
     }
@@ -201,7 +201,7 @@ const UpgradeModal = ({ isOpen, onClose, currentPlan = 'free', usage = {} }) => 
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <div>
                   <h4 style={{ margin: 0, fontWeight: 600, color: '#111827' }}>Premium Plan</h4>
-                  <p style={{ margin: 0, color: '#6b7280', fontSize: '12px' }}>3,000 resumes per month</p>
+                  <p style={{ margin: 0, color: '#6b7280', fontSize: '12px' }}>1,500 resumes per month</p>
                   <ul style={{ margin: '8px 0 0', padding: 0, listStyle: 'none' }}>
                     {plans.premium.features.map((feature, idx) => (
                       <li key={idx} style={{ display: 'flex', alignItems: 'center', fontSize: '12px', color: '#6b7280' }}>
@@ -228,7 +228,7 @@ const UpgradeModal = ({ isOpen, onClose, currentPlan = 'free', usage = {} }) => 
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <div>
                   <h4 style={{ margin: 0, fontWeight: 600, color: '#111827' }}>Ultimate Plan</h4>
-                  <p style={{ margin: 0, color: '#6b7280', fontSize: '12px' }}>30,000 resumes per month</p>
+                  <p style={{ margin: 0, color: '#6b7280', fontSize: '12px' }}>15,000 resumes per month</p>
                   <ul style={{ margin: '8px 0 0', padding: 0, listStyle: 'none' }}>
                     {plans.ultimate.features.map((feature, idx) => (
                       <li key={idx} style={{ display: 'flex', alignItems: 'center', fontSize: '12px', color: '#6b7280' }}>

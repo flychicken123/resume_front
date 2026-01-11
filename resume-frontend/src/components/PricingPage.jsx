@@ -24,7 +24,7 @@ const DEFAULT_PLAN_DETAILS = {
 
     features: [
 
-      '100 resumes per week'
+      '50 resumes per week'
 
     ],
 
@@ -46,7 +46,7 @@ const DEFAULT_PLAN_DETAILS = {
 
     features: [
 
-      '3,000 resumes per month',
+      '1,500 resumes per month',
 
       'AI-generated cover letters included'
 
@@ -70,7 +70,7 @@ const DEFAULT_PLAN_DETAILS = {
 
     features: [
 
-      '30,000 resumes per month',
+      '15,000 resumes per month',
 
       '24 hours online support'
 
@@ -514,7 +514,7 @@ const PricingPage = () => {
 
         free: [
 
-          '100 resumes per week',
+          '50 resumes per week',
 
           'Basic templates',
 
@@ -526,7 +526,7 @@ const PricingPage = () => {
 
         premium: [
 
-          '3,000 resumes per month',
+          '1,500 resumes per month',
 
           'AI-generated cover letters included',
 
@@ -534,7 +534,7 @@ const PricingPage = () => {
 
         ultimate: [
 
-          '30,000 resumes per month',
+          '15,000 resumes per month',
 
           '24 hours online support',
 
