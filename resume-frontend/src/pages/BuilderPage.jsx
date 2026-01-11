@@ -2922,7 +2922,7 @@ function BuilderPage() {
               subscription: {
                 plan_name: result.data?.plan?.toLowerCase() || currentPlan,
                 display_name: result.data?.plan || currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1),
-                resume_limit: result.data?.limit || (currentPlan === 'premium' ? 30 : currentPlan === 'ultimate' ? 200 : 1),
+                resume_limit: result.data?.limit || (currentPlan === 'premium' ? 1500 : currentPlan === 'ultimate' ? 15000 : 50),
                 resume_period: result.data?.period || (currentPlan === 'free' ? 'week' : 'month')
               }
             };
@@ -3116,7 +3116,7 @@ function BuilderPage() {
           subscription: sub || {
             plan_name: planKey,
             display_name: planKey.charAt(0).toUpperCase() + planKey.slice(1),
-            resume_limit: planKey === 'premium' ? 30 : planKey === 'ultimate' ? 200 : 1,
+            resume_limit: planKey === 'premium' ? 1500 : planKey === 'ultimate' ? 15000 : 50,
             resume_period: planKey === 'free' ? 'week' : 'month'
           }
         };
@@ -3141,7 +3141,7 @@ function BuilderPage() {
             subscription: sub || {
               plan_name: planKey,
               display_name: planKey.charAt(0).toUpperCase() + planKey.slice(1),
-              resume_limit: planKey === 'premium' ? 30 : planKey === 'ultimate' ? 200 : 1,
+              resume_limit: planKey === 'premium' ? 1500 : planKey === 'ultimate' ? 15000 : 50,
               resume_period: planKey === 'free' ? 'week' : 'month'
             }
           };
