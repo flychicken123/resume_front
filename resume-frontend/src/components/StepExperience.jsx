@@ -180,10 +180,14 @@ const StepExperience = () => {
   const location = useLocation();
 
   const experiences = Array.isArray(data?.experiences) ? data.experiences : [];
-  const hasExperienceDescriptions = experiences.some(
-    (exp) => exp && (exp.description || '').trim()
+  const hasAnyContent = experiences.some(
+    (exp) =>
+      exp &&
+      ((exp.description || '').trim() ||
+        (Array.isArray(exp.projectsForRole) &&
+          exp.projectsForRole.some((p) => (p.description || '').trim())))
   );
-  const bulkButtonDisabled = bulkLoading || loadingIndex !== null || !hasExperienceDescriptions;
+  const bulkButtonDisabled = bulkLoading || loadingIndex !== null || !hasAnyContent;
 
   const updateExperiences = useCallback((updater) => {
     setData((prev) => {
@@ -305,9 +309,9 @@ const StepExperience = () => {
   };
 
   const checkAllWithAI = async () => {
-    if (!hasExperienceDescriptions || bulkLoading) {
-      if (!hasExperienceDescriptions) {
-        alert('Add descriptions to your experiences before running an AI check.');
+    if (!hasAnyContent || bulkLoading) {
+      if (!hasAnyContent) {
+        alert('Add descriptions to your experiences or projects before running an AI check.');
       }
       return;
     }
@@ -316,10 +320,22 @@ const StepExperience = () => {
       setBulkLoading(true);
       for (let idx = 0; idx < experiences.length; idx += 1) {
         const experience = experiences[idx];
-        if (!experience || !(experience.description || '').trim()) {
+        if (!experience) {
           continue;
         }
-        await checkWithAI(idx);
+        // Check experience description if present
+        if ((experience.description || '').trim()) {
+          await checkWithAI(idx);
+        }
+        // Check all projects with descriptions under this experience
+        if (Array.isArray(experience.projectsForRole)) {
+          for (let pIdx = 0; pIdx < experience.projectsForRole.length; pIdx += 1) {
+            const project = experience.projectsForRole[pIdx];
+            if (project && (project.description || '').trim()) {
+              await checkProjectWithAI(idx, pIdx);
+            }
+          }
+        }
       }
     } finally {
       setBulkLoading(false);
@@ -616,8 +632,8 @@ const StepExperience = () => {
               transition: 'background 0.2s ease, opacity 0.2s ease',
             }}
             title={
-              !hasExperienceDescriptions
-                ? 'Add descriptions to your experiences first.'
+              !hasAnyContent
+                ? 'Add descriptions to your experiences or projects first.'
                 : loadingIndex !== null
                 ? 'Finish the current AI check before running all.'
                 : undefined
