@@ -1826,8 +1826,6 @@ function BuilderPage() {
     const summaryText = typeof data.summary === 'string' ? data.summary : '';
     const position = targetPosition;
     const skills = resumeSkills;
-    // Limit job description to prevent 413 errors (max ~50KB)
-    const normalizedJobDescription = trimmedJobDescription?.slice(0, 50000) || '';
 
     return {
       position,
@@ -1836,14 +1834,12 @@ function BuilderPage() {
       summary: summaryText,
       experience: experienceSummary,
       education: educationSummary,
-      jobDescription: normalizedJobDescription,
       location: preferredLocation,
       skills,
-      htmlContent: '',
       candidateJobLimit: 400,
       maxResults: 50,
     };
-  }, [data, trimmedJobDescription, jobMatchesLocation, autoLocation, targetPosition, resumeSkills]);
+  }, [data, jobMatchesLocation, autoLocation, targetPosition, resumeSkills]);
 
   const fetchJobMatches = useCallback(async (useQuickMode = true) => {
     if (!user) {
