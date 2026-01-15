@@ -1826,7 +1826,8 @@ function BuilderPage() {
     const summaryText = typeof data.summary === 'string' ? data.summary : '';
     const position = targetPosition;
     const skills = resumeSkills;
-    const normalizedJobDescription = trimmedJobDescription;
+    // Limit job description to prevent 413 errors (max ~50KB)
+    const normalizedJobDescription = trimmedJobDescription?.slice(0, 50000) || '';
 
     return {
       position,
