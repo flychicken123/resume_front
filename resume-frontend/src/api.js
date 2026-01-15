@@ -112,7 +112,8 @@ export async function computeJobMatches(payload) {
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || "Unable to compute job matches.");
+    const message = err.details ? `${err.error}: ${err.details}` : (err.error || "Unable to compute job matches.");
+    throw new Error(message);
   }
   return await res.json();
 }
