@@ -1253,3 +1253,30 @@ export async function extractImpactKeywordsAI(experiences) {
   return data?.data || data;
 }
 
+// Ads rewards helpers
+export async function fetchAdStatus() {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/ads/status`, {
+    method: 'GET',
+    headers: getAuthHeaders(),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error || 'Failed to load ad status.');
+  }
+  return { data };
+}
+
+export async function completeAdWatch() {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/ads/watch-complete`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const error = new Error(data?.error || 'Failed to complete ad watch.');
+    error.response = { status: res.status, data };
+    throw error;
+  }
+  return { data };
+}
+

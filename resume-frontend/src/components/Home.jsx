@@ -506,6 +506,14 @@ const Home = () => {
                   >
                     Membership
                   </Link>
+                  <Link
+                    to="/ads-rewards"
+                    className="home-account-item"
+                    role="menuitem"
+                    onClick={() => setShowAccountMenu(false)}
+                  >
+                    Ads Rewards
+                  </Link>
                   {isAdmin && (
                     <Link
                       to="/admin/memberships"
@@ -645,6 +653,15 @@ const Home = () => {
                 onClick={() => setShowMobileMenu(false)}
               >
                 Membership
+              </Link>
+            )}
+            {user && (
+              <Link
+                to="/ads-rewards"
+                className="mobile-nav-link"
+                onClick={() => setShowMobileMenu(false)}
+              >
+                Ads Rewards
               </Link>
             )}
 
