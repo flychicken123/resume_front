@@ -165,6 +165,7 @@ const AdsRewardsPage = () => {
             <li>Earn 1 free resume credit after the ad completes</li>
             <li>You can watch 1 ad every 30 minutes</li>
             <li>Credits can be used to generate additional resumes</li>
+            <li>For free tier users, credits and usage reset every week</li>
           </ul>
         </div>
       </div>
