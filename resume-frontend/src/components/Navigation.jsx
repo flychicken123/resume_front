@@ -142,6 +142,14 @@ const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setS
                   >
                     Membership
                   </Link>
+                  <Link
+                    to="/ads-rewards"
+                    className="nav-account-item"
+                    role="menuitem"
+                    onClick={() => setShowAccountMenu(false)}
+                  >
+                    Ads Rewards
+                  </Link>
                   <button
                     type="button"
                     className="nav-account-item nav-account-logout"
@@ -242,6 +250,15 @@ const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setS
                 onClick={() => setShowMobileMenu(false)}
               >
                 Membership
+              </Link>
+            )}
+            {user && (
+              <Link
+                to="/ads-rewards"
+                className="mobile-nav-link"
+                onClick={() => setShowMobileMenu(false)}
+              >
+                Ads Rewards
               </Link>
             )}
             {isAdmin && (
