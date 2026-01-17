@@ -11,7 +11,6 @@ import { useResume } from "../context/ResumeContext";
 import Login from "./auth/Login";
 
 import ResumeHistory from "./ResumeHistory";
-import NewHome from "./NewHome";
 import SimpleHero from "./SimpleHero";
 import About from "./About";
 import ProductOverview from "./ProductOverview";
@@ -69,7 +68,7 @@ const getForcedHomeVariant = () => {
 const Home = () => {
   const { user, login, isAdmin } = useAuth();
   const { assignments, assignVariant, trackEvent } = useExperiments();
-  const { resume, hasResume } = useResume();
+  useResume();
 
   const displayName =
     typeof user === "string" ? user : user?.name || user?.email || "";
@@ -116,7 +115,6 @@ const Home = () => {
   const [showResumeHistory, setShowResumeHistory] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showAccountMenu, setShowAccountMenu] = useState(false);
-  const [showResumePrompt, setShowResumePrompt] = useState(false);
   const accountMenuRef = useRef(null);
 
   const navigate = useNavigate();
@@ -260,39 +258,6 @@ const Home = () => {
     });
   };
 
-  const handleNewHomeSearch = ({ role, location, seniority }) => {
-    if (!hasResume) {
-      setShowResumePrompt(true);
-      trackHomeEvent("resume_prompt", { source: "search" });
-      return;
-    }
-    trackHomeEvent("job_search", { role, location, seniority });
-    triggerBuilderCta("new_home_search", {
-      targetStep: BUILDER_TARGET_JOB_MATCHES,
-    });
-  };
-
-  const handleTailorForRole = (job) => {
-    if (!hasResume) {
-      setShowResumePrompt(true);
-      trackHomeEvent("resume_prompt", { source: "tailor_click" });
-      return;
-    }
-    trackHomeEvent("tailor_resume", {
-      title: job?.title,
-      company: job?.company,
-    });
-    triggerBuilderCta("new_home_role_cta", {
-      targetStep: BUILDER_TARGET_JOB_MATCHES,
-    });
-  };
-
-  const handleJobAlertClick = () => {
-    trackHomeEvent("job_alert_click");
-    if (!user) {
-      openLoginModal("Sign in to create job alerts");
-    }
-  };
 
   useEffect(() => {
     if (!showAccountMenu) {
@@ -314,165 +279,11 @@ const Home = () => {
     };
   }, [showAccountMenu]);
 
-  const normalizedHomeVariant = (homeVariant || "").trim().toLowerCase();
-  const isNewHomeVariant =
-    normalizedHomeVariant === "new" ||
-    normalizedHomeVariant === "new-home" ||
-    normalizedHomeVariant === "newlayout" ||
-    normalizedHomeVariant.startsWith("new-");
-
-  if (!forcedHomeVariant && !homeVariant) {
-    return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "grid",
-          placeItems: "center",
-          background: "#0b1220",
-          color: "#e2e8f0",
-          padding: "24px",
-        }}
-      >
-        <div style={{ textAlign: "center" }}>
-          <div style={{ fontWeight: 700, fontSize: "1.05rem" }}>Loading…</div>
-          <div style={{ marginTop: 8, color: "#94a3b8", fontSize: "0.95rem" }}>
-            Preparing your homepage.
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   const handleLogout = () => {
     localStorage.removeItem("resumeUser");
     localStorage.removeItem("resumeToken");
     window.location.reload();
   };
-
-  if (isNewHomeVariant) {
-    return (
-      <>
-        <SEO
-          title="Curated Tech Jobs + ATS Resume Builder | HiHired"
-          description="A Simplify-inspired home: verified tech roles with compensation, plus an AI resume builder that tailors every apply. Join the experiment."
-          canonical="https://hihired.org/"
-        />
-        <NewHome
-          user={user}
-          displayName={displayName}
-          isAdmin={isAdmin}
-          hasResume={!!hasResume}
-          variantKey={homeVariant}
-          onPrimaryCta={() =>
-            triggerBuilderCta("new_home_primary", { stepId: "home_builder_cta", targetStep: BUILDER_TARGET_IMPORT })
-          }
-          onSecondaryCta={() =>
-            triggerBuilderCta("new_home_jobs", {
-              targetStep: BUILDER_TARGET_JOB_MATCHES,
-            })
-          }
-          onSearch={handleNewHomeSearch}
-          onTailorJob={handleTailorForRole}
-          onJobAlertClick={handleJobAlertClick}
-          onOpenLogin={(message) => openLoginModal(message)}
-          onOpenResumeHistory={() => setShowResumeHistory(true)}
-          onLogout={handleLogout}
-          onTrack={trackHomeEvent}
-          onRequireResume={(source) => {
-            setShowResumePrompt(true);
-            trackHomeEvent("resume_prompt", { source });
-          }}
-        />
-
-        {showAuthModal && (
-          <div
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              width: "100vw",
-              height: "100vh",
-
-              background: "rgba(0,0,0,0.25)",
-              zIndex: 200,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <div style={{ position: "relative" }}>
-                <Login
-                  contextMessage={authContextMessage}
-                  onLogin={handleAuthSuccess}
-                  onClose={() => {
-                    setShowAuthModal(false);
-                    setPendingBuilderStep(null);
-                    setAuthContextMessage("");
-                  }}
-                />
-              </div>
-            </div>
-          )}
-
-        {showResumePrompt && (
-          <div
-            style={{
-              position: "fixed",
-              inset: 0,
-              background: "rgba(0,0,0,0.25)",
-              zIndex: 210,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "12px",
-            }}
-          >
-            <div
-              style={{
-                width: "100%",
-                maxWidth: 440,
-                background: "#ffffff",
-                borderRadius: 12,
-                padding: "18px 16px",
-                boxShadow: "0 18px 40px rgba(15,23,42,0.2)",
-                color: "#0f172a",
-              }}
-            >
-              <h3 style={{ margin: "0 0 6px" }}>Create your resume to proceed</h3>
-              <p style={{ margin: 0, color: "#475569" }}>
-                Build or start a resume first—then we&apos;ll tailor it to the job you pick.
-              </p>
-              <div style={{ display: "flex", gap: 10, marginTop: 12, flexWrap: "wrap" }}>
-                <button
-                  type="button"
-                  className="nh-primary"
-                  style={{ border: "none" }}
-                  onClick={() => {
-                    setShowResumePrompt(false);
-                    triggerBuilderCta("new_home_resume_prompt", { stepId: "home_builder_cta", targetStep: BUILDER_TARGET_IMPORT });
-                  }}
-                >
-                  Start my resume
-                </button>
-                <button
-                  type="button"
-                  className="nh-ghost"
-                  style={{ border: "1px solid #e2e8f0" }}
-                  onClick={() => setShowResumePrompt(false)}
-                >
-                  Maybe later
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {showResumeHistory && (
-          <ResumeHistory onClose={() => setShowResumeHistory(false)} />
-        )}
-      </>
-    );
-  }
 
   return (
     <div>
