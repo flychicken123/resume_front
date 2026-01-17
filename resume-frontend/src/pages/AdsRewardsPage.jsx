@@ -131,11 +131,13 @@ const AdsRewardsPage = () => {
             <div className="ads-rewards-usage-label">Your usage this period:</div>
             <div className="ads-rewards-usage-stats">
               <span className="ads-rewards-usage-used">
-                {usage.limit - usage.remaining} / {usage.limit}
+                {usage.limit ? `${usage.limit - usage.remaining} / ${usage.limit}` : `${usage.remaining} remaining`}
               </span>
-              <span className="ads-rewards-usage-remaining">
-                ({usage.remaining} remaining)
-              </span>
+              {usage.limit && (
+                <span className="ads-rewards-usage-remaining">
+                  ({usage.remaining} remaining)
+                </span>
+              )}
             </div>
           </div>
         )}
