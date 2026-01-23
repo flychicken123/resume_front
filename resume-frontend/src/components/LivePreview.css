@@ -439,9 +439,9 @@
   max-height: 100%;
   overflow: hidden;
   box-sizing: border-box;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-  hyphens: auto;
+  overflow-wrap: break-word;
+  word-break: normal;
+  hyphens: none;
   position: relative;
   border-radius: 0;
   padding-left: 0;
