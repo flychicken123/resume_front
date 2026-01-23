@@ -453,9 +453,6 @@ const collectExperienceFieldChanges = (previousList = [], nextList = []) => {
     // Get font size scale factor to adjust heights
     const fontScale = getFontSizeScaleFactor();
 const applyFormatAdjustment = (value, sectionKey = type) => {
-  if (!isIndustryManagerFormat && !isAttorneyFormat) {
-    return value;
-  }
   if (isAttorneyFormat) {
     const attorneyAdjustments = {
       aggressive: {
@@ -482,31 +479,31 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
     return Math.max(floor, value * multiplier);
   }
   const adjustmentSets = {
-    // Keep aggressive mode close to measured height
+    // Aggressive mode - accurate estimates matching rendered heights
     aggressive: {
-      header: { multiplier: 1.00, floor: 24 },
-      summary: { multiplier: 1.01, floor: 30 },
-      experience: { multiplier: 1.04, floor: 92 },
-      education: { multiplier: 1.01, floor: 28 },
-      projects: { multiplier: 1.04, floor: 64 },
-      skills: { multiplier: 1.03, floor: 34 },
-      default: { multiplier: 1.01, floor: 30 }
+      header: { multiplier: 0.98, floor: 20 },
+      summary: { multiplier: 0.98, floor: 24 },
+      experience: { multiplier: 0.98, floor: 70 },
+      education: { multiplier: 0.98, floor: 22 },
+      projects: { multiplier: 0.98, floor: 45 },
+      skills: { multiplier: 0.98, floor: 28 },
+      default: { multiplier: 0.98, floor: 22 }
     },
     conservative: {
-      header: { multiplier: 1.06, floor: 28 },
-      summary: { multiplier: 1.1, floor: 34 },
-      experience: { multiplier: 1.12, floor: 110 },
-      education: { multiplier: 1.06, floor: 34 },
-      projects: { multiplier: 1.12, floor: 74 },
-      skills: { multiplier: 1.08, floor: 38 },
-      default: { multiplier: 1.08, floor: 34 }
+      header: { multiplier: 1.0, floor: 24 },
+      summary: { multiplier: 1.0, floor: 28 },
+      experience: { multiplier: 1.0, floor: 80 },
+      education: { multiplier: 1.0, floor: 28 },
+      projects: { multiplier: 1.0, floor: 60 },
+      skills: { multiplier: 1.0, floor: 32 },
+      default: { multiplier: 1.0, floor: 28 }
     }
   };
   const mode = useConservativePaging ? 'conservative' : 'aggressive';
   const selected = adjustmentSets[mode];
   const { multiplier, floor } = selected[sectionKey] || selected.default;
   const adjusted = Math.max(floor, value * multiplier);
-  // Allow increasing estimates to prevent overflow/cutoff
+  console.log(`[Height] ${sectionKey}: raw=${value}, multiplier=${multiplier}, adjusted=${adjusted}`);
   return adjusted;
 };
     switch (type) {
@@ -530,9 +527,8 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
             let height = Math.round(32 * fontScale);
             if (exp.description) {
               const rawLines = String(exp.description).split(/\n+/).filter((line) => line.trim());
-              // More conservative line width so long bullets near the bottom
-              // of the page don't get clipped.
-              const descCharsPerLine = Math.round(100 / fontScale);
+              // Wider line estimate to reduce over-estimation
+              const descCharsPerLine = Math.round(200 / fontScale);
               const lineHeightPx = Math.round(14 * fontScale);
               let descLines = 0;
               for (const rawLine of rawLines.length ? rawLines : [String(exp.description)]) {
@@ -684,11 +680,11 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
     const pageUtilization = Math.max(0.8, baseUtilization - utilizationTightening);
     const basePageBuffer = useConservativePaging
       ? (fontScale >= 1.5 ? 64 : 44)
-      : (fontScale >= 1.5 ? 22 : 12);
-    let effectiveAvailableHeight = Math.min(
-      AVAILABLE_HEIGHT * pageUtilization,
-      AVAILABLE_HEIGHT - basePageBuffer
-    );
+      : (fontScale >= 1.5 ? 8 : 0);
+    // Use full available height for non-conservative mode
+    let effectiveAvailableHeight = useConservativePaging
+      ? Math.min(AVAILABLE_HEIGHT * pageUtilization, AVAILABLE_HEIGHT - basePageBuffer)
+      : AVAILABLE_HEIGHT;
 
     if (isIndustryManagerFormat && !useConservativePaging) {
       const marginLimit = AVAILABLE_HEIGHT - 18;
@@ -696,13 +692,13 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
     }
 
     const sectionPadding = {
-      header: useConservativePaging ? 10 : 10,
-      summary: useConservativePaging ? 12 : 12,
-      experience: useConservativePaging ? 14 : 14,
-      projects: useConservativePaging ? 14 : 14,
-      education: useConservativePaging ? 12 : 12,
-      skills: useConservativePaging ? 10 : 10,
-      default: useConservativePaging ? 10 : 10,
+      header: useConservativePaging ? 6 : 0,
+      summary: useConservativePaging ? 8 : 0,
+      experience: useConservativePaging ? 8 : 0,
+      projects: useConservativePaging ? 8 : 0,
+      education: useConservativePaging ? 6 : 0,
+      skills: useConservativePaging ? 6 : 0,
+      default: useConservativePaging ? 6 : 0,
     };
 
     const getSectionPadding = (type) => sectionPadding[type] ?? sectionPadding.default;
@@ -778,7 +774,8 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
       const description = toText(entry.description);
       if (description) {
         const rawLines = String(description).split(/\n+/).filter((line) => line.trim());
-        const descCharsPerLine = Math.round((useConservativePaging ? 100 : 150) / fontScale);
+        // Use same chars per line for both modes to avoid big estimation differences
+        const descCharsPerLine = Math.round(180 / fontScale);
         const lineHeightPx = Math.round(14 * fontScale);
         let descLines = 0;
         for (const rawLine of rawLines.length ? rawLines : [String(description)]) {
@@ -792,7 +789,8 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
         }
       }
       height += Math.round(8 * fontScale);
-      const multiplier = useConservativePaging ? resolveFormatMultiplier('experience') : 1;
+      // Use accurate multiplier matching rendered heights
+      const multiplier = 0.98;
       return Math.round(height * multiplier);
     };
 
@@ -805,7 +803,8 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
       if (description) {
         const lines = String(description).split('\n').filter((line) => line.trim());
         let totalLines = lines.length || 1;
-        const descCharsPerLine = Math.round((useConservativePaging ? 140 : 190) / fontScale);
+        // Use consistent chars per line
+        const descCharsPerLine = Math.round(170 / fontScale);
         for (const line of lines.length ? lines : [String(description)]) {
           const cleanLine = String(line).replace('•', '').trim();
           if (cleanLine.length > descCharsPerLine) {
@@ -821,7 +820,8 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
         height += Math.round(12 * fontScale);
       }
       height += Math.round(5 * fontScale);
-      const multiplier = useConservativePaging ? resolveFormatMultiplier('projects') : 1;
+      // Use accurate multiplier matching rendered heights
+      const multiplier = 0.98;
       return Math.round(height * multiplier);
     };
 
@@ -1037,6 +1037,7 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
         currentHeight += bufferedHeight;
       });
     } else {
+      console.log('[Pagination] effectiveAvailableHeight:', effectiveAvailableHeight);
       const queue = [...allSections];
       while (queue.length > 0) {
         const section = queue.shift();
@@ -1044,6 +1045,8 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
         const sectionHeight = computeSplittableSectionHeight(section);
         const bufferedHeight = addBuffer(sectionHeight, section.type);
         const remainingSpace = effectiveAvailableHeight - currentHeight;
+
+        console.log(`[Pagination] ${section.type}: raw=${sectionHeight}, buffered=${bufferedHeight}, current=${currentHeight}, remaining=${remainingSpace}, fits=${bufferedHeight <= remainingSpace}`);
 
         if (currentHeight > 0 && bufferedHeight > remainingSpace) {
           const splitResult = fitArraySectionWithin(section, remainingSpace, { forceAtLeastOne: false });
@@ -1077,6 +1080,8 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
     }
 
     pushPage();
+
+    // No special merge logic - sections flow naturally based on height estimation
 
     if (isAttorneyFormat && pages.length > 0) {
       const attorneyBaseBuffer = useConservativePaging ? 156 : 132;
@@ -1481,9 +1486,10 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
       return actualHeight > maxContentHeight;
     });
 
-    if (hasOverflow) {
-      setUseConservativePaging(true);
-    }
+    // Disabled: Conservative mode causes bad splits with empty space
+    // if (hasOverflow) {
+    //   setUseConservativePaging(true);
+    // }
   }, [isBrowser, isAttorneyFormat, pages, useConservativePaging]);
 
   // If conservative paging was enabled due to a transient overflow (e.g., while
@@ -1570,7 +1576,8 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
     if (actualHeight <= maxContentHeight) {
       return;
     }
-    setUseConservativePaging(true);
+    // Disabled: Conservative mode causes bad splits with empty space
+    // setUseConservativePaging(true);
   }, [isBrowser, isAttorneyFormat, pages, useConservativePaging]);
   if (!isVisible) {
     return null;
@@ -2378,9 +2385,9 @@ function parseSkills(value) {
     const summaryStyle = {
       ...styles.summary,
       whiteSpace: 'pre-wrap',
-      overflowWrap: styles.summary?.overflowWrap || 'anywhere',
-      wordBreak: styles.summary?.wordBreak || 'break-word',
-      hyphens: styles.summary?.hyphens || 'auto',
+      overflowWrap: styles.summary?.overflowWrap || 'break-word',
+      wordBreak: styles.summary?.wordBreak || 'normal',
+      hyphens: styles.summary?.hyphens || 'none',
       maxWidth: '100%',
       display: 'block'
     };
@@ -2947,7 +2954,7 @@ const renderEducation = (education, styles) => {
             {(startLabel || endLabel) && (
               <div
                 style={{
-                  ...styles.date,
+                  ...styles.company,
                   fontWeight: 'normal',
                   float: 'right',
                   textAlign: 'right',

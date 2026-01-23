@@ -2757,7 +2757,7 @@ function BuilderPage() {
             white-space: normal !important;
             word-wrap: break-word !important;
             overflow-wrap: break-word !important;
-            hyphens: auto !important;
+            hyphens: none !important;
             /* Do NOT set font-size here - preserve inline styles */
           }
 
