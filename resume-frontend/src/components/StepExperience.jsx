@@ -242,6 +242,24 @@ const StepExperience = () => {
     updateExperiences((current) => current.filter((_, i) => i !== idx));
   };
 
+  const moveExperienceUp = (idx) => {
+    if (idx <= 0) return;
+    updateExperiences((current) => {
+      const newArr = [...current];
+      [newArr[idx - 1], newArr[idx]] = [newArr[idx], newArr[idx - 1]];
+      return newArr;
+    });
+  };
+
+  const moveExperienceDown = (idx) => {
+    updateExperiences((current) => {
+      if (idx >= current.length - 1) return current;
+      const newArr = [...current];
+      [newArr[idx], newArr[idx + 1]] = [newArr[idx + 1], newArr[idx]];
+      return newArr;
+    });
+  };
+
   const skipExperience = () => {
     updateExperiences(() => []);
   };
@@ -693,20 +711,56 @@ const StepExperience = () => {
                   </div>
                 )}
               </div>
-              <button
-                onClick={() => removeExperience(idx)}
-                style={{
-                  background: '#fee2e2',
-                  color: '#dc2626',
-                  border: '1px solid #fecaca',
-                  borderRadius: '4px',
-                  padding: '0.25rem 0.5rem',
-                  fontSize: '0.75rem',
-                  cursor: 'pointer',
-                }}
-              >
-                Remove
-              </button>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button
+                  onClick={() => moveExperienceUp(idx)}
+                  disabled={idx === 0}
+                  style={{
+                    background: idx === 0 ? '#f3f4f6' : '#e0f2fe',
+                    color: idx === 0 ? '#9ca3af' : '#0369a1',
+                    border: '1px solid',
+                    borderColor: idx === 0 ? '#e5e7eb' : '#bae6fd',
+                    borderRadius: '4px',
+                    padding: '0.25rem 0.5rem',
+                    fontSize: '0.75rem',
+                    cursor: idx === 0 ? 'not-allowed' : 'pointer',
+                  }}
+                  title="Move up"
+                >
+                  ↑
+                </button>
+                <button
+                  onClick={() => moveExperienceDown(idx)}
+                  disabled={idx === experiences.length - 1}
+                  style={{
+                    background: idx === experiences.length - 1 ? '#f3f4f6' : '#e0f2fe',
+                    color: idx === experiences.length - 1 ? '#9ca3af' : '#0369a1',
+                    border: '1px solid',
+                    borderColor: idx === experiences.length - 1 ? '#e5e7eb' : '#bae6fd',
+                    borderRadius: '4px',
+                    padding: '0.25rem 0.5rem',
+                    fontSize: '0.75rem',
+                    cursor: idx === experiences.length - 1 ? 'not-allowed' : 'pointer',
+                  }}
+                  title="Move down"
+                >
+                  ↓
+                </button>
+                <button
+                  onClick={() => removeExperience(idx)}
+                  style={{
+                    background: '#fee2e2',
+                    color: '#dc2626',
+                    border: '1px solid #fecaca',
+                    borderRadius: '4px',
+                    padding: '0.25rem 0.5rem',
+                    fontSize: '0.75rem',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Remove
+                </button>
+              </div>
             </div>
 
             <div
