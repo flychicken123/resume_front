@@ -18,7 +18,6 @@ import TeamSection from "./TeamSection";
 import { setLastStep } from "../utils/exitTracking";
 import SEO from "./SEO";
 import { trackReferrer, trackBuilderStart, trackCTAClick } from "./Analytics";
-import TRUSTED_COMPANIES from "../constants/trustedCompanies";
 import {
   BUILDER_TARGET_STEP_KEY,
   BUILDER_TARGET_JOB_MATCHES,
@@ -27,27 +26,6 @@ import {
   BUILDER_IMPORT_STEP_ID,
 } from "../constants/builder";
 import geoGuides from "../constants/geoGuides";
-
-const HERO_FEATURES = [
-  {
-    icon: "⚡",
-    title: "Tailored in seconds",
-    description:
-      "Paste any job description and get role-specific bullet points instantly.",
-  },
-  {
-    icon: "🧠",
-    title: "Keeps your voice",
-    description:
-      "AI suggestions build on your real experience—never fabricated accomplishments.",
-  },
-  {
-    icon: "📊",
-    title: "ATS proof",
-    description:
-      "Export polished PDFs with keyword coverage and recruiter-ready formatting.",
-  },
-];
 
 const HOME_EXPERIMENT_KEY = "new-home";
 const HOME_VARIANT_SESSION_KEY = "homeVariantResolved";
@@ -239,13 +217,6 @@ const Home = () => {
     setPendingBuilderStep(null);
     setShowAuthModal(true);
     trackHomeEvent("open_login", { source: message ? "prompt" : "direct" });
-  };
-
-  // Calculate optimal spacing based on button width
-
-  const handleStartBuilding = () => {
-    // Track referrer and builder start when user clicks the button
-    triggerBuilderCta("home_primary_cta", { stepId: "home_builder_cta", targetStep: BUILDER_TARGET_IMPORT });
   };
 
   const handleNavbarStart = () => {
@@ -883,183 +854,6 @@ const Home = () => {
             >
               🚀 Try Job Match
             </button>
-          </div>
-        </div>
-      </div>
-
-      <div className="home-hero">
-        <div className="home-hero-content">
-          <div className="hero-main-content">
-            <div className="hero-badge">✨ New for 2025: AI Job Match + Resume Rewrite</div>
-
-            <h1 className="hero-title">
-              Build an ATS-proof resume recruiters trust
-            </h1>
-
-            <p className="hero-subtitle">
-              Paste any job description, get tailored bullet points in seconds, and download a polished PDF our users have used to land offers at teams like Google, Netflix, and Microsoft.
-            </p>
-
-            <div className="home-trusted home-trusted-inline">
-              <div className="home-trusted-heading">
-                <span className="home-trusted-title">
-                  Our users get hired at companies like
-                </span>
-                <span className="home-trusted-rating">
-                  <span className="home-trusted-rating-score">4.9/5</span> satisfaction · 50k+ resumes built
-                </span>
-              </div>
-
-              <div className="home-trusted-logos" role="list">
-                {TRUSTED_COMPANIES.map(({ name, logo, logoHeight }) => (
-                  <span key={name} className="home-trusted-logo" role="listitem">
-                    <img
-                      src={logo}
-                      alt={`${name} logo`}
-                      style={logoHeight ? { height: `${logoHeight}px` } : undefined}
-                      loading="lazy"
-                      onError={(event) => {
-                        event.currentTarget.style.display = "none";
-                      }}
-                    />
-                  </span>
-                ))}
-              </div>
-
-              <p className="home-trusted-note">
-                *Logos reflect companies where HiHired users reported receiving offers.
-              </p>
-            </div>
-
-            <div className="hero-features">
-              {HERO_FEATURES.map(({ icon, title, description }) => (
-                <div key={title} className="hero-feature">
-                  <span className="hero-feature-icon" aria-hidden="true">
-                    {icon}
-                  </span>
-                  <span className="hero-feature-text">
-                    <strong>{title}.</strong> {description}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            <div className="home-cta-buttons">
-              <button
-                className="home-btn primary"
-                onClick={handleStartBuilding}
-                type="button"
-              >
-                {user
-                  ? "📝 Continue in the Builder"
-                  : "🚀 Sign In & Start My Resume"}
-              </button>
-              <button
-                className="home-btn secondary"
-                type="button"
-                onClick={() =>
-                  document
-                    .getElementById("product")
-                    ?.scrollIntoView({ behavior: "smooth" })
-                }
-              >
-                Explore Templates
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="home-hero-image">
-          <div className="ai-impact-preview">
-            <div className="impact-header">
-              <div className="impact-title">📝 Professional Resume Builder</div>
-
-              <div className="impact-subtitle">
-                Intelligent Technology That Delivers Results
-              </div>
-            </div>
-
-            <div className="impact-stats">
-              <div className="stat-item">
-                <div className="stat-number">🤖 AI</div>
-
-                <div className="stat-label">Powered Tech</div>
-              </div>
-
-              <div className="stat-item">
-                <div className="stat-number">⚡ Smart</div>
-
-                <div className="stat-label">Auto-Optimize</div>
-              </div>
-
-              <div className="stat-item">
-                <div className="stat-number">📊 ML</div>
-
-                <div className="stat-label">Algorithms</div>
-              </div>
-            </div>
-
-            <div className="comparison-section">
-              <div className="comparison-item before">
-                <div className="comparison-label">Before</div>
-
-                <div className="comparison-content">
-                  <div className="keyword-match">❌ Manual keywords</div>
-
-                  <div className="skill-alignment">❌ Generic content</div>
-
-                  <div className="ats-score">❌ Hours of work</div>
-                </div>
-              </div>
-
-              <div className="comparison-item after">
-                <div className="comparison-label">After</div>
-
-                <div className="comparison-content">
-                  <div className="keyword-match">✅ AI powered</div>
-
-                  <div className="skill-alignment">✅ Smart tools</div>
-
-                  <div className="ats-score">✅ Fast AI</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="ai-features">
-              <div className="feature-item">
-                <span>🤖 AI content generation</span>
-              </div>
-
-              <div className="feature-item">
-                <span>📊 Smart skill analysis</span>
-              </div>
-
-              <div className="feature-item">
-                <span>🎯 AI job matching</span>
-              </div>
-
-              <div className="feature-item">
-                <span>⚡ Real-time AI optimize</span>
-              </div>
-
-              <div className="feature-item">
-                <span>📄 AI-formatted PDF</span>
-              </div>
-
-              <div className="feature-item">
-                <span>📱 Works on mobile</span>
-              </div>
-            </div>
-
-            <div className="ai-benefits">
-              <div className="benefit-highlight">
-                <span>🤖 AI analyzes instantly</span>
-              </div>
-
-              <div className="benefit-highlight">
-                <span>📊 ML improves results</span>
-              </div>
-            </div>
           </div>
         </div>
       </div>
