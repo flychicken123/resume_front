@@ -962,10 +962,10 @@ const clampLauncherPosition = useCallback(
   const widgetStyle = useMemo(
     () => ({
       position: 'fixed',
-      top: `${launcherPosition.top}px`,
-      left: `${launcherPosition.left}px`,
+      bottom: '24px',
+      right: '24px',
     }),
-    [launcherPosition]
+    []
   );
 
   const buildResumeSummaryInput = useCallback(() => {
@@ -2938,7 +2938,6 @@ const buildSectionResponse = (sectionKey) => {
         <button
           type="button"
           className="chat-toggle"
-          onPointerDown={handleLauncherPointerDown}
           onClick={handleLauncherClick}
           onKeyDown={handleLauncherKeyDown}
           aria-label={isOpen ? 'Hide chat assistant' : 'Chat with HiHired bot'}
