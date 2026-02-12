@@ -10,6 +10,7 @@ import {
 } from "../api";
 import { useAuth } from "../context/AuthContext";
 import Navigation from "../components/Navigation";
+import SEO from "../components/SEO";
 import "./MembershipPage.css";
 
 const INTRO_PRICING = {
@@ -258,6 +259,12 @@ const MembershipPage = () => {
 
   return (
     <>
+      <SEO
+        title="My Account | HiHired Membership"
+        description="Manage your HiHired membership. View usage, update billing, change plans, or cancel anytime."
+        keywords="HiHired account, membership management, subscription, billing, resume usage, plan upgrade"
+        canonical="https://hihired.org/account"
+      />
       <Navigation />
       <div className="membership-page">
         <div className="membership-container">

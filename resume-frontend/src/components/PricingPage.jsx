@@ -8,6 +8,8 @@ import { useAuth } from '../context/AuthContext';
 
 import Navigation from './Navigation';
 
+import SEO from './SEO';
+
 import './PricingPage.css';
 
 const DEFAULT_PLAN_DETAILS = {
@@ -653,6 +655,13 @@ const PricingPage = () => {
   return (
 
     <div className="pricing-page">
+
+      <SEO
+        title="Pricing Plans | HiHired AI Resume Builder"
+        description="Choose the perfect HiHired plan. Free tier available. Premium plans start at $1.99/month with AI cover letters."
+        keywords="resume builder pricing, HiHired plans, free resume builder, premium resume, AI resume cost, subscription plans"
+        canonical="https://hihired.org/pricing"
+      />
 
       <Navigation />
 
