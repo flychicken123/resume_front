@@ -6,7 +6,8 @@ const TermsOfService = () => (
   <div style={{ padding: '60px 20px', maxWidth: '960px', margin: '0 auto' }}>
     <SEO
       title="Terms of Service | HiHired"
-      description="Read the HiHired Terms of Service to understand how our AI resume platform operates and how your data may be used."
+      description="HiHired Terms of Service. Understand our AI resume platform rules, user rights, and data usage policies."
+      keywords="terms of service, user agreement, HiHired terms, resume builder terms, service agreement, legal terms"
       canonical="https://hihired.org/terms"
     />
     <h1 style={{ fontSize: '2.75rem', fontWeight: 800, marginBottom: '1.5rem', color: '#0f172a' }}>

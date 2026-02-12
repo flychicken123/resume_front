@@ -6,7 +6,8 @@ const PrivacyPolicy = () => (
   <div style={{ padding: '60px 20px', maxWidth: '960px', margin: '0 auto' }}>
     <SEO
       title="Privacy Policy | HiHired"
-      description="Understand how HiHired collects, uses, shares, and protects your data, including how aggregated insights may be monetized."
+      description="Learn how HiHired protects your data. Our privacy policy covers data collection, usage, and your rights."
+      keywords="privacy policy, data protection, HiHired privacy, resume data security, GDPR, CCPA, user data rights"
       canonical="https://hihired.org/privacy"
     />
     <h1 style={{ fontSize: '2.75rem', fontWeight: 800, marginBottom: '1.5rem', color: '#0f172a' }}>

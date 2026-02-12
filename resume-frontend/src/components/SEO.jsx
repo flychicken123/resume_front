@@ -10,7 +10,7 @@ const SEO = ({
   ogType = "website"
 }) => {
   const defaultTitle = "HiHired - Free AI Resume Builder | Build Professional Resumes Online";
-  const defaultDescription = "Create professional resumes in minutes with our free AI resume builder. Build ATS-friendly resumes, optimize for job descriptions, and land your dream job. No registration required.";
+  const defaultDescription = "Free AI resume builder. Create ATS-friendly resumes in minutes. No registration required. Download PDF instantly.";
   const defaultKeywords = "resume builder, AI resume builder, free resume builder, professional resume, resume maker, build resume, write resume, create resume, resume template, ATS resume, job resume, career resume, online resume builder";
   const defaultCanonical = typeof window !== 'undefined' 
     ? `${window.location.origin}${window.location.pathname}` 

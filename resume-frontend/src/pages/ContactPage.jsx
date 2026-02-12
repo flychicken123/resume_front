@@ -6,7 +6,8 @@ const ContactPage = () => (
   <>
     <SEO
       title="Contact HiHired | Talk to the Team"
-      description="Get in touch with the HiHired team for support, partnership inquiries, or feedback. We're here to help with anything related to AI resume building."
+      description="Contact HiHired for support, partnerships, or feedback. We're here to help with your AI resume needs."
+      keywords="contact HiHired, resume builder support, customer service, help desk, feedback, partnership inquiry"
       canonical="https://hihired.org/contact"
     />
     <Contact />
