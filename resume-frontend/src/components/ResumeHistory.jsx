@@ -23,7 +23,7 @@ const ResumeHistory = ({ onClose, onSelectResume, importingResumeId }) => {
   const [uploadNotice, setUploadNotice] = useState('');
   const [uploading, setUploading] = useState(false);
   const uploadInputRef = useRef(null);
-  const canUploadPdf = user?.email === 'harwtalk@gmail.com';
+  const canUploadPdf = !!user;
 
   useEffect(() => {
     if (user) {
