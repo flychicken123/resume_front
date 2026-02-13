@@ -1,16 +1,7 @@
 // Job Parser Service - Mock implementation for development
 // In production, this would connect to a backend service that uses web scraping or APIs
 
-const getAPIBaseURL = () => {
-  if (typeof window !== 'undefined') {
-    const host = window.location.hostname;
-    if (host === 'localhost' || host === '127.0.0.1') {
-      return 'http://localhost:8081';
-    }
-    return window.location.origin;
-  }
-  return process.env.REACT_APP_API_URL || 'http://localhost:8081';
-};
+import { getAPIBaseURL } from '../api';
 
 class JobParserService {
   constructor() {

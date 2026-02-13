@@ -1,16 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-
-const getAPIBaseURL = () => {
-  if (typeof window !== 'undefined') {
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      return 'http://localhost:8081';
-    }
-    return window.location.hostname === 'www.hihired.org' ? 'https://hihired.org' : window.location.origin;
-  }
-  return process.env.REACT_APP_API_URL || 'http://localhost:8081';
-};
+import { getAPIBaseURL } from '../api';
 
 const SubscriptionStatus = ({ onLimitReached, minimal = false }) => {
   const { user } = useAuth();

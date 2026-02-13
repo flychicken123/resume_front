@@ -6,6 +6,8 @@ import { CheckIcon } from '@heroicons/react/24/solid';
 
 import { useAuth } from '../context/AuthContext';
 
+import { getAPIBaseURL } from '../api';
+
 import Navigation from './Navigation';
 
 import SEO from './SEO';
@@ -97,24 +99,6 @@ const INTRO_PRICING = {
   premium: { firstMonth: '$1.99', thereafter: '$7.99' },
 
   ultimate: { firstMonth: '$6.99', thereafter: '$29.99' },
-
-};
-
-const getAPIBaseURL = () => {
-
-  if (typeof window !== 'undefined') {
-
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-
-      return 'http://localhost:8081';
-
-    }
-
-    return window.location.hostname === 'www.hihired.org' ? 'https://hihired.org' : window.location.origin;
-
-  }
-
-  return process.env.REACT_APP_API_URL || 'http://localhost:8081';
 
 };
 

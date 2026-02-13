@@ -2,16 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { CheckIcon } from '@heroicons/react/24/solid';
-
-const getAPIBaseURL = () => {
-  if (typeof window !== 'undefined') {
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      return 'http://localhost:8081';
-    }
-    return window.location.hostname === 'www.hihired.org' ? 'https://hihired.org' : window.location.origin;
-  }
-  return process.env.REACT_APP_API_URL || 'http://localhost:8081';
-};
+import { getAPIBaseURL } from '../api';
 
 const UpgradeModal = ({ isOpen, onClose, currentPlan = 'free', usage = {} }) => {
   const navigate = useNavigate();

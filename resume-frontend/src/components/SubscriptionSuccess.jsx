@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
+import { getAPIBaseURL } from '../api';
 import './SubscriptionSuccess.css';
 
 const SubscriptionSuccess = () => {
@@ -9,16 +10,6 @@ const SubscriptionSuccess = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const sessionId = searchParams.get('session_id');
-
-  const getAPIBaseURL = () => {
-    if (typeof window !== 'undefined') {
-      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        return 'http://localhost:8081';
-      }
-      return window.location.hostname === 'www.hihired.org' ? 'https://hihired.org' : window.location.origin;
-    }
-    return process.env.REACT_APP_API_URL || 'http://localhost:8081';
-  };
 
   useEffect(() => {
     const confirmSession = async () => {

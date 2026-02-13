@@ -1,7 +1,8 @@
 import { useState, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { getAPIBaseURL } from '../api';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8081';
+const API_BASE_URL = getAPIBaseURL();
 
 export const useResumeHistory = () => {
   const [history, setHistory] = useState([]);
