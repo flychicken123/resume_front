@@ -5,8 +5,6 @@ import { useResumeHistory } from '../hooks/useResumeHistory';
 import { uploadResumeHistoryPdf } from '../api';
 import './ResumeHistory.css';
 
-const ADMIN_UPLOAD_EMAIL = 'harwtalk@gmail.com';
-
 const ResumeHistory = ({ onClose, onSelectResume, importingResumeId }) => {
   const { user } = useAuth();
   const {
@@ -25,7 +23,7 @@ const ResumeHistory = ({ onClose, onSelectResume, importingResumeId }) => {
   const [uploadNotice, setUploadNotice] = useState('');
   const [uploading, setUploading] = useState(false);
   const uploadInputRef = useRef(null);
-  const canUploadPdf = (user?.email || '').toLowerCase() === ADMIN_UPLOAD_EMAIL;
+  const canUploadPdf = !!user;
 
   useEffect(() => {
     if (user) {
@@ -75,7 +73,7 @@ const ResumeHistory = ({ onClose, onSelectResume, importingResumeId }) => {
   const triggerUploadDialog = () => {
     setUploadNotice('');
     if (!canUploadPdf) {
-      setUploadError('We are doing internal testing, so only admins can upload PDFs right now.');
+      setUploadError('Please log in to upload PDFs.');
       return;
     }
     setUploadError('');
@@ -162,9 +160,7 @@ const ResumeHistory = ({ onClose, onSelectResume, importingResumeId }) => {
             >
               {uploading
                 ? 'Uploading PDF…'
-                : canUploadPdf
-                ? 'Upload PDF to History'
-                : 'Upload PDF (admins only)'}
+                : 'Upload PDF to History'}
             </button>
             <input
               type="file"
@@ -174,9 +170,7 @@ const ResumeHistory = ({ onClose, onSelectResume, importingResumeId }) => {
               onChange={handleUploadChange}
             />
             <p className="upload-note">
-              {canUploadPdf
-                ? 'Add a PDF from your device to keep it in your history.'
-                : 'We are doing internal testing so this upload is limited to administrators for now.'}
+              Add a PDF from your device to keep it in your history.
             </p>
             {uploadError && <p className="upload-error">{uploadError}</p>}
             {uploadNotice && <p className="upload-success">{uploadNotice}</p>}

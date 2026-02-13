@@ -8,7 +8,8 @@
       "Bash(timeout 10 npm start)",
       "Bash(powershell:*)",
       "Bash(taskkill:*)",
-      "Bash(cmd /c:*)"
+      "Bash(cmd /c:*)",
+      "Bash(go build:*)"
     ],
     "deny": [],
     "ask": []
