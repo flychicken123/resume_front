@@ -23,7 +23,7 @@ const ResumeHistory = ({ onClose, onSelectResume, importingResumeId }) => {
   const [uploadNotice, setUploadNotice] = useState('');
   const [uploading, setUploading] = useState(false);
   const uploadInputRef = useRef(null);
-  const canUploadPdf = !!user;
+  const canUploadPdf = user?.email === 'harwtalk@gmail.com';
 
   useEffect(() => {
     if (user) {
@@ -151,6 +151,7 @@ const ResumeHistory = ({ onClose, onSelectResume, importingResumeId }) => {
         </div>
 
         <div className="resume-history-body">
+          {canUploadPdf && (
           <div className="resume-history-upload">
             <button
               type="button"
@@ -175,6 +176,7 @@ const ResumeHistory = ({ onClose, onSelectResume, importingResumeId }) => {
             {uploadError && <p className="upload-error">{uploadError}</p>}
             {uploadNotice && <p className="upload-success">{uploadNotice}</p>}
           </div>
+          )}
           {loading ? (
             <div className="loading">Loading resume history...</div>
           ) : error ? (
