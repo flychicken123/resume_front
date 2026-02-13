@@ -45,18 +45,9 @@ import {
   optimizeProjectAI,
   generateSummaryAI,
   getJobById,
+  getAPIBaseURL,
 } from '../api';
 import './BuilderPage.css';
-
-const getAPIBaseURL = () => {
-  if (typeof window !== 'undefined') {
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      return 'http://localhost:8081';
-    }
-    return window.location.hostname === 'www.hihired.org' ? 'https://hihired.org' : window.location.origin;
-  }
-  return process.env.REACT_APP_API_URL || 'http://localhost:8081';
-};
 
 const formatLocationParts = (parts) => {
   if (!Array.isArray(parts)) {

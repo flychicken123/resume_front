@@ -1,18 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { useAuth } from './AuthContext';
 import { DEFAULT_TEMPLATE_ID, normalizeTemplateId, getTemplateMetaById } from '../constants/templates';
-
-// Get API URL - use same logic as other files
-const getAPIBaseURL = () => {
-  if (typeof window !== 'undefined') {
-    // Use the backend domain (non-www) for API calls
-    return window.location.hostname === 'www.hihired.org' 
-      ? 'https://hihired.org' 
-      : window.location.origin;
-  }
-  // Fallback for server-side rendering
-  return process.env.REACT_APP_API_URL || 'http://localhost:8081';
-};
+import { getAPIBaseURL } from '../api';
 
 const API_BASE_URL = getAPIBaseURL();
 

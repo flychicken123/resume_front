@@ -1,18 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useResume } from '../context/ResumeContext';
 import { useAuth } from '../context/AuthContext';
-import { fetchResumeHistoryList } from '../api';
+import { fetchResumeHistoryList, getAPIBaseURL } from '../api';
 import './StepCoverLetter.css';
-
-const getAPIBaseURL = () => {
-  if (typeof window !== 'undefined') {
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      return 'http://localhost:8081';
-    }
-    return window.location.hostname === 'www.hihired.org' ? 'https://hihired.org' : window.location.origin;
-  }
-  return process.env.REACT_APP_API_URL || 'http://localhost:8081';
-};
 
 const StepCoverLetter = ({ onGeneratePremiumFeature }) => {
   const { data: resumeData, setData } = useResume();
