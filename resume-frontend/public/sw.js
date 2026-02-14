@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hihired-v4-2024-08-17';
+const CACHE_NAME = 'hihired-v5-2026-02-13';
 const urlsToCache = [
   '/',
   '/manifest.json'
