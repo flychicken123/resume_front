@@ -1765,7 +1765,10 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
           bullet: {
             display: 'flex',
             alignItems: 'flex-start',
-            marginBottom: `${1.5 * scaleFactor}px`
+            marginBottom: `${1.5 * scaleFactor}px`,
+            width: '100%',
+            boxSizing: 'border-box',
+            minWidth: 0
           },
           bulletMarker: {
             display: 'inline-flex',
@@ -1783,7 +1786,10 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
             flex: 1,
             fontSize: `${bodyFont}px`,
             color: '#374151',
-            lineHeight: '1.3'
+            lineHeight: '1.3',
+            wordBreak: 'break-word',
+            overflowWrap: 'break-word',
+            minWidth: 0
           },
           bulletMarkerChar: '▪',
           summary: {
