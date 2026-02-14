@@ -9,7 +9,14 @@
       "Bash(powershell:*)",
       "Bash(taskkill:*)",
       "Bash(cmd /c:*)",
-      "Bash(go build:*)"
+      "Bash(go build:*)",
+      "Bash(ssh:*)",
+      "Bash(chmod:*)",
+      "Bash(git pull:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nFix CORS: use same-origin API calls instead of cross-origin\n\nRemove hardcoded www.hihired.org -> hihired.org redirect that was\ncausing CORS errors. All files now use getAPIBaseURL from api.js\nwhich correctly uses window.location.origin.\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nRemove admin restriction on PDF upload - allow all logged-in users\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
     ],
     "deny": [],
     "ask": []

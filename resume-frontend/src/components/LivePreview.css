@@ -99,7 +99,7 @@
   max-width: 816px;
   transform: none;
   transition: all 0.3s ease;
-  overflow: visible; /* avoid clipping at page bottom in preview */
+  overflow: hidden; /* clip content at page boundary for accurate preview */
 }
 
 .single-page-container:hover {
@@ -132,7 +132,7 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   border: 1px solid #e5e7eb;
   border-radius: 0;
-  overflow: visible; /* avoid clipping at page bottom in preview */
+  overflow: hidden; /* clip content at page boundary for accurate preview */
   transform: none;
   transition: background-color 0.35s ease, box-shadow 0.35s ease;
 }
