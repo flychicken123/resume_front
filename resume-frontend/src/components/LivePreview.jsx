@@ -2,12 +2,16 @@ import React, { useState, useEffect, useRef, useCallback, Fragment } from 'react
 import { useResume } from '../context/ResumeContext';
 import { TEMPLATE_SLUGS, DEFAULT_TEMPLATE_ID, normalizeTemplateId } from '../constants/templates';
 import './LivePreview.css';
+const LIVE_PREVIEW_BUILD = '2026-02-14-v3';
 const LivePreview = ({ isVisible = true, onToggle, onDownload, downloadNotice }) => {
   const isBrowser = typeof window !== 'undefined';
   const DEBUG_PAGINATION = isBrowser && (
     process.env.REACT_APP_DEBUG_PAGINATION === 'true' ||
     (window.localStorage && window.localStorage.getItem('DEBUG_PAGINATION') === 'true')
   );
+  if (isBrowser) {
+    console.log('[LivePreview] BUILD=' + LIVE_PREVIEW_BUILD);
+  }
   if (DEBUG_PAGINATION && isBrowser) {
     console.log('[Pagination] debug enabled');
   }
