@@ -141,6 +141,11 @@
   align-items: center;
 }
 
+.history-item-actions button {
+  min-width: 100px;
+  text-align: center;
+}
+
 .download-button {
   padding: 0.5rem 1rem;
   background: #3b82f6;

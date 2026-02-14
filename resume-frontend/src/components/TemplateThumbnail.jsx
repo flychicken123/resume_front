@@ -282,40 +282,7 @@ const TemplateThumbnail = ({ templateId, width = 220 }) => {
 
   const scale = width / PAGE_WIDTH_PX;
 
-  if (normalizedTemplateId === TEMPLATE_SLUGS.MODERN_CLEAN) {
-    return (
-      <div className="template-thumbnail-wrapper" style={{ width }}>
-        <div
-          className="template-thumbnail-inner"
-          style={{ transform: `scale(${scale})` }}
-        >
-          <img
-            src="/templates/modern.png"
-            alt="Modern Clean resume template preview"
-            className="template-thumbnail-image"
-          />
-        </div>
-      </div>
-    );
-  }
-
-  if (normalizedTemplateId === TEMPLATE_SLUGS.EXECUTIVE_SERIF) {
-    return (
-      <div className="template-thumbnail-wrapper" style={{ width }}>
-        <div
-          className="template-thumbnail-inner"
-          style={{ transform: `scale(${scale})` }}
-        >
-          <img
-            src="/templates/executive.png"
-            alt="Executive Serif resume template preview"
-            className="template-thumbnail-image"
-          />
-        </div>
-      </div>
-    );
-  }
-
+  // Use live preview for all templates (removed static images)
   const factory =
     SAMPLE_DATA_FACTORIES[normalizedTemplateId]
     || SAMPLE_DATA_FACTORIES[TEMPLATE_SLUGS.CLASSIC_PROFESSIONAL];

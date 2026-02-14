@@ -527,8 +527,9 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
             let height = Math.round(32 * fontScale);
             if (exp.description) {
               const rawLines = String(exp.description).split(/\n+/).filter((line) => line.trim());
-              // Wider line estimate to reduce over-estimation
-              const descCharsPerLine = Math.round(200 / fontScale);
+              // Attorney uses 65%-width column; serif fonts wider; executive-serif has indent
+              const baseCharsPerLine = isAttorneyFormat ? 75 : isIndustryManagerFormat ? 136 : 150;
+              const descCharsPerLine = Math.round(baseCharsPerLine / fontScale);
               const lineHeightPx = Math.round(14 * fontScale);
               let descLines = 0;
               for (const rawLine of rawLines.length ? rawLines : [String(exp.description)]) {
@@ -588,7 +589,8 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
               const lines = project.description.split('\n').filter(l => l.trim());
               // Most bullet points fit on one line at preview scale
               let totalLines = lines.length;
-              const descCharsPerLine = Math.round(140 / fontScale); // Increased - more chars fit per line
+              const baseCharsPerLine = isAttorneyFormat ? 75 : isIndustryManagerFormat ? 136 : 150;
+              const descCharsPerLine = Math.round(baseCharsPerLine / fontScale);
               // Only count extra lines for very long bullet points
               for (const line of lines) {
                 const cleanLine = line.replace('•', '').trim();
@@ -774,8 +776,9 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
       const description = toText(entry.description);
       if (description) {
         const rawLines = String(description).split(/\n+/).filter((line) => line.trim());
-        // Use same chars per line for both modes to avoid big estimation differences
-        const descCharsPerLine = Math.round(180 / fontScale);
+        // Attorney uses 65%-width column; serif fonts wider; executive-serif has indent
+        const baseCharsPerLine = isAttorneyFormat ? 75 : isIndustryManagerFormat ? 136 : 150;
+        const descCharsPerLine = Math.round(baseCharsPerLine / fontScale);
         const lineHeightPx = Math.round(14 * fontScale);
         let descLines = 0;
         for (const rawLine of rawLines.length ? rawLines : [String(description)]) {
