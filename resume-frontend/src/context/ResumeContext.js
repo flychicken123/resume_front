@@ -140,10 +140,12 @@ const clearStoredData = (userId) => {
 // API functions for database operations
 const saveToDatabase = async (data, userEmail) => {
   try {
+    const token = localStorage.getItem('resumeToken');
     const response = await fetch(`${API_BASE_URL}/api/user/save`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
       },
       body: JSON.stringify({
         userEmail: userEmail,
@@ -164,10 +166,12 @@ const saveToDatabase = async (data, userEmail) => {
 
 const loadFromDatabase = async (userEmail) => {
   try {
+    const token = localStorage.getItem('resumeToken');
     const response = await fetch(`${API_BASE_URL}/api/user/load?userEmail=${encodeURIComponent(userEmail)}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
       },
     });
 
