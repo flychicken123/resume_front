@@ -47,7 +47,9 @@
   <link rel="preconnect" href="https://www.google-analytics.com">
   <link rel="dns-prefetch" href="https://www.googletagmanager.com">
   <link rel="dns-prefetch" href="https://www.google-analytics.com">
-  
+  <link rel="preconnect" href="https://pagead2.googlesyndication.com">
+  <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com">
+
   <!-- PWA Manifest -->
   <link rel="manifest" href="/manifest.json">
   
@@ -293,8 +295,19 @@
     }
   </script>
 
-  <!-- Google IMA SDK for VAST video ads -->
-  <script src="https://imasdk.googleapis.com/js/sdkloader/ima3.js"></script>
+  <!-- Google AdSense - Only load on production -->
+  <script>
+    if (window.location.hostname !== 'localhost' &&
+        window.location.hostname !== '127.0.0.1' &&
+        window.location.hostname !== '0.0.0.0' &&
+        !window.location.hostname.includes('localhost')) {
+      var adsScript = document.createElement('script');
+      adsScript.async = true;
+      adsScript.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8458868058919665';
+      adsScript.crossOrigin = 'anonymous';
+      document.head.appendChild(adsScript);
+    }
+  </script>
 
 </head>
 <body>

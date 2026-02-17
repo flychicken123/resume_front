@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { fetchSubscriptionOverview, fetchAdStatus, completeAdWatch } from "../api";
-import RewardedVideoAd from "../components/ads/RewardedVideoAd";
+import RewardedAdDisplay from "../components/ads/RewardedAdDisplay";
 import "./AdsRewardsPage.css";
 
 const AdsRewardsPage = () => {
@@ -11,7 +11,7 @@ const AdsRewardsPage = () => {
   const [usage, setUsage] = useState(null);
   const [canWatch, setCanWatch] = useState(false);
   const [cooldown, setCooldown] = useState(0);
-  const [showVideoAd, setShowVideoAd] = useState(false);
+  const [showAd, setShowAd] = useState(false);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState(null);
 
@@ -65,7 +65,7 @@ const AdsRewardsPage = () => {
   };
 
   const handleAdComplete = async () => {
-    setShowVideoAd(false);
+    setShowAd(false);
     setMessage({ type: "info", text: "Processing your reward..." });
 
     try {
@@ -90,12 +90,12 @@ const AdsRewardsPage = () => {
   };
 
   const handleAdError = () => {
-    setShowVideoAd(false);
+    setShowAd(false);
     setMessage({ type: "error", text: "Ad failed to load. Please try again later." });
   };
 
   const handleAdClose = () => {
-    setShowVideoAd(false);
+    setShowAd(false);
   };
 
   const formatTime = (seconds) => {
@@ -117,7 +117,7 @@ const AdsRewardsPage = () => {
       <div className="ads-rewards-container">
         <h1>Ads Rewards</h1>
         <p className="ads-rewards-subtitle">
-          Watch a short video ad to earn free resume credits!
+          View an ad to earn free resume credits!
         </p>
 
         {message && (
@@ -146,7 +146,7 @@ const AdsRewardsPage = () => {
           {canWatch ? (
             <button
               className="ads-rewards-watch-btn"
-              onClick={() => setShowVideoAd(true)}
+              onClick={() => setShowAd(true)}
             >
               Watch Ad to Get +1 Resume
             </button>
@@ -161,8 +161,8 @@ const AdsRewardsPage = () => {
         <div className="ads-rewards-info">
           <h3>How it works</h3>
           <ul>
-            <li>Watch a short video ad (15-30 seconds)</li>
-            <li>Earn 1 free resume credit after the ad completes</li>
+            <li>View a display ad for about 20 seconds</li>
+            <li>Claim your free resume credit after the timer completes</li>
             <li>You can watch 1 ad every 30 minutes</li>
             <li>Credits can be used to generate additional resumes</li>
             <li>For free tier users, credits and usage reset every week</li>
@@ -170,8 +170,8 @@ const AdsRewardsPage = () => {
         </div>
       </div>
 
-      {showVideoAd && (
-        <RewardedVideoAd
+      {showAd && (
+        <RewardedAdDisplay
           onComplete={handleAdComplete}
           onClose={handleAdClose}
           onError={handleAdError}
