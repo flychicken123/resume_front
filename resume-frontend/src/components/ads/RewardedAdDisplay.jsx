@@ -2,8 +2,7 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import "./RewardedAdDisplay.css";
 
 const AD_VIEW_DURATION = 20; // seconds user must view the ad
-// TODO: Replace with your real AdSense ad slot ID from https://www.google.com/adsense
-const AD_SLOT = "YOUR_AD_SLOT_ID";
+const AD_SLOT = "8585235164";
 
 const RewardedAdDisplay = ({ onComplete, onClose, onError }) => {
   const [adStatus, setAdStatus] = useState("loading"); // loading, viewing, completed, error
