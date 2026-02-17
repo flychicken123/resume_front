@@ -73,12 +73,12 @@ const RewardedAdDisplay = ({ onComplete, onClose, onError }) => {
 
       if (hasContent) {
         adLoadedRef.current = true;
-        setAdStatus("viewing");
-        startCountdown();
-      } else {
-        setAdStatus("error");
-        if (onError) onError(new Error("Ad failed to load"));
       }
+
+      // Start countdown regardless — AdSense may still be pending approval
+      // Once approved, real ads will render automatically
+      setAdStatus("viewing");
+      startCountdown();
     }, 5000);
   };
 
