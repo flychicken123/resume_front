@@ -2014,23 +2014,25 @@ function BuilderPage() {
       const skillsList = normaliseSkillsForSummary(data.skills);
 
       let updatedSummary = data.summary;
-      try {
-        const experienceSummaryText = summariseExperiences(updatedExperiences);
-        const educationSummaryText = summariseEducation(education);
-        const experiencePayload = [
-          experienceSummaryText,
-          jobDescriptionSource ? `Job Description:\n${jobDescriptionSource}` : ''
-        ]
-          .filter(Boolean)
-          .join('\n\n');
+      if (typeof data.summary === 'string' && data.summary.trim()) {
+        try {
+          const experienceSummaryText = summariseExperiences(updatedExperiences);
+          const educationSummaryText = summariseEducation(education);
+          const experiencePayload = [
+            experienceSummaryText,
+            jobDescriptionSource ? `Job Description:\n${jobDescriptionSource}` : ''
+          ]
+            .filter(Boolean)
+            .join('\n\n');
 
-        updatedSummary = await generateSummaryAI({
-          experience: experiencePayload,
-          education: educationSummaryText,
-          skills: skillsList,
-        });
-      } catch (summaryError) {
-        console.warn('Summary generation failed', summaryError);
+          updatedSummary = await generateSummaryAI({
+            experience: experiencePayload,
+            education: educationSummaryText,
+            skills: skillsList,
+          });
+        } catch (summaryError) {
+          console.warn('Summary generation failed', summaryError);
+        }
       }
 
       updateData({
