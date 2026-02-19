@@ -2,9 +2,24 @@ import React from 'react';
 import './SimpleHero.css';
 import { setLastStep } from '../utils/exitTracking';
 import { trackCTAClick } from './Analytics';
-import TRUSTED_COMPANIES from '../constants/trustedCompanies';
+
+import googleLogo from '../assets/logos/google.png';
+import amazonLogo from '../assets/logos/amazon.png';
+import microsoftLogo from '../assets/logos/microsoft.png';
+import netflixLogo from '../assets/logos/netflix.png';
+import salesforceLogo from '../assets/logos/salesforce.png';
+import stripeLogo from '../assets/logos/stripe.png';
 
 const resumePreviewSrc = '/templates/modern.png';
+
+const LOGO_COMPANIES = [
+  { name: 'Google', logo: googleLogo },
+  { name: 'Amazon', logo: amazonLogo },
+  { name: 'Microsoft', logo: microsoftLogo },
+  { name: 'Netflix', logo: netflixLogo },
+  { name: 'Salesforce', logo: salesforceLogo },
+  { name: 'Stripe', logo: stripeLogo },
+];
 
 const SimpleHero = ({ onCreateClick }) => {
   const handleCreate = () => {
@@ -17,71 +32,36 @@ const SimpleHero = ({ onCreateClick }) => {
     <div className="simple-hero">
       <div className="hero-container">
         <div className="hero-left">
-          <span className="hero-eyebrow">Launch your resume in minutes</span>
           <h1 className="hero-headline">
-            Build resume with AI
+            Land more interviews with a resume tailored to each job
           </h1>
+          <p className="hero-description">
+            Import your resume, paste a job description, and get an ATS-optimized
+            version in under 5 minutes. Free to start.
+          </p>
+
           <div className="hero-primary-cta">
             <button className="btn-create" onClick={handleCreate}>
               Create my resume
             </button>
+            <span className="hero-cta-note">No credit card required</span>
           </div>
 
-          <p className="hero-description">
-            Start for free, polish every section with smart suggestions, and see how your resume
-            scores against real openings. Upgrade only if you need unlimited downloads, advanced
-            formatting, or premium cover letters.
-          </p>
-
-          <div className="hero-trusted">
-            <span className="hero-trusted-heading">
+          <div className="hero-logos">
+            <span className="hero-logos-label">
               Trusted by professionals hired at
             </span>
-            <div className="hero-company-logos" role="list">
-              {TRUSTED_COMPANIES.map(({ name, logo }) => (
-                <span key={name} className="hero-company-logo" role="listitem">
-                  <img src={logo} alt={`${name} logo`} loading="lazy" />
-                  <span className="hero-company-name">{name}</span>
-                </span>
+            <div className="hero-logos-row" role="list">
+              {LOGO_COMPANIES.map(({ name, logo }) => (
+                <img
+                  key={name}
+                  src={logo}
+                  alt={name}
+                  className="hero-logo-img"
+                  loading="lazy"
+                  role="listitem"
+                />
               ))}
-            </div>
-          </div>
-
-          <div className="hero-job-match-note">
-            <span className="hero-job-match-icon" aria-hidden="true">💼</span>
-            Match your resume to live job openings without leaving HiHired.
-          </div>
-
-          <div className="hero-quick-stats">
-            <div className="hero-stat">
-              <strong>3 steps</strong>
-              <span>Profile · Experience · Polish</span>
-            </div>
-            <div className="hero-stat">
-              <strong>&lt;5 min</strong>
-              <span>Average time to first draft</span>
-            </div>
-            <div className="hero-stat">
-              <strong>ATS safe</strong>
-              <span>Templates recruiters trust</span>
-            </div>
-            <div className="hero-stat">
-              <strong>Daily jobs</strong>
-              <span>Fresh matches every morning</span>
-            </div>
-          </div>
-
-          <div className="ai-feature">
-            <div className="ai-icon" aria-hidden="true">✨</div>
-            <div className="ai-content">
-              <h3>AI suggestions, your voice</h3>
-              <p>
-                Get tailored bullet ideas, keyword checks, and instant rewrites
-                while you edit. Accept, tweak, or skip — you stay in control.
-              </p>
-              <button className="btn-try-ai" onClick={handleCreate}>
-                Try the builder ->
-              </button>
             </div>
           </div>
         </div>
@@ -90,26 +70,11 @@ const SimpleHero = ({ onCreateClick }) => {
           <div className="resume-preview">
             <img
               src={resumePreviewSrc}
-              alt="HiHired live resume preview"
+              alt="HiHired resume preview"
               className="hero-preview-image"
             />
             <div className="hero-preview-badge">
-              <span role="img" aria-hidden="true">⚡</span>
-              Live preview updates as you type
-            </div>
-            <div className="hero-preview-steps" aria-hidden="true">
-              <div className="preview-step">
-                <span className="preview-step-number">1</span>
-                <span className="preview-step-text">Choose a template</span>
-              </div>
-              <div className="preview-step">
-                <span className="preview-step-number">2</span>
-                <span className="preview-step-text">Let AI draft your story</span>
-              </div>
-              <div className="preview-step">
-                <span className="preview-step-number">3</span>
-                <span className="preview-step-text">Download &amp; share instantly</span>
-              </div>
+              Live preview as you type
             </div>
           </div>
         </div>

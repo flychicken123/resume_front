@@ -1537,7 +1537,229 @@
   }
 
 }
-/* Success Stories Section */
+/* How It Works Section */
+.how-it-works {
+  background: #f8fafc;
+  padding: 80px 24px;
+}
+
+.how-it-works-content {
+  max-width: 960px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.how-it-works-content h2 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 8px;
+}
+
+.how-it-works-subtitle {
+  font-size: 1.1rem;
+  color: #64748b;
+  margin: 0 0 48px;
+}
+
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  margin-bottom: 40px;
+}
+
+.step-card {
+  text-align: left;
+  padding: 32px 28px;
+  background: white;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+}
+
+.step-number {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: #2563eb;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.step-card h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 10px;
+}
+
+.step-card p {
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: #475569;
+  margin: 0;
+}
+
+.how-it-works-cta {
+  margin-top: 8px;
+}
+
+@media (max-width: 768px) {
+  .how-it-works {
+    padding: 56px 16px;
+  }
+
+  .how-it-works-content h2 {
+    font-size: 1.75rem;
+  }
+
+  .steps-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+/* Features Section */
+.features-section {
+  padding: 80px 24px;
+}
+
+.features-section-content {
+  max-width: 960px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.features-section-content h2 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 8px;
+}
+
+.features-section-subtitle {
+  font-size: 1.1rem;
+  color: #64748b;
+  margin: 0 0 48px;
+}
+
+.features-section .features-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.features-section .feature-card {
+  text-align: left;
+  padding: 32px 28px;
+  background: white;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.features-section .feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.1);
+}
+
+.feature-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: #eff6ff;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.features-section .feature-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.features-section .feature-description {
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: #475569;
+}
+
+@media (max-width: 768px) {
+  .features-section {
+    padding: 56px 16px;
+  }
+
+  .features-section-content h2 {
+    font-size: 1.75rem;
+  }
+
+  .features-section .features-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+/* Final CTA Section */
+.final-cta-section {
+  background: #0f172a;
+  padding: 80px 24px;
+  text-align: center;
+}
+
+.final-cta-content {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.final-cta-content h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: white;
+  margin: 0 0 12px;
+}
+
+.final-cta-content p {
+  font-size: 1.1rem;
+  color: #94a3b8;
+  margin: 0 0 32px;
+  line-height: 1.6;
+}
+
+.final-cta-btn {
+  font-size: 1.1rem;
+  padding: 16px 36px;
+}
+
+@media (max-width: 768px) {
+  .final-cta-section {
+    padding: 56px 16px;
+  }
+
+  .final-cta-content h2 {
+    font-size: 1.6rem;
+  }
+
+  .final-cta-btn {
+    width: 100%;
+    max-width: 320px;
+  }
+}
+
+/* ---- Legacy sections below (kept for other pages that may reference them) ---- */
+
+/* Success Stories Section - REMOVED from home page */
 .success-stories-section {
   background: #f8fafc;
   padding: 80px 0;
