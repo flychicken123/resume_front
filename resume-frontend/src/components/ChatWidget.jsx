@@ -972,12 +972,15 @@ const clampLauncherPosition = useCallback(
     if (!resumeData) {
       return null;
     }
-    const experienceText = flattenExperienceText(resumeData.experiences || []);
-    const educationText = flattenEducationText(resumeData.education || []);
-    const skillsArray = (resumeData.skills || '')
-      .split(/[\n,]/)
-      .map((skill) => skill.trim())
-      .filter(Boolean);
+    const experienceText = flattenExperienceText(Array.isArray(resumeData.experiences) ? resumeData.experiences : []);
+    const educationText = flattenEducationText(Array.isArray(resumeData.education) ? resumeData.education : []);
+    const rawSkills = resumeData.skills;
+    const skillsArray = Array.isArray(rawSkills)
+      ? rawSkills.map((s) => (typeof s === 'string' ? s.trim() : '')).filter(Boolean)
+      : (typeof rawSkills === 'string' ? rawSkills : '')
+          .split(/[\n,]/)
+          .map((skill) => skill.trim())
+          .filter(Boolean);
 
     if (!experienceText && !educationText && skillsArray.length === 0) {
       return null;
