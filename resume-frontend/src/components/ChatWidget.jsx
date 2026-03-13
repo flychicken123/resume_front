@@ -2919,7 +2919,7 @@ const buildSectionResponse = (sectionKey) => {
         </div>
       )}
 
-      <div className="chat-toggle-wrapper">
+      {!isOpen && <div className="chat-toggle-wrapper">
         {showIntroTooltip && (
           <div className="chat-intro-tooltip" role="status" aria-live="polite">
             <div className="chat-intro-tooltip__text">
@@ -2945,7 +2945,7 @@ const buildSectionResponse = (sectionKey) => {
         >
           <RobotIcon />
         </button>
-      </div>
+      </div>}
     </div>
   );
 };
