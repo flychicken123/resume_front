@@ -142,6 +142,18 @@ const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setS
                   >
                     Membership
                   </Link>
+                  <button
+                    type="button"
+                    className="nav-account-item"
+                    role="menuitem"
+                    onClick={() => {
+                      setShowAccountMenu(false);
+                      window.localStorage.setItem('builderLastStep', '12');
+                      navigate('/builder');
+                    }}
+                  >
+                    Applications
+                  </button>
                   <Link
                     to="/ads-rewards"
                     className="nav-account-item"
@@ -235,6 +247,18 @@ const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setS
               >
                 Resume History
               </Link>
+            )}
+            {user && (
+              <button
+                className="mobile-nav-link"
+                onClick={() => {
+                  setShowMobileMenu(false);
+                  window.localStorage.setItem('builderLastStep', '12');
+                  navigate('/builder');
+                }}
+              >
+                Applications
+              </button>
             )}
             <Link
               to="/pricing"

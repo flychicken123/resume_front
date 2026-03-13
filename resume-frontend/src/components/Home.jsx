@@ -333,6 +333,17 @@ const Home = () => {
                   >
                     Resume History
                   </button>
+                  <button
+                    className="home-account-item"
+                    role="menuitem"
+                    onClick={() => {
+                      setShowAccountMenu(false);
+                      window.localStorage.setItem('builderLastStep', '12');
+                      navigate('/builder');
+                    }}
+                  >
+                    Applications
+                  </button>
                   <Link to="/account" className="home-account-item" role="menuitem" onClick={() => setShowAccountMenu(false)}>
                     Membership
                   </Link>
@@ -397,6 +408,18 @@ const Home = () => {
             <Link to="/guides" className="mobile-nav-link" onClick={() => setShowMobileMenu(false)}>
               Guides
             </Link>
+            {user && (
+              <button
+                className="mobile-nav-link"
+                onClick={() => {
+                  setShowMobileMenu(false);
+                  window.localStorage.setItem('builderLastStep', '12');
+                  navigate('/builder');
+                }}
+              >
+                Applications
+              </button>
+            )}
             {user && (
               <Link to="/account" className="mobile-nav-link" onClick={() => setShowMobileMenu(false)}>
                 Membership

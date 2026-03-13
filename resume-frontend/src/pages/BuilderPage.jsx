@@ -31,6 +31,7 @@ import StepJobDescription from '../components/StepJobDescription';
 import StepFormat from '../components/StepFormat';
 import StepSummary from '../components/StepSummary';
 import StepCoverLetter from '../components/StepCoverLetter';
+import JobTrackingDashboard from './JobTrackingDashboard';
 import LivePreview from '../components/LivePreview';
 import AuthModal from '../components/auth/AuthModal';
 import ImportResumeModal from '../components/ImportResumeModal';
@@ -46,6 +47,8 @@ import {
   generateSummaryAI,
   getJobById,
   getAPIBaseURL,
+  submitJobApplication,
+  getUserJobApplications,
 } from '../api';
 import './BuilderPage.css';
 
@@ -729,7 +732,8 @@ const steps = [
   "Skills",
   "Summary",
   "Job Matches",
-  "Cover/Recommendation Letter"
+  "Cover/Recommendation Letter",
+  "Track My Applications"
 ];
 const STEP_IDS = {
   IMPORT: 1,
@@ -743,6 +747,7 @@ const STEP_IDS = {
   SUMMARY: 9,
   JOB_MATCHES: 10,
   COVER_LETTER: 11,
+  TRACKING: 12,
 };
 
 const CHAT_STAGE_TO_STEP = {
@@ -797,6 +802,8 @@ function BuilderPage() {
   const [tailorActiveJobId, setTailorActiveJobId] = useState(null);
   const [tailorNotice, setTailorNotice] = useState(null);
   const [tailorError, setTailorError] = useState(null);
+  const [trackedJobIds, setTrackedJobIds] = useState(new Set());
+  const [trackingInProgress, setTrackingInProgress] = useState(null);
   const [hoveredMatchKey, setHoveredMatchKey] = useState(null);
   const [hoveredMatchAnchor, setHoveredMatchAnchor] = useState(null);
   const [jobMatchesPage, setJobMatchesPage] = useState(0);
@@ -1907,6 +1914,51 @@ function BuilderPage() {
       setShowAuthModal(false);
     }
   }, [user]);
+
+  // Load tracked application IDs on mount
+  useEffect(() => {
+    if (!user) return;
+    getUserJobApplications(200, 0)
+      .then((res) => {
+        const ids = new Set();
+        (res.applications || []).forEach((app) => {
+          if (app.job_posting_id) ids.add(`posting-${app.job_posting_id}`);
+        });
+        setTrackedJobIds(ids);
+      })
+      .catch(() => {}); // silent — non-critical
+  }, [user]);
+
+  const handleTrackApplication = useCallback(async (match) => {
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
+    const key = getMatchKey(match);
+    if (trackedJobIds.has(key)) return;
+    setTrackingInProgress(key);
+    try {
+      await submitJobApplication({
+        job_posting_id: match.job_posting_id || null,
+        resume_job_match_id: match.id || null,
+        job_title: match.job_title || '',
+        company_name: match.company_name || '',
+        job_url: match.job_url || '',
+        job_location: match.job_location || '',
+      });
+      setTrackedJobIds((prev) => new Set(prev).add(key));
+      setTailorNotice('Application added to tracker!');
+    } catch (err) {
+      if (err.message && err.message.includes('already exists')) {
+        setTrackedJobIds((prev) => new Set(prev).add(key));
+        setTailorNotice('Already tracking this application.');
+      } else {
+        setTailorError(err.message || 'Failed to track application.');
+      }
+    } finally {
+      setTrackingInProgress(null);
+    }
+  }, [user, trackedJobIds]);
 
   const handleAutoTailorResume = useCallback(async (match) => {
     if (!match) {
@@ -3272,6 +3324,24 @@ function BuilderPage() {
                       >
                         {jobMatchesLoading ? 'Refreshing...' : !user ? 'Login required' : 'Refresh'}
                       </button>
+                      {user && (
+                        <button
+                          type="button"
+                          onClick={() => handleStepChange(STEP_IDS.TRACKING)}
+                          style={{
+                            padding: '0.4rem 0.9rem',
+                            borderRadius: '999px',
+                            border: '1px solid #10b981',
+                            background: '#ecfdf5',
+                            color: '#047857',
+                            fontWeight: 600,
+                            fontSize: '0.85rem',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          Application Tracking
+                        </button>
+                      )}
                     </div>
                   </div>
 
@@ -3850,6 +3920,23 @@ function BuilderPage() {
                         >
                           {tailorActiveJobId === topMatchKey ? 'Generating…' : 'One-Click AI Resume'}
                         </button>
+                        <button
+                          type="button"
+                          onClick={() => handleTrackApplication(topMatch)}
+                          disabled={trackedJobIds.has(topMatchKey) || trackingInProgress === topMatchKey}
+                          style={{
+                            padding: '0.45rem 0.9rem',
+                            borderRadius: '999px',
+                            border: '1px solid #10b981',
+                            background: trackedJobIds.has(topMatchKey) ? '#d1fae5' : '#ecfdf5',
+                            color: '#047857',
+                            fontWeight: 600,
+                            cursor: trackedJobIds.has(topMatchKey) || trackingInProgress === topMatchKey ? 'not-allowed' : 'pointer',
+                            fontSize: '0.85rem',
+                          }}
+                        >
+                          {trackedJobIds.has(topMatchKey) ? '✓ Tracking' : trackingInProgress === topMatchKey ? 'Adding…' : 'Start Tracking'}
+                        </button>
                       </div>
                       {!topMatchHasDescription && (
                         <span style={{ fontSize: '0.75rem', color: '#f97316' }}>
@@ -4014,6 +4101,23 @@ function BuilderPage() {
                                 >
                                   {tailorActiveJobId === matchKey ? 'Generating…' : 'One-Click AI Resume'}
                                 </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleTrackApplication(match)}
+                                  disabled={trackedJobIds.has(matchKey) || trackingInProgress === matchKey}
+                                  style={{
+                                    padding: '0.35rem 0.8rem',
+                                    borderRadius: '999px',
+                                    border: '1px solid #10b981',
+                                    background: trackedJobIds.has(matchKey) ? '#d1fae5' : '#ecfdf5',
+                                    color: '#047857',
+                                    fontWeight: 600,
+                                    cursor: trackedJobIds.has(matchKey) || trackingInProgress === matchKey ? 'not-allowed' : 'pointer',
+                                    fontSize: '0.8rem',
+                                  }}
+                                >
+                                  {trackedJobIds.has(matchKey) ? '✓ Tracking' : trackingInProgress === matchKey ? 'Adding…' : 'Start Tracking'}
+                                </button>
                               </div>
                             </div>
                             {!canTailorMatch && (
@@ -4088,7 +4192,9 @@ function BuilderPage() {
                 onGeneratePremiumFeature={() => setShowUpgradeModal(true)}
               />
             )}
-
+            {step === STEP_IDS.TRACKING && (
+              <JobTrackingDashboard />
+            )}
             {/* Navigation Buttons */}
             <div
               style={{
@@ -4278,7 +4384,7 @@ function BuilderPage() {
             flexDirection: 'column'
           }}
         >
-          {step !== STEP_IDS.COVER_LETTER && (
+          {step !== STEP_IDS.COVER_LETTER && step !== STEP_IDS.TRACKING && (
             <LivePreview onDownload={handleViewResume} downloadNotice={downloadNotice} />
           )}
           {step === STEP_IDS.COVER_LETTER && (
@@ -4291,6 +4397,18 @@ function BuilderPage() {
               fontSize: '1.1rem'
             }}>
               Resume preview not available for Cover Letter
+            </div>
+          )}
+          {step === STEP_IDS.TRACKING && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
+              color: '#6b7280',
+              fontSize: '1.1rem'
+            }}>
+              Resume preview not available for Application Tracking
             </div>
           )}
         </div>

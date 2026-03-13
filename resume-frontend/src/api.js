@@ -913,6 +913,18 @@ export async function deleteJobApplication(applicationId) {
   return await res.json();
 }
 
+export async function getJobApplicationStats() {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/job/applications/stats`, {
+    method: 'GET',
+    headers: getAuthHeaders(),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error || 'Failed to fetch application stats');
+  }
+  return await res.json();
+}
+
 // Feedback API functions
 export async function sendFeedback(feedbackPayload) {
   const res = await fetchWithAuth(`${API_BASE_URL}/api/feedback`, {
