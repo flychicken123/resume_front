@@ -2682,7 +2682,7 @@ const buildSectionResponse = (sectionKey) => {
       return;
     }
 
-    const historyPayload = updatedHistory.slice(-8).map((msg) => ({
+    const historyPayload = updatedHistory.map((msg) => ({
       role: msg.sender === 'bot' ? 'assistant' : 'user',
       text: msg.text,
     }));
@@ -2720,6 +2720,21 @@ const buildSectionResponse = (sectionKey) => {
         if (polishedPreview) {
           reply = `${reply}\n\n**Polished Content:**\n${polishedPreview}`;
         }
+      }
+
+      // Handle feature action from intent router
+      if (data.featureAction) {
+        console.log('[ChatWidget] Feature action received:', data.featureAction);
+        const formattedResult = formatFeatureResult(data.featureAction, data.featureResult);
+        if (formattedResult) {
+          reply = `${reply}\n\n${formattedResult}`;
+        }
+        // Apply updated resume data if the feature produced any
+        if (data.updatedResumeData) {
+          updateResume(data.updatedResumeData);
+        }
+      } else {
+        console.log('[ChatWidget] General chat response (no feature action)');
       }
 
       setMessages((prev) => [...prev, { sender: 'bot', text: reply }]);
@@ -3361,6 +3376,58 @@ const formatPolishedContent = (polishedContent, section) => {
   }
 
   return String(polishedContent);
+};
+
+// Format feature results from intent router for display in chat
+const formatFeatureResult = (featureAction, featureResult) => {
+  if (!featureResult) return '';
+
+  switch (featureAction) {
+    case 'cover_letter':
+    case 'recommendation_letter':
+      return typeof featureResult === 'string' ? featureResult : String(featureResult);
+
+    case 'resume_advice':
+      return typeof featureResult === 'string' ? featureResult : String(featureResult);
+
+    case 'generate_summary':
+      return typeof featureResult === 'string'
+        ? `**Generated Summary:**\n${featureResult}`
+        : String(featureResult);
+
+    case 'optimize_experience':
+      return typeof featureResult === 'string'
+        ? `**Optimized Experience:**\n${featureResult}`
+        : String(featureResult);
+
+    case 'optimize_project':
+      return typeof featureResult === 'string'
+        ? `**Optimized Project:**\n${featureResult}`
+        : String(featureResult);
+
+    case 'improve_grammar':
+      return typeof featureResult === 'string'
+        ? `**Improved Text:**\n${featureResult}`
+        : String(featureResult);
+
+    case 'generate_skills':
+      if (Array.isArray(featureResult)) {
+        return `**Generated Skills:**\n${featureResult.join(', ')}`;
+      }
+      return typeof featureResult === 'string' ? featureResult : String(featureResult);
+
+    case 'categorize_skills':
+      if (Array.isArray(featureResult)) {
+        return featureResult
+          .filter((cat) => cat.name && cat.skills && cat.skills.length > 0)
+          .map((cat) => `**${cat.name}:** ${cat.skills.join(', ')}`)
+          .join('\n');
+      }
+      return typeof featureResult === 'string' ? featureResult : String(featureResult);
+
+    default:
+      return typeof featureResult === 'string' ? featureResult : JSON.stringify(featureResult, null, 2);
+  }
 };
 
 const handleSectionUpdateIntent = ({
