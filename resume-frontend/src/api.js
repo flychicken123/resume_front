@@ -951,6 +951,19 @@ export async function updateAppReminders(applicationId, enabled) {
   return await res.json();
 }
 
+export async function updateAppNotes(applicationId, notes) {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/job/applications/${applicationId}/notes`, {
+    method: 'PUT',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ notes }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Failed to update notes');
+  }
+  return await res.json();
+}
+
 export async function getJobApplicationStats() {
   const res = await fetchWithAuth(`${API_BASE_URL}/api/job/applications/stats`, {
     method: 'GET',

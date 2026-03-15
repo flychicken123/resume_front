@@ -10,6 +10,7 @@ import {
   getFollowupReminders,
   updateFollowupReminders,
   updateAppReminders,
+  updateAppNotes,
 } from '../api';
 import './JobTrackingDashboard.css';
 
@@ -188,6 +189,24 @@ const JobTrackingDashboard = () => {
         setSelectedApp(prev => ({ ...prev, reminders_enabled: !newValue }));
       }
       showToast('Failed to update reminder', 'error');
+    }
+  };
+
+  const handleNotesChange = (e) => {
+    const newNotes = e.target.value;
+    setSelectedApp(prev => ({ ...prev, notes: newNotes }));
+  };
+
+  const handleNotesSave = async () => {
+    if (!selectedApp) return;
+    try {
+      await updateAppNotes(selectedApp.id, selectedApp.notes || '');
+      setApplications(prev =>
+        prev.map(a => a.id === selectedApp.id ? { ...a, notes: selectedApp.notes } : a)
+      );
+      showToast('Notes saved');
+    } catch (err) {
+      showToast(err.message || 'Failed to save notes', 'error');
     }
   };
 
@@ -385,9 +404,16 @@ const JobTrackingDashboard = () => {
               <textarea
                 className="notes-textarea"
                 value={selectedApp.notes || ''}
-                readOnly
-                placeholder="No notes"
+                onChange={handleNotesChange}
+                placeholder="Add notes about this application..."
               />
+              <button
+                className="btn-primary"
+                onClick={handleNotesSave}
+                style={{ marginTop: '0.5rem', padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}
+              >
+                Save Notes
+              </button>
             </div>
 
             {/* Actions */}
