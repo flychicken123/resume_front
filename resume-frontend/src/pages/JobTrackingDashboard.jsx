@@ -11,6 +11,7 @@ import {
   updateFollowupReminders,
   updateAppReminders,
   updateAppNotes,
+  submitJobApplication,
 } from '../api';
 import './JobTrackingDashboard.css';
 
@@ -56,6 +57,9 @@ const JobTrackingDashboard = () => {
   const [toast, setToast] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [remindersEnabled, setRemindersEnabled] = useState(true);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newApp, setNewApp] = useState({ job_title: '', company_name: '', job_url: '', job_location: '', notes: '' });
+  const [creating, setCreating] = useState(false);
 
   const showToast = useCallback((message, type = 'success') => {
     setToast({ message, type });
@@ -210,6 +214,31 @@ const JobTrackingDashboard = () => {
     }
   };
 
+  const resetCreateForm = () => {
+    setNewApp({ job_title: '', company_name: '', job_url: '', job_location: '', notes: '' });
+    setShowCreateModal(false);
+  };
+
+  const handleCreateApplication = async () => {
+    if (!newApp.job_title.trim()) {
+      showToast('Job title is required', 'error');
+      return;
+    }
+    setCreating(true);
+    try {
+      const created = await submitJobApplication(newApp);
+      setApplications(prev => [created, ...prev]);
+      const statsRes = await getJobApplicationStats();
+      setStats(statsRes);
+      resetCreateForm();
+      showToast('Application added');
+    } catch (err) {
+      showToast(err.message || 'Failed to create application', 'error');
+    } finally {
+      setCreating(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="job-tracking-page">
@@ -227,12 +256,18 @@ const JobTrackingDashboard = () => {
           <h1>Application Tracker</h1>
           <p>Track and manage your job applications</p>
         </div>
-        <div className="reminder-toggle">
-          <span className="reminder-toggle-label">Follow-up Reminders</span>
-          <label className="toggle-switch">
-            <input type="checkbox" checked={remindersEnabled} onChange={handleToggleGlobalReminders} />
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <button className="btn-primary" onClick={() => setShowCreateModal(true)}
+            style={{ padding: '0.4rem 0.75rem', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>
+            + Add Application
+          </button>
+          <div className="reminder-toggle">
+            <span className="reminder-toggle-label">Follow-up Reminders</span>
+            <label className="toggle-switch">
+              <input type="checkbox" checked={remindersEnabled} onChange={handleToggleGlobalReminders} />
             <span className="toggle-slider"></span>
           </label>
+          </div>
         </div>
       </div>
 
@@ -266,8 +301,14 @@ const JobTrackingDashboard = () => {
       {totalApps === 0 ? (
         <div className="kanban-empty">
           <h2>No applications yet</h2>
-          <p>Start tracking your job applications by clicking "Start Tracking" on your job matches.</p>
-          <Link to="/builder">Go to Job Matches</Link>
+          <p>Start tracking your job applications by clicking "Start Tracking" on your job matches, or add one manually.</p>
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link to="/builder">Go to Job Matches</Link>
+            <button className="btn-primary" onClick={() => setShowCreateModal(true)}
+              style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}>
+              + Add Application
+            </button>
+          </div>
         </div>
       ) : (
         <DragDropContext onDragEnd={handleDragEnd}>
@@ -435,6 +476,84 @@ const JobTrackingDashboard = () => {
                   Delete Application
                 </button>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create application modal */}
+      {showCreateModal && (
+        <div className="modal-overlay" onClick={resetCreateForm}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Add Application</h2>
+              <button className="modal-close-btn" onClick={resetCreateForm}>&times;</button>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Job Title *</label>
+              <input
+                className="form-input"
+                type="text"
+                value={newApp.job_title}
+                onChange={e => setNewApp(prev => ({ ...prev, job_title: e.target.value }))}
+                placeholder="e.g. Software Engineer"
+                autoFocus
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Company Name</label>
+              <input
+                className="form-input"
+                type="text"
+                value={newApp.company_name}
+                onChange={e => setNewApp(prev => ({ ...prev, company_name: e.target.value }))}
+                placeholder="e.g. Google"
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Job URL</label>
+              <input
+                className="form-input"
+                type="text"
+                value={newApp.job_url}
+                onChange={e => setNewApp(prev => ({ ...prev, job_url: e.target.value }))}
+                placeholder="e.g. https://..."
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Location</label>
+              <input
+                className="form-input"
+                type="text"
+                value={newApp.job_location}
+                onChange={e => setNewApp(prev => ({ ...prev, job_location: e.target.value }))}
+                placeholder="e.g. San Francisco, CA"
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Notes</label>
+              <textarea
+                className="notes-textarea"
+                value={newApp.notes}
+                onChange={e => setNewApp(prev => ({ ...prev, notes: e.target.value }))}
+                placeholder="Any notes about this application..."
+              />
+            </div>
+
+            <div className="modal-actions">
+              <button className="btn-delete" onClick={resetCreateForm}>Cancel</button>
+              <button
+                className="btn-primary"
+                onClick={handleCreateApplication}
+                disabled={creating || !newApp.job_title.trim()}
+              >
+                {creating ? 'Adding...' : 'Add Application'}
+              </button>
             </div>
           </div>
         </div>
