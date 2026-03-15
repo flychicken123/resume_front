@@ -214,8 +214,13 @@ const hasInterviewProcessIntent = (text = '') => {
   if (!normalized.includes('interview')) {
     return false;
   }
-  const intentHints = ['process', 'how', 'difficult', 'tips', 'looks like', 'expect'];
-  const companyHints = ['google', 'meta', 'amazon', 'microsoft', 'apple', 'sde', 'engineer', 'interview'];
+  // If user is asking about their own applications/statuses, let the backend handle it
+  const personalHints = ['my ', 'i have', 'do i', 'how many', 'am i', "i'm", 'me ', 'mine', 'my application', 'my status', 'currently', 'tracker', 'tracking', 'applied'];
+  if (personalHints.some((hint) => normalized.includes(hint))) {
+    return false;
+  }
+  const intentHints = ['process', 'difficult', 'tips', 'looks like', 'expect'];
+  const companyHints = ['google', 'meta', 'amazon', 'microsoft', 'apple', 'sde', 'engineer'];
   return (
     intentHints.some((hint) => normalized.includes(hint)) ||
     companyHints.some((hint) => normalized.includes(hint))
