@@ -4273,40 +4273,6 @@ function BuilderPage() {
                   Next →
                 </button>
               )}
-              {step === steps.length && (
-                <button
-                  onClick={handleViewResume}
-                  style={{
-                    padding: '1rem 2.5rem',
-                    border: 'none',
-                    borderRadius: '8px',
-                    background: '#10b981',
-                    color: 'white',
-                    cursor: 'pointer',
-                    fontWeight: 600,
-                    fontSize: '1rem',
-                    boxShadow: '0 4px 6px rgba(16, 185, 129, 0.25)',
-                    transition: 'all 0.2s ease',
-                    minWidth: '200px',
-                    height: '48px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.background = '#059669';
-                    e.target.style.transform = 'translateY(-2px)';
-                    e.target.style.boxShadow = '0 6px 12px rgba(16, 185, 129, 0.3)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.background = '#10b981';
-                    e.target.style.transform = 'translateY(0)';
-                    e.target.style.boxShadow = '0 4px 6px rgba(16, 185, 129, 0.25)';
-                  }}
-                >
-                  📄 View Resume
-                </button>
-              )}
             </div>
           </div>
         </div>
