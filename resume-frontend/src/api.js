@@ -913,6 +913,44 @@ export async function deleteJobApplication(applicationId) {
   return await res.json();
 }
 
+export async function getFollowupReminders() {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/user/followup-reminders`, {
+    method: 'GET',
+    headers: getAuthHeaders(),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Failed to fetch reminder settings');
+  }
+  return await res.json();
+}
+
+export async function updateFollowupReminders(enabled) {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/user/followup-reminders`, {
+    method: 'PUT',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ enabled }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Failed to update reminder settings');
+  }
+  return await res.json();
+}
+
+export async function updateAppReminders(applicationId, enabled) {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/job/applications/${applicationId}/reminders`, {
+    method: 'PUT',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ enabled }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Failed to update app reminder');
+  }
+  return await res.json();
+}
+
 export async function getJobApplicationStats() {
   const res = await fetchWithAuth(`${API_BASE_URL}/api/job/applications/stats`, {
     method: 'GET',

@@ -7,6 +7,9 @@ import {
   updateJobApplicationStatus,
   deleteJobApplication,
   getJobApplicationStats,
+  getFollowupReminders,
+  updateFollowupReminders,
+  updateAppReminders,
 } from '../api';
 import './JobTrackingDashboard.css';
 
@@ -32,6 +35,11 @@ const VALID_TRANSITIONS = {
   withdrawn: [],
 };
 
+const TERMINAL_STATUSES = ['rejected', 'withdrawn', 'accepted'];
+const STALE_DAYS = 7;
+const daysSince = (dateStr) => Math.floor((Date.now() - new Date(dateStr)) / 86400000);
+const isStale = (app) => !TERMINAL_STATUSES.includes(app.status) && daysSince(app.status_updated_at) >= STALE_DAYS;
+
 function formatDate(dateStr) {
   if (!dateStr) return '';
   const d = new Date(dateStr);
@@ -46,6 +54,7 @@ const JobTrackingDashboard = () => {
   const [selectedAppHistory, setSelectedAppHistory] = useState([]);
   const [toast, setToast] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [remindersEnabled, setRemindersEnabled] = useState(true);
 
   const showToast = useCallback((message, type = 'success') => {
     setToast({ message, type });
@@ -60,6 +69,13 @@ const JobTrackingDashboard = () => {
       ]);
       setApplications(appsRes.applications || []);
       setStats(statsRes);
+      // Load reminder settings (non-blocking, default to true on error)
+      try {
+        const reminderRes = await getFollowupReminders();
+        setRemindersEnabled(reminderRes.followup_reminders_enabled ?? true);
+      } catch {
+        setRemindersEnabled(true);
+      }
     } catch (err) {
       console.error('Failed to fetch applications:', err);
       showToast('Failed to load applications', 'error');
@@ -97,7 +113,13 @@ const JobTrackingDashboard = () => {
     );
 
     try {
-      await updateJobApplicationStatus(appId, toStatus);
+      const result = await updateJobApplicationStatus(appId, toStatus);
+      // Update application with server response (has correct timestamps)
+      if (result.application) {
+        setApplications(prev =>
+          prev.map(app => app.id === appId ? { ...app, ...result.application } : app)
+        );
+      }
       // Refresh stats
       const statsRes = await getJobApplicationStats();
       setStats(statsRes);
@@ -136,6 +158,39 @@ const JobTrackingDashboard = () => {
     }
   };
 
+  const handleToggleGlobalReminders = async () => {
+    const newValue = !remindersEnabled;
+    setRemindersEnabled(newValue);
+    try {
+      await updateFollowupReminders(newValue);
+      showToast(newValue ? 'Follow-up reminders enabled' : 'Follow-up reminders disabled');
+    } catch {
+      setRemindersEnabled(!newValue);
+      showToast('Failed to update reminder settings', 'error');
+    }
+  };
+
+  const handleToggleAppReminder = async (app) => {
+    const newValue = !app.reminders_enabled;
+    // Optimistic update
+    const updateApp = (a) => a.id === app.id ? { ...a, reminders_enabled: newValue } : a;
+    setApplications(prev => prev.map(updateApp));
+    if (selectedApp && selectedApp.id === app.id) {
+      setSelectedApp(prev => ({ ...prev, reminders_enabled: newValue }));
+    }
+    try {
+      await updateAppReminders(app.id, newValue);
+      showToast(newValue ? 'Reminders enabled for this application' : 'Reminders disabled for this application');
+    } catch {
+      // Rollback
+      setApplications(prev => prev.map(a => a.id === app.id ? { ...a, reminders_enabled: !newValue } : a));
+      if (selectedApp && selectedApp.id === app.id) {
+        setSelectedApp(prev => ({ ...prev, reminders_enabled: !newValue }));
+      }
+      showToast('Failed to update reminder', 'error');
+    }
+  };
+
   if (loading) {
     return (
       <div className="job-tracking-page">
@@ -149,8 +204,17 @@ const JobTrackingDashboard = () => {
   return (
     <div className="job-tracking-page">
       <div className="job-tracking-header">
-        <h1>Application Tracker</h1>
-        <p>Track and manage your job applications</p>
+        <div>
+          <h1>Application Tracker</h1>
+          <p>Track and manage your job applications</p>
+        </div>
+        <div className="reminder-toggle">
+          <span className="reminder-toggle-label">Follow-up Reminders</span>
+          <label className="toggle-switch">
+            <input type="checkbox" checked={remindersEnabled} onChange={handleToggleGlobalReminders} />
+            <span className="toggle-slider"></span>
+          </label>
+        </div>
       </div>
 
       {/* Stats bar */}
@@ -172,6 +236,10 @@ const JobTrackingDashboard = () => {
           <div className="stat-value">
             {stats?.response_rate != null ? `${Math.round(stats.response_rate * 100)}%` : '0%'}
           </div>
+        </div>
+        <div className="stat-card stale-stat">
+          <div className="stat-label">Needs Follow-up</div>
+          <div className="stat-value">{applications.filter(isStale).length}</div>
         </div>
       </div>
 
@@ -214,6 +282,7 @@ const JobTrackingDashboard = () => {
                                 {...provided.dragHandleProps}
                                 onClick={() => handleCardClick(app)}
                               >
+                                {isStale(app) && <span className="stale-badge">{daysSince(app.status_updated_at)}d</span>}
                                 <div className="app-card-top">
                                   <div className="app-card-company-initial">
                                     {(app.company_name || app.job_title || '?')[0].toUpperCase()}
@@ -223,7 +292,7 @@ const JobTrackingDashboard = () => {
                                     <p className="app-card-company">{app.company_name || 'Unknown'}</p>
                                   </div>
                                 </div>
-                                <div className="app-card-date">{formatDate(app.applied_at)}</div>
+                                <div className="app-card-date">{formatDate(app.status_updated_at)}</div>
                               </div>
                             )}
                           </Draggable>
@@ -271,6 +340,19 @@ const JobTrackingDashboard = () => {
                 <span className="modal-detail-label">Applied</span>
                 <span>{formatDate(selectedApp.applied_at)}</span>
               </div>
+              {!TERMINAL_STATUSES.includes(selectedApp.status) && (
+                <div className="modal-detail-row">
+                  <span className="modal-detail-label">Reminders</span>
+                  <button
+                    className={`reminder-btn ${selectedApp.reminders_enabled ? 'on' : 'off'}`}
+                    onClick={() => handleToggleAppReminder(selectedApp)}
+                    disabled={!remindersEnabled}
+                    title={!remindersEnabled ? 'Enable global reminders first' : ''}
+                  >
+                    {selectedApp.reminders_enabled ? '\uD83D\uDD14 On' : '\uD83D\uDD15 Off'}
+                  </button>
+                </div>
+              )}
               {selectedApp.job_url && (
                 <div className="modal-detail-row">
                   <span className="modal-detail-label">Job URL</span>

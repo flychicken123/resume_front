@@ -8,6 +8,10 @@
 
 .job-tracking-header {
   margin-bottom: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
 }
 
 .job-tracking-header h1 {
@@ -137,6 +141,7 @@
   margin-bottom: 0.35rem;
   cursor: grab;
   transition: box-shadow 0.15s, border-color 0.15s;
+  position: relative;
 }
 
 .app-card:hover {
@@ -461,6 +466,121 @@
   to { transform: translateY(0); opacity: 1; }
 }
 
+/* Global reminder toggle */
+.reminder-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.reminder-toggle-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+/* iOS-style toggle switch */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 22px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #cbd5e1;
+  transition: 0.3s;
+  border-radius: 22px;
+}
+
+.toggle-slider::before {
+  position: absolute;
+  content: '';
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background-color: #fff;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background-color: #3b82f6;
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+  transform: translateX(18px);
+}
+
+/* Stale badge on Kanban cards */
+.stale-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: #f97316;
+  color: #fff;
+  font-size: 0.55rem;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 999px;
+  line-height: 1.3;
+  z-index: 1;
+}
+
+/* Needs Follow-up stat card */
+.stat-card.stale-stat {
+  border-color: #fed7aa;
+}
+
+.stat-card.stale-stat .stat-label {
+  color: #c2410c;
+}
+
+.stat-card.stale-stat .stat-value {
+  color: #ea580c;
+}
+
+/* Per-app reminder button */
+.reminder-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.2s;
+}
+
+.reminder-btn.on {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.reminder-btn.off {
+  background: #f1f5f9;
+  color: #94a3b8;
+}
+
+.reminder-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .job-tracking-page {
@@ -478,6 +598,15 @@
 
   .stat-card .stat-value {
     font-size: 1rem;
+  }
+
+  .job-tracking-header {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .reminder-toggle {
+    align-self: flex-start;
   }
 
   .kanban-column {

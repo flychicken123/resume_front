@@ -17,6 +17,8 @@ import {
   generateSkillsAI,
   transcribeVoiceAI,
   analyzeResumeModification,
+  getFollowupReminders,
+  getUserJobApplications,
 } from '../api';
 import { setLastStep } from '../utils/exitTracking';
 import { useAuth } from '../context/AuthContext';
@@ -29,7 +31,7 @@ import { useLocation } from "react-router-dom";
 const INITIAL_MESSAGES = [
   {
     sender: 'bot',
-    text: "Hey! I'm the HiHired assistant. Ask me anything about building resumes or using our AI tools.",
+    text: "Hey! I'm your HiHired assistant. Job searching can be tough, but you don't have to do it alone. I can help you craft a standout resume, find job matches tailored to your skills, and keep your applications on track.",
   },
   {
     sender: 'bot',
@@ -39,6 +41,7 @@ const INITIAL_MESSAGES = [
       { label: 'Download Resume', value: 'download resume' },
       { label: 'Job Matches', value: 'job matches' },
       { label: 'Analysis my background', value: 'analysis my background' },
+      { label: 'Emotional Support', value: 'I\'m feeling stressed about my job search. Can you give me some encouragement and emotional support?' },
     ],
   },
 ];
@@ -485,6 +488,7 @@ const ChatWidgetInner = () => {
   const dragStateRef = React.useRef(null);
   const clickSuppressedRef = React.useRef(false);
   const prevUserRef = React.useRef(user);
+  const staleReminderShownRef = React.useRef(false);
   const location = useLocation();
   const notifyBuilderStage = useCallback((stage) => {
     if (location.pathname === "/") {
@@ -625,6 +629,7 @@ const clampLauncherPosition = useCallback(
     setInput('');
     setIsLoading(false);
     setMessages(INITIAL_MESSAGES);
+    staleReminderShownRef.current = false;
     setResumeFlowState(DEFAULT_RESUME_FLOW_STATE);
     try {
       localStorage.removeItem(STORAGE_KEY);
@@ -716,6 +721,49 @@ const clampLauncherPosition = useCallback(
       resetChatState({ keepOpen: true });
     }
   }, [user, resetChatState]);
+
+  // Proactive stale app reminder — runs once per fresh session for logged-in users
+  React.useEffect(() => {
+    if (!user?.email || staleReminderShownRef.current) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const reminderRes = await getFollowupReminders();
+        if (cancelled || !(reminderRes.followup_reminders_enabled ?? true)) return;
+        const appsRes = await getUserJobApplications(200, 0);
+        if (cancelled) return;
+        const apps = appsRes.applications || [];
+        const STALE_DAYS = 7;
+        const TERMINAL = ['rejected', 'withdrawn', 'accepted'];
+        const now = Date.now();
+        const staleApps = apps.filter(a =>
+          !TERMINAL.includes(a.status) &&
+          a.reminders_enabled &&
+          Math.floor((now - new Date(a.status_updated_at)) / 86400000) >= STALE_DAYS
+        ).sort((a, b) => new Date(a.status_updated_at) - new Date(b.status_updated_at));
+        if (staleApps.length === 0) return;
+
+        staleReminderShownRef.current = true;
+        const top5 = staleApps.slice(0, 5);
+        const daysSince = (d) => Math.floor((now - new Date(d)) / 86400000);
+        let text = `You have ${staleApps.length} application(s) that haven't been updated in over a week:\n\n`;
+        top5.forEach(a => {
+          text += `  \u2022 ${a.job_title} at ${a.company_name} \u2014 ${a.status} \u2014 ${daysSince(a.status_updated_at)} days ago\n`;
+        });
+        if (staleApps.length > 5) {
+          text += `\n...and ${staleApps.length - 5} more.\n`;
+        }
+        text += `\nConsider following up or updating their status on your Application Tracker.`;
+        setMessages(prev => {
+          if (prev.some(m => m.isStaleReminder)) return prev;
+          return [...prev, { sender: 'bot', text, isStaleReminder: true }];
+        });
+      } catch {
+        // Non-blocking — don't show reminder if fetch fails
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [user]);
 
   const handleKeyDown = (event) => {
     if (event.key === 'Enter' && !event.shiftKey) {
