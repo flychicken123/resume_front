@@ -763,6 +763,7 @@ const clampLauncherPosition = useCallback(
           if (prev.some(m => m.isStaleReminder)) return prev;
           return [...prev, { sender: 'bot', text, isStaleReminder: true }];
         });
+        setIsOpen(true);
       } catch {
         // Non-blocking — don't show reminder if fetch fails
       }
