@@ -110,7 +110,6 @@ const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setS
               </Link>
             </>
           )}
-          <Link to="/#about" className="nav-link">About</Link>
           <Link to="/contact" className="nav-link">Contact</Link>
           <a href="/contact#about-us" className="nav-link">About Us</a>
         </div>
@@ -304,13 +303,6 @@ const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setS
                 </Link>
               </>
             )}
-            <Link
-              to="/#about"
-              className="mobile-nav-link"
-              onClick={() => setShowMobileMenu(false)}
-            >
-              About
-            </Link>
             <Link
               to="/contact"
               className="mobile-nav-link"
