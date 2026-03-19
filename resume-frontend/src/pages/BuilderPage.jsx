@@ -761,6 +761,7 @@ const CHAT_STAGE_TO_STEP = {
   education: STEP_IDS.EDUCATION,
   skills: STEP_IDS.SKILLS,
   summary: STEP_IDS.SUMMARY,
+  tracking: STEP_IDS.TRACKING,
 };
 
 const getInitialStep = () => {

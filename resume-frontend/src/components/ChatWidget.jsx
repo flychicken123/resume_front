@@ -24,7 +24,7 @@ import { setLastStep } from '../utils/exitTracking';
 import { useAuth } from '../context/AuthContext';
 import { useResume } from '../context/ResumeContext';
 import { TEMPLATE_OPTIONS } from '../constants/templates';
-import { BUILDER_TARGET_STEP_KEY, BUILDER_TARGET_TEMPLATE, BUILDER_TARGET_JOB_MATCHES, BUILDER_TARGET_TRACKING } from '../constants/builder';
+import { BUILDER_TARGET_STEP_KEY, BUILDER_TARGET_TEMPLATE, BUILDER_TARGET_JOB_MATCHES } from '../constants/builder';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from "react-router-dom";
 
@@ -2871,6 +2871,7 @@ const buildSectionResponse = (sectionKey) => {
       return;
     }
     if (btn.action === 'go_to_tracker') {
+      window.dispatchEvent(new CustomEvent('builder:focus-stage', { detail: { stage: 'tracking' } }));
       navigate('/builder?view=tracking');
       return;
     }
