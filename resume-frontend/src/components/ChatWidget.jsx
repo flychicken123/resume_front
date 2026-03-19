@@ -3583,8 +3583,8 @@ const getStoredJobDescription = () => {
   return (legacy && legacy.trim()) || '';
 };
 
-const escapeHtml = (value = '') =>
-  value
+const escapeHtml = (value) =>
+  String(value ?? '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
