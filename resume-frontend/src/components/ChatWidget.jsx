@@ -3759,8 +3759,8 @@ const buildResumeHtml = (data = {}, jobDescription = '') => {
   `;
 };
 
-const flattenExperienceText = (experiences = []) =>
-  experiences
+const flattenExperienceText = (experiences) =>
+  (Array.isArray(experiences) ? experiences : [])
     .filter((exp) => exp && Object.values(exp).some((val) => val && `${val}`.trim()))
     .map((exp) => {
       const header = [exp.jobTitle, exp.company].filter(Boolean).join(' at ');
@@ -3770,8 +3770,8 @@ const flattenExperienceText = (experiences = []) =>
     })
     .join('\n\n');
 
-const flattenEducationText = (education = []) =>
-  education
+const flattenEducationText = (education) =>
+  (Array.isArray(education) ? education : [])
     .filter((ed) => ed && Object.values(ed).some((val) => val && `${val}`.trim()))
     .map((ed) => {
       const degree = [ed.degree, ed.field].filter(Boolean).join(' in ');
