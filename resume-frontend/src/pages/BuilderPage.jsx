@@ -1230,6 +1230,16 @@ function BuilderPage() {
     })();
   }, [locationHook.search]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(locationHook.search || '');
+    if (params.get('view') === 'tracking') {
+      setUserRequestedImport(false);
+      setStep(STEP_IDS.TRACKING);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [locationHook.search, setStep, setUserRequestedImport]);
+
   // Persist job descriptions and combined legacy string
   useEffect(() => {
     if (typeof window === 'undefined') {

@@ -2871,8 +2871,7 @@ const buildSectionResponse = (sectionKey) => {
       return;
     }
     if (btn.action === 'go_to_tracker') {
-      window.localStorage.setItem(BUILDER_TARGET_STEP_KEY, BUILDER_TARGET_TRACKING);
-      navigate('/builder');
+      navigate('/builder?view=tracking');
       return;
     }
     if (btn.value) {
