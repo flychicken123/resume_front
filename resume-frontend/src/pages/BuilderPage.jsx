@@ -1238,7 +1238,7 @@ function BuilderPage() {
       } else {
         window.localStorage.removeItem('jobDescriptions');
       }
-      const legacyCombined = combinedJobDescription.trim();
+      const legacyCombined = combinedJobDescription.trim().slice(0, 10000);
       if (legacyCombined) {
         window.localStorage.setItem('jobDescription', legacyCombined);
       } else {

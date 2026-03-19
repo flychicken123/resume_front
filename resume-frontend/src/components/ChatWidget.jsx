@@ -3609,7 +3609,7 @@ const buildResumeHtml = (data = {}, jobDescription = '') => {
   const skillsSource = (skillsCategorized && skillsCategorized.trim()) || skills;
 
   const renderList = (items, renderer) =>
-    items
+    (Array.isArray(items) ? items : [])
       .filter((item) => item && Object.values(item).some((val) => val && `${val}`.trim()))
       .map(renderer)
       .join('');
