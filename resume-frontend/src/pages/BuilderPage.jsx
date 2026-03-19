@@ -11,6 +11,7 @@ import {
   BUILDER_TARGET_JOB_MATCHES,
   BUILDER_TARGET_TEMPLATE,
   BUILDER_TARGET_IMPORT,
+  BUILDER_TARGET_TRACKING,
   BUILDER_LAST_STEP_KEY,
 } from '../constants/builder';
 import {
@@ -846,6 +847,9 @@ function BuilderPage() {
       window.localStorage.removeItem(BUILDER_TARGET_STEP_KEY);
     } else if (storedTarget === BUILDER_TARGET_TEMPLATE) {
       targetStep = STEP_IDS.FORMAT;
+      window.localStorage.removeItem(BUILDER_TARGET_STEP_KEY);
+    } else if (storedTarget === BUILDER_TARGET_TRACKING) {
+      targetStep = STEP_IDS.TRACKING;
       window.localStorage.removeItem(BUILDER_TARGET_STEP_KEY);
     }
 

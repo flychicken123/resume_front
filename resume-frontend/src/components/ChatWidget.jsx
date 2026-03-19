@@ -24,7 +24,7 @@ import { setLastStep } from '../utils/exitTracking';
 import { useAuth } from '../context/AuthContext';
 import { useResume } from '../context/ResumeContext';
 import { TEMPLATE_OPTIONS } from '../constants/templates';
-import { BUILDER_TARGET_STEP_KEY, BUILDER_TARGET_TEMPLATE, BUILDER_TARGET_JOB_MATCHES } from '../constants/builder';
+import { BUILDER_TARGET_STEP_KEY, BUILDER_TARGET_TEMPLATE, BUILDER_TARGET_JOB_MATCHES, BUILDER_TARGET_TRACKING } from '../constants/builder';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from "react-router-dom";
 
@@ -40,6 +40,7 @@ const INITIAL_MESSAGES = [
       { label: 'Build Resume', value: 'build resume' },
       { label: 'Download Resume', value: 'download resume' },
       { label: 'Job Matches', value: 'job matches' },
+      { label: 'Track Applications', value: 'track_applications' },
       { label: 'Analysis my background', value: 'analysis my background' },
       { label: 'Emotional Support', value: 'I\'m feeling stressed about my job search. Can you give me some encouragement and emotional support?' },
     ],
@@ -1117,6 +1118,48 @@ const clampLauncherPosition = useCallback(
     navigate('/builder#template-format');
     setLastStep('chat_template_section_jump');
   }, [navigate]);
+
+  const handleTrackApplications = async () => {
+    if (!user) {
+      appendBotMessage('Please log in to view your tracked applications.');
+      return;
+    }
+    appendBotMessage('Let me pull up your application summary...');
+    try {
+      const appsRes = await getUserJobApplications(200, 0);
+      const apps = appsRes.applications || [];
+      if (apps.length === 0) {
+        appendBotMessage(
+          "You haven't tracked any applications yet. Head to the Application Tracker to start adding jobs you've applied to!",
+          { buttons: [{ label: 'Open Application Tracker', action: 'go_to_tracker' }] }
+        );
+        return;
+      }
+      const counts = apps.reduce((acc, a) => {
+        const s = a.status || 'applied';
+        acc[s] = (acc[s] || 0) + 1;
+        return acc;
+      }, {});
+      const statusLines = Object.entries(counts)
+        .sort((a, b) => b[1] - a[1])
+        .map(([status, count]) => `  • ${status.charAt(0).toUpperCase() + status.slice(1)}: ${count}`)
+        .join('\n');
+      const TERMINAL = ['rejected', 'withdrawn', 'accepted'];
+      const active = apps.filter(a => !TERMINAL.includes(a.status));
+      const summary =
+        `You have **${apps.length} tracked application${apps.length !== 1 ? 's' : ''}**:\n\n${statusLines}\n\n` +
+        (active.length > 0
+          ? `You have ${active.length} active application${active.length !== 1 ? 's' : ''} in progress. Would you like to review and update their statuses?`
+          : 'All your applications have reached a final status. Consider tracking new opportunities!');
+      appendBotMessage(summary, {
+        buttons: [{ label: 'Go to Application Tracker', action: 'go_to_tracker' }],
+      });
+    } catch {
+      appendBotMessage('I had trouble fetching your applications. Please try again or visit the Application Tracker directly.', {
+        buttons: [{ label: 'Open Application Tracker', action: 'go_to_tracker' }],
+      });
+    }
+  };
 
   const redirectToJobMatchesSection = () => {
     const isBrowser = typeof window !== 'undefined';
@@ -2820,6 +2863,15 @@ const buildSectionResponse = (sectionKey) => {
     }
     if (btn.action === 'jump_template_section') {
       jumpToTemplateSection();
+      return;
+    }
+    if (btn.value === 'track_applications') {
+      handleTrackApplications();
+      return;
+    }
+    if (btn.action === 'go_to_tracker') {
+      window.localStorage.setItem(BUILDER_TARGET_STEP_KEY, BUILDER_TARGET_TRACKING);
+      navigate('/builder');
       return;
     }
     if (btn.value) {
