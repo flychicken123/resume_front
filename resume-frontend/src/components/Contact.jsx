@@ -36,6 +36,13 @@ const Contact = () => {
 
   const apiBaseUrl = useMemo(() => getAPIBaseURL(), []);
 
+  useEffect(() => {
+    if (window.location.hash === '#about-us') {
+      const el = document.getElementById('about-us');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, []);
+
 
 
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
@@ -693,6 +700,52 @@ const Contact = () => {
                   {status === 'loading' ? 'Sending…' : 'Send Message'}
                 </button>
               </form>
+            </div>
+
+            {/* ── About Us ─────────────────────────────── */}
+            <div id="about-us" className="contact-about-section">
+              <h2 className="contact-about-title">About HiHired</h2>
+              <p className="contact-about-intro">
+                HiHired is your AI-powered career coach — built to help job seekers craft
+                standout resumes, land interviews, and take control of their job search.
+              </p>
+              <h3 className="contact-about-subtitle">What Makes Us Different</h3>
+              <div className="contact-about-grid">
+                <div className="contact-about-card">
+                  <span className="contact-about-icon">🤖</span>
+                  <h4>AI-Powered Optimization</h4>
+                  <p>Advanced AI analyzes job descriptions and rewrites your resume with the right keywords to pass ATS systems.</p>
+                </div>
+                <div className="contact-about-card">
+                  <span className="contact-about-icon">🎯</span>
+                  <h4>Job-Specific Tailoring</h4>
+                  <p>Paste any job description and our AI customizes your resume to match the role — highlighting your most relevant experience.</p>
+                </div>
+                <div className="contact-about-card">
+                  <span className="contact-about-icon">📱</span>
+                  <h4>Mobile-Friendly</h4>
+                  <p>Build your resume on any device. Your progress is always saved and synced.</p>
+                </div>
+                <div className="contact-about-card">
+                  <span className="contact-about-icon">⚡</span>
+                  <h4>Lightning Fast</h4>
+                  <p>Go from blank page to polished resume in minutes, not hours.</p>
+                </div>
+                <div className="contact-about-card">
+                  <span className="contact-about-icon">🎨</span>
+                  <h4>Professional Templates</h4>
+                  <p>Recruiter-approved templates that look great and perform well with ATS systems.</p>
+                </div>
+                <div className="contact-about-card">
+                  <span className="contact-about-icon">💰</span>
+                  <h4>Free to Start</h4>
+                  <p>Get started at no cost. Upgrade only when you need more power.</p>
+                </div>
+              </div>
+              <div className="contact-about-mission">
+                <h3>Our Mission</h3>
+                <p>To make professional-quality resumes accessible to every job seeker — regardless of background or experience — by combining the best of AI with a simple, human-centered design.</p>
+              </div>
             </div>
 
             <div className="contact-cta">
