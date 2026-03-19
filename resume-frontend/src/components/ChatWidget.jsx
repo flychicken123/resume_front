@@ -2,7 +2,7 @@ import React, { useMemo, useState, useCallback } from 'react';
 import './ChatWidget.css';
 import {
   getAPIBaseURL,
-  generateSummaryAI,
+  generateResumeAdviceAI,
   fetchResumeHistoryList,
   fetchJobCount,
   computeJobMatches,
@@ -41,7 +41,7 @@ const INITIAL_MESSAGES = [
       { label: 'Download Resume', value: 'download resume' },
       { label: 'Job Matches', value: 'job matches' },
       { label: 'Track Applications', value: 'track_applications' },
-      { label: 'Analysis my background', value: 'analysis my background' },
+      { label: 'Analysis my resume', value: 'analysis my resume' },
       { label: 'Emotional Support', value: 'I\'m feeling stressed about my job search. Can you give me some encouragement and emotional support?' },
     ],
   },
@@ -310,6 +310,9 @@ const hasBackgroundAnalysisIntent = (text = '') => {
   if (!text) return false;
   const normalized = text.toLowerCase();
   return (
+    normalized.includes('analysis my resume') ||
+    normalized.includes('analyze my resume') ||
+    normalized.includes('resume analysis') ||
     normalized.includes('analysis my background') ||
     normalized.includes('analyze my background') ||
     normalized.includes('background analysis')
@@ -1048,33 +1051,31 @@ const clampLauncherPosition = useCallback(
   }, [resumeData]);
 
   const handleBackgroundAnalysis = async () => {
-    appendBotMessage('Let me review your latest resume from history...');
+    const hasContent =
+      resumeData?.name?.trim() ||
+      resumeData?.summary?.trim() ||
+      (Array.isArray(resumeData?.experiences) && resumeData.experiences.some(e => e.jobTitle || e.company || e.description)) ||
+      (Array.isArray(resumeData?.education) && resumeData.education.some(e => e.degree || e.school)) ||
+      (typeof resumeData?.skills === 'string' ? resumeData.skills.trim() : (resumeData?.skills?.length > 0));
+    if (!hasContent) {
+      appendBotMessage("Please fill in your resume first (name, experience, education, or skills), then I can give you expert feedback.");
+      setLastStep('chat_resume_analysis_missing_data');
+      setIsLoading(false);
+      return;
+    }
+    appendBotMessage('Analyzing your resume as an expert consultant…');
     setLastStep('chat_resume_analysis_start');
     try {
-      const response = await fetchResumeHistoryList();
-      const entries = Array.isArray(response?.history) ? response.history : [];
-      if (!entries || entries.length === 0) {
-        appendBotMessage('I could not find any resumes in your history yet. Please build or import one, then ask me again.');
-        setLastStep('chat_resume_analysis_missing_history');
-        return;
-      }
-      const summaryInput = buildResumeSummaryInput();
-      if (!summaryInput) {
-        appendBotMessage("I found a resume in your history, but I still need more details in the builder (experience, education, or skills) before I can analyze it. Please complete your resume and try again.");
-        setLastStep('chat_resume_analysis_missing_data');
-        return;
-      }
-      const aiSummary = await generateSummaryAI(summaryInput);
-      const cleanedSummary = (aiSummary || '').trim();
-      if (!cleanedSummary) {
-        appendBotMessage("I couldn't summarize your background this time. Please try again later.");
-        setLastStep('chat_resume_analysis_error');
-        return;
-      }
-      appendBotMessage(`Here's what stands out in your background:\n${cleanedSummary}`);
+      const advice = await generateResumeAdviceAI(resumeData);
+      const cleanAdvice = (advice || '')
+        .replace(/\*\*(.*?)\*\*/g, '$1')
+        .replace(/__(.*?)__/g, '$1')
+        .replace(/^#{1,3}\s+/gm, '')
+        .replace(/^- /gm, '• ');
+      appendBotMessage(cleanAdvice);
       setLastStep('chat_resume_analysis_complete');
     } catch (error) {
-      console.error('Background analysis failed', error);
+      console.error('Resume analysis failed', error);
       appendBotMessage("I couldn't analyze your resume right now. Please try again later.");
       setLastStep('chat_resume_analysis_error');
     } finally {
