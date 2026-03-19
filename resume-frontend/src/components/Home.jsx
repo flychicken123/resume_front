@@ -302,6 +302,9 @@ const Home = () => {
           <Link to="/contact" className="home-nav-link">
             Contact
           </Link>
+          <a href="/contact#about-us" className="home-nav-link">
+            About Us
+          </a>
         </div>
 
         <div className="home-navbar-right">
@@ -428,6 +431,9 @@ const Home = () => {
             <Link to="/contact" className="mobile-nav-link" onClick={() => setShowMobileMenu(false)}>
               Contact
             </Link>
+            <a href="/contact#about-us" className="mobile-nav-link" onClick={() => setShowMobileMenu(false)}>
+              About Us
+            </a>
           </div>
         </div>
       )}
