@@ -3049,8 +3049,8 @@ const RobotIcon = () => (
 
 const buildDownloadPayload = (data, jobDescription, html) => {
   const rawSkills = Array.isArray(data.skills) ? data.skills.join(', ') : (data.skills || '');
-  const skillsSource =
-    (data.skillsCategorized && data.skillsCategorized.trim()) || rawSkills;
+  const rawSkillsCategorized = typeof data.skillsCategorized === 'string' ? data.skillsCategorized : '';
+  const skillsSource = rawSkillsCategorized.trim() || rawSkills;
 
   return {
     name: data.name || '',
@@ -3607,7 +3607,7 @@ const buildResumeHtml = (data = {}, jobDescription = '') => {
     skillsCategorized = '',
   } = data;
 
-  const skillsSource = (skillsCategorized && skillsCategorized.trim()) || skills;
+  const skillsSource = (typeof skillsCategorized === 'string' ? skillsCategorized.trim() : '') || skills;
 
   const renderList = (items, renderer) =>
     (Array.isArray(items) ? items : [])
