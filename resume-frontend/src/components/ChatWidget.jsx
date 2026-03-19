@@ -3048,8 +3048,9 @@ const RobotIcon = () => (
 );
 
 const buildDownloadPayload = (data, jobDescription, html) => {
+  const rawSkills = Array.isArray(data.skills) ? data.skills.join(', ') : (data.skills || '');
   const skillsSource =
-    (data.skillsCategorized && data.skillsCategorized.trim()) || data.skills || '';
+    (data.skillsCategorized && data.skillsCategorized.trim()) || rawSkills;
 
   return {
     name: data.name || '',
