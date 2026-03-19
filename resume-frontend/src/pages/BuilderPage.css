@@ -463,19 +463,36 @@
     position: fixed;
     left: 0;
     top: 0;
-    overflow: visible;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #b0b7f1 #d1d5fa;
     z-index: 20;
   }
-  
+
+  .stepper-container::-webkit-scrollbar {
+    display: block;
+    width: 4px;
+  }
+
+  .stepper-container::-webkit-scrollbar-track {
+    background: #d1d5fa;
+  }
+
+  .stepper-container::-webkit-scrollbar-thumb {
+    background: #b0b7f1;
+    border-radius: 2px;
+  }
+
   .stepper-step {
-    width: 120px;
-    margin: 12px 0;
-    padding: 12px 8px;           /* add horizontal padding to keep text inside */
+    width: calc(100% - 16px);
+    max-width: calc(100% - 16px);
+    margin: 5% 0;
+    padding: 7.5% 5%;
     border-radius: 12px;
     font-size: 1rem;
     text-align: center;
     flex-shrink: 0;
-    max-width: calc(100% - 16px); /* respect container width with padding */
   }
   
   .builder-content {
