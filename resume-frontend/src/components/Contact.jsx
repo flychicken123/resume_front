@@ -719,9 +719,6 @@ const Contact = () => {
                       <li>Former Tech Lead at TikTok</li>
                       <li>Senior engineer at Twilio &amp; eBay</li>
                     </ul>
-                    <div className="contact-team-links">
-                      <a href="https://www.linkedin.com/in/han-y-1448344b/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-                    </div>
                   </div>
                 </div>
                 <div className="contact-team-card">
@@ -734,9 +731,6 @@ const Contact = () => {
                       <li>Focus on resume intelligence</li>
                       <li>Tech Lead in Microsoft's infrastructure team</li>
                     </ul>
-                    <div className="contact-team-links">
-                      <a href="https://www.linkedin.com/in/h-w-b0b10317a/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-                    </div>
                   </div>
                 </div>
               </div>
