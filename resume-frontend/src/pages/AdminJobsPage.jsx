@@ -113,7 +113,7 @@ const navLinkStyle = {
 };
 
 export default function AdminJobsPage() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
 
   const [activeTab, setActiveTab] = useState("postings");
   const [error, setError] = useState("");
@@ -332,7 +332,7 @@ export default function AdminJobsPage() {
   };
 
   // --- Render ---
-  if (!user?.is_admin) {
+  if (!user || !isAdmin) {
     return <Navigate to="/" replace />;
   }
 
