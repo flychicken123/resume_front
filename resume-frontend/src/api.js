@@ -151,6 +151,35 @@ export async function getJobMatches(params = {}) {
   return await res.json();
 }
 
+export async function dismissJobMatch(jobPostingId, reason = '') {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/jobs/matches/dismiss`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    body: JSON.stringify({
+      job_posting_id: jobPostingId,
+      reason: reason || '',
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Failed to dismiss job match.');
+  }
+  return await res.json();
+}
+
+export async function undismissJobMatch(jobPostingId) {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/jobs/matches/undismiss`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    body: JSON.stringify({ job_posting_id: jobPostingId }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Failed to undismiss job match.');
+  }
+  return await res.json();
+}
+
 // AI assistant endpoints
 export async function generateExperienceAI(experience, jobDescription = '', matchedSkills = [], missingSkills = []) {
   const payload = { 

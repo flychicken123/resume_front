@@ -43,6 +43,7 @@ import { trackResumeGeneration, trackBuilderLoaded, trackDownloadClicked } from 
 import {
   computeJobMatches,
   getJobMatches,
+  dismissJobMatch,
   generateExperienceAI,
   optimizeProjectAI,
   generateSummaryAI,
@@ -809,6 +810,10 @@ function BuilderPage() {
   const [hoveredMatchKey, setHoveredMatchKey] = useState(null);
   const [hoveredMatchAnchor, setHoveredMatchAnchor] = useState(null);
   const [jobMatchesPage, setJobMatchesPage] = useState(0);
+  const [dismissedJobIds, setDismissedJobIds] = useState(new Set());
+  const [dismissReasonJobId, setDismissReasonJobId] = useState(null);
+  const [dismissToast, setDismissToast] = useState(null);
+  const dismissTimersRef = useRef(new Map());
   const JOBS_PER_PAGE = 25;
   const scrollBuilderIntoView = useCallback(() => {
     if (typeof window === 'undefined') {
@@ -1676,8 +1681,15 @@ function BuilderPage() {
     }
     return ` — filtered ${parts.join(' and ')}.`;
   }, [locationFilteredCount, keywordFilteredCount]);
-  const topMatch = filteredJobMatches.length > 0 ? filteredJobMatches[0] : null;
-  const secondaryMatches = filteredJobMatches.length > 1 ? filteredJobMatches.slice(1) : [];
+  const visibleJobMatches = useMemo(() => {
+    if (dismissedJobIds.size === 0) return filteredJobMatches;
+    return filteredJobMatches.filter(
+      (match) => match && !dismissedJobIds.has(match.job_posting_id)
+    );
+  }, [filteredJobMatches, dismissedJobIds]);
+
+  const topMatch = visibleJobMatches.length > 0 ? visibleJobMatches[0] : null;
+  const secondaryMatches = visibleJobMatches.length > 1 ? visibleJobMatches.slice(1) : [];
 
   // Pagination for secondary matches
   const totalPages = Math.ceil(secondaryMatches.length / JOBS_PER_PAGE);
@@ -1690,6 +1702,73 @@ function BuilderPage() {
   useEffect(() => {
     setJobMatchesPage(0);
   }, [filteredJobMatches.length]);
+
+  // Auto-adjust pagination when all items on current page are dismissed
+  useEffect(() => {
+    if (jobMatchesPage > 0 && paginatedMatches.length === 0 && secondaryMatches.length > 0) {
+      setJobMatchesPage((prev) => Math.max(0, prev - 1));
+    }
+  }, [jobMatchesPage, paginatedMatches.length, secondaryMatches.length]);
+
+  const dismissReasons = [
+    { value: '', label: 'Just dismiss' },
+    { value: 'wrong_role', label: 'Wrong role' },
+    { value: 'too_senior_junior', label: 'Too senior/junior' },
+    { value: 'bad_location', label: 'Bad location' },
+    { value: 'low_pay', label: 'Low pay' },
+    { value: 'not_interested_company', label: 'Not interested in company' },
+  ];
+
+  const handleDismissMatch = useCallback((match, reason = '') => {
+    const jobPostingId = match?.job_posting_id;
+    if (!jobPostingId) return;
+    const jobTitle = match?.job_title || 'Job';
+
+    // Hide card locally immediately
+    setDismissedJobIds((prev) => new Set([...prev, jobPostingId]));
+    setDismissReasonJobId(null);
+
+    // Clear any existing timer for this job
+    const existing = dismissTimersRef.current.get(jobPostingId);
+    if (existing) clearTimeout(existing);
+
+    // Start deferred dismiss timer
+    const timerId = setTimeout(async () => {
+      dismissTimersRef.current.delete(jobPostingId);
+      try {
+        await dismissJobMatch(jobPostingId, reason);
+      } catch (err) {
+        console.error('Failed to dismiss match', err);
+      }
+      // Clear toast if it's for this job
+      setDismissToast((prev) => (prev?.jobPostingId === jobPostingId ? null : prev));
+    }, 5000);
+
+    dismissTimersRef.current.set(jobPostingId, timerId);
+
+    // Show undo toast
+    setDismissToast({ jobPostingId, jobTitle });
+  }, []);
+
+  const handleUndoDismiss = useCallback(() => {
+    if (!dismissToast) return;
+    const { jobPostingId } = dismissToast;
+
+    // Cancel the pending API call
+    const timerId = dismissTimersRef.current.get(jobPostingId);
+    if (timerId) {
+      clearTimeout(timerId);
+      dismissTimersRef.current.delete(jobPostingId);
+    }
+
+    // Restore the card
+    setDismissedJobIds((prev) => {
+      const next = new Set(prev);
+      next.delete(jobPostingId);
+      return next;
+    });
+    setDismissToast(null);
+  }, [dismissToast]);
 
   const topMatchKey = topMatch ? getMatchKey(topMatch) : '';
   const trimmedJobDescription = combinedJobDescription.trim();
@@ -3952,7 +4031,45 @@ function BuilderPage() {
                         >
                           {trackedJobIds.has(topMatchKey) ? '✓ Tracking' : trackingInProgress === topMatchKey ? 'Adding…' : 'Start Tracking'}
                         </button>
+                        <button
+                          type="button"
+                          onClick={() => setDismissReasonJobId(dismissReasonJobId === topMatchKey ? null : topMatchKey)}
+                          style={{
+                            padding: '0.35rem 0.8rem',
+                            borderRadius: '999px',
+                            border: '1px solid #e2e8f0',
+                            background: '#f8fafc',
+                            color: '#64748b',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            fontSize: '0.8rem',
+                          }}
+                        >
+                          Not Interested
+                        </button>
                       </div>
+                      {dismissReasonJobId === topMatchKey && (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.4rem' }}>
+                          {dismissReasons.map((opt) => (
+                            <button
+                              key={opt.value}
+                              type="button"
+                              onClick={() => handleDismissMatch(topMatch, opt.value)}
+                              style={{
+                                padding: '0.25rem 0.6rem',
+                                borderRadius: '6px',
+                                border: '1px solid #cbd5e1',
+                                background: '#ffffff',
+                                color: '#334155',
+                                fontSize: '0.75rem',
+                                cursor: 'pointer',
+                              }}
+                            >
+                              {opt.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                       {!topMatchHasDescription && (
                         <span style={{ fontSize: '0.75rem', color: '#f97316' }}>
                           Add a job description to enable One-Click AI Resume.
@@ -4133,7 +4250,45 @@ function BuilderPage() {
                                 >
                                   {trackedJobIds.has(matchKey) ? '✓ Tracking' : trackingInProgress === matchKey ? 'Adding…' : 'Start Tracking'}
                                 </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setDismissReasonJobId(dismissReasonJobId === matchKey ? null : matchKey)}
+                                  style={{
+                                    padding: '0.25rem 0.6rem',
+                                    borderRadius: '999px',
+                                    border: '1px solid #e2e8f0',
+                                    background: '#f8fafc',
+                                    color: '#64748b',
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                    fontSize: '0.75rem',
+                                  }}
+                                >
+                                  Not Interested
+                                </button>
                               </div>
+                              {dismissReasonJobId === matchKey && (
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: '0.35rem' }}>
+                                  {dismissReasons.map((opt) => (
+                                    <button
+                                      key={opt.value}
+                                      type="button"
+                                      onClick={() => handleDismissMatch(match, opt.value)}
+                                      style={{
+                                        padding: '0.2rem 0.5rem',
+                                        borderRadius: '6px',
+                                        border: '1px solid #cbd5e1',
+                                        background: '#ffffff',
+                                        color: '#334155',
+                                        fontSize: '0.7rem',
+                                        cursor: 'pointer',
+                                      }}
+                                    >
+                                      {opt.label}
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
                             </div>
                             {!canTailorMatch && (
                               <span style={{ color: '#f97316', fontSize: '0.75rem' }}>Add a job description to enable One-Click AI Resume.</span>
@@ -4200,6 +4355,44 @@ function BuilderPage() {
                     </>
                   )}
                 </div>
+                {dismissToast && (
+                  <div
+                    style={{
+                      position: 'fixed',
+                      bottom: '2rem',
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      background: '#1e293b',
+                      color: '#f8fafc',
+                      padding: '0.75rem 1.25rem',
+                      borderRadius: '10px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem',
+                      fontSize: '0.9rem',
+                      boxShadow: '0 8px 30px rgba(0,0,0,0.2)',
+                      zIndex: 9999,
+                    }}
+                  >
+                    <span>Dismissed "{dismissToast.jobTitle}"</span>
+                    <button
+                      type="button"
+                      onClick={handleUndoDismiss}
+                      style={{
+                        padding: '0.3rem 0.7rem',
+                        borderRadius: '6px',
+                        border: '1px solid #475569',
+                        background: 'transparent',
+                        color: '#38bdf8',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        fontSize: '0.85rem',
+                      }}
+                    >
+                      Undo
+                    </button>
+                  </div>
+                )}
               </section>
             )}
             {step === STEP_IDS.COVER_LETTER && (
