@@ -437,6 +437,8 @@ export default function AdminJobsPage() {
                       <th style={thStyle}>Type</th>
                       <th style={{ ...thStyle, cursor: "pointer" }} onClick={() => handleSort("seniority_level")}>Seniority {sortBy === "seniority_level" ? (sortDir === "asc" ? "^" : "v") : ""}</th>
                       <th style={thStyle}>Active</th>
+                      <th style={thStyle}>Career Field</th>
+                      <th style={thStyle}>Skills</th>
                       <th style={{ ...thStyle, cursor: "pointer" }} onClick={() => handleSort("posted_at")}>Posted {sortBy === "posted_at" ? (sortDir === "asc" ? "^" : "v") : ""}</th>
                       <th style={thStyle}>Actions</th>
                     </tr>
@@ -456,6 +458,10 @@ export default function AdminJobsPage() {
                           <span style={{ display: "inline-block", padding: "2px 8px", borderRadius: "12px", fontSize: "0.75rem", fontWeight: 600, background: p.is_active ? "#d1fae5" : "#fee2e2", color: p.is_active ? "#065f46" : "#991b1b" }}>
                             {p.is_active ? "Yes" : "No"}
                           </span>
+                        </td>
+                        <td style={{ ...tdStyle, fontSize: "0.7rem" }}>{p.career_field || "-"}</td>
+                        <td style={{ ...tdStyle, maxWidth: "150px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: "0.7rem" }}>
+                          {Array.isArray(p.extracted_skills) && p.extracted_skills.length > 0 ? p.extracted_skills.slice(0, 3).join(", ") + (p.extracted_skills.length > 3 ? ` +${p.extracted_skills.length - 3}` : "") : "-"}
                         </td>
                         <td style={tdStyle}>{formatDate(p.posted_at)}</td>
                         <td style={{ ...tdStyle, whiteSpace: "nowrap" }}>
