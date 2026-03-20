@@ -64,6 +64,18 @@ const formatLocationParts = (parts) => {
     .join(', ');
 };
 
+const timeAgo = (dateStr) => {
+  if (!dateStr) return null;
+  const days = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
+  if (days <= 0) return 'Today';
+  if (days === 1) return '1 day ago';
+  if (days < 7) return `${days} days ago`;
+  const weeks = Math.floor(days / 7);
+  if (days < 30) return `${weeks} week${weeks > 1 ? 's' : ''} ago`;
+  const months = Math.floor(days / 30);
+  return `${months} month${months > 1 ? 's' : ''} ago`;
+};
+
 const decodeHtmlEntities = (value) => {
   if (!value || typeof value !== 'string') {
     return '';
@@ -813,6 +825,7 @@ function BuilderPage() {
   const [dismissedJobIds, setDismissedJobIds] = useState(new Set());
   const [dismissReasonJobId, setDismissReasonJobId] = useState(null);
   const [dismissToast, setDismissToast] = useState(null);
+  const [remoteOnlyFilter, setRemoteOnlyFilter] = useState(false);
   const dismissTimersRef = useRef(new Map());
   const JOBS_PER_PAGE = 25;
   const scrollBuilderIntoView = useCallback(() => {
@@ -1682,11 +1695,19 @@ function BuilderPage() {
     return ` — filtered ${parts.join(' and ')}.`;
   }, [locationFilteredCount, keywordFilteredCount]);
   const visibleJobMatches = useMemo(() => {
-    if (dismissedJobIds.size === 0) return filteredJobMatches;
-    return filteredJobMatches.filter(
-      (match) => match && !dismissedJobIds.has(match.job_posting_id)
-    );
-  }, [filteredJobMatches, dismissedJobIds]);
+    let matches = filteredJobMatches;
+    if (dismissedJobIds.size > 0) {
+      matches = matches.filter(
+        (match) => match && !dismissedJobIds.has(match.job_posting_id)
+      );
+    }
+    if (remoteOnlyFilter) {
+      matches = matches.filter(
+        (match) => match && typeof match.job_remote_type === 'string' && match.job_remote_type.toLowerCase().includes('remote')
+      );
+    }
+    return matches;
+  }, [filteredJobMatches, dismissedJobIds, remoteOnlyFilter]);
 
   const topMatch = visibleJobMatches.length > 0 ? visibleJobMatches[0] : null;
   const secondaryMatches = visibleJobMatches.length > 1 ? visibleJobMatches.slice(1) : [];
@@ -3397,6 +3418,15 @@ function BuilderPage() {
                           {filterSummaryText}
                         </span>
                       )}
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', color: '#334155', cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={remoteOnlyFilter}
+                          onChange={(e) => { setRemoteOnlyFilter(e.target.checked); setJobMatchesPage(0); }}
+                          style={{ cursor: 'pointer' }}
+                        />
+                        Remote only
+                      </label>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                       {jobMatchesLoading && <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Loading...</span>}
@@ -3912,6 +3942,9 @@ function BuilderPage() {
                       <div style={{ color: '#1e293b', fontSize: '0.9rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                         <span>{topMatch.company_name || 'Hiring company'}</span>
                         <span>{[topMatch.job_location, topMatch.job_remote_type].filter(Boolean).join(' • ')}</span>
+                        {topMatch.job_posted_at && (
+                          <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Posted {timeAgo(topMatch.job_posted_at)}</span>
+                        )}
                         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
                           {typeof topMatch.match_score === 'number' && (
                             <span style={{ fontWeight: 600, color: '#0284c7' }}>Match score: {topMatch.match_score.toFixed(1)}</span>
@@ -4144,6 +4177,11 @@ function BuilderPage() {
                             </div>
                             <span style={{ color: '#334155', fontSize: '0.85rem' }}>
                               {[match.company_name, match.job_location].filter(Boolean).join(' — ')}
+                              {match.job_posted_at && (
+                                <span style={{ color: '#94a3b8', fontSize: '0.75rem', marginLeft: '0.5rem' }}>
+                                  Posted {timeAgo(match.job_posted_at)}
+                                </span>
+                              )}
                             </span>
                             {match.job_department && (
                               <span style={{ color: '#64748b', fontSize: '0.8rem' }}>{match.job_department}</span>
