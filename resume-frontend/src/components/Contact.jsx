@@ -441,6 +441,7 @@ const Contact = () => {
 
 
 
+        <button className="contact-back-btn" onClick={() => navigate('/')}>← Go Back</button>
         <h2 className="contact-title">Contact Us</h2>
 
 
