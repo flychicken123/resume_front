@@ -16,13 +16,11 @@ import {
 const PAGE_SIZE = 25;
 
 const SENIORITY_LABELS = {
-  1: "Intern",
-  2: "Junior",
-  3: "Mid",
-  4: "Senior",
-  5: "Staff",
-  6: "Principal",
-  7: "Director+",
+  0: "Intern",
+  1: "Entry",
+  2: "Mid",
+  3: "Senior",
+  4: "Lead",
 };
 
 const formatDate = (value) => {
