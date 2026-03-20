@@ -606,6 +606,24 @@ const AdminMembershipPage = () => {
             >
               A/B Test Lab
             </Link>
+            <Link
+              to="/admin/jobs"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "0.65rem 1rem",
+                borderRadius: "10px",
+                border: "1px solid #f59e0b",
+                color: "#0f172a",
+                background: "#fbbf24",
+                fontWeight: 700,
+                textDecoration: "none",
+                boxShadow: "0 6px 14px rgba(245, 158, 11, 0.18)",
+              }}
+            >
+              Job Management
+            </Link>
           </div>
         </div>
 

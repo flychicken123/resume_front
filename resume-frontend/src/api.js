@@ -1343,3 +1343,87 @@ export async function completeAdWatch() {
   return { data };
 }
 
+// ---------------------------------------------------------------------------
+// Admin Job Postings Management
+// ---------------------------------------------------------------------------
+
+export async function adminListJobPostings(params = {}) {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== null && value !== '') {
+      query.set(key, value);
+    }
+  }
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/admin/jobs/postings?${query.toString()}`, {
+    headers: getAuthHeaders(),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.error || 'Failed to load job postings.');
+  return data;
+}
+
+export async function adminGetJobPosting(id) {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/admin/jobs/postings/${id}`, {
+    headers: getAuthHeaders(),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.error || 'Failed to load job posting.');
+  return data;
+}
+
+export async function adminUpdateJobPosting(id, fields) {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/admin/jobs/postings/${id}`, {
+    method: 'PUT',
+    headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify(fields),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.error || 'Failed to update job posting.');
+  return data;
+}
+
+export async function adminDeleteJobPosting(id) {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/admin/jobs/postings/${id}`, {
+    method: 'DELETE',
+    headers: getAuthHeaders(),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.error || 'Failed to delete job posting.');
+  return data;
+}
+
+export async function adminBulkUpdateJobPostings(ids, isActive) {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/admin/jobs/postings/bulk-update`, {
+    method: 'POST',
+    headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ids, is_active: isActive }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.error || 'Failed to bulk update postings.');
+  return data;
+}
+
+export async function adminGetJobStats() {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/admin/jobs/stats`, {
+    headers: getAuthHeaders(),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.error || 'Failed to load job statistics.');
+  return data;
+}
+
+export async function adminListSyncRuns(params = {}) {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== null && value !== '') {
+      query.set(key, value);
+    }
+  }
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/admin/jobs/sync-runs?${query.toString()}`, {
+    headers: getAuthHeaders(),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.error || 'Failed to load sync runs.');
+  return data;
+}
+

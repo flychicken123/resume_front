@@ -6,7 +6,7 @@ import { ResumeProvider } from './context/ResumeContext';
 import { FeedbackProvider } from './context/FeedbackContext';
 import { ExperimentProvider } from './context/ExperimentContext';
 import Home from './components/Home';
-import { LoginPage, BuilderPage, AdminMembershipPage, AdminExitAnalyticsPage, AdminExperimentsPage, TermsOfServicePage, PrivacyPolicyPage, MembershipPage, GuidesPage, GuideDetailPage, ContactPage, AdsRewardsPage } from './pages';
+import { LoginPage, BuilderPage, AdminMembershipPage, AdminExitAnalyticsPage, AdminExperimentsPage, AdminJobsPage, TermsOfServicePage, PrivacyPolicyPage, MembershipPage, GuidesPage, GuideDetailPage, ContactPage, AdsRewardsPage } from './pages';
 import PricingPage from './components/PricingPage';
 import SubscriptionSuccess from './components/SubscriptionSuccess';
 import SubscriptionCancel from './components/SubscriptionCancel';
@@ -70,6 +70,7 @@ function App() {
                 <Route path="/admin/analytics" element={<AdminExitAnalyticsPage />} />
                 <Route path="/admin/experiments" element={<AdminExperimentsPage />} />
                 <Route path="/admin/memberships" element={<AdminMembershipPage />} />
+                <Route path="/admin/jobs" element={<AdminJobsPage />} />
                 <Route path="/subscription/success" element={<SubscriptionSuccess />} />
                 <Route path="/subscription/cancel" element={<SubscriptionCancel />} />
                 <Route path="/terms" element={<TermsOfServicePage />} />

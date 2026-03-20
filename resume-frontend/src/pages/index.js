@@ -10,3 +10,4 @@ export { default as GuidesPage } from './GuidesPage';
 export { default as GuideDetailPage } from './GuideDetailPage';
 export { default as ContactPage } from './ContactPage';
 export { default as AdsRewardsPage } from './AdsRewardsPage';
+export { default as AdminJobsPage } from './AdminJobsPage';
