@@ -139,6 +139,15 @@ export async function getJobMatches(params = {}) {
   if (typeof params.limit === 'number' && params.limit > 0) {
     searchParams.set('limit', params.limit.toString());
   }
+  if (params.excludeKeywords?.length) {
+    searchParams.set('exclude_keywords', params.excludeKeywords.join(','));
+  }
+  if (params.usOnly) {
+    searchParams.set('us_only', 'true');
+  }
+  if (params.remoteOnly) {
+    searchParams.set('remote_only', 'true');
+  }
   const query = searchParams.toString();
   const res = await fetchWithAuth(`${API_BASE_URL}/api/jobs/matches${query ? `?${query}` : ''}`, {
     method: "GET",

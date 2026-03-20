@@ -1626,88 +1626,41 @@ function BuilderPage() {
     );
   };
   const isUSPreferredLocation = useMemo(() => isLikelyUSLocation(effectiveLocation), [effectiveLocation]);
-  const keywordFilteredMatches = useMemo(() => {
-    if (!Array.isArray(jobMatches)) {
-      return [];
-    }
-    if (!jobDislikeKeywords.length) {
-      return jobMatches;
-    }
-    return jobMatches.filter((match) => {
-      if (!match || typeof match !== 'object') {
-        return true;
+  // Server-side filter re-fetch: when filters change, fetch fresh results from backend
+  useEffect(() => {
+    if (!jobMatchesHash || !user) return;
+    const controller = new AbortController();
+    const fetchFiltered = async () => {
+      setJobMatchesLoading(true);
+      try {
+        const result = await getJobMatches({
+          resumeHash: jobMatchesHash,
+          limit: 100,
+          excludeKeywords: jobDislikeKeywords,
+          usOnly: isUSPreferredLocation,
+          remoteOnly: remoteOnlyFilter,
+        });
+        if (!controller.signal.aborted) {
+          setJobMatches(Array.isArray(result.matches) ? result.matches : []);
+        }
+      } catch (err) {
+        if (!controller.signal.aborted) console.error('Failed to fetch filtered matches', err);
+      } finally {
+        if (!controller.signal.aborted) setJobMatchesLoading(false);
       }
-      const haystack = [
-        match.job_title,
-        match.job_description,
-        match.job_department,
-        match.job_location,
-        match.job_remote_type,
-        match.job_employment_type,
-        match.company_name,
-      ]
-        .map((value) => (typeof value === 'string' ? value.toLowerCase() : ''))
-        .filter(Boolean)
-        .join(' ');
-      if (!haystack) {
-        return true;
-      }
-      return !jobDislikeKeywords.some((keyword) => haystack.includes(keyword));
-    });
-  }, [jobMatches, jobDislikeKeywords]);
+    };
+    const timer = setTimeout(fetchFiltered, 500);
+    return () => { clearTimeout(timer); controller.abort(); };
+  }, [jobDislikeKeywords, isUSPreferredLocation, remoteOnlyFilter]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const filteredJobMatches = useMemo(() => {
-    if (!Array.isArray(keywordFilteredMatches)) {
-      return [];
-    }
-    if (!isUSPreferredLocation) {
-      return keywordFilteredMatches;
-    }
-    return keywordFilteredMatches.filter((match) => {
-      if (!match) {
-        return false;
-      }
-      const location = typeof match.job_location === 'string' ? match.job_location : '';
-      const remoteType = typeof match.job_remote_type === 'string' ? match.job_remote_type.toLowerCase() : '';
-      if (isLikelyUSLocation(location)) {
-        return true;
-      }
-      if (remoteType.includes('us') || remoteType.includes('united states')) {
-        return true;
-      }
-      return false;
-    });
-  }, [keywordFilteredMatches, isUSPreferredLocation]);
-
-  const keywordFilteredCount = Math.max(jobMatches.length - keywordFilteredMatches.length, 0);
-  const locationFilteredCount = Math.max(keywordFilteredMatches.length - filteredJobMatches.length, 0);
-  const filterSummaryText = useMemo(() => {
-    const parts = [];
-    if (locationFilteredCount > 0) {
-      parts.push(`${locationFilteredCount} non-US listing${locationFilteredCount === 1 ? '' : 's'}`);
-    }
-    if (keywordFilteredCount > 0) {
-      parts.push(`${keywordFilteredCount} keyword match${keywordFilteredCount === 1 ? '' : 'es'}`);
-    }
-    if (!parts.length) {
-      return '.';
-    }
-    return ` — filtered ${parts.join(' and ')}.`;
-  }, [locationFilteredCount, keywordFilteredCount]);
+  // Dismiss filter stays client-side (optimistic with undo toast)
   const visibleJobMatches = useMemo(() => {
-    let matches = filteredJobMatches;
-    if (dismissedJobIds.size > 0) {
-      matches = matches.filter(
-        (match) => match && !dismissedJobIds.has(match.job_posting_id)
-      );
-    }
-    if (remoteOnlyFilter) {
-      matches = matches.filter(
-        (match) => match && typeof match.job_remote_type === 'string' && match.job_remote_type.toLowerCase().includes('remote')
-      );
-    }
-    return matches;
-  }, [filteredJobMatches, dismissedJobIds, remoteOnlyFilter]);
+    if (!Array.isArray(jobMatches)) return [];
+    if (dismissedJobIds.size === 0) return jobMatches;
+    return jobMatches.filter(
+      (match) => match && !dismissedJobIds.has(match.job_posting_id)
+    );
+  }, [jobMatches, dismissedJobIds]);
 
   const topMatch = visibleJobMatches.length > 0 ? visibleJobMatches[0] : null;
   const secondaryMatches = visibleJobMatches.length > 1 ? visibleJobMatches.slice(1) : [];
@@ -1722,7 +1675,7 @@ function BuilderPage() {
   // Reset page when matches change
   useEffect(() => {
     setJobMatchesPage(0);
-  }, [filteredJobMatches.length]);
+  }, [jobMatches.length]);
 
   // Auto-adjust pagination when all items on current page are dismissed
   useEffect(() => {
@@ -1950,9 +1903,12 @@ function BuilderPage() {
       location: preferredLocation,
       skills,
       candidateJobLimit: 400,
-      maxResults: 50,
+      maxResults: 100,
+      exclude_keywords: jobDislikeKeywords.length > 0 ? jobDislikeKeywords : undefined,
+      us_only: isUSPreferredLocation || undefined,
+      remote_only: remoteOnlyFilter || undefined,
     };
-  }, [data, jobMatchesLocation, autoLocation, targetPosition, resumeSkills]);
+  }, [data, jobMatchesLocation, autoLocation, targetPosition, resumeSkills, jobDislikeKeywords, isUSPreferredLocation, remoteOnlyFilter]);
 
   const fetchJobMatches = useCallback(async (useQuickMode = true) => {
     if (!user) {
@@ -2002,7 +1958,13 @@ function BuilderPage() {
       await new Promise(resolve => setTimeout(resolve, pollInterval));
 
       try {
-        const response = await getJobMatches({ resumeHash, limit: 50 });
+        const response = await getJobMatches({
+          resumeHash,
+          limit: 100,
+          excludeKeywords: jobDislikeKeywords.length > 0 ? jobDislikeKeywords : undefined,
+          usOnly: isUSPreferredLocation,
+          remoteOnly: remoteOnlyFilter,
+        });
         const matches = Array.isArray(response.matches) ? response.matches : [];
 
         // Update with refined results
@@ -3414,8 +3376,7 @@ function BuilderPage() {
                       )}
                       {isUSPreferredLocation && user && (
                         <span style={{ fontSize: '0.75rem', color: '#0f172a' }}>
-                          Showing US-based roles only
-                          {filterSummaryText}
+                          Showing US-based roles only.
                         </span>
                       )}
                       <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', color: '#334155', cursor: 'pointer' }}>
@@ -3841,11 +3802,6 @@ function BuilderPage() {
                           }}
                         >
                           Filtering out {formatListForSentence(jobDislikeLabels)}.
-                          {keywordFilteredCount > 0 && jobMatches.length > 0 && (
-                            <span style={{ marginLeft: '0.25rem' }}>
-                              Hidden {keywordFilteredCount} listing{keywordFilteredCount === 1 ? '' : 's'} so far.
-                            </span>
-                          )}
                         </div>
                       )}
                     </div>
@@ -3909,10 +3865,10 @@ function BuilderPage() {
                     </div>
                   )}
 
-                  {user && !jobMatchesError && !jobMatchesLoading && filteredJobMatches.length === 0 && (
+                  {user && !jobMatchesError && !jobMatchesLoading && visibleJobMatches.length === 0 && (
                     <p style={{ color: '#475569', fontSize: '0.9rem', margin: 0 }}>
                         {jobMatches.length > 0
-                          ? 'No US-based matches found yet. Adjust your location or refresh to explore more roles.'
+                          ? 'No matches found with current filters. Try adjusting your filters or refresh.'
                           : 'Complete your profile or add experience, then refresh to see curated openings.'}
                       </p>
                     )}
