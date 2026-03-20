@@ -704,47 +704,60 @@ const Contact = () => {
 
             {/* ── About Us ─────────────────────────────── */}
             <div id="about-us" className="contact-about-section">
-              <h2 className="contact-about-title">About HiHired</h2>
+              <h2 className="contact-about-title">Meet the Team</h2>
               <p className="contact-about-intro">
-                HiHired is your AI-powered career coach — built to help job seekers craft
-                standout resumes, land interviews, and take control of their job search.
+                We're a product-led crew of operators, engineers, and career experts building HiHired for job seekers worldwide.
               </p>
-              <h3 className="contact-about-subtitle">What Makes Us Different</h3>
-              <div className="contact-about-grid">
-                <div className="contact-about-card">
-                  <span className="contact-about-icon">🤖</span>
-                  <h4>AI-Powered Optimization</h4>
-                  <p>Advanced AI analyzes job descriptions and rewrites your resume with the right keywords to pass ATS systems.</p>
+              <div className="contact-team-grid">
+                <div className="contact-team-card">
+                  <div className="contact-team-avatar">J</div>
+                  <div className="contact-team-info">
+                    <h3>Jack Yu</h3>
+                    <span className="contact-team-role">Founder &amp; CEO</span>
+                    <p>Builder and operator behind HiHired.</p>
+                    <ul className="contact-team-highlights">
+                      <li>Former Tech Lead at TikTok</li>
+                      <li>Senior engineer at Twilio &amp; eBay</li>
+                    </ul>
+                    <div className="contact-team-links">
+                      <a href="https://www.linkedin.com/in/han-y-1448344b/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                    </div>
+                  </div>
                 </div>
-                <div className="contact-about-card">
-                  <span className="contact-about-icon">🎯</span>
-                  <h4>Job-Specific Tailoring</h4>
-                  <p>Paste any job description and our AI customizes your resume to match the role — highlighting your most relevant experience.</p>
-                </div>
-                <div className="contact-about-card">
-                  <span className="contact-about-icon">📱</span>
-                  <h4>Mobile-Friendly</h4>
-                  <p>Build your resume on any device. Your progress is always saved and synced.</p>
-                </div>
-                <div className="contact-about-card">
-                  <span className="contact-about-icon">⚡</span>
-                  <h4>Lightning Fast</h4>
-                  <p>Go from blank page to polished resume in minutes, not hours.</p>
-                </div>
-                <div className="contact-about-card">
-                  <span className="contact-about-icon">🎨</span>
-                  <h4>Professional Templates</h4>
-                  <p>Recruiter-approved templates that look great and perform well with ATS systems.</p>
-                </div>
-                <div className="contact-about-card">
-                  <span className="contact-about-icon">💰</span>
-                  <h4>Free to Start</h4>
-                  <p>Get started at no cost. Upgrade only when you need more power.</p>
+                <div className="contact-team-card">
+                  <div className="contact-team-avatar">X</div>
+                  <div className="contact-team-info">
+                    <h3>Xuan Wu</h3>
+                    <span className="contact-team-role">Co-Founder &amp; CTO</span>
+                    <p>Leads product engineering and AI systems.</p>
+                    <ul className="contact-team-highlights">
+                      <li>Focus on resume intelligence</li>
+                      <li>Tech Lead in Microsoft's infrastructure team</li>
+                    </ul>
+                    <div className="contact-team-links">
+                      <a href="https://www.linkedin.com/in/h-w-b0b10317a/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div className="contact-about-mission">
-                <h3>Our Mission</h3>
-                <p>To make professional-quality resumes accessible to every job seeker — regardless of background or experience — by combining the best of AI with a simple, human-centered design.</p>
+              <div className="contact-team-contact">
+                <h3>Founder Contact</h3>
+                <p>Seattle-based and available at <a href="mailto:hyu@hihired.org">hyu@hihired.org</a>.</p>
+                <p>Product &amp; design can be reached at <a href="mailto:xw@hihired.org">xw@hihired.org</a>.</p>
+              </div>
+              <div className="contact-team-supporting">
+                <div className="contact-team-supporting-item">
+                  <span>Product &amp; Engineering Partners</span>
+                  <p>Lean team augmented by trusted contractors from Jack's TikTok and Twilio network as we scale feature delivery.</p>
+                </div>
+                <div className="contact-team-supporting-item">
+                  <span>Advisors</span>
+                  <p>Engaged legal, GTM, and university career advisors on a project basis while we formalize an external advisory board.</p>
+                </div>
+                <div className="contact-team-supporting-item">
+                  <span>We're Hiring</span>
+                  <p>Seeking founding engineers (Go/React) and AI researchers passionate about career tech and resume intelligence.</p>
+                </div>
               </div>
             </div>
 
