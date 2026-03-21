@@ -9,7 +9,7 @@ const teamMembers = [
     highlights: ["Former Tech Lead at TikTok", "Senior engineer at Twilio & eBay"],
   },
   {
-    name: "Xuan Wu",
+    name: "Co-Founder",
     role: "Co-Founder & CTO",
     summary: "Leads product engineering and AI systems.",
     highlights: ["Focus on resume intelligence", "Tech Lead in Microsoft's infrastructure team"],
