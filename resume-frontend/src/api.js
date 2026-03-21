@@ -189,6 +189,31 @@ export async function undismissJobMatch(jobPostingId) {
   return await res.json();
 }
 
+// Classify backfill admin endpoints
+export async function startClassifyBackfill(batchSize = 20, sinceDays = 0) {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/admin/jobs/classify/backfill`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    body: JSON.stringify({ batch_size: batchSize, since_days: sinceDays }),
+  });
+  return await res.json();
+}
+
+export async function getClassifyBackfillStatus() {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/admin/jobs/classify/backfill/status`, {
+    headers: getAuthHeaders(),
+  });
+  return await res.json();
+}
+
+export async function stopClassifyBackfill() {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/admin/jobs/classify/backfill`, {
+    method: 'DELETE',
+    headers: getAuthHeaders(),
+  });
+  return await res.json();
+}
+
 // AI assistant endpoints
 export async function generateExperienceAI(experience, jobDescription = '', matchedSkills = [], missingSkills = []) {
   const payload = { 

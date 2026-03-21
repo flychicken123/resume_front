@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { Helmet } from "react-helmet";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -11,17 +11,15 @@ import {
   adminBulkUpdateJobPostings,
   adminGetJobStats,
   adminListSyncRuns,
+  startClassifyBackfill,
+  getClassifyBackfillStatus,
+  stopClassifyBackfill,
 } from "../api";
 
 const PAGE_SIZE = 25;
 
-const SENIORITY_LABELS = {
-  0: "Intern",
-  1: "Entry",
-  2: "Mid",
-  3: "Senior",
-  4: "Lead",
-};
+const SENIORITY_OPTIONS = ["intern", "entry", "mid", "senior", "staff", "lead"];
+const capitalize = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : "-";
 
 const formatDate = (value) => {
   if (!value) return "-";
@@ -133,6 +131,12 @@ export default function AdminJobsPage() {
   const [sortBy, setSortBy] = useState("id");
   const [sortDir, setSortDir] = useState("desc");
   const [selectedIds, setSelectedIds] = useState(new Set());
+
+  // --- Classify Backfill state ---
+  const [backfillStatus, setBackfillStatus] = useState(null);
+  const [backfillSinceDays, setBackfillSinceDays] = useState(30);
+  const [backfillStarting, setBackfillStarting] = useState(false);
+  const backfillPollRef = useRef(null);
   const [companies, setCompanies] = useState([]);
 
   // --- View/Edit modals ---
@@ -165,7 +169,7 @@ export default function AdminJobsPage() {
         page: postingsPage, page_size: PAGE_SIZE,
         search, company_id: filterCompanyId, is_active: filterActive,
         remote_type: filterRemote, employment_type: filterEmployment,
-        seniority_level: filterSeniority,
+        seniority: filterSeniority,
         date_from: dateFrom, date_to: dateTo,
         sort_by: sortBy, sort_dir: sortDir,
       });
@@ -178,6 +182,58 @@ export default function AdminJobsPage() {
       setPostingsLoading(false);
     }
   }, [postingsPage, search, filterCompanyId, filterActive, filterRemote, filterEmployment, filterSeniority, dateFrom, dateTo, sortBy, sortDir]);
+
+  // --- Classify Backfill handlers ---
+  const pollBackfillStatus = useCallback(async () => {
+    try {
+      const status = await getClassifyBackfillStatus();
+      setBackfillStatus(status);
+      if (!status.running && backfillPollRef.current) {
+        clearInterval(backfillPollRef.current);
+        backfillPollRef.current = null;
+      }
+    } catch (err) {
+      console.error("Failed to get backfill status", err);
+    }
+  }, []);
+
+  const handleStartBackfill = useCallback(async () => {
+    setBackfillStarting(true);
+    try {
+      await startClassifyBackfill(20, backfillSinceDays);
+      // Start polling
+      pollBackfillStatus();
+      if (backfillPollRef.current) clearInterval(backfillPollRef.current);
+      backfillPollRef.current = setInterval(pollBackfillStatus, 3000);
+    } catch (err) {
+      console.error("Failed to start backfill", err);
+    } finally {
+      setBackfillStarting(false);
+    }
+  }, [backfillSinceDays, pollBackfillStatus]);
+
+  const handleStopBackfill = useCallback(async () => {
+    try {
+      await stopClassifyBackfill();
+      pollBackfillStatus();
+    } catch (err) {
+      console.error("Failed to stop backfill", err);
+    }
+  }, [pollBackfillStatus]);
+
+  // Fetch initial status + start polling if running
+  useEffect(() => {
+    pollBackfillStatus();
+    return () => {
+      if (backfillPollRef.current) clearInterval(backfillPollRef.current);
+    };
+  }, [pollBackfillStatus]);
+
+  useEffect(() => {
+    if (backfillStatus?.running && !backfillPollRef.current) {
+      backfillPollRef.current = setInterval(pollBackfillStatus, 3000);
+    }
+  }, [backfillStatus?.running, pollBackfillStatus]);
 
   const loadCompanies = useCallback(async () => {
     try {
@@ -371,6 +427,46 @@ export default function AdminJobsPage() {
         {/* ==================== POSTINGS TAB ==================== */}
         {activeTab === "postings" && (
           <div>
+            {/* Classify Backfill Controls */}
+            <div style={{ ...cardStyle, marginBottom: "1rem", background: "#f0fdf4", border: "1px solid #bbf7d0" }}>
+              <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
+                <strong style={{ fontSize: "0.85rem", color: "#166534" }}>Classify Backfill</strong>
+                <label style={{ fontSize: "0.8rem", color: "#334155", display: "flex", alignItems: "center", gap: "4px" }}>
+                  Since days:
+                  <input
+                    type="number"
+                    value={backfillSinceDays}
+                    onChange={(e) => setBackfillSinceDays(Number(e.target.value) || 0)}
+                    style={{ ...inputStyle, width: "60px", padding: "4px 6px" }}
+                    min={0}
+                  />
+                </label>
+                <button
+                  style={{ ...btnSmall, background: "#16a34a", color: "#fff", opacity: backfillStatus?.running || backfillStarting ? 0.5 : 1 }}
+                  disabled={backfillStatus?.running || backfillStarting}
+                  onClick={handleStartBackfill}
+                >
+                  {backfillStarting ? "Starting..." : "Start"}
+                </button>
+                <button
+                  style={{ ...btnSmall, background: "#dc2626", color: "#fff", opacity: backfillStatus?.running ? 1 : 0.5 }}
+                  disabled={!backfillStatus?.running}
+                  onClick={handleStopBackfill}
+                >
+                  Stop
+                </button>
+                {backfillStatus && (
+                  <span style={{ fontSize: "0.8rem", color: "#475569" }}>
+                    {backfillStatus.running
+                      ? `Running — ${backfillStatus.processed}/${backfillStatus.total} processed, ${backfillStatus.errors} errors`
+                      : backfillStatus.finished_at
+                        ? `Finished — ${backfillStatus.processed}/${backfillStatus.total} processed, ${backfillStatus.errors} errors`
+                        : "Idle"}
+                  </span>
+                )}
+              </div>
+            </div>
+
             {/* Filters */}
             <div style={{ ...cardStyle, marginBottom: "1rem" }}>
               <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "flex-end" }}>
@@ -399,7 +495,7 @@ export default function AdminJobsPage() {
                 </select>
                 <select style={selectStyle} value={filterSeniority} onChange={(e) => { setFilterSeniority(e.target.value); setPostingsPage(1); }}>
                   <option value="">All Seniority</option>
-                  {Object.entries(SENIORITY_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                  {SENIORITY_OPTIONS.map((s) => <option key={s} value={s}>{capitalize(s)}</option>)}
                 </select>
                 <input type="date" style={inputStyle} value={dateFrom} onChange={(e) => { setDateFrom(e.target.value); setPostingsPage(1); }} title="From date" />
                 <input type="date" style={inputStyle} value={dateTo} onChange={(e) => { setDateTo(e.target.value); setPostingsPage(1); }} title="To date" />
@@ -451,7 +547,7 @@ export default function AdminJobsPage() {
                         <td style={{ ...tdStyle, maxWidth: "150px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.location || "-"}</td>
                         <td style={tdStyle}>{p.remote_type || "-"}</td>
                         <td style={tdStyle}>{p.employment_type || "-"}</td>
-                        <td style={tdStyle}>{SENIORITY_LABELS[p.seniority_level] || p.seniority_level}</td>
+                        <td style={tdStyle}>{capitalize(p.seniority || "")}</td>
                         <td style={tdStyle}>
                           <span style={{ display: "inline-block", padding: "2px 8px", borderRadius: "12px", fontSize: "0.75rem", fontWeight: 600, background: p.is_active ? "#d1fae5" : "#fee2e2", color: p.is_active ? "#065f46" : "#991b1b" }}>
                             {p.is_active ? "Yes" : "No"}
@@ -612,7 +708,7 @@ export default function AdminJobsPage() {
                       <thead><tr><th style={thStyle}>Level</th><th style={thStyle}>Count</th></tr></thead>
                       <tbody>
                         {(stats.by_seniority || []).map((r, i) => (
-                          <tr key={i}><td style={tdStyle}>{SENIORITY_LABELS[r.seniority_level] || r.seniority_level}</td><td style={tdStyle}>{r.count}</td></tr>
+                          <tr key={i}><td style={tdStyle}>{capitalize(r.seniority_level != null ? String(r.seniority_level) : "")}</td><td style={tdStyle}>{r.count}</td></tr>
                         ))}
                       </tbody>
                     </table>
@@ -681,7 +777,7 @@ export default function AdminJobsPage() {
                 <div><strong>Location:</strong> {viewPosting.location || "-"}</div>
                 <div><strong>Remote:</strong> {viewPosting.remote_type || "-"}</div>
                 <div><strong>Employment:</strong> {viewPosting.employment_type || "-"}</div>
-                <div><strong>Seniority:</strong> {SENIORITY_LABELS[viewPosting.seniority_level] || viewPosting.seniority_level}</div>
+                <div><strong>Seniority:</strong> {capitalize(viewPosting.seniority || "")}</div>
                 <div><strong>Active:</strong> {viewPosting.is_active ? "Yes" : "No"}</div>
                 <div><strong>Department:</strong> {viewPosting.department || "-"}</div>
                 <div><strong>Salary:</strong> {viewPosting.salary_min || viewPosting.salary_max ? `${viewPosting.salary_min ?? "?"} - ${viewPosting.salary_max ?? "?"} ${viewPosting.salary_currency || ""}` : "-"}</div>
@@ -748,7 +844,7 @@ export default function AdminJobsPage() {
                 <label style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                   Seniority
                   <select style={selectStyle} value={editFields.seniority_level} onChange={(e) => setEditFields({ ...editFields, seniority_level: e.target.value })}>
-                    {Object.entries(SENIORITY_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                    {SENIORITY_OPTIONS.map((s) => <option key={s} value={s}>{capitalize(s)}</option>)}
                   </select>
                 </label>
                 <label style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
