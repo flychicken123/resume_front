@@ -1356,6 +1356,10 @@ function BuilderPage() {
       if (!match || typeof match !== 'object') {
         return [];
       }
+      // Use AI-generated fit reasons if pre-cached from backend
+      if (Array.isArray(match.fit_reasons) && match.fit_reasons.length > 0) {
+        return match.fit_reasons;
+      }
       const reasons = [];
       const score = typeof match.match_score === 'number' ? match.match_score : null;
       const jobDepartment = typeof match.job_department === 'string' ? match.job_department.trim() : '';
