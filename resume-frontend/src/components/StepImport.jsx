@@ -13,6 +13,7 @@ const StepImport = ({ onSkip }) => {
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [historyImportError, setHistoryImportError] = useState('');
   const [historyImportingId, setHistoryImportingId] = useState(null);
+  const [conversions, setConversions] = useState([]);
   const fileInputRef = useRef(null);
   const { applyImportedData } = useResume();
   const { triggerFeedbackPrompt } = useFeedback();
@@ -28,6 +29,9 @@ const StepImport = ({ onSkip }) => {
     try {
       const parsed = await parseResumeFile(file);
       if (parsed && parsed.structured) {
+        if (Array.isArray(parsed.structured.conversions) && parsed.structured.conversions.length > 0) {
+          setConversions(parsed.structured.conversions);
+        }
         applyImportedData(parsed.structured);
       }
       setLastStep('resume_import_success');
@@ -40,7 +44,10 @@ const StepImport = ({ onSkip }) => {
           fileName: file.name,
         },
       });
-      onSkip();
+      // If conversions exist, let the user see them before navigating
+      if (!Array.isArray(parsed?.structured?.conversions) || parsed.structured.conversions.length === 0) {
+        onSkip();
+      }
     } catch (err) {
       console.error('Resume import failed', err);
       setError(err?.message || 'Failed to parse resume. Please try a different file.');
@@ -256,6 +263,38 @@ const StepImport = ({ onSkip }) => {
             style={{ width: '100%', maxWidth: 420, marginBottom: '1rem', padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5f5' }}
           />
           <button type="button" disabled>Import from text (Coming Soon)</button>
+        </div>
+      )}
+
+      {conversions.length > 0 && (
+        <div style={{
+          margin: '1.5rem auto', maxWidth: 500, padding: '1rem 1.25rem',
+          background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px',
+        }}>
+          <h4 style={{ margin: '0 0 0.5rem 0', color: '#166534', fontSize: '0.9rem' }}>
+            Auto-converted to fit your resume:
+          </h4>
+          <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.85rem', color: '#334155' }}>
+            {conversions.map((c, i) => (
+              <li key={i} style={{ marginBottom: '0.3rem' }}>
+                <strong>{c.original}</strong> → {c.action}
+              </li>
+            ))}
+          </ul>
+          <p style={{ margin: '0.75rem 0 0', fontSize: '0.8rem', color: '#64748b' }}>
+            Review your Skills and Summary sections to ensure everything looks right.
+          </p>
+          <button
+            type="button"
+            onClick={onSkip}
+            style={{
+              marginTop: '0.75rem', padding: '0.5rem 1.5rem', borderRadius: '8px',
+              background: '#16a34a', color: '#fff', border: 'none', fontWeight: 600,
+              cursor: 'pointer', fontSize: '0.85rem',
+            }}
+          >
+            Continue
+          </button>
         </div>
       )}
 
