@@ -324,6 +324,40 @@ function BenchmarkTab({ benchmarkSummary, setBenchmarkSummary, benchmarkHistory,
 }
 const capitalize = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : "-";
 
+function normalizeRemoteType(raw) {
+  if (!raw) return "Unspecified";
+  const v = raw.toLowerCase().replace(/[\[\]]/g, "").trim();
+  if (!v || v === "nil" || v === "unspecified" || v === "null") return "Unspecified";
+  if (v.includes("hybrid") && v.includes("remote")) return "Hybrid Remote";
+  if (v.includes("remote")) return "Remote";
+  if (v.includes("hybrid")) return "Hybrid";
+  if (v.includes("onsite") || v.includes("on-site") || v.includes("office")) return "Onsite";
+  return "Unspecified";
+}
+
+function normalizeEmploymentType(raw) {
+  if (!raw) return "Unspecified";
+  const v = raw.toLowerCase().replace(/[\[\]]/g, "").trim();
+  if (!v || v === "nil" || v === "unspecified" || v === "null") return "Unspecified";
+  if (v.includes("intern")) return "Internship";
+  if (v.includes("part-time") || v.includes("part time")) return "Part-time";
+  if (v.includes("contract") || v.includes("fixed term")) return "Contract";
+  if (v.includes("temporary") || v.includes("temp")) return "Temporary";
+  if (v.includes("full") || v.includes("regular") || v.includes("permanent") || v.includes("employee") || v.includes("exempt") || v === "employee") return "Full-time";
+  return "Other";
+}
+
+function groupStats(items, keyField, normalizeFn) {
+  const groups = {};
+  for (const item of (items || [])) {
+    const normalized = normalizeFn(item[keyField]);
+    groups[normalized] = (groups[normalized] || 0) + (item.count || 0);
+  }
+  return Object.entries(groups)
+    .map(([type, count]) => ({ type, count }))
+    .sort((a, b) => b.count - a.count);
+}
+
 const formatDate = (value) => {
   if (!value) return "-";
   const d = new Date(value);
@@ -1025,27 +1059,27 @@ export default function AdminJobsPage() {
                     </table>
                   </div>
 
-                  {/* By Remote Type */}
+                  {/* By Remote Type (normalized) */}
                   <div style={cardStyle}>
                     <h3 style={{ fontSize: "1rem", fontWeight: 600, marginTop: 0, marginBottom: "0.75rem" }}>By Remote Type</h3>
                     <table style={tableStyle}>
                       <thead><tr><th style={thStyle}>Type</th><th style={thStyle}>Count</th></tr></thead>
                       <tbody>
-                        {(stats.by_remote_type || []).map((r, i) => (
-                          <tr key={i}><td style={tdStyle}>{r.remote_type || "-"}</td><td style={tdStyle}>{r.count}</td></tr>
+                        {groupStats(stats.by_remote_type, "remote_type", normalizeRemoteType).map((r, i) => (
+                          <tr key={i}><td style={tdStyle}>{r.type}</td><td style={tdStyle}>{r.count.toLocaleString()}</td></tr>
                         ))}
                       </tbody>
                     </table>
                   </div>
 
-                  {/* By Employment Type */}
+                  {/* By Employment Type (normalized) */}
                   <div style={cardStyle}>
                     <h3 style={{ fontSize: "1rem", fontWeight: 600, marginTop: 0, marginBottom: "0.75rem" }}>By Employment Type</h3>
                     <table style={tableStyle}>
                       <thead><tr><th style={thStyle}>Type</th><th style={thStyle}>Count</th></tr></thead>
                       <tbody>
-                        {(stats.by_employment_type || []).map((r, i) => (
-                          <tr key={i}><td style={tdStyle}>{r.employment_type || "-"}</td><td style={tdStyle}>{r.count}</td></tr>
+                        {groupStats(stats.by_employment_type, "employment_type", normalizeEmploymentType).map((r, i) => (
+                          <tr key={i}><td style={tdStyle}>{r.type}</td><td style={tdStyle}>{r.count.toLocaleString()}</td></tr>
                         ))}
                       </tbody>
                     </table>
