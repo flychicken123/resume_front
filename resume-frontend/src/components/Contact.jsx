@@ -725,7 +725,7 @@ const Contact = () => {
                 <div className="contact-team-card">
                   <div className="contact-team-avatar">X</div>
                   <div className="contact-team-info">
-                    <h3>Co-Founder</h3>
+                    <h3>Xuan Wu</h3>
                     <span className="contact-team-role">Co-Founder &amp; CTO</span>
                     <p>Leads product engineering and AI systems.</p>
                     <ul className="contact-team-highlights">
