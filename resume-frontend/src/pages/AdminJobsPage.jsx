@@ -18,6 +18,7 @@ import {
   getBenchmarkStatus,
   getBenchmarkSummary,
   getBenchmarkHistory,
+  getBenchmarkResults,
 } from "../api";
 
 const PAGE_SIZE = 25;
@@ -39,6 +40,20 @@ const BENCHMARK_TYPES = [
 
 function BenchmarkTab({ benchmarkSummary, setBenchmarkSummary, benchmarkHistory, setBenchmarkHistory, benchmarkStatus, setBenchmarkStatus, benchmarkRunning, setBenchmarkRunning, benchmarkPollRef, cardStyle, btnSmall }) {
   const [loading, setLoading] = useState(false);
+  const [reportData, setReportData] = useState(null);
+  const [reportLoading, setReportLoading] = useState(false);
+
+  const openReport = async (type, runId) => {
+    setReportLoading(true);
+    try {
+      const res = await getBenchmarkResults(type, runId);
+      setReportData(res);
+    } catch (err) {
+      console.error("Failed to load report", err);
+    } finally {
+      setReportLoading(false);
+    }
+  };
 
   // Load summary + history on mount
   useEffect(() => {
@@ -159,13 +174,22 @@ function BenchmarkTab({ benchmarkSummary, setBenchmarkSummary, benchmarkHistory,
                   <span style={{ fontWeight: 600, fontSize: "0.82rem" }}>{t.label}</span>
                   <span style={{ fontWeight: 700, color: s.color, fontSize: "0.85rem" }}>{s.label}</span>
                 </div>
-                <button
-                  style={{ ...btnSmall, marginTop: "0.5rem", fontSize: "0.7rem", opacity: benchmarkRunning ? 0.5 : 1 }}
-                  disabled={benchmarkRunning}
-                  onClick={() => handleRun(t.key)}
-                >
-                  Run
-                </button>
+                <div style={{ display: "flex", gap: "4px", marginTop: "0.5rem" }}>
+                  <button
+                    style={{ ...btnSmall, fontSize: "0.7rem", opacity: benchmarkRunning ? 0.5 : 1 }}
+                    disabled={benchmarkRunning}
+                    onClick={() => handleRun(t.key)}
+                  >
+                    Run
+                  </button>
+                  <button
+                    style={{ ...btnSmall, fontSize: "0.7rem", color: "#2563eb" }}
+                    onClick={() => openReport(t.key)}
+                    disabled={reportLoading}
+                  >
+                    Report
+                  </button>
+                </div>
               </div>
             );
           })}
@@ -184,13 +208,22 @@ function BenchmarkTab({ benchmarkSummary, setBenchmarkSummary, benchmarkHistory,
                   <span style={{ fontWeight: 600, fontSize: "0.82rem" }}>{t.label}</span>
                   <span style={{ fontWeight: 700, color: s.color, fontSize: "0.85rem" }}>{s.label}</span>
                 </div>
-                <button
-                  style={{ ...btnSmall, marginTop: "0.5rem", fontSize: "0.7rem", opacity: benchmarkRunning ? 0.5 : 1 }}
-                  disabled={benchmarkRunning}
-                  onClick={() => handleRun(t.key)}
-                >
-                  Run
-                </button>
+                <div style={{ display: "flex", gap: "4px", marginTop: "0.5rem" }}>
+                  <button
+                    style={{ ...btnSmall, fontSize: "0.7rem", opacity: benchmarkRunning ? 0.5 : 1 }}
+                    disabled={benchmarkRunning}
+                    onClick={() => handleRun(t.key)}
+                  >
+                    Run
+                  </button>
+                  <button
+                    style={{ ...btnSmall, fontSize: "0.7rem", color: "#2563eb" }}
+                    onClick={() => openReport(t.key)}
+                    disabled={reportLoading}
+                  >
+                    Report
+                  </button>
+                </div>
               </div>
             );
           })}
@@ -208,6 +241,7 @@ function BenchmarkTab({ benchmarkSummary, setBenchmarkSummary, benchmarkHistory,
                 <th style={{ textAlign: "left", padding: "4px 8px" }}>Type</th>
                 <th style={{ textAlign: "left", padding: "4px 8px" }}>Samples</th>
                 <th style={{ textAlign: "left", padding: "4px 8px" }}>Score</th>
+                <th style={{ textAlign: "left", padding: "4px 8px" }}>Report</th>
               </tr>
             </thead>
             <tbody>
@@ -220,10 +254,69 @@ function BenchmarkTab({ benchmarkSummary, setBenchmarkSummary, benchmarkHistory,
                     {h.accuracy?.overall != null ? `${(h.accuracy.overall * 100).toFixed(0)}%` : ""}
                     {h.average_scores?.overall != null ? ` ${h.average_scores.overall.toFixed(1)}/5` : ""}
                   </td>
+                  <td style={{ padding: "4px 8px" }}>
+                    <button style={{ ...btnSmall, fontSize: "0.7rem", color: "#2563eb" }} onClick={() => openReport(h.benchmark_type, h.run_id)}>View</button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+      {/* Report Modal */}
+      {reportData && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center" }} onClick={() => setReportData(null)}>
+          <div style={{ background: "#fff", borderRadius: "12px", padding: "1.5rem", maxWidth: "700px", width: "90%", maxHeight: "80vh", overflowY: "auto" }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+              <h3 style={{ margin: 0 }}>{reportData.benchmark_type ? reportData.benchmark_type.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()) : ""} Report</h3>
+              <button style={{ ...btnSmall, fontSize: "0.8rem" }} onClick={() => setReportData(null)}>Close</button>
+            </div>
+
+            {/* Summary */}
+            {reportData.summary && Object.keys(reportData.summary).length > 0 && (
+              <div style={{ ...cardStyle, marginBottom: "1rem", background: "#f8fafc" }}>
+                <strong style={{ fontSize: "0.82rem" }}>Summary</strong>
+                <div style={{ marginTop: "0.5rem", fontSize: "0.8rem" }}>
+                  {Object.entries(reportData.summary).map(([k, v]) => (
+                    <div key={k}>{k.replace(/_/g, " ")}: <strong>{typeof v === "number" ? (v <= 1 ? `${(v * 100).toFixed(0)}%` : v.toFixed(1)) : v}</strong></div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Insights */}
+            {reportData.insights && (
+              <div style={{ ...cardStyle, marginBottom: "1rem", background: "#fffbeb", border: "1px solid #fde68a" }}>
+                <strong style={{ fontSize: "0.82rem", color: "#92400e" }}>Insights</strong>
+                <p style={{ margin: "0.5rem 0 0", fontSize: "0.8rem", color: "#78350f" }}>{reportData.insights}</p>
+              </div>
+            )}
+
+            {/* Failures */}
+            {reportData.failures && reportData.failures.length > 0 && (
+              <div style={{ ...cardStyle, marginBottom: "1rem", background: "#fef2f2", border: "1px solid #fecaca" }}>
+                <strong style={{ fontSize: "0.82rem", color: "#991b1b" }}>Failures ({reportData.failures.length})</strong>
+                <div style={{ marginTop: "0.5rem" }}>
+                  {reportData.failures.map((f, i) => (
+                    <div key={i} style={{ padding: "0.5rem", marginBottom: "0.4rem", background: "#fff", borderRadius: "6px", border: "1px solid #fee2e2", fontSize: "0.78rem" }}>
+                      <div><strong>Field:</strong> {f.field_name} {f.entity_id ? `(#${f.entity_id})` : ""}</div>
+                      {f.ai_value && <div><strong>AI said:</strong> {f.ai_value.length > 100 ? f.ai_value.substring(0, 100) + "..." : f.ai_value}</div>}
+                      {f.expected_value && <div><strong>Expected:</strong> {f.expected_value}</div>}
+                      {f.score != null && <div><strong>Score:</strong> {f.score}/5</div>}
+                      {f.reasoning && <div style={{ color: "#64748b", marginTop: "0.25rem" }}>{f.reasoning}</div>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* All passed */}
+            {(!reportData.failures || reportData.failures.length === 0) && (
+              <div style={{ ...cardStyle, background: "#f0fdf4", border: "1px solid #bbf7d0" }}>
+                <strong style={{ color: "#166534" }}>All benchmarks passed!</strong>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
