@@ -730,7 +730,7 @@ const Contact = () => {
                     <p>Leads product engineering and AI systems.</p>
                     <ul className="contact-team-highlights">
                       <li>Focus on resume intelligence</li>
-                      <li>Tech Lead in Microsoft's infrastructure team</li>
+                      <li>Former Microsoft engineer who led large-scale infrastructure automation and reliability initiatives for Microsoft Office Online</li>
                     </ul>
                   </div>
                 </div>
