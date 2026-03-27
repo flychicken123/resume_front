@@ -214,6 +214,39 @@ export async function stopClassifyBackfill() {
   return await res.json();
 }
 
+// AI Benchmark admin endpoints
+export async function runBenchmark(type = 'all', sampleSize = 20, userId = 0) {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/admin/benchmark/run`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    body: JSON.stringify({ type, sample_size: sampleSize, user_id: userId }),
+  });
+  return await res.json();
+}
+
+export async function getBenchmarkStatus() {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/admin/benchmark/status`, { headers: getAuthHeaders() });
+  return await res.json();
+}
+
+export async function getBenchmarkResults(type, runId) {
+  const params = new URLSearchParams();
+  if (runId) params.set('run_id', runId);
+  else if (type) params.set('type', type);
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/admin/benchmark/results?${params}`, { headers: getAuthHeaders() });
+  return await res.json();
+}
+
+export async function getBenchmarkHistory() {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/admin/benchmark/history`, { headers: getAuthHeaders() });
+  return await res.json();
+}
+
+export async function getBenchmarkSummary() {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/admin/benchmark/summary`, { headers: getAuthHeaders() });
+  return await res.json();
+}
+
 // AI assistant endpoints
 export async function generateExperienceAI(experience, jobDescription = '', matchedSkills = [], missingSkills = []) {
   const payload = { 

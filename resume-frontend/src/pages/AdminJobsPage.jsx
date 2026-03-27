@@ -14,11 +14,221 @@ import {
   startClassifyBackfill,
   getClassifyBackfillStatus,
   stopClassifyBackfill,
+  runBenchmark,
+  getBenchmarkStatus,
+  getBenchmarkSummary,
+  getBenchmarkHistory,
 } from "../api";
 
 const PAGE_SIZE = 25;
 
 const SENIORITY_OPTIONS = ["intern", "entry", "mid", "senior", "staff", "lead"];
+
+const BENCHMARK_TYPES = [
+  { key: "classification", label: "Classification", group: "factual" },
+  { key: "skills", label: "Skill Inference", group: "factual" },
+  { key: "intent", label: "Intent Routing", group: "factual" },
+  { key: "matching", label: "Job Matching", group: "quality" },
+  { key: "fit_reasons", label: "Fit Reasons", group: "quality" },
+  { key: "experience", label: "Experience Opt", group: "quality" },
+  { key: "summary", label: "Summary Gen", group: "quality" },
+  { key: "projects", label: "Project Opt", group: "quality" },
+  { key: "chat", label: "Chat Bot", group: "quality" },
+  { key: "cover_letter", label: "Cover Letter", group: "quality" },
+];
+
+function BenchmarkTab({ benchmarkSummary, setBenchmarkSummary, benchmarkHistory, setBenchmarkHistory, benchmarkStatus, setBenchmarkStatus, benchmarkRunning, setBenchmarkRunning, benchmarkPollRef, cardStyle, btnSmall }) {
+  const [loading, setLoading] = useState(false);
+
+  // Load summary + history on mount
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [summaryRes, historyRes, statusRes] = await Promise.all([
+          getBenchmarkSummary(),
+          getBenchmarkHistory(),
+          getBenchmarkStatus(),
+        ]);
+        setBenchmarkSummary(summaryRes.systems || []);
+        setBenchmarkHistory((historyRes.history || []).slice(0, 20));
+        setBenchmarkStatus(statusRes);
+        if (statusRes.running) {
+          setBenchmarkRunning(true);
+          if (!benchmarkPollRef.current) {
+            benchmarkPollRef.current = setInterval(async () => {
+              const s = await getBenchmarkStatus();
+              setBenchmarkStatus(s);
+              if (!s.running) {
+                clearInterval(benchmarkPollRef.current);
+                benchmarkPollRef.current = null;
+                setBenchmarkRunning(false);
+                const [sr, hr] = await Promise.all([getBenchmarkSummary(), getBenchmarkHistory()]);
+                setBenchmarkSummary(sr.systems || []);
+                setBenchmarkHistory((hr.history || []).slice(0, 20));
+              }
+            }, 3000);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load benchmark data", err);
+      }
+    };
+    load();
+    return () => { if (benchmarkPollRef.current) clearInterval(benchmarkPollRef.current); };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleRun = async (type) => {
+    setLoading(true);
+    try {
+      await runBenchmark(type, 20);
+      setBenchmarkRunning(true);
+      if (benchmarkPollRef.current) clearInterval(benchmarkPollRef.current);
+      benchmarkPollRef.current = setInterval(async () => {
+        const s = await getBenchmarkStatus();
+        setBenchmarkStatus(s);
+        if (!s.running) {
+          clearInterval(benchmarkPollRef.current);
+          benchmarkPollRef.current = null;
+          setBenchmarkRunning(false);
+          const [sr, hr] = await Promise.all([getBenchmarkSummary(), getBenchmarkHistory()]);
+          setBenchmarkSummary(sr.systems || []);
+          setBenchmarkHistory((hr.history || []).slice(0, 20));
+        }
+      }, 3000);
+    } catch (err) {
+      console.error("Failed to run benchmark", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getScore = (type) => {
+    const sys = benchmarkSummary.find((s) => s.benchmark_type === type);
+    if (!sys) return { label: "Not yet run", color: "#94a3b8" };
+    const score = sys.overall_score;
+    if (score > 0.8) return { label: `${(score * 100).toFixed(0)}%`, color: "#16a34a" };
+    if (score > 0.6) return { label: `${(score * 100).toFixed(0)}%`, color: "#ca8a04" };
+    return { label: `${(score * 100).toFixed(0)}%`, color: "#dc2626" };
+  };
+
+  const getScoreForQuality = (type) => {
+    const sys = benchmarkSummary.find((s) => s.benchmark_type === type);
+    if (!sys) return { label: "Not yet run", color: "#94a3b8" };
+    const score = sys.overall_score;
+    const display = (score * 5).toFixed(1);
+    if (score > 0.8) return { label: `${display}/5`, color: "#16a34a" };
+    if (score > 0.6) return { label: `${display}/5`, color: "#ca8a04" };
+    return { label: `${display}/5`, color: "#dc2626" };
+  };
+
+  const factual = BENCHMARK_TYPES.filter((t) => t.group === "factual");
+  const quality = BENCHMARK_TYPES.filter((t) => t.group === "quality");
+
+  return (
+    <div>
+      {/* Status bar */}
+      {benchmarkRunning && benchmarkStatus && (
+        <div style={{ ...cardStyle, marginBottom: "1rem", background: "#eff6ff", border: "1px solid #bfdbfe" }}>
+          <span style={{ fontSize: "0.85rem", color: "#1d4ed8", fontWeight: 600 }}>
+            Running: {benchmarkStatus.type} — {benchmarkStatus.progress}/{benchmarkStatus.total} processed
+          </span>
+        </div>
+      )}
+
+      {/* Run All button */}
+      <div style={{ ...cardStyle, marginBottom: "1rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <strong style={{ fontSize: "0.95rem" }}>AI Quality Dashboard</strong>
+        <button
+          style={{ ...btnSmall, background: "#2563eb", color: "#fff", padding: "0.4rem 1rem", opacity: benchmarkRunning || loading ? 0.5 : 1 }}
+          disabled={benchmarkRunning || loading}
+          onClick={() => handleRun("all")}
+        >
+          {loading ? "Starting..." : "Run All Benchmarks"}
+        </button>
+      </div>
+
+      {/* Factual Systems */}
+      <div style={{ ...cardStyle, marginBottom: "1rem" }}>
+        <h4 style={{ margin: "0 0 0.75rem", fontSize: "0.85rem", color: "#334155", textTransform: "uppercase", letterSpacing: "0.05em" }}>Factual Systems</h4>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "0.75rem" }}>
+          {factual.map((t) => {
+            const s = getScore(t.key);
+            return (
+              <div key={t.key} style={{ padding: "0.75rem", background: "#f8fafc", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontWeight: 600, fontSize: "0.82rem" }}>{t.label}</span>
+                  <span style={{ fontWeight: 700, color: s.color, fontSize: "0.85rem" }}>{s.label}</span>
+                </div>
+                <button
+                  style={{ ...btnSmall, marginTop: "0.5rem", fontSize: "0.7rem", opacity: benchmarkRunning ? 0.5 : 1 }}
+                  disabled={benchmarkRunning}
+                  onClick={() => handleRun(t.key)}
+                >
+                  Run
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Quality Systems */}
+      <div style={{ ...cardStyle, marginBottom: "1rem" }}>
+        <h4 style={{ margin: "0 0 0.75rem", fontSize: "0.85rem", color: "#334155", textTransform: "uppercase", letterSpacing: "0.05em" }}>Quality Systems</h4>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "0.75rem" }}>
+          {quality.map((t) => {
+            const s = getScoreForQuality(t.key);
+            return (
+              <div key={t.key} style={{ padding: "0.75rem", background: "#f8fafc", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontWeight: 600, fontSize: "0.82rem" }}>{t.label}</span>
+                  <span style={{ fontWeight: 700, color: s.color, fontSize: "0.85rem" }}>{s.label}</span>
+                </div>
+                <button
+                  style={{ ...btnSmall, marginTop: "0.5rem", fontSize: "0.7rem", opacity: benchmarkRunning ? 0.5 : 1 }}
+                  disabled={benchmarkRunning}
+                  onClick={() => handleRun(t.key)}
+                >
+                  Run
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Run History */}
+      {benchmarkHistory.length > 0 && (
+        <div style={cardStyle}>
+          <h4 style={{ margin: "0 0 0.75rem", fontSize: "0.85rem", color: "#334155", textTransform: "uppercase", letterSpacing: "0.05em" }}>Run History</h4>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8rem" }}>
+            <thead>
+              <tr style={{ borderBottom: "1px solid #e5e7eb" }}>
+                <th style={{ textAlign: "left", padding: "4px 8px" }}>Date</th>
+                <th style={{ textAlign: "left", padding: "4px 8px" }}>Type</th>
+                <th style={{ textAlign: "left", padding: "4px 8px" }}>Samples</th>
+                <th style={{ textAlign: "left", padding: "4px 8px" }}>Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              {benchmarkHistory.map((h, i) => (
+                <tr key={i} style={{ borderBottom: "1px solid #f3f4f6" }}>
+                  <td style={{ padding: "4px 8px" }}>{new Date(h.created_at).toLocaleDateString()}</td>
+                  <td style={{ padding: "4px 8px" }}>{h.benchmark_type}</td>
+                  <td style={{ padding: "4px 8px" }}>{h.sample_size}</td>
+                  <td style={{ padding: "4px 8px" }}>
+                    {h.accuracy?.overall != null ? `${(h.accuracy.overall * 100).toFixed(0)}%` : ""}
+                    {h.average_scores?.overall != null ? ` ${h.average_scores.overall.toFixed(1)}/5` : ""}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
 const capitalize = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : "-";
 
 const formatDate = (value) => {
@@ -137,6 +347,13 @@ export default function AdminJobsPage() {
   const [backfillSinceDays, setBackfillSinceDays] = useState(30);
   const [backfillStarting, setBackfillStarting] = useState(false);
   const backfillPollRef = useRef(null);
+
+  // --- Benchmark state ---
+  const [benchmarkSummary, setBenchmarkSummary] = useState([]);
+  const [benchmarkHistory, setBenchmarkHistory] = useState([]);
+  const [benchmarkStatus, setBenchmarkStatus] = useState(null);
+  const [benchmarkRunning, setBenchmarkRunning] = useState(false);
+  const benchmarkPollRef = useRef(null);
   const [companies, setCompanies] = useState([]);
 
   // --- View/Edit modals ---
@@ -422,6 +639,7 @@ export default function AdminJobsPage() {
           <button style={tabBtn(activeTab === "postings")} onClick={() => setActiveTab("postings")}>Postings</button>
           <button style={tabBtn(activeTab === "sync")} onClick={() => setActiveTab("sync")}>Sync History</button>
           <button style={tabBtn(activeTab === "stats")} onClick={() => setActiveTab("stats")}>Statistics</button>
+          <button style={tabBtn(activeTab === "benchmark")} onClick={() => setActiveTab("benchmark")}>AI Benchmark</button>
         </div>
 
         {/* ==================== POSTINGS TAB ==================== */}
@@ -761,6 +979,23 @@ export default function AdminJobsPage() {
               </>
             ) : null}
           </div>
+        )}
+
+        {/* ==================== AI BENCHMARK TAB ==================== */}
+        {activeTab === "benchmark" && (
+          <BenchmarkTab
+            benchmarkSummary={benchmarkSummary}
+            setBenchmarkSummary={setBenchmarkSummary}
+            benchmarkHistory={benchmarkHistory}
+            setBenchmarkHistory={setBenchmarkHistory}
+            benchmarkStatus={benchmarkStatus}
+            setBenchmarkStatus={setBenchmarkStatus}
+            benchmarkRunning={benchmarkRunning}
+            setBenchmarkRunning={setBenchmarkRunning}
+            benchmarkPollRef={benchmarkPollRef}
+            cardStyle={cardStyle}
+            btnSmall={btnSmall}
+          />
         )}
 
         {/* ==================== VIEW MODAL ==================== */}
