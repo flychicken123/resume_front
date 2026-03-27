@@ -12,7 +12,7 @@ const teamMembers = [
     name: "Xuan Wu",
     role: "Co-Founder & CTO since Aug 2025",
     summary: "Leads product engineering and AI systems.",
-    highlights: ["Focus on resume intelligence", "Former Microsoft engineer who led large-scale infrastructure automation and reliability initiatives for Microsoft Office Online"],
+    highlights: ["Focused on applied AI, LLM-powered resume intelligence, and job matching systems", "Former Microsoft engineer who led large-scale infrastructure automation and reliability initiatives for Microsoft Office Online"],
   },
 ];
 
