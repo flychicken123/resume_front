@@ -10,7 +10,7 @@ const teamMembers = [
   },
   {
     name: "Xuan Wu",
-    role: "Co-Founder & CTO",
+    role: "Co-Founder & CTO since Aug 2025",
     summary: "Leads product engineering and AI systems.",
     highlights: ["Focus on resume intelligence", "Tech Lead in Microsoft's infrastructure team"],
   },

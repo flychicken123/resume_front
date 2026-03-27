@@ -726,7 +726,7 @@ const Contact = () => {
                   <div className="contact-team-avatar">X</div>
                   <div className="contact-team-info">
                     <h3>Xuan Wu</h3>
-                    <span className="contact-team-role">Co-Founder &amp; CTO</span>
+                    <span className="contact-team-role">Co-Founder &amp; CTO since Aug 2025</span>
                     <p>Leads product engineering and AI systems.</p>
                     <ul className="contact-team-highlights">
                       <li>Focus on resume intelligence</li>
