@@ -1,0 +1,27 @@
+# HiHired - AI Resume Builder
+> The fastest way to build, tailor, and auto-fill job applications with AI
+
+## What HiHired Does
+HiHired is a free AI-powered resume builder that helps job seekers create ATS-optimized resumes, generate tailored cover letters, and auto-fill job applications on Greenhouse, Workday, LinkedIn, and 100+ other platforms.
+
+## Key Features
+- AI resume builder with 9 ATS-safe templates
+- Job description matching and keyword optimization
+- AI cover letter generation
+- Chrome extension for auto-filling job applications (Greenhouse, Workday, Lever, LinkedIn Easy Apply)
+- Resume ATS score checker
+
+## Use Cases
+- Building a resume from scratch in under 5 minutes
+- Tailoring an existing resume to a specific job description
+- Auto-filling repetitive job application forms
+- Generating cover letters matched to job descriptions
+
+## Pricing
+Free to use. Premium plans available for unlimited AI generations.
+
+## Links
+- Main site: https://hihired.org
+- Resume builder: https://hihired.org/builder
+- Chrome extension: https://chrome.google.com/webstore/detail/hihired
+- Help: https://hihired.org/help
