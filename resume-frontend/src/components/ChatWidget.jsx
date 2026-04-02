@@ -2637,10 +2637,8 @@ const buildSectionResponse = (sectionKey) => {
     // "Analysis my resume" now routed through backend intent router (resume_advice)
     // with streaming support — no longer intercepted here
 
-    if (hasSoftwareEngineerJobCountIntent(trimmed)) {
-      await handleSoftwareEngineerJobCount();
-      return;
-    }
+    // Job count questions now handled by backend general_chat with real-time DB stats
+    // Supports all roles (not just "software engineer") and streams the response
 
     if (awaitingJobMatchAnswer) {
       handleJobMatchDecision(trimmed);
