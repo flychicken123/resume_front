@@ -2789,7 +2789,10 @@ const buildSectionResponse = (sectionKey) => {
       const pagePath = typeof window !== 'undefined' ? window.location.pathname : '';
       const userEmail = readStoredUserEmail();
 
-      const response = await fetch(`${apiBaseUrl}/api/assistant/chat`, {
+      // Add empty bot message for streaming
+      setMessages((prev) => [...prev, { sender: 'bot', text: '' }]);
+
+      const response = await fetch(`${apiBaseUrl}/api/assistant/chat?stream=true`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -2806,36 +2809,106 @@ const buildSectionResponse = (sectionKey) => {
         throw new Error('Assistant unavailable');
       }
 
-      const data = await response.json();
-      let reply = (data.reply || '').trim() || FALLBACK_REPLY;
+      const contentType = response.headers.get('content-type') || '';
+      if (contentType.includes('text/event-stream')) {
+        // Streaming SSE response
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let streamedText = '';
 
-      // Handle polish action - update resume data with polished content
-      if (data.isPolishAction && data.updatedResumeData) {
-        updateResume(data.updatedResumeData);
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
 
-        // Show the polished content in the chat
-        const polishedPreview = formatPolishedContent(data.polishedContent, data.section);
-        if (polishedPreview) {
-          reply = `${reply}\n\n**Polished Content:**\n${polishedPreview}`;
-        }
-      }
+          const lines = buffer.split('\n\n');
+          buffer = lines.pop() || '';
 
-      // Handle feature action from intent router
-      if (data.featureAction) {
-        console.log('[ChatWidget] Feature action received:', data.featureAction);
-        const formattedResult = formatFeatureResult(data.featureAction, data.featureResult);
-        if (formattedResult) {
-          reply = `${reply}\n\n${formattedResult}`;
-        }
-        // Apply updated resume data if the feature produced any
-        if (data.updatedResumeData) {
-          updateResume(data.updatedResumeData);
+          for (const line of lines) {
+            if (!line.startsWith('data: ')) continue;
+            try {
+              const eventData = JSON.parse(line.slice(6));
+              if (eventData.error) {
+                setMessages((prev) => {
+                  const updated = [...prev];
+                  updated[updated.length - 1] = { sender: 'bot', text: eventData.message || FALLBACK_REPLY };
+                  return updated;
+                });
+                break;
+              }
+              if (eventData.token) {
+                streamedText += eventData.token;
+                setMessages((prev) => {
+                  const updated = [...prev];
+                  updated[updated.length - 1] = { sender: 'bot', text: streamedText };
+                  return updated;
+                });
+              }
+              if (eventData.done) {
+                // Replace streamed text with final cleaned version
+                let reply = (eventData.reply || streamedText || '').trim() || FALLBACK_REPLY;
+
+                if (eventData.isPolishAction && eventData.updatedResumeData) {
+                  updateResume(eventData.updatedResumeData);
+                  const polishedPreview = formatPolishedContent(eventData.polishedContent, eventData.section);
+                  if (polishedPreview) {
+                    reply = `${reply}\n\n**Polished Content:**\n${polishedPreview}`;
+                  }
+                }
+
+                if (eventData.featureAction) {
+                  console.log('[ChatWidget] Feature action received:', eventData.featureAction);
+                  const formattedResult = formatFeatureResult(eventData.featureAction, eventData.featureResult);
+                  if (formattedResult) {
+                    reply = `${reply}\n\n${formattedResult}`;
+                  }
+                  if (eventData.updatedResumeData) {
+                    updateResume(eventData.updatedResumeData);
+                  }
+                }
+
+                setMessages((prev) => {
+                  const updated = [...prev];
+                  updated[updated.length - 1] = { sender: 'bot', text: reply };
+                  return updated;
+                });
+              }
+            } catch (e) {
+              // Skip unparseable SSE lines
+            }
+          }
         }
       } else {
-        console.log('[ChatWidget] General chat response (no feature action)');
-      }
+        // Fallback: non-streaming JSON response
+        const data = await response.json();
+        let reply = (data.reply || '').trim() || FALLBACK_REPLY;
 
-      setMessages((prev) => [...prev, { sender: 'bot', text: reply }]);
+        if (data.isPolishAction && data.updatedResumeData) {
+          updateResume(data.updatedResumeData);
+          const polishedPreview = formatPolishedContent(data.polishedContent, data.section);
+          if (polishedPreview) {
+            reply = `${reply}\n\n**Polished Content:**\n${polishedPreview}`;
+          }
+        }
+
+        if (data.featureAction) {
+          console.log('[ChatWidget] Feature action received:', data.featureAction);
+          const formattedResult = formatFeatureResult(data.featureAction, data.featureResult);
+          if (formattedResult) {
+            reply = `${reply}\n\n${formattedResult}`;
+          }
+          if (data.updatedResumeData) {
+            updateResume(data.updatedResumeData);
+          }
+        }
+
+        setMessages((prev) => {
+          const updated = [...prev];
+          updated[updated.length - 1] = { sender: 'bot', text: reply };
+          return updated;
+        });
+      }
       setLastStep('chat_response_received');
     } catch (err) {
       console.error('Chat assistant error:', err);
