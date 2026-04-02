@@ -19,6 +19,11 @@ import {
   getBenchmarkSummary,
   getBenchmarkHistory,
   getBenchmarkResults,
+  listKnowledge,
+  createKnowledge,
+  updateKnowledge,
+  deleteKnowledge,
+  backfillKnowledgeEmbeddings,
 } from "../api";
 
 const PAGE_SIZE = 25;
@@ -438,6 +443,140 @@ const tabBtn = (active) => ({
   fontWeight: active ? 700 : 500, cursor: "pointer", fontSize: "0.9rem",
 });
 
+const KNOWLEDGE_CATEGORIES = ["product", "resume_tips", "interview", "career", "job_search", "faq"];
+
+function KnowledgeTab({ cardStyle, btnSmall }) {
+  const [entries, setEntries] = useState([]);
+  const [filterCat, setFilterCat] = useState("");
+  const [showForm, setShowForm] = useState(false);
+  const [editEntry, setEditEntry] = useState(null);
+  const [formTitle, setFormTitle] = useState("");
+  const [formCategory, setFormCategory] = useState("product");
+  const [formContent, setFormContent] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const loadEntries = useCallback(async () => {
+    try {
+      const res = await listKnowledge();
+      setEntries(res.entries || []);
+    } catch (err) {
+      console.error("Failed to load knowledge", err);
+    }
+  }, []);
+
+  useEffect(() => { loadEntries(); }, [loadEntries]);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      if (editEntry) {
+        await updateKnowledge(editEntry.id, formTitle, formCategory, formContent);
+      } else {
+        await createKnowledge(formTitle, formCategory, formContent);
+      }
+      setShowForm(false);
+      setEditEntry(null);
+      setFormTitle("");
+      setFormCategory("product");
+      setFormContent("");
+      await loadEntries();
+    } catch (err) {
+      console.error("Save failed", err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleEdit = (entry) => {
+    setEditEntry(entry);
+    setFormTitle(entry.title);
+    setFormCategory(entry.category);
+    setFormContent(entry.content);
+    setShowForm(true);
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Delete this entry?")) return;
+    await deleteKnowledge(id);
+    await loadEntries();
+  };
+
+  const handleBackfill = async () => {
+    const res = await backfillKnowledgeEmbeddings();
+    alert(`Backfill complete: ${res.processed} entries embedded`);
+    await loadEntries();
+  };
+
+  const filtered = filterCat ? entries.filter(e => e.category === filterCat) : entries;
+  const tdStyle = { padding: "6px 8px", borderBottom: "1px solid #f3f4f6", fontSize: "0.8rem" };
+  const thStyle = { padding: "6px 8px", borderBottom: "1px solid #e5e7eb", textAlign: "left", fontSize: "0.8rem", fontWeight: 600 };
+
+  return (
+    <div>
+      <div style={{ ...cardStyle, marginBottom: "1rem", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.5rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <strong style={{ fontSize: "0.95rem" }}>Knowledge Base ({entries.length} entries)</strong>
+          <select value={filterCat} onChange={e => setFilterCat(e.target.value)} style={{ padding: "0.3rem", borderRadius: "6px", border: "1px solid #d1d5db", fontSize: "0.8rem" }}>
+            <option value="">All Categories</option>
+            {KNOWLEDGE_CATEGORIES.map(c => <option key={c} value={c}>{c.replace(/_/g, " ")}</option>)}
+          </select>
+        </div>
+        <div style={{ display: "flex", gap: "0.5rem" }}>
+          <button style={{ ...btnSmall, background: "#2563eb", color: "#fff", padding: "0.35rem 0.8rem" }} onClick={() => { setEditEntry(null); setFormTitle(""); setFormCategory("product"); setFormContent(""); setShowForm(true); }}>Add Entry</button>
+          <button style={{ ...btnSmall, padding: "0.35rem 0.8rem" }} onClick={handleBackfill}>Backfill Embeddings</button>
+        </div>
+      </div>
+
+      {showForm && (
+        <div style={{ ...cardStyle, marginBottom: "1rem", background: "#f8fafc" }}>
+          <h4 style={{ margin: "0 0 0.75rem", fontSize: "0.85rem" }}>{editEntry ? "Edit Entry" : "Add Entry"}</h4>
+          <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem" }}>
+            <input placeholder="Title" value={formTitle} onChange={e => setFormTitle(e.target.value)} style={{ flex: 1, padding: "0.4rem", borderRadius: "6px", border: "1px solid #d1d5db", fontSize: "0.8rem" }} />
+            <select value={formCategory} onChange={e => setFormCategory(e.target.value)} style={{ padding: "0.4rem", borderRadius: "6px", border: "1px solid #d1d5db", fontSize: "0.8rem" }}>
+              {KNOWLEDGE_CATEGORIES.map(c => <option key={c} value={c}>{c.replace(/_/g, " ")}</option>)}
+            </select>
+          </div>
+          <textarea placeholder="Content (200-400 words of expert advice)" value={formContent} onChange={e => setFormContent(e.target.value)} rows={6} style={{ width: "100%", padding: "0.4rem", borderRadius: "6px", border: "1px solid #d1d5db", fontSize: "0.8rem", resize: "vertical", boxSizing: "border-box" }} />
+          <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
+            <button style={{ ...btnSmall, background: "#2563eb", color: "#fff", padding: "0.35rem 0.8rem", opacity: saving ? 0.5 : 1 }} disabled={saving || !formTitle || !formContent} onClick={handleSave}>{saving ? "Saving..." : "Save"}</button>
+            <button style={{ ...btnSmall, padding: "0.35rem 0.8rem" }} onClick={() => { setShowForm(false); setEditEntry(null); }}>Cancel</button>
+          </div>
+        </div>
+      )}
+
+      <div style={cardStyle}>
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <thead>
+            <tr>
+              <th style={thStyle}>Title</th>
+              <th style={thStyle}>Category</th>
+              <th style={thStyle}>Content</th>
+              <th style={thStyle}>Embed</th>
+              <th style={thStyle}>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map(e => (
+              <tr key={e.id} style={{ opacity: e.is_active ? 1 : 0.4 }}>
+                <td style={tdStyle}>{e.title}</td>
+                <td style={tdStyle}><span style={{ background: "#e0e7ff", padding: "2px 6px", borderRadius: "4px", fontSize: "0.7rem" }}>{e.category}</span></td>
+                <td style={{ ...tdStyle, maxWidth: "300px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.content}</td>
+                <td style={tdStyle}>{e.has_embedding ? "✓" : "✗"}</td>
+                <td style={tdStyle}>
+                  <div style={{ display: "flex", gap: "4px" }}>
+                    <button style={{ ...btnSmall, fontSize: "0.7rem" }} onClick={() => handleEdit(e)}>Edit</button>
+                    <button style={{ ...btnSmall, fontSize: "0.7rem", color: "#dc2626" }} onClick={() => handleDelete(e.id)}>Del</button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 const navLinkStyle = {
   display: "inline-flex", alignItems: "center", gap: "6px",
   padding: "0.65rem 1rem", borderRadius: "10px", border: "1px solid #2563eb",
@@ -767,6 +906,7 @@ export default function AdminJobsPage() {
           <button style={tabBtn(activeTab === "sync")} onClick={() => setActiveTab("sync")}>Sync History</button>
           <button style={tabBtn(activeTab === "stats")} onClick={() => setActiveTab("stats")}>Statistics</button>
           <button style={tabBtn(activeTab === "benchmark")} onClick={() => setActiveTab("benchmark")}>AI Benchmark</button>
+          <button style={tabBtn(activeTab === "knowledge")} onClick={() => setActiveTab("knowledge")}>Knowledge Base</button>
         </div>
 
         {/* ==================== POSTINGS TAB ==================== */}
@@ -1123,6 +1263,11 @@ export default function AdminJobsPage() {
             cardStyle={cardStyle}
             btnSmall={btnSmall}
           />
+        )}
+
+        {/* ==================== KNOWLEDGE BASE TAB ==================== */}
+        {activeTab === "knowledge" && (
+          <KnowledgeTab cardStyle={cardStyle} btnSmall={btnSmall} />
         )}
 
         {/* ==================== VIEW MODAL ==================== */}

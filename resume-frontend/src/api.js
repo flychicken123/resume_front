@@ -247,6 +247,42 @@ export async function getBenchmarkSummary() {
   return await res.json();
 }
 
+// Knowledge base admin endpoints
+export async function listKnowledge() {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/admin/knowledge`, { headers: getAuthHeaders() });
+  return await res.json();
+}
+
+export async function createKnowledge(title, category, content) {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/admin/knowledge`, {
+    method: 'POST', headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title, category, content }),
+  });
+  return await res.json();
+}
+
+export async function updateKnowledge(id, title, category, content) {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/admin/knowledge/${id}`, {
+    method: 'PUT', headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title, category, content }),
+  });
+  return await res.json();
+}
+
+export async function deleteKnowledge(id) {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/admin/knowledge/${id}`, {
+    method: 'DELETE', headers: getAuthHeaders(),
+  });
+  return await res.json();
+}
+
+export async function backfillKnowledgeEmbeddings() {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/admin/knowledge/backfill`, {
+    method: 'POST', headers: getAuthHeaders(),
+  });
+  return await res.json();
+}
+
 // AI assistant endpoints
 export async function generateExperienceAI(experience, jobDescription = '', matchedSkills = [], missingSkills = []) {
   const payload = { 
