@@ -2634,10 +2634,8 @@ const buildSectionResponse = (sectionKey) => {
       return;
     }
 
-    if (hasBackgroundAnalysisIntent(trimmed)) {
-      await handleBackgroundAnalysis();
-      return;
-    }
+    // "Analysis my resume" now routed through backend intent router (resume_advice)
+    // with streaming support — no longer intercepted here
 
     if (hasSoftwareEngineerJobCountIntent(trimmed)) {
       await handleSoftwareEngineerJobCount();
@@ -2753,14 +2751,8 @@ const buildSectionResponse = (sectionKey) => {
       // Fall through to normal chat if modification check fails
     }
 
-    if (hasInterviewProcessIntent(trimmed)) {
-      appendBotMessage(
-        "Great question! We're building an upcoming feature that shares interview insights for specific companies. Stay tuned -- it's on our roadmap!"
-      );
-      setLastStep('chat_interview_future_feature');
-      setIsLoading(false);
-      return;
-    }
+    // Interview process questions now handled by backend career coach (general_chat)
+    // with streaming support — no longer returns hardcoded "coming soon" message
 
     if (resumeFlowState.active) {
       await handleResumeFlowMessage(trimmed);
