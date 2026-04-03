@@ -2664,11 +2664,13 @@ const buildSectionResponse = (sectionKey) => {
     const isPolishRequest = polishKeywords.some(kw => trimmed.toLowerCase().includes(kw));
 
     // Check for AI-powered resume modification intent (works outside resume flow too)
-    // Skip this for polish requests - they should go to the chat endpoint
+    // Skip for polish requests and follow-up messages (where bot just asked a question)
+    const lastBotMsg = messages.filter(m => m.sender === 'bot').pop();
+    const isLikelyFollowUp = lastBotMsg && lastBotMsg.text && lastBotMsg.text.includes('?');
     try {
-      if (isPolishRequest) {
-        // Skip modify check - go straight to chat for polish requests
-        throw new Error('Skip to chat for polish request');
+      if (isPolishRequest || isLikelyFollowUp) {
+        // Skip modify check - go straight to chat for polish or follow-up messages
+        throw new Error('Skip to chat');
       }
 
       const modifyResult = await analyzeResumeModification(trimmed, resumeData || {});
