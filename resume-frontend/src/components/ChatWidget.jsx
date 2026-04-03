@@ -16,7 +16,7 @@ import {
   parseSkillsAI,
   generateSkillsAI,
   transcribeVoiceAI,
-  analyzeResumeModification,
+  // analyzeResumeModification removed — backend handles via tool calling
   getFollowupReminders,
   getUserJobApplications,
 } from '../api';
@@ -2659,100 +2659,8 @@ const buildSectionResponse = (sectionKey) => {
       return;
     }
 
-    // Check if this is a polish/optimize request - skip modify check and go straight to chat
-    const polishKeywords = ['polish', 'improve', 'enhance', 'optimize', 'rewrite', 'refine', 'make better'];
-    const isPolishRequest = polishKeywords.some(kw => trimmed.toLowerCase().includes(kw));
-
-    // Check for AI-powered resume modification intent (works outside resume flow too)
-    // Skip for polish requests and follow-up messages (where bot just asked a question)
-    const lastBotMsg = messages.filter(m => m.sender === 'bot').pop();
-    const isLikelyFollowUp = lastBotMsg && lastBotMsg.text && lastBotMsg.text.includes('?');
-    try {
-      if (isPolishRequest || isLikelyFollowUp) {
-        // Skip modify check - go straight to chat for polish or follow-up messages
-        throw new Error('Skip to chat');
-      }
-
-      const modifyResult = await analyzeResumeModification(trimmed, resumeData || {});
-
-      if (modifyResult.isModification) {
-        if (modifyResult.needsClarification) {
-          // Ask for clarification
-          appendBotMessage(modifyResult.clarificationQuestion || 'Could you please clarify which field you want to update?');
-          setIsLoading(false);
-          return;
-        }
-
-        // Apply the modification based on section
-        const section = modifyResult.section;
-        const action = modifyResult.action;
-        const field = modifyResult.field;
-        const value = modifyResult.value;
-
-        if (section === 'personal' && field && value !== null && value !== undefined) {
-          // Update personal field (name, email, phone)
-          updateResume((prev) => ({ ...prev, [field]: value }));
-          appendBotMessage(modifyResult.message || `Updated ${field} to "${value}".`);
-          setLastStep('chat_resume_field_updated');
-          setIsLoading(false);
-          return;
-        }
-
-        if (section === 'summary') {
-          if (action === 'delete') {
-            updateResume((prev) => ({ ...prev, summary: '' }));
-            appendBotMessage(modifyResult.message || 'Summary has been cleared.');
-          } else if (value) {
-            updateResume((prev) => ({ ...prev, summary: String(value) }));
-            appendBotMessage(modifyResult.message || 'Summary has been updated.');
-          }
-          setLastStep('chat_resume_summary_updated');
-          setIsLoading(false);
-          return;
-        }
-
-        if (section === 'skills' && value) {
-          const valueStr = String(value).toLowerCase();
-          const currentSkills = (resumeData?.skills || '').split(',').map(s => s.trim()).filter(Boolean);
-
-          if (valueStr.startsWith('add ')) {
-            const skillToAdd = String(value).replace(/^add\s+/i, '').trim();
-            if (skillToAdd && !currentSkills.some(s => s.toLowerCase() === skillToAdd.toLowerCase())) {
-              const newSkills = [...currentSkills, skillToAdd].join(', ');
-              updateResume((prev) => ({ ...prev, skills: newSkills }));
-              appendBotMessage(modifyResult.message || `Added "${skillToAdd}" to your skills.`);
-            } else {
-              appendBotMessage(`"${skillToAdd}" is already in your skills list.`);
-            }
-          } else if (valueStr.startsWith('remove ')) {
-            const skillToRemove = String(value).replace(/^remove\s+/i, '').trim().toLowerCase();
-            const newSkills = currentSkills.filter(s => s.toLowerCase() !== skillToRemove).join(', ');
-            updateResume((prev) => ({ ...prev, skills: newSkills }));
-            appendBotMessage(modifyResult.message || `Removed "${skillToRemove}" from your skills.`);
-          } else {
-            // Replace all skills
-            updateResume((prev) => ({ ...prev, skills: String(value) }));
-            appendBotMessage(modifyResult.message || 'Skills have been updated.');
-          }
-          setLastStep('chat_resume_skills_updated');
-          setIsLoading(false);
-          return;
-        }
-
-        // For other sections (experience, projects, education), show message if detected
-        if (['experience', 'projects', 'education'].includes(section)) {
-          appendBotMessage(modifyResult.message || `To modify ${section}, please use the resume builder sections or the guided resume flow.`);
-          setIsLoading(false);
-          return;
-        }
-      }
-    } catch (modifyErr) {
-      console.error('Resume modification check error:', modifyErr);
-      // Fall through to normal chat if modification check fails
-    }
-
-    // Interview process questions now handled by backend career coach (general_chat)
-    // with streaming support — no longer returns hardcoded "coming soon" message
+    // All resume modifications, application updates, and general queries now handled by
+    // backend intent classification + tool calling + text-to-SQL. No frontend interception needed.
 
     if (resumeFlowState.active) {
       await handleResumeFlowMessage(trimmed);
