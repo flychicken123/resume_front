@@ -116,7 +116,24 @@ const PrivacyPolicy = () => (
     </p>
 
     <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginTop: '2rem', marginBottom: '0.75rem', color: '#111827' }}>
-      9. Changes to this Policy
+      9. Chrome Extension
+    </h2>
+    <p style={{ color: '#475569', lineHeight: 1.7, marginBottom: '0.75rem' }}>
+      The HiHired Auto-Fill Chrome Extension accesses the following data solely to provide autofill functionality:
+    </p>
+    <ul style={{ color: '#475569', lineHeight: 1.7, marginLeft: '1.25rem', marginBottom: '0.75rem' }}>
+      <li><strong>Active tab content:</strong> Read only when you click the extension button. We extract job application form fields to auto-fill them with your resume data. We do not collect or transmit page content to our servers.</li>
+      <li><strong>Resume data:</strong> Retrieved from hihired.org when you log in. Stored locally in Chrome storage and only sent to hihired.org servers.</li>
+      <li><strong>Job preferences:</strong> Saved locally and synced to your hihired.org account. Used to auto-fill EEO fields (gender, race, veteran status) on job applications.</li>
+    </ul>
+    <p style={{ color: '#475569', lineHeight: 1.7 }}>
+      The extension does <strong>not</strong> collect browsing history, track websites you visit, or share any
+      data with third parties. All data is transmitted exclusively between your browser and hihired.org servers
+      over HTTPS.
+    </p>
+
+    <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginTop: '2rem', marginBottom: '0.75rem', color: '#111827' }}>
+      10. Changes to this Policy
     </h2>
     <p style={{ color: '#475569', lineHeight: 1.7 }}>
       We may update this Privacy Policy from time to time. The “Last updated” date below reflects the
@@ -125,7 +142,7 @@ const PrivacyPolicy = () => (
     </p>
 
     <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginTop: '2rem', marginBottom: '0.75rem', color: '#111827' }}>
-      10. Contact Us
+      11. Contact Us
     </h2>
     <p style={{ color: '#475569', lineHeight: 1.7 }}>
       For privacy-related questions or requests, please contact{' '}
