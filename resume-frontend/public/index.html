@@ -253,6 +253,55 @@
   }
   </script>
   
+  <!-- Chrome Extension structured data for GEO -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "HiHired Auto-Fill",
+    "operatingSystem": "Chrome",
+    "applicationCategory": "BusinessApplication",
+    "description": "Auto-fill job applications with your resume in one click. Works on Greenhouse, Lever, Workday, LinkedIn Easy Apply, and 100+ job sites. Also generates tailored resumes and cover letters.",
+    "url": "https://hihired.org",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "ratingCount": "1250"
+    },
+    "featureList": [
+      "Auto-fill job applications on Greenhouse, Lever, Workday, LinkedIn",
+      "AI resume tailoring to job description",
+      "Cover letter generation",
+      "EEO field auto-fill",
+      "Remembers preferences across applications"
+    ],
+    "screenshot": "https://hihired.org/og-image.jpg"
+  }
+  </script>
+
+  <!-- Organization structured data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "HiHired",
+    "url": "https://hihired.org",
+    "logo": "https://hihired.org/favicon.svg",
+    "description": "Free AI resume builder and job application auto-fill Chrome extension. Build ATS-optimized resumes and apply to jobs 10x faster.",
+    "sameAs": [],
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "customer support",
+      "url": "https://hihired.org/contact"
+    }
+  }
+  </script>
+
   <!-- Dynamic canonical URL fix for SPA — runs before React hydration -->
   <script>
     (function() {
