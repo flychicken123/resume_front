@@ -2860,9 +2860,19 @@ const buildSectionResponse = (sectionKey) => {
                   }
                 }
 
+                const suggestionButtons = (eventData.proactiveSuggestions || []).map(s => ({
+                  label: s.label,
+                  action: s.action,
+                  variant: 'suggestion',
+                }));
+
                 setMessages((prev) => {
                   const updated = [...prev];
-                  updated[updated.length - 1] = { sender: 'bot', text: reply };
+                  updated[updated.length - 1] = {
+                    sender: 'bot',
+                    text: reply,
+                    buttons: suggestionButtons.length > 0 ? suggestionButtons : undefined,
+                  };
                   return updated;
                 });
               }
@@ -2895,9 +2905,19 @@ const buildSectionResponse = (sectionKey) => {
           }
         }
 
+        const jsonSuggestionButtons = (data.proactiveSuggestions || []).map(s => ({
+          label: s.label,
+          action: s.action,
+          variant: 'suggestion',
+        }));
+
         setMessages((prev) => {
           const updated = [...prev];
-          updated[updated.length - 1] = { sender: 'bot', text: reply };
+          updated[updated.length - 1] = {
+            sender: 'bot',
+            text: reply,
+            buttons: jsonSuggestionButtons.length > 0 ? jsonSuggestionButtons : undefined,
+          };
           return updated;
         });
       }
@@ -2935,9 +2955,38 @@ const buildSectionResponse = (sectionKey) => {
       handleTrackApplications();
       return;
     }
-    if (btn.action === 'go_to_tracker') {
+    if (btn.action === 'go_to_tracker' || btn.action === 'go_to_tracking') {
       window.dispatchEvent(new CustomEvent('builder:focus-stage', { detail: { stage: 'tracking' } }));
       navigate('/builder?view=tracking');
+      return;
+    }
+    if (btn.action === 'go_to_summary') {
+      localStorage.setItem('builderLastStep', '9');
+      navigate('/builder');
+      return;
+    }
+    if (btn.action === 'go_to_skills') {
+      localStorage.setItem('builderLastStep', '8');
+      navigate('/builder');
+      return;
+    }
+    if (btn.action === 'go_to_experience') {
+      localStorage.setItem('builderLastStep', '5');
+      navigate('/builder');
+      return;
+    }
+    if (btn.action === 'go_to_education') {
+      localStorage.setItem('builderLastStep', '7');
+      navigate('/builder');
+      return;
+    }
+    if (btn.action === 'go_to_matches') {
+      localStorage.setItem(BUILDER_TARGET_STEP_KEY, BUILDER_TARGET_JOB_MATCHES);
+      navigate('/builder#job-matches');
+      return;
+    }
+    if (btn.action === 'go_to_builder') {
+      navigate('/builder');
       return;
     }
     if (btn.value) {
