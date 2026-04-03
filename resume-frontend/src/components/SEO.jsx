@@ -13,7 +13,7 @@ const SEO = ({
   const defaultDescription = "Free AI resume builder. Create ATS-friendly resumes in minutes. No registration required. Download PDF instantly.";
   const defaultKeywords = "resume builder, AI resume builder, free resume builder, professional resume, resume maker, build resume, write resume, create resume, resume template, ATS resume, job resume, career resume, online resume builder";
   const defaultCanonical = typeof window !== 'undefined' 
-    ? `${window.location.origin}${window.location.pathname}` 
+    ? `https://hihired.org${window.location.pathname}`.replace(/\/$/, '') || 'https://hihired.org/'
     : "https://hihired.org";
 
   // Use noindex on localhost to keep dev builds out of search
@@ -57,8 +57,8 @@ const SEO = ({
       <meta name="author" content="HiHired" />
       <meta name="application-name" content="HiHired" />
       <meta name="apple-mobile-web-app-title" content="HiHired" />
-      <meta name="theme-color" content="#667eea" />
-      <meta name="msapplication-TileColor" content="#667eea" />
+      <meta name="theme-color" content="#0ea5e9" />
+      <meta name="msapplication-TileColor" content="#0ea5e9" />
       
       {/* Structured Data for Rich Snippets */}
       <script type="application/ld+json">

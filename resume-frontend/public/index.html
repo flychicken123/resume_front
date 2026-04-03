@@ -8,8 +8,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   
   <!-- Primary Meta Tags -->
-  <title>Free AI Resume Builder - Create Professional Resumes Online | HiHired</title>
-  <meta name="title" content="Free AI Resume Builder - Create Professional Resumes Online | HiHired">
+  <title>Free AI Resume Builder | Create ATS Resumes - HiHired</title>
+  <meta name="title" content="Free AI Resume Builder | Create ATS Resumes - HiHired">
   <meta name="description" content="Free AI resume builder. Create professional, ATS-optimized resumes in minutes. No signup required. Download PDF instantly.">
   <meta name="keywords" content="free resume builder, free ai resume builder, resume builder, free resume, ai resume builder, resume builder free, online resume builder, free resume templates, professional resume builder, resume maker free, build resume online free, free cv builder, resume generator, ats resume builder, free resume creator, make resume online free">
   <meta name="author" content="HiHired">
@@ -34,8 +34,8 @@
   <!-- Additional SEO Meta Tags -->
   <meta name="application-name" content="HiHired">
   <meta name="apple-mobile-web-app-title" content="HiHired">
-  <meta name="theme-color" content="#667eea">
-  <meta name="msapplication-TileColor" content="#667eea">
+  <meta name="theme-color" content="#0ea5e9">
+  <meta name="msapplication-TileColor" content="#0ea5e9">
   
   <!-- Canonical URL -->
   <link rel="canonical" href="https://hihired.org/">
@@ -253,6 +253,24 @@
   }
   </script>
   
+  <!-- Dynamic canonical URL fix for SPA — runs before React hydration -->
+  <script>
+    (function() {
+      var canonical = document.querySelector('link[rel="canonical"]');
+      if (canonical) {
+        var url = window.location.origin + window.location.pathname;
+        // Strip trailing slash except for root
+        if (url !== window.location.origin + '/' && url.endsWith('/')) {
+          url = url.slice(0, -1);
+        }
+        canonical.setAttribute('href', url);
+      }
+      // Also update og:url
+      var ogUrl = document.querySelector('meta[property="og:url"]');
+      if (ogUrl) ogUrl.setAttribute('content', window.location.origin + window.location.pathname);
+    })();
+  </script>
+
   <!-- Service Worker Registration -->
   <script>
     if ('serviceWorker' in navigator) {
