@@ -2692,9 +2692,14 @@ const buildSectionResponse = (sectionKey) => {
       // Add empty bot message for streaming
       setMessages((prev) => [...prev, { sender: 'bot', text: '' }]);
 
+      const chatHeaders = { 'Content-Type': 'application/json' };
+      const storedToken = localStorage.getItem('resumeToken');
+      if (storedToken) {
+        chatHeaders['Authorization'] = `Bearer ${storedToken}`;
+      }
       const response = await fetch(`${apiBaseUrl}/api/assistant/chat?stream=true`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: chatHeaders,
         body: JSON.stringify({
           message: trimmed,
           history: historyPayload,
