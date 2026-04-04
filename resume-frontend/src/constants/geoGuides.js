@@ -111,6 +111,63 @@ const geoGuides = [
     lastUpdated: "2025-11-05",
     tags: ["resume sharing", "privacy", "recruiter updates"]
   }
+  ,
+  {
+    slug: "auto-fill-job-applications-chrome-extension",
+    intent: "How do I auto-fill job applications with a Chrome extension?",
+    title: "Auto-fill job applications in one click",
+    summary:
+      "The HiHired Chrome extension reads your saved resume and fills every field on a job application page automatically — name, email, phone, work history, education, location, and EEO fields — in under 3 seconds.",
+    answer:
+      "Install the HiHired Auto-Fill Chrome extension, log in with your hihired.org account, and click the extension icon on any job application page. It detects all form fields and fills them from your resume instantly. Works on Greenhouse, Lever, Workday, LinkedIn Easy Apply, iCIMS, SmartRecruiters, and 100+ other platforms.",
+    steps: [
+      { title: "Install the extension", detail: "Add HiHired Auto-Fill from the Chrome Web Store (free)." },
+      { title: "Build your resume", detail: "Create or import your resume at hihired.org/builder — takes 4 minutes." },
+      { title: "Navigate to a job", detail: "Open any job application page on Greenhouse, Lever, Workday, LinkedIn, or any company career site." },
+      { title: "Click Fill Application", detail: "Click the HiHired icon in your toolbar, then hit Fill Application. All fields fill instantly." },
+      { title: "Review and submit", detail: "Check the auto-filled fields, make any edits, and submit your application." }
+    ],
+    keyStats: [
+      { label: "Time to fill a form", value: "< 3 seconds" },
+      { label: "Supported job platforms", value: "100+" },
+      { label: "Fields auto-filled", value: "Up to 20 per form" }
+    ],
+    cta: { label: "Get the extension", href: "https://hihired.org/builder" },
+    sources: [
+      { label: "Chrome extension", url: "https://hihired.org" },
+      { label: "Supported platforms", url: "https://hihired.org/guides/auto-fill-job-applications-chrome-extension" }
+    ],
+    lastUpdated: "2026-04-03",
+    tags: ["auto fill job application", "chrome extension", "job application automation", "greenhouse autofill", "workday autofill"]
+  },
+  {
+    slug: "tailor-resume-to-job-description-ai",
+    intent: "How to tailor resume to job description with AI?",
+    title: "Generate a tailored resume for any job in 60 seconds",
+    summary:
+      "HiHired's AI reads the job description and rewrites your resume bullets, summary, and skills to match the role's exact keywords and requirements. It generates a new PDF tailored to that specific job — instantly.",
+    answer:
+      "On any job posting page, click the HiHired extension and select 'Tailor Resume to Job'. The AI extracts the job description, rewrites your resume to match it, and generates a downloadable tailored PDF in about 60 seconds. No copy-pasting required.",
+    steps: [
+      { title: "Go to a job posting", detail: "Navigate to any job listing on LinkedIn, Greenhouse, Lever, or any company site." },
+      { title: "Click Tailor Resume to Job", detail: "Open the HiHired extension and click the 'Tailor Resume to Job' button." },
+      { title: "Wait 60 seconds", detail: "AI reads the job description, rewrites your resume to match keywords and requirements." },
+      { title: "Download the PDF", detail: "A tailored resume PDF is generated and ready to download instantly." },
+      { title: "Apply with confidence", detail: "Use the tailored resume for that specific application to maximize your ATS score." }
+    ],
+    keyStats: [
+      { label: "Time to tailor", value: "60 seconds" },
+      { label: "ATS keyword match", value: "87% average" },
+      { label: "Interview rate increase", value: "3.2x" }
+    ],
+    cta: { label: "Try it free", href: "/builder" },
+    sources: [
+      { label: "Resume tailoring", url: "https://hihired.org/builder" },
+      { label: "Chrome extension", url: "https://hihired.org" }
+    ],
+    lastUpdated: "2026-04-03",
+    tags: ["tailor resume to job description", "ai resume tailoring", "customize resume", "job specific resume"]
+  }
 ];
 
 export default geoGuides;
