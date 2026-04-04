@@ -16,15 +16,45 @@
     "@testing-library/jest-dom": "^6.6.4",
     "@testing-library/react": "^14.3.1",
     "@testing-library/user-event": "^14.6.1",
-    "jest": "^29.7.0"
+    "jest": "^29.7.0",
+    "react-snap": "^1.23.0"
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "react-scripts build && react-snap && node scripts/fix-canonical.js",
+    "build:nesnap": "react-scripts build",
     "test": "react-scripts test --watchAll=false --coverage",
     "test:watch": "react-scripts test",
     "test:ci": "react-scripts test --watchAll=false --coverage --ci",
-    "lint": "eslint src --ext .js,.jsx --report-unused-disable-directives --max-warnings 0"
+    "lint": "eslint src --ext .js,.jsx --report-unused-disable-directives --max-warnings 0",
+    "postbuild": "echo Build complete"
+  },
+  "reactSnap": {
+    "source": "build",
+    "minifyHtml": {
+      "collapseWhitespace": true,
+      "removeComments": false
+    },
+    "puppeteerArgs": ["--no-sandbox", "--disable-setuid-sandbox"],
+    "skipThirdPartyRequests": true,
+    "include": [
+      "/",
+      "/builder",
+      "/pricing",
+      "/privacy",
+      "/terms",
+      "/contact",
+      "/login",
+      "/guides",
+      "/guides/build-free-resume",
+      "/guides/ats-resume-checklist",
+      "/guides/tailor-to-job-description",
+      "/guides/share-resume-securely",
+      "/guides/auto-fill-job-applications-chrome-extension",
+      "/guides/tailor-resume-to-job-description-ai"
+    ],
+    "puppeteerExecutablePath": "C:\\Users\\yuhan\\.cache\\puppeteer\\chrome\\win64-121.0.6167.85\\chrome-win64\\chrome.exe",
+    "puppeteerExecutablePathEnvVar": "PUPPETEER_EXECUTABLE_PATH"
   },
   "browserslist": {
     "production": [
