@@ -21,13 +21,12 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build && react-snap && node scripts/fix-canonical.js",
+    "build": "react-scripts build && node scripts/prerender.js",
     "build:nesnap": "react-scripts build",
     "test": "react-scripts test --watchAll=false --coverage",
     "test:watch": "react-scripts test",
     "test:ci": "react-scripts test --watchAll=false --coverage --ci",
-    "lint": "eslint src --ext .js,.jsx --report-unused-disable-directives --max-warnings 0",
-    "postbuild": "echo Build complete"
+    "lint": "eslint src --ext .js,.jsx --report-unused-disable-directives --max-warnings 0"
   },
   "reactSnap": {
     "source": "build",
@@ -35,7 +34,10 @@
       "collapseWhitespace": true,
       "removeComments": false
     },
-    "puppeteerArgs": ["--no-sandbox", "--disable-setuid-sandbox"],
+    "puppeteerArgs": [
+      "--no-sandbox",
+      "--disable-setuid-sandbox"
+    ],
     "skipThirdPartyRequests": true,
     "include": [
       "/",
@@ -52,9 +54,7 @@
       "/guides/share-resume-securely",
       "/guides/auto-fill-job-applications-chrome-extension",
       "/guides/tailor-resume-to-job-description-ai"
-    ],
-    "puppeteerExecutablePath": "C:\\Users\\yuhan\\.cache\\puppeteer\\chrome\\win64-121.0.6167.85\\chrome-win64\\chrome.exe",
-    "puppeteerExecutablePathEnvVar": "PUPPETEER_EXECUTABLE_PATH"
+    ]
   },
   "browserslist": {
     "production": [
