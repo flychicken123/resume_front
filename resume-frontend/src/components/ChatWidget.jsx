@@ -498,6 +498,40 @@ const ChatWidgetInner = () => {
   const clickSuppressedRef = React.useRef(false);
   const prevUserRef = React.useRef(user);
   const staleReminderShownRef = React.useRef(false);
+  const chatStorageLoadedRef = React.useRef(false);
+
+  // Load chat messages from localStorage on mount
+  const CHAT_STORAGE_KEY = 'chatMessages';
+  useEffect(() => {
+    const email = user?.email;
+    if (!email) { chatStorageLoadedRef.current = true; return; }
+    try {
+      const stored = localStorage.getItem(`${CHAT_STORAGE_KEY}_${email}`);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setMessages(parsed);
+        }
+      }
+    } catch (e) {
+      // Corrupted data — ignore
+    }
+    chatStorageLoadedRef.current = true;
+  }, [user?.email]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Auto-persist messages to localStorage whenever they change
+  useEffect(() => {
+    if (!chatStorageLoadedRef.current) return;
+    const email = user?.email;
+    if (!email || messages.length === 0) return;
+    const capped = messages.slice(-50);
+    try {
+      localStorage.setItem(`${CHAT_STORAGE_KEY}_${email}`, JSON.stringify(capped));
+    } catch (e) {
+      // localStorage full — silently ignore
+    }
+  }, [messages, user?.email]);
+
   const location = useLocation();
   const notifyBuilderStage = useCallback((stage) => {
     if (location.pathname === "/") {
@@ -900,6 +934,10 @@ const clampLauncherPosition = useCallback(
   };
 
   const handleStartNewSession = () => {
+    // Clear persisted chat messages
+    if (user?.email) {
+      localStorage.removeItem(`${CHAT_STORAGE_KEY}_${user.email}`);
+    }
     resetChatState({ keepOpen: true });
     setIsOpen(true);
     setLastStep('chat_session_restart');

@@ -20,6 +20,13 @@ const Navigation = ({ showAuthModal, setShowAuthModal, showIntegratedModal, setS
   const accountMenuRef = useRef(null);
 
   const handleLogout = () => {
+    // Clear chat messages before removing auth (need email from resumeUser)
+    try {
+      const userData = JSON.parse(localStorage.getItem('resumeUser') || '{}');
+      if (userData.email) {
+        localStorage.removeItem(`chatMessages_${userData.email}`);
+      }
+    } catch (e) {}
     localStorage.removeItem('resumeUser');
     localStorage.removeItem('resumeToken');
     window.location.href = '/';
