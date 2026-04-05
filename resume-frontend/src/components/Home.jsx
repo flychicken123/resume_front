@@ -544,6 +544,28 @@ const Home = () => {
                 Your resume gets read by humans, not filtered by machines.
               </div>
             </div>
+
+            <div className="feature-card">
+              <div className="feature-icon-wrap">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              </div>
+              <div className="feature-title">Never lose track of an application</div>
+              <div className="feature-description">
+                Manage your entire pipeline in one place with a visual Kanban board.
+                Get smart reminders when it's time to follow up — so no opportunity slips away.
+              </div>
+            </div>
+
+            <div className="feature-card">
+              <div className="feature-icon-wrap">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              </div>
+              <div className="feature-title">Your job search copilot</div>
+              <div className="feature-description">
+                Ask anything — interview tips, salary negotiation, resume feedback.
+                The AI knows your background and gives advice tailored to your goals, not generic tips.
+              </div>
+            </div>
           </div>
         </div>
       </section>
