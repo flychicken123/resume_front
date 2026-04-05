@@ -83,6 +83,18 @@ The key differentiator is the Chrome extension that auto-fills job applications.
 - Templates: 9 ATS-safe resume templates
 - Export: PDF download
 
+## Guides & Articles
+
+- Best free AI resume builder in 2026: https://hihired.org/guides/best-free-ai-resume-builder-2026
+- Auto-fill job applications with Chrome extension: https://hihired.org/guides/auto-fill-job-applications-chrome-extension
+- AI cover letter generator (free): https://hihired.org/guides/ai-cover-letter-generator-free
+- Best Simplify Copilot alternative: https://hihired.org/guides/simplify-copilot-alternative
+- Greenhouse & Workday auto-fill guide: https://hihired.org/guides/greenhouse-workday-autofill
+- Tailor resume to job description with AI: https://hihired.org/guides/tailor-resume-to-job-description-ai
+- Resume professional summary examples: https://hihired.org/guides/resume-professional-summary-examples
+- ATS resume checklist: https://hihired.org/guides/ats-resume-checklist
+- Build a free resume: https://hihired.org/guides/build-free-resume
+
 ## Contact & Links
 
 - Website: https://hihired.org
