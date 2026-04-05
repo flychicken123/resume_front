@@ -527,10 +527,10 @@ const Home = () => {
               <div className="feature-icon-wrap">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
               </div>
-              <div className="feature-title">Job matching</div>
+              <div className="feature-title">AI-powered job matching</div>
               <div className="feature-description">
-                Paste any job description and see how your resume scores. AI highlights
-                gaps and suggests edits to improve your match rate.
+                Our matching engine uses vector embeddings to compare your resume against 35,000+
+                live job postings — ranking each by skill fit, seniority alignment, and career relevance.
               </div>
             </div>
 
