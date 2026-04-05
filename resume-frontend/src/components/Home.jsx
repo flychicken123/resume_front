@@ -450,33 +450,33 @@ const Home = () => {
       <section className="how-it-works" id="how-it-works">
         <div className="how-it-works-content">
           <h2>How it works</h2>
-          <p className="how-it-works-subtitle">Three steps to a job-winning resume</p>
+          <p className="how-it-works-subtitle">From resume to offer — one platform</p>
 
           <div className="steps-grid">
             <div className="step-card">
               <div className="step-number">1</div>
-              <h3>Import your resume</h3>
+              <h3>Build your resume</h3>
               <p>
-                Upload your existing PDF or DOCX. Our parser extracts your experience,
-                education, and skills automatically.
+                Import your existing PDF or start fresh. AI extracts your experience,
+                optimizes your bullet points, and tailors everything to your target role.
               </p>
             </div>
 
             <div className="step-card">
               <div className="step-number">2</div>
-              <h3>Paste the job description</h3>
+              <h3>Discover matching jobs</h3>
               <p>
-                Drop in any job posting. AI maps the role's requirements to your real
-                experience and suggests targeted improvements.
+                AI scans 35,000+ active positions and ranks them by how well they fit
+                your skills, experience, and preferences. One-click to tailor your resume for any match.
               </p>
             </div>
 
             <div className="step-card">
               <div className="step-number">3</div>
-              <h3>Download and apply</h3>
+              <h3>Apply and track</h3>
               <p>
-                Export a polished, ATS-optimized PDF that's tailored to the specific
-                role. Ready to submit in minutes.
+                Download your ATS-optimized PDF, track every application on a Kanban board,
+                and get AI-powered follow-up reminders so nothing falls through the cracks.
               </p>
             </div>
           </div>
