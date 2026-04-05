@@ -504,7 +504,7 @@ const ChatWidgetInner = () => {
   const CHAT_STORAGE_KEY = 'chatMessages';
   useEffect(() => {
     const email = user?.email;
-    if (!email) { chatStorageLoadedRef.current = true; return; }
+    if (!email) return; // wait for auth to load before enabling persistence
     try {
       const stored = localStorage.getItem(`${CHAT_STORAGE_KEY}_${email}`);
       if (stored) {
