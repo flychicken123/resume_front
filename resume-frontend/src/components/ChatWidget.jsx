@@ -759,9 +759,21 @@ const clampLauncherPosition = useCallback(
     }
 
     // Reset chat when user logs in (was logged out, now logged in)
-    // This clears the "please login" message
+    // But DON'T reset if we have stored messages from localStorage (page refresh case)
     if (!prevUser && user) {
-      resetChatState({ keepOpen: true });
+      const hasStoredMessages = (() => {
+        try {
+          const stored = localStorage.getItem(`chatMessages_${user.email}`);
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            return Array.isArray(parsed) && parsed.length > 0;
+          }
+        } catch (e) {}
+        return false;
+      })();
+      if (!hasStoredMessages) {
+        resetChatState({ keepOpen: true });
+      }
     }
   }, [user, resetChatState]);
 
