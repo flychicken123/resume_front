@@ -76,7 +76,15 @@ function generateGuidesIndexHtml() {
 
   let html = templateHtml;
   html = html.replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(title)}</title>`);
-  html = html.replace(/content="Free AI resume builder[^"]*"/, `content="${escapeHtml(description)}"`);
+  // Replace all meta description variants (name, og, twitter)
+  html = html.replace(/<meta name="description" content="[^"]*"/, `<meta name="description" content="${escapeHtml(description)}"`);
+  html = html.replace(/<meta name="title" content="[^"]*"/, `<meta name="title" content="${escapeHtml(title)}"`);
+  html = html.replace(/<meta property="og:title" content="[^"]*"/, `<meta property="og:title" content="${escapeHtml(title)}"`);
+  html = html.replace(/<meta property="og:description" content="[^"]*"/, `<meta property="og:description" content="${escapeHtml(description)}"`);
+  html = html.replace(/<meta property="og:url" content="[^"]*"/, `<meta property="og:url" content="${canonical}"`);
+  html = html.replace(/<meta property="twitter:title" content="[^"]*"/, `<meta property="twitter:title" content="${escapeHtml(title)}"`);
+  html = html.replace(/<meta property="twitter:description" content="[^"]*"/, `<meta property="twitter:description" content="${escapeHtml(description)}"`);
+  html = html.replace(/<meta property="twitter:url" content="[^"]*"/, `<meta property="twitter:url" content="${canonical}"`);
   html = html.replace(/<link rel="canonical" href="[^"]*"/, `<link rel="canonical" href="${canonical}"`);
   html = html.replace('</head>', `<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>\n</head>`);
   html = html.replace('<div id="root"></div>', `<div id="root">${bodyHtml}</div>`);
@@ -163,6 +171,37 @@ function generateGuideHtml(guide) {
     }))
   };
 
+  // Article JSON-LD for Google Discover and search
+  const articleLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": guide.title,
+    "description": guide.summary,
+    "image": "https://hihired.org/og-image.jpg",
+    "author": {
+      "@type": "Organization",
+      "name": "HiHired",
+      "url": "https://hihired.org"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "HiHired",
+      "url": "https://hihired.org",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://hihired.org/favicon.svg"
+      }
+    },
+    "url": canonical,
+    "datePublished": guide.lastUpdated,
+    "dateModified": guide.lastUpdated,
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": canonical
+    },
+    "keywords": guide.tags.join(", ")
+  };
+
   // FAQ JSON-LD from intent
   const faqLd = {
     "@context": "https://schema.org",
@@ -179,9 +218,19 @@ function generateGuideHtml(guide) {
 
   let html = templateHtml;
   html = html.replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(title)}</title>`);
-  html = html.replace(/content="Free AI resume builder[^"]*"/, `content="${escapeHtml(description)}"`);
+  // Replace all meta description variants (name, og, twitter)
+  html = html.replace(/<meta name="description" content="[^"]*"/, `<meta name="description" content="${escapeHtml(description)}"`);
+  html = html.replace(/<meta name="title" content="[^"]*"/, `<meta name="title" content="${escapeHtml(title)}"`);
+  html = html.replace(/<meta property="og:title" content="[^"]*"/, `<meta property="og:title" content="${escapeHtml(title)}"`);
+  html = html.replace(/<meta property="og:description" content="[^"]*"/, `<meta property="og:description" content="${escapeHtml(description)}"`);
+  html = html.replace(/<meta property="og:url" content="[^"]*"/, `<meta property="og:url" content="${canonical}"`);
+  html = html.replace(/<meta property="og:type" content="[^"]*"/, `<meta property="og:type" content="article"`);
+  html = html.replace(/<meta property="twitter:title" content="[^"]*"/, `<meta property="twitter:title" content="${escapeHtml(title)}"`);
+  html = html.replace(/<meta property="twitter:description" content="[^"]*"/, `<meta property="twitter:description" content="${escapeHtml(description)}"`);
+  html = html.replace(/<meta property="twitter:url" content="[^"]*"/, `<meta property="twitter:url" content="${canonical}"`);
   html = html.replace(/<link rel="canonical" href="[^"]*"/, `<link rel="canonical" href="${canonical}"`);
   html = html.replace('</head>', `
+    <script type="application/ld+json">${JSON.stringify(articleLd)}</script>
     <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
     <script type="application/ld+json">${JSON.stringify(faqLd)}</script>
   </head>`);
