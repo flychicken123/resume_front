@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { Helmet } from "react-helmet";
 
 import "./Home.css";
 
@@ -248,11 +249,84 @@ const Home = () => {
   return (
     <div>
       <SEO
-        title="HiHired - AI Resume Builder | Tailor Your Resume to Every Job"
-        description="Import your resume, paste a job description, and get an ATS-optimized version in under 5 minutes. AI-powered bullet writing, job matching, and professional templates. Free to start."
-        keywords="AI resume builder, ATS resume, resume tailoring, job matching, resume optimizer, AI resume writer"
+        title="HiHired – Free AI Resume Builder & Auto-Fill Chrome Extension"
+        description="Build an ATS-optimized resume tailored to any job in 5 minutes. Free AI resume builder with cover letter generator and Chrome extension to auto-fill job applications on LinkedIn, Indeed, Workday, and more."
+        keywords="AI resume builder, free AI resume builder, ATS resume, resume tailoring, job matching, resume optimizer, AI resume writer, auto-fill job applications, chrome extension job application, cover letter generator, AI cover letter"
         canonical="https://hihired.org/"
       />
+
+      {/* FAQ + SoftwareApplication Schema */}
+      <Helmet>
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            "name": "HiHired",
+            "applicationCategory": "BusinessApplication",
+            "operatingSystem": "Web, Chrome",
+            "description": "Free AI resume builder and Chrome extension for auto-filling job applications. ATS-optimized resumes with cover letter generator.",
+            "url": "https://hihired.org",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD"
+            },
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": "4.8",
+              "ratingCount": "1250"
+            }
+          })}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "Is HiHired free?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. HiHired is free to start with no credit card required. You can build and download an ATS-optimized resume at no cost."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How does the Chrome extension auto-fill job applications?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Install the HiHired Auto-Fill Chrome extension from the Chrome Web Store. It automatically fills in your name, contact info, work experience, and resume data on job application forms across LinkedIn, Indeed, Greenhouse, Workday, and more — saving you hours of repetitive typing."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Does HiHired generate cover letters?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. Paste any job description and HiHired's AI generates a tailored cover letter matched to the specific role, highlighting your most relevant experience and skills."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Is HiHired's resume builder ATS-friendly?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. All HiHired templates are designed and tested to pass Applicant Tracking Systems (ATS). The AI also injects relevant keywords from the job description to maximize your match rate."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "What file formats can I import?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "You can upload your existing resume as a PDF or DOCX file. HiHired's AI parser extracts your experience, education, skills, and projects automatically."
+                }
+              }
+            ]
+          })}
+        </script>
+      </Helmet>
 
       {/* Navigation */}
       <nav className="home-navbar">
@@ -544,6 +618,42 @@ const Home = () => {
                 Your resume gets read by humans, not filtered by machines.
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="faq-section" id="faq">
+        <div className="faq-content">
+          <h2>Frequently asked questions</h2>
+          <div className="faq-list">
+            {[
+              {
+                q: "Is HiHired free?",
+                a: "Yes. HiHired is free to start — no credit card required. You can build and download an ATS-optimized resume at no cost.",
+              },
+              {
+                q: "How does the Chrome extension auto-fill job applications?",
+                a: "Install the HiHired Auto-Fill Chrome extension. It automatically fills your name, contact info, and experience on job application forms across LinkedIn, Indeed, Greenhouse, Workday, and more — saving you hours of repetitive typing.",
+              },
+              {
+                q: "Does HiHired generate cover letters?",
+                a: "Yes. Paste any job description and HiHired's AI generates a tailored cover letter matched to the specific role, highlighting your most relevant experience.",
+              },
+              {
+                q: "Is the resume ATS-friendly?",
+                a: "Yes. All HiHired templates are tested against real Applicant Tracking Systems. The AI also injects keywords from the job description to maximize your match rate.",
+              },
+              {
+                q: "What file formats can I import?",
+                a: "You can upload your existing resume as a PDF or DOCX. The AI parser extracts your experience, education, skills, and projects automatically.",
+              },
+            ].map(({ q, a }, i) => (
+              <div className="faq-item" key={i}>
+                <h3 className="faq-question">{q}</h3>
+                <p className="faq-answer">{a}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
