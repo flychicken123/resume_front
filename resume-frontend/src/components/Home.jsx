@@ -524,33 +524,33 @@ const Home = () => {
       <section className="how-it-works" id="how-it-works">
         <div className="how-it-works-content">
           <h2>How it works</h2>
-          <p className="how-it-works-subtitle">Three steps to a job-winning resume</p>
+          <p className="how-it-works-subtitle">From resume to offer — one platform</p>
 
           <div className="steps-grid">
             <div className="step-card">
               <div className="step-number">1</div>
-              <h3>Import your resume</h3>
+              <h3>Build your resume</h3>
               <p>
-                Upload your existing PDF or DOCX. Our parser extracts your experience,
-                education, and skills automatically.
+                Import your existing PDF or start fresh. AI extracts your experience,
+                optimizes your bullet points, and tailors everything to your target role.
               </p>
             </div>
 
             <div className="step-card">
               <div className="step-number">2</div>
-              <h3>Paste the job description</h3>
+              <h3>Discover matching jobs</h3>
               <p>
-                Drop in any job posting. AI maps the role's requirements to your real
-                experience and suggests targeted improvements.
+                AI scans 35,000+ active positions and ranks them by how well they fit
+                your skills, experience, and preferences. One-click to tailor your resume for any match.
               </p>
             </div>
 
             <div className="step-card">
               <div className="step-number">3</div>
-              <h3>Download and apply</h3>
+              <h3>Apply and track</h3>
               <p>
-                Export a polished, ATS-optimized PDF that's tailored to the specific
-                role. Ready to submit in minutes.
+                Download your ATS-optimized PDF, track every application on a Kanban board,
+                and get AI-powered follow-up reminders so nothing falls through the cracks.
               </p>
             </div>
           </div>
@@ -601,10 +601,10 @@ const Home = () => {
               <div className="feature-icon-wrap">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
               </div>
-              <div className="feature-title">Job matching</div>
+              <div className="feature-title">AI-powered job matching</div>
               <div className="feature-description">
-                Paste any job description and see how your resume scores. AI highlights
-                gaps and suggests edits to improve your match rate.
+                Our matching engine uses vector embeddings to compare your resume against 35,000+
+                live job postings — ranking each by skill fit, seniority alignment, and career relevance.
               </div>
             </div>
 
@@ -616,6 +616,28 @@ const Home = () => {
               <div className="feature-description">
                 Clean, professional designs tested against real applicant tracking systems.
                 Your resume gets read by humans, not filtered by machines.
+              </div>
+            </div>
+
+            <div className="feature-card">
+              <div className="feature-icon-wrap">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              </div>
+              <div className="feature-title">Never lose track of an application</div>
+              <div className="feature-description">
+                Manage your entire pipeline in one place with a visual Kanban board.
+                Get smart reminders when it's time to follow up — so no opportunity slips away.
+              </div>
+            </div>
+
+            <div className="feature-card">
+              <div className="feature-icon-wrap">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              </div>
+              <div className="feature-title">Your job search copilot</div>
+              <div className="feature-description">
+                Ask anything — interview tips, salary negotiation, resume feedback.
+                The AI knows your background and gives advice tailored to your goals, not generic tips.
               </div>
             </div>
           </div>
