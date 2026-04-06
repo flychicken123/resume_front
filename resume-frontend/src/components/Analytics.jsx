@@ -180,52 +180,54 @@ export const getUserSource = () => {
 };
 
 
+// Safe gtag wrapper — queues events until GA is ready
+const safeGtag = (...args) => {
+  if (isLocalhost()) return;
+  if (typeof window === 'undefined') return;
+  // gtag may not be ready yet; dataLayer is always available after index.html loads
+  if (typeof window.gtag === 'function') {
+    window.gtag(...args);
+  } else {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push(args);
+  }
+};
+
 // Track referrer/source when user enters the builder
 export const trackReferrer = () => {
   const userSource = getUserSource();
   const currentPage = window.location.pathname;
-  
-  // Analytics tracking (debug logging removed for production)
-  
-  if (typeof window !== 'undefined' && window.gtag && !isLocalhost()) {
-    
-    window.gtag('event', 'page_referrer', {
-      'event_category': 'user_acquisition',
-      'event_label': userSource.source,
-      'custom_parameter_1': userSource.medium,
-      'custom_parameter_2': userSource.type,
-      'custom_parameter_3': currentPage,
-      'custom_parameter_4': window.location.search || 'no_params'
-    });
-    
-    // Also track as a separate user source event for better analytics
-    window.gtag('event', 'user_source_detected', {
-      'event_category': 'user_acquisition',
-      'event_label': userSource.source,
-      'source_medium': userSource.medium,
-      'source_type': userSource.type,
-      'landing_page': currentPage,
-      'custom_parameter_source': userSource.source,
-      'custom_parameter_medium': userSource.medium,
-      'custom_parameter_type': userSource.type
-    });
-  }
+
+  safeGtag('event', 'page_referrer', {
+    event_category: 'user_acquisition',
+    event_label: userSource.source,
+    traffic_medium: userSource.medium,
+    traffic_type: userSource.type,
+    landing_page: currentPage,
+    url_params: window.location.search || '(none)'
+  });
+
+  safeGtag('event', 'user_source_detected', {
+    event_category: 'user_acquisition',
+    event_label: userSource.source,
+    traffic_source: userSource.source,
+    traffic_medium: userSource.medium,
+    traffic_type: userSource.type,
+    landing_page: currentPage
+  });
 };
 
 // Track when user starts building resume (enhanced with source info)
 export const trackBuilderStart = (source) => {
-  if (typeof window !== 'undefined' && window.gtag && !isLocalhost()) {
-    const userSource = getUserSource();
-    
-    window.gtag('event', 'resume_builder_start', {
-      'event_category': 'engagement',
-      'event_label': source || 'unknown',
-      'user_source': userSource.source,
-      'user_medium': userSource.medium,
-      'user_source_type': userSource.type,
-      'custom_parameter_1': document.referrer || 'direct'
-    });
-  }
+  const userSource = getUserSource();
+  safeGtag('event', 'resume_builder_start', {
+    event_category: 'engagement',
+    event_label: source || 'unknown',
+    traffic_source: userSource.source,
+    traffic_medium: userSource.medium,
+    traffic_type: userSource.type,
+    referrer_url: document.referrer || '(direct)'
+  });
 };
 
 // Function to get detailed source information (useful for debugging)
@@ -250,14 +252,12 @@ export const getDetailedSourceInfo = () => {
 
 // Track when user completes a step
 export const trackStepCompletion = (stepName, stepNumber) => {
-  if (typeof window !== 'undefined' && window.gtag && !isLocalhost()) {
-    window.gtag('event', 'step_completion', {
-      'event_category': 'progress',
-      'event_label': stepName,
-      'custom_parameter_1': stepNumber,
-      'custom_parameter_2': document.referrer || 'direct'
-    });
-  }
+  safeGtag('event', 'step_completion', {
+    event_category: 'progress',
+    event_label: stepName,
+    step_number: stepNumber,
+    referrer_url: document.referrer || '(direct)'
+  });
 };
 
 // Analytics component for automatic page tracking

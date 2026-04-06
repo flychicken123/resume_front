@@ -12,6 +12,18 @@ const SubscriptionSuccess = () => {
   const sessionId = searchParams.get('session_id');
 
   useEffect(() => {
+    // Fire Google Ads conversion only on real purchase success
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('event', 'conversion', {
+        'send_to': 'AW-825433319/y3lTCOiwuXoQ57nMiQM',
+        'value': 1.0,
+        'currency': 'USD',
+        'transaction_id': sessionId || ''
+      });
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
     const confirmSession = async () => {
       if (!sessionId) {
         setError('Invalid session');

@@ -338,32 +338,27 @@
     }
   </script>
 
-  <!-- Google Analytics 4 - Only load on production -->
+  <!-- Google Analytics 4 - standard synchronous load (production only) -->
   <script>
-    if (window.location.hostname !== 'localhost' &&
+    var _isProduction = window.location.hostname !== 'localhost' &&
         window.location.hostname !== '127.0.0.1' &&
         window.location.hostname !== '0.0.0.0' &&
-        !window.location.hostname.includes('localhost')) {
-
-      const script = document.createElement('script');
-      script.async = true;
-      script.src = 'https://www.googletagmanager.com/gtag/js?id=G-B327RPMPS5';
-      document.head.appendChild(script);
-
+        !window.location.hostname.includes('localhost');
+    if (_isProduction) {
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-      gtag('config', 'G-B327RPMPS5');
-
-      // Event snippet for purchase_conversion_cleverppc conversion page
-      gtag('event', 'conversion', {
-        'send_to': 'AW-825433319/y3lTCOiwuXoQ57nMiQM',
-        'value': 1.0,
-        'currency': 'USD',
-        'transaction_id': ''
+      gtag('config', 'G-B327RPMPS5', {
+        'send_page_view': true,
+        'linker': { 'domains': ['hihired.org'] }
       });
+    } else {
+      /* stub gtag on localhost so calls don't throw */
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function(){};
     }
   </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B327RPMPS5"></script>
 
   <!-- Google AdSense - Only load on production -->
   <script>
