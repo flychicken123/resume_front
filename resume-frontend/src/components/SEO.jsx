@@ -6,7 +6,7 @@ const SEO = ({
   description, 
   keywords, 
   canonical, 
-  ogImage = "https://hihired.org/og-image.jpg",
+  ogImage = "https://hihired.org/og-image.png",
   ogType = "website"
 }) => {
   const defaultTitle = "HiHired - Free AI Resume Builder | Build Professional Resumes Online";
