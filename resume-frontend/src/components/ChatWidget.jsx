@@ -2792,6 +2792,14 @@ const buildSectionResponse = (sectionKey) => {
                 });
                 break;
               }
+              if (eventData.retry_reset) {
+                streamedText = '';
+                setMessages((prev) => {
+                  const updated = [...prev];
+                  updated[updated.length - 1] = { sender: 'bot', text: '' };
+                  return updated;
+                });
+              }
               if (eventData.token) {
                 streamedText += eventData.token;
                 setMessages((prev) => {
