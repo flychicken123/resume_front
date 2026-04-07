@@ -2823,6 +2823,19 @@ const buildSectionResponse = (sectionKey) => {
                   }
                 }
 
+                // Append tool debug info if present
+                if (eventData.toolDebug) {
+                  const d = eventData.toolDebug;
+                  let debugLines = ['\n\n---\n**🔧 Tool Debug:**'];
+                  debugLines.push(`Tools called: ${(d.toolsCalled || []).join(', ')}`);
+                  (d.toolArgs || []).forEach((a, i) => debugLines.push(`Args[${i}]: \`${a}\``));
+                  (d.toolResults || []).forEach((r, i) => debugLines.push(`Result[${i}]: \`${r}\``));
+                  if (d.toolErrors && d.toolErrors.length > 0) {
+                    debugLines.push(`**Errors:** ${d.toolErrors.join(', ')}`);
+                  }
+                  reply += debugLines.join('\n');
+                }
+
                 const suggestionButtons = (eventData.proactiveSuggestions || []).map(s => ({
                   label: s.label,
                   action: s.action,
@@ -2866,6 +2879,19 @@ const buildSectionResponse = (sectionKey) => {
           if (data.updatedResumeData) {
             updateResume(data.updatedResumeData);
           }
+        }
+
+        // Append tool debug info if present
+        if (data.toolDebug) {
+          const d = data.toolDebug;
+          let debugLines = ['\n\n---\n**🔧 Tool Debug:**'];
+          debugLines.push(`Tools called: ${(d.toolsCalled || []).join(', ')}`);
+          (d.toolArgs || []).forEach((a, i) => debugLines.push(`Args[${i}]: \`${a}\``));
+          (d.toolResults || []).forEach((r, i) => debugLines.push(`Result[${i}]: \`${r}\``));
+          if (d.toolErrors && d.toolErrors.length > 0) {
+            debugLines.push(`**Errors:** ${d.toolErrors.join(', ')}`);
+          }
+          reply += debugLines.join('\n');
         }
 
         const jsonSuggestionButtons = (data.proactiveSuggestions || []).map(s => ({
