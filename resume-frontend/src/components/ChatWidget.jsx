@@ -736,7 +736,7 @@ const clampLauncherPosition = useCallback(
   React.useEffect(() => {
     try {
       const snapshot = {
-        messages,
+        messages: messages.slice(-50),
         isOpen,
         isLarge,
         resumeFlowState,
@@ -2823,6 +2823,11 @@ const buildSectionResponse = (sectionKey) => {
                   }
                 }
 
+                // Log tool debug info to console
+                if (eventData.toolDebug) {
+                  console.log('[ChatWidget] Tool Debug:', JSON.stringify(eventData.toolDebug, null, 2));
+                }
+
                 const suggestionButtons = (eventData.proactiveSuggestions || []).map(s => ({
                   label: s.label,
                   action: s.action,
@@ -2866,6 +2871,11 @@ const buildSectionResponse = (sectionKey) => {
           if (data.updatedResumeData) {
             updateResume(data.updatedResumeData);
           }
+        }
+
+        // Log tool debug info to console
+        if (data.toolDebug) {
+          console.log('[ChatWidget] Tool Debug:', JSON.stringify(data.toolDebug, null, 2));
         }
 
         const jsonSuggestionButtons = (data.proactiveSuggestions || []).map(s => ({
