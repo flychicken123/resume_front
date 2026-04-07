@@ -44,19 +44,19 @@
   padding: 16px 36px;
   font-size: 17px;
   font-weight: 700;
-  background: #2563eb;
+  background: #f97316;
   color: white;
   border: none;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 4px 14px rgba(249, 115, 22, 0.3);
 }
 
 .btn-create:hover {
-  background: #1d4ed8;
+  background: #ea580c;
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+  box-shadow: 0 8px 20px rgba(249, 115, 22, 0.35);
 }
 
 .hero-cta-note {

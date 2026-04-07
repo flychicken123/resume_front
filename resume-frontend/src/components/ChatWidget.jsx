@@ -3024,6 +3024,28 @@ const buildSectionResponse = (sectionKey) => {
               </button>
             </div>
           </div>
+          {!user && (
+            <div style={{
+              background: '#fef3c7',
+              borderBottom: '1px solid #fcd34d',
+              padding: '0.6rem 1rem',
+              fontSize: '0.85rem',
+              color: '#92400e',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+            }}>
+              <span>Please</span>
+              <button
+                type="button"
+                style={{ color: '#1d4ed8', fontWeight: 600, textDecoration: 'underline', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.85rem' }}
+                onClick={() => navigate('/login')}
+              >
+                sign in
+              </button>
+              <span>to chat with the AI assistant.</span>
+            </div>
+          )}
           <div className="chat-messages">
             {messages.map((message, index) => {
               const progressInfo = getProgressInfo(message.progress);

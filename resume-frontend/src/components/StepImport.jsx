@@ -14,6 +14,7 @@ const StepImport = ({ onSkip }) => {
   const [historyImportError, setHistoryImportError] = useState('');
   const [historyImportingId, setHistoryImportingId] = useState(null);
   const [conversions, setConversions] = useState([]);
+  const [pasteText, setPasteText] = useState('');
   const fileInputRef = useRef(null);
   const { applyImportedData } = useResume();
   const { triggerFeedbackPrompt } = useFeedback();
@@ -74,6 +75,14 @@ const StepImport = ({ onSkip }) => {
     if (!file || loading) {
       return;
     }
+    importFromFile(file);
+  };
+
+  const handlePasteImport = () => {
+    const trimmed = pasteText.trim();
+    if (!trimmed || loading) return;
+    const blob = new Blob([trimmed], { type: 'text/plain' });
+    const file = new File([blob], 'resume.txt', { type: 'text/plain' });
     importFromFile(file);
   };
 
@@ -258,11 +267,31 @@ const StepImport = ({ onSkip }) => {
       {tab === 'paste' && (
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <textarea
-            placeholder="Paste your resume text here..."
+            placeholder="Paste your resume text here (from LinkedIn, a Word doc, or anywhere)..."
             rows={8}
+            value={pasteText}
+            onChange={(e) => setPasteText(e.target.value)}
             style={{ width: '100%', maxWidth: 420, marginBottom: '1rem', padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5f5' }}
+            disabled={loading}
           />
-          <button type="button" disabled>Import from text (Coming Soon)</button>
+          <div>
+            <button
+              type="button"
+              onClick={handlePasteImport}
+              disabled={loading || !pasteText.trim()}
+              style={{
+                padding: '0.6rem 1.5rem',
+                borderRadius: '8px',
+                background: pasteText.trim() ? '#2563eb' : '#94a3b8',
+                color: '#fff',
+                border: 'none',
+                fontWeight: 600,
+                cursor: pasteText.trim() && !loading ? 'pointer' : 'not-allowed',
+              }}
+            >
+              {loading ? 'Parsing...' : 'Import from text'}
+            </button>
+          </div>
         </div>
       )}
 
