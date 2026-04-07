@@ -2823,17 +2823,9 @@ const buildSectionResponse = (sectionKey) => {
                   }
                 }
 
-                // Append tool debug info if present
+                // Log tool debug info to console
                 if (eventData.toolDebug) {
-                  const d = eventData.toolDebug;
-                  let debugLines = ['\n\n---\n**🔧 Tool Debug:**'];
-                  debugLines.push(`Tools called: ${(d.toolsCalled || []).join(', ')}`);
-                  (d.toolArgs || []).forEach((a, i) => debugLines.push(`Args[${i}]: \`${a}\``));
-                  (d.toolResults || []).forEach((r, i) => debugLines.push(`Result[${i}]: \`${r}\``));
-                  if (d.toolErrors && d.toolErrors.length > 0) {
-                    debugLines.push(`**Errors:** ${d.toolErrors.join(', ')}`);
-                  }
-                  reply += debugLines.join('\n');
+                  console.log('[ChatWidget] Tool Debug:', JSON.stringify(eventData.toolDebug, null, 2));
                 }
 
                 const suggestionButtons = (eventData.proactiveSuggestions || []).map(s => ({
@@ -2881,17 +2873,9 @@ const buildSectionResponse = (sectionKey) => {
           }
         }
 
-        // Append tool debug info if present
+        // Log tool debug info to console
         if (data.toolDebug) {
-          const d = data.toolDebug;
-          let debugLines = ['\n\n---\n**🔧 Tool Debug:**'];
-          debugLines.push(`Tools called: ${(d.toolsCalled || []).join(', ')}`);
-          (d.toolArgs || []).forEach((a, i) => debugLines.push(`Args[${i}]: \`${a}\``));
-          (d.toolResults || []).forEach((r, i) => debugLines.push(`Result[${i}]: \`${r}\``));
-          if (d.toolErrors && d.toolErrors.length > 0) {
-            debugLines.push(`**Errors:** ${d.toolErrors.join(', ')}`);
-          }
-          reply += debugLines.join('\n');
+          console.log('[ChatWidget] Tool Debug:', JSON.stringify(data.toolDebug, null, 2));
         }
 
         const jsonSuggestionButtons = (data.proactiveSuggestions || []).map(s => ({
