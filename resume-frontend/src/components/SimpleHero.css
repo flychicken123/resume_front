@@ -54,7 +54,9 @@
 }
 
 .btn-create:hover {
-  background: #ea580c;
+  background: #ea580c !important;
+  color: white !important;
+  border: none !important;
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(249, 115, 22, 0.35);
 }
