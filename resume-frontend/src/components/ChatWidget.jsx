@@ -736,7 +736,7 @@ const clampLauncherPosition = useCallback(
   React.useEffect(() => {
     try {
       const snapshot = {
-        messages,
+        messages: messages.slice(-50),
         isOpen,
         isLarge,
         resumeFlowState,
