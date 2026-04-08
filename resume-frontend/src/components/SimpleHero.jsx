@@ -80,7 +80,7 @@ const SimpleHero = ({ onCreateClick }) => {
             </div>
             <div className="resume-preview">
               <img
-                src="/templates/tracker.png"
+                src="/templates/tracker.PNG"
                 alt="HiHired application tracker"
                 className="hero-preview-image"
               />
