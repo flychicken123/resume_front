@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useRef, useCallback, Component } from 'react';
+import React, { useMemo, useState, useRef, useCallback, useEffect, Component } from 'react';
 import { getAPIBaseURL } from '../api';
 
 const API_BASE_URL = getAPIBaseURL();
@@ -34,21 +34,19 @@ const ResumeProgressBar = ({ resumeData, jobDescriptions, onSectionClick }) => {
 
   const [showTooltip, setShowTooltip] = useState(false);
   const [hint, setHint] = useState('');
+  const [encouragement, setEncouragement] = useState('');
   const [loading, setLoading] = useState(false);
-  const hintCacheRef = useRef({ key: '', hint: '' });
+  const cacheRef = useRef({ key: '', hint: '', encouragement: '' });
   const hoverTimerRef = useRef(null);
 
   const missing = SECTIONS.filter(s => !completion[s.key]).map(s => s.label);
   const complete = SECTIONS.filter(s => completion[s.key]).map(s => s.label);
   const cacheKey = missing.join(',');
 
-  const fetchHint = useCallback(async () => {
-    if (missing.length === 0) {
-      setHint('Your resume is complete! Preview and download it.');
-      return;
-    }
-    if (hintCacheRef.current.key === cacheKey) {
-      setHint(hintCacheRef.current.hint);
+  const fetchProgress = useCallback(async () => {
+    if (cacheRef.current.key === cacheKey) {
+      setHint(cacheRef.current.hint);
+      setEncouragement(cacheRef.current.encouragement);
       return;
     }
     setLoading(true);
@@ -59,20 +57,26 @@ const ResumeProgressBar = ({ resumeData, jobDescriptions, onSectionClick }) => {
         body: JSON.stringify({ missing, complete }),
       });
       const data = await res.json();
-      const h = data.hint || `Consider adding your ${missing[0]} next.`;
-      hintCacheRef.current = { key: cacheKey, hint: h };
+      const h = data.hint || '';
+      const e = data.encouragement || '';
+      cacheRef.current = { key: cacheKey, hint: h, encouragement: e };
       setHint(h);
+      setEncouragement(e);
     } catch {
-      setHint(`Consider adding your ${missing[0]} next.`);
+      setEncouragement(completedCount === total ? 'Your resume is ready!' : 'Keep going, you\'re doing great!');
     } finally {
       setLoading(false);
     }
-  }, [missing, complete, cacheKey]);
+  }, [missing, complete, cacheKey, completedCount, total]);
+
+  // Fetch encouragement on mount and whenever completion changes
+  useEffect(() => {
+    fetchProgress();
+  }, [cacheKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleMouseEnter = () => {
     hoverTimerRef.current = setTimeout(() => {
       setShowTooltip(true);
-      fetchHint();
     }, 300);
   };
 
@@ -88,6 +92,11 @@ const ResumeProgressBar = ({ resumeData, jobDescriptions, onSectionClick }) => {
       onMouseLeave={handleMouseLeave}
       style={{ position: 'relative' }}
     >
+      {encouragement && (
+        <div style={{ fontSize: '0.8rem', color: '#6b7280', textAlign: 'center', marginBottom: '4px' }}>
+          {encouragement}
+        </div>
+      )}
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', maxWidth: '320px' }}>
         <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#374151', whiteSpace: 'nowrap', minWidth: '36px' }}>
           {pct}% Complete
