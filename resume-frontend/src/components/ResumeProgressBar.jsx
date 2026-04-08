@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, Component } from 'react';
 
 const SECTIONS = [
   { key: 'personal',   label: 'Personal',       stepId: 3, suggestion: 'Start by adding your name and contact info' },
@@ -91,4 +91,17 @@ const ResumeProgressBar = ({ resumeData, jobDescriptions, onSectionClick }) => {
   );
 };
 
-export default ResumeProgressBar;
+class ProgressBarErrorBoundary extends Component {
+  state = { hasError: false };
+  static getDerivedStateFromError() { return { hasError: true }; }
+  componentDidCatch(error) { console.error('[ResumeProgressBar] crashed:', error); }
+  render() { return this.state.hasError ? null : this.props.children; }
+}
+
+const SafeResumeProgressBar = (props) => (
+  <ProgressBarErrorBoundary>
+    <ResumeProgressBar {...props} />
+  </ProgressBarErrorBoundary>
+);
+
+export default SafeResumeProgressBar;
