@@ -90,7 +90,7 @@ const ResumeProgressBar = ({ resumeData, jobDescriptions, onSectionClick }) => {
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', maxWidth: '320px' }}>
         <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#374151', whiteSpace: 'nowrap', minWidth: '36px' }}>
-          {pct}%
+          {pct}% Complete
         </span>
         <div style={{ flex: 1, height: '8px', borderRadius: '4px', background: '#e5e7eb', overflow: 'hidden' }}>
           <div style={{
