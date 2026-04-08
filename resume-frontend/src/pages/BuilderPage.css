@@ -198,6 +198,13 @@
   min-height: 44px; /* iOS touch target */
 }
 
+/* Progress bar mobile-first */
+.resume-progress-bar {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  box-sizing: border-box;
+}
+
 /* Stepper mobile-first */
 .stepper-container {
   width: 100%;
@@ -589,6 +596,9 @@
   
   .builder-content {
     margin-left: calc(160px + 24px) !important;
+  }
+  .resume-progress-bar {
+    margin-left: calc(160px + 24px);
   }
   .stepper-step {
     max-width: calc(100% - 16px) !important;

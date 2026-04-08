@@ -22,6 +22,7 @@ import {
 } from '../utils/jobDescriptions';
 import { TEMPLATE_SLUGS, DEFAULT_TEMPLATE_ID, normalizeTemplateId } from '../constants/templates';
 import Stepper from '../components/Stepper';
+import ResumeProgressBar from '../components/ResumeProgressBar';
 import StepPersonal from '../components/StepPersonal';
 import StepImport from '../components/StepImport';
 import StepExperience from '../components/StepExperience';
@@ -3346,7 +3347,12 @@ function BuilderPage() {
             )}
           </div>
 
-          
+          <ResumeProgressBar
+            resumeData={data}
+            jobDescriptions={jobDescriptions}
+            onSectionClick={handleStepChange}
+          />
+
           {/* Stepper and Content */}
           <div className="builder-main-section">
             <div className="stepper-container">
