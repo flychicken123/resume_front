@@ -88,7 +88,10 @@ const ResumeProgressBar = ({ resumeData, jobDescriptions, onSectionClick }) => {
       onMouseLeave={handleMouseLeave}
       style={{ position: 'relative' }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', maxWidth: '320px' }}>
+        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#374151', whiteSpace: 'nowrap', minWidth: '36px' }}>
+          {pct}%
+        </span>
         <div style={{ flex: 1, height: '8px', borderRadius: '4px', background: '#e5e7eb', overflow: 'hidden' }}>
           <div style={{
             width: `${pct}%`,
@@ -98,9 +101,6 @@ const ResumeProgressBar = ({ resumeData, jobDescriptions, onSectionClick }) => {
             transition: 'width 0.4s ease',
           }} />
         </div>
-        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#374151', whiteSpace: 'nowrap' }}>
-          {pct}%
-        </span>
       </div>
 
       {showTooltip && (
