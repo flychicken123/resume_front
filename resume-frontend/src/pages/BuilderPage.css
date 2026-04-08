@@ -198,10 +198,12 @@
   min-height: 44px; /* iOS touch target */
 }
 
-/* Progress bar mobile-first */
+/* Progress bar — centered inside site-header */
 .resume-progress-bar {
   width: 100%;
-  padding: 0.5rem 1rem;
+  max-width: 360px;
+  margin: 0.5rem auto 0;
+  padding: 0.5rem 0;
   box-sizing: border-box;
 }
 
@@ -596,9 +598,6 @@
   
   .builder-content {
     margin-left: calc(160px + 24px) !important;
-  }
-  .resume-progress-bar {
-    margin-left: calc(160px + 24px);
   }
   .stepper-step {
     max-width: calc(100% - 16px) !important;

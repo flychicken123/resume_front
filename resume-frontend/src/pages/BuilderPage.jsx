@@ -3334,6 +3334,11 @@ function BuilderPage() {
             }}>
               HiHired - AI Resume Builder
             </h1>
+            <ResumeProgressBar
+              resumeData={data}
+              jobDescriptions={jobDescriptions}
+              onSectionClick={handleStepChange}
+            />
             {user && (
               <div style={{ position: 'absolute', right: '20px', top: '80px' }}>
                 <SubscriptionStatus
@@ -3346,12 +3351,6 @@ function BuilderPage() {
               </div>
             )}
           </div>
-
-          <ResumeProgressBar
-            resumeData={data}
-            jobDescriptions={jobDescriptions}
-            onSectionClick={handleStepChange}
-          />
 
           {/* Stepper and Content */}
           <div className="builder-main-section">
