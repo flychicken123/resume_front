@@ -7,20 +7,35 @@ import { getAPIBaseURL } from "../api";
 import SEO from "../components/SEO";
 
 const JOB_COMPANY_PAGE_SIZE = 20;
+const USER_PAGE_SIZE = 20;
 
 const formatDate = (value) => {
-  if (!value) {
-    return "-";
-  }
+  if (!value) return "-";
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return "-";
-  }
-  return date.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  if (Number.isNaN(date.getTime())) return "-";
+  return date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+};
+
+const tabStyle = (active) => ({
+  padding: "0.6rem 1.2rem",
+  borderRadius: "8px 8px 0 0",
+  border: "1px solid #e5e7eb",
+  borderBottom: active ? "2px solid #2563eb" : "1px solid #e5e7eb",
+  background: active ? "#ffffff" : "#f9fafb",
+  color: active ? "#2563eb" : "#6b7280",
+  fontWeight: active ? 700 : 500,
+  cursor: "pointer",
+  fontSize: "0.9rem",
+  transition: "all 0.15s",
+});
+
+const cardStyle = {
+  background: "#ffffff",
+  border: "1px solid #e5e7eb",
+  borderRadius: "10px",
+  padding: "1rem 1.25rem",
+  flex: "1 1 140px",
+  minWidth: "140px",
 };
 
 const AdminMembershipPage = () => {
@@ -33,6 +48,10 @@ const AdminMembershipPage = () => {
   const [selectedPlans, setSelectedPlans] = useState({});
   const [updating, setUpdating] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState("users");
+  const [userPage, setUserPage] = useState(1);
+
+  // ATS Job Sync state
   const [jobCompanies, setJobCompanies] = useState([]);
   const [jobLoading, setJobLoading] = useState(false);
   const [jobError, setJobError] = useState("");
@@ -61,50 +80,25 @@ const AdminMembershipPage = () => {
   const jobEndIndex = jobTotalCount === 0 ? 0 : Math.min(jobTotalCount, jobStartIndex + jobCompanies.length - 1);
 
   useEffect(() => {
-    if (!loading && isAdmin) {
-      loadData();
-    }
+    if (!loading && isAdmin) loadData();
   }, [loading, isAdmin]);
+
+  // ── Data Loading ──────────────────────────────────────────
 
   const loadJobCompanies = async (page = jobPage) => {
     setJobLoading(true);
     setJobError("");
-    const params = new URLSearchParams({
-      page: String(page),
-      page_size: String(JOB_COMPANY_PAGE_SIZE),
-      status: "all",
-    });
-
+    const params = new URLSearchParams({ page: String(page), page_size: String(JOB_COMPANY_PAGE_SIZE), status: "all" });
     try {
-      const response = await fetch(`${API_BASE_URL}/api/admin/jobs/companies?${params.toString()}`, {
-        headers: getAuthHeaders(),
-      });
-
+      const response = await fetch(`${API_BASE_URL}/api/admin/jobs/companies?${params.toString()}`, { headers: getAuthHeaders() });
       let payload = {};
-      try {
-        payload = await response.json();
-      } catch (parseErr) {
-        payload = {};
-      }
-
-      if (!response.ok) {
-        const messageText = payload && typeof payload.error === "string" ? payload.error : "Failed to load job companies";
-        throw new Error(messageText);
-      }
-
-      const companies = Array.isArray(payload.companies) ? payload.companies : [];
-      setJobCompanies(companies);
-
-      const incomingPage = typeof payload.page === "number" && payload.page > 0 ? payload.page : page;
-      setJobPage(incomingPage);
-
-      const totalPages = typeof payload.total_pages === "number" && payload.total_pages > 0 ? payload.total_pages : 1;
-      setJobTotalPages(Math.max(1, totalPages));
-
-      const totalCount = typeof payload.total === "number" && payload.total >= 0 ? payload.total : companies.length;
-      setJobTotalCount(totalCount);
+      try { payload = await response.json(); } catch { payload = {}; }
+      if (!response.ok) throw new Error(payload?.error || "Failed to load job companies");
+      setJobCompanies(Array.isArray(payload.companies) ? payload.companies : []);
+      setJobPage(typeof payload.page === "number" && payload.page > 0 ? payload.page : page);
+      setJobTotalPages(Math.max(1, typeof payload.total_pages === "number" ? payload.total_pages : 1));
+      setJobTotalCount(typeof payload.total === "number" ? payload.total : (payload.companies || []).length);
     } catch (err) {
-      console.error("Failed to load job companies", err);
       setJobError(err.message || "Failed to load job companies");
       setJobCompanies([]);
       setJobTotalPages(1);
@@ -120,306 +114,78 @@ const AdminMembershipPage = () => {
     setError("");
     try {
       const [usersRes, plansRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/api/admin/memberships/users`, {
-          headers: getAuthHeaders(),
-        }),
+        fetch(`${API_BASE_URL}/api/admin/memberships/users`, { headers: getAuthHeaders() }),
         fetch(`${API_BASE_URL}/api/plans`),
       ]);
-
       const usersJson = await usersRes.json();
-      if (!usersRes.ok) {
-        throw new Error(usersJson.error || "Failed to load members");
-      }
+      if (!usersRes.ok) throw new Error(usersJson.error || "Failed to load members");
       const fetchedUsers = Array.isArray(usersJson.users) ? usersJson.users : [];
       setUsers(fetchedUsers);
       const defaults = {};
-      fetchedUsers.forEach((entry) => {
-        defaults[entry.id] = entry.plan_name || "free";
-      });
+      fetchedUsers.forEach((e) => { defaults[e.id] = e.plan_name || "free"; });
       setSelectedPlans(defaults);
-
       if (plansRes.ok) {
         const plansJson = await plansRes.json();
         setPlans(Array.isArray(plansJson.plans) ? plansJson.plans : []);
       } else {
         setPlans([]);
       }
-
       setJobPage(1);
       await loadJobCompanies(1);
     } catch (err) {
-      console.error("Failed to load admin data", err);
       setError(err.message || "Failed to load admin data");
     } finally {
       setLoadingData(false);
     }
   };
 
-  const handleNewCompanyChange = (field, value) => {
-    setNewCompany((prev) => ({ ...prev, [field]: value }));
-  };
+  // ── User Handlers ─────────────────────────────────────────
 
-  const handleCreateCompany = async (event) => {
-    if (event) {
-      event.preventDefault();
-    }
-    setJobError("");
-    setJobMessage("");
+  const planOptions = useMemo(() => plans.map((p) => ({ value: p.name, label: p.display_name || p.name })), [plans]);
+
+  const filteredUsers = useMemo(() => {
+    if (!searchTerm.trim()) return users;
+    const q = searchTerm.trim().toLowerCase();
+    return users.filter((e) => (e.email || "").toLowerCase().includes(q) || (e.name || "").toLowerCase().includes(q));
+  }, [users, searchTerm]);
+
+  // Paginated users
+  const userTotalPages = Math.max(1, Math.ceil(filteredUsers.length / USER_PAGE_SIZE));
+  const paginatedUsers = useMemo(() => {
+    const start = (userPage - 1) * USER_PAGE_SIZE;
+    return filteredUsers.slice(start, start + USER_PAGE_SIZE);
+  }, [filteredUsers, userPage]);
+
+  // Reset to page 1 when search changes
+  useEffect(() => { setUserPage(1); }, [searchTerm]);
+
+  const handlePlanChange = (userId, planName) => setSelectedPlans((p) => ({ ...p, [userId]: planName }));
+
+  const handleUpdate = async (userId) => {
+    const selectedPlanName = selectedPlans[userId];
+    if (!selectedPlanName) { setError("Please select a plan before updating."); return; }
+    setUpdating((p) => ({ ...p, [userId]: true }));
+    setError("");
+    setMessage("");
     try {
-      const payload = { ...newCompany };
-      if (!payload.name || !payload.careers_url || !payload.ats_provider) {
-        throw new Error("Name, careers url, and ATS provider are required");
-      }
-      if (typeof payload.sync_interval_minutes !== "number" || payload.sync_interval_minutes <= 0) {
-        payload.sync_interval_minutes = 180;
-      }
-
-      const response = await fetch(`${API_BASE_URL}/api/admin/jobs/companies`, {
-        method: "POST",
-        headers: {
-          ...getAuthHeaders(),
-        },
-        body: JSON.stringify(payload),
-      });
-
-      let data = {};
-      try {
-        data = await response.json();
-      } catch (parseErr) {
-        data = {};
-      }
-
-      if (!response.ok) {
-        throw new Error(data && typeof data.error === "string" ? data.error : "Failed to create company");
-      }
-
-      setJobMessage(`Added ${data.company?.name || "company"} to ATS sync list.`);
-      setNewCompany({
-        name: "",
-        website_url: "",
-        careers_url: "",
-        ats_provider: payload.ats_provider,
-        external_identifier: "",
-        sync_interval_minutes: 180,
-      });
-      setJobPage(1);
-      await loadJobCompanies(1);
-    } catch (err) {
-      console.error("Failed to create company", err);
-      setJobError(err.message || "Failed to create company");
-    }
-  };
-
-  const handleTriggerJobSync = async (companyId) => {
-    setJobError("");
-    setJobMessage("");
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/admin/jobs/companies/${companyId}/sync`, {
-        method: "POST",
+      const response = await fetch(`${API_BASE_URL}/api/admin/memberships/users/${userId}`, {
+        method: "PUT",
         headers: getAuthHeaders(),
+        body: JSON.stringify({ plan_name: selectedPlanName, status: selectedPlanName === "free" ? "free" : "active", cancel_at_period_end: false }),
       });
-
-      let data = {};
-      try {
-        data = await response.json();
-      } catch (parseErr) {
-        data = {};
-      }
-
-      if (!response.ok) {
-        throw new Error(data && typeof data.error === "string" ? data.error : "Failed to trigger job sync");
-      }
-
-      const jobsFound = data?.result?.jobsFound ?? data?.result?.jobs_found ?? 0;
-      setJobMessage(`Sync started. Found ${jobsFound} jobs.`);
-      await loadJobCompanies(jobPage);
-    } catch (err) {
-      console.error("Failed to trigger job sync", err);
-      setJobError(err.message || "Failed to trigger job sync");
-    }
-  };
-
-  const handleTriggerSyncAll = async () => {
-    setJobError("");
-    setJobMessage("");
-    setSyncingAll(true);
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/admin/jobs/companies/sync-all`, {
-        method: "POST",
-        headers: getAuthHeaders(),
-      });
-
-      let data = {};
-      try {
-        data = await response.json();
-      } catch (parseErr) {
-        data = {};
-      }
-
-      if (!response.ok) {
-        throw new Error(data && typeof data.error === "string" ? data.error : "Failed to sync companies");
-      }
-
-      if (data.result && typeof data.result === "object") {
-        const summary = data.result;
-        const ran = typeof summary.ran === "number" ? summary.ran : summary.total_companies || 0;
-        const succeeded = summary.succeeded ?? 0;
-        const failed = summary.failed ?? 0;
-        const found = summary.total_jobs_found ?? 0;
-        const created = summary.total_jobs_created ?? 0;
-        const updated = summary.total_jobs_updated ?? 0;
-        const closed = summary.total_jobs_closed ?? 0;
-        const parts = [
-          `Ran ${ran} ${ran === 1 ? "company" : "companies"}`,
-          `${succeeded} succeeded${failed ? `, ${failed} failed` : ""}`,
-          `Jobs: ${found} found (${created} new, ${updated} updated, ${closed} closed)`,
-        ];
-        setJobMessage(parts.join(". ") + ".");
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Failed to update membership");
+      if (result.user) {
+        setUsers((prev) => prev.map((e) => (e.id === userId ? result.user : e)));
+        setSelectedPlans((p) => ({ ...p, [userId]: result.user.plan_name || selectedPlanName }));
+        setMessage(`Updated ${result.user.email || "user"}.`);
       } else {
-        setJobMessage(data.message || "Sync completed.");
+        setMessage("Membership updated.");
       }
-
-      await loadJobCompanies(jobPage);
     } catch (err) {
-      console.error("Failed to sync all companies", err);
-      setJobError(err.message || "Failed to sync all companies");
+      setError(err.message || "Failed to update membership");
     } finally {
-      setSyncingAll(false);
-    }
-  };
-
-  const handleCompanyStatusChange = async (companyId, nextActive) => {
-    setJobError("");
-    setJobMessage("");
-    setJobStatusUpdating((prev) => ({ ...prev, [companyId]: true }));
-
-    try {
-      const headers = { ...getAuthHeaders() };
-      const response = await fetch(`${API_BASE_URL}/api/admin/jobs/companies/${companyId}/status`, {
-        method: "PATCH",
-        headers,
-        body: JSON.stringify({ is_active: nextActive }),
-      });
-
-      let payload = {};
-      try {
-        payload = await response.json();
-      } catch (parseErr) {
-        payload = {};
-      }
-
-      if (!response.ok) {
-        const messageText = typeof payload.error === "string" ? payload.error : "Failed to update company status";
-        throw new Error(messageText);
-      }
-
-      if (nextActive) {
-        setJobMessage("Company reactivated. Trigger a sync to refresh listings.");
-      } else {
-        setJobMessage("Company paused. It will no longer be synced automatically.");
-      }
-
-      await loadJobCompanies(jobPage);
-    } catch (err) {
-      console.error("Failed to update company status", err);
-      setJobError(err.message || "Failed to update company status");
-    } finally {
-      setJobStatusUpdating((prev) => {
-        const next = { ...prev };
-        delete next[companyId];
-        return next;
-      });
-    }
-  };
-
-  const handleJobPageChange = (nextPage) => {
-    if (nextPage < 1 || nextPage > jobTotalPages) {
-      return;
-    }
-    setJobPage(nextPage);
-    loadJobCompanies(nextPage);
-  };
-
-  const handleImportCompanies = async (file) => {
-    setImportErrors([]);
-    setJobError("");
-    setJobMessage("");
-    setImportingCompanies(true);
-
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const headers = { ...getAuthHeaders() };
-      delete headers["Content-Type"];
-
-      const response = await fetch(`${API_BASE_URL}/api/admin/jobs/companies/import`, {
-        method: "POST",
-        headers,
-        body: formData,
-      });
-
-      let payload = {};
-      try {
-        payload = await response.json();
-      } catch (parseErr) {
-        payload = {};
-      }
-
-      if (!response.ok) {
-        throw new Error(payload && typeof payload.error === "string" ? payload.error : "Failed to import companies");
-      }
-
-      const summary = payload.summary;
-      if (summary && Array.isArray(summary.errors)) {
-        setImportErrors(summary.errors);
-      } else {
-        setImportErrors([]);
-      }
-
-      if (summary && typeof summary === "object") {
-        const processed = summary.processed_rows ?? summary.processed ?? 0;
-        const totalRows = summary.total_rows ?? summary.total ?? 0;
-        const inserted = summary.inserted ?? 0;
-        const updated = summary.updated ?? 0;
-        const skipped = summary.skipped ?? 0;
-
-        const summaryParts = [
-          `Processed ${processed} of ${totalRows} rows`,
-          `${inserted} inserted`,
-          `${updated} updated`,
-        ];
-        if (skipped > 0) {
-          summaryParts.push(`${skipped} skipped`);
-        }
-        setJobMessage(summaryParts.join(" • "));
-      } else {
-        setJobMessage(payload.message || "Company import completed.");
-      }
-
-      setJobPage(1);
-      await loadJobCompanies(1);
-    } catch (err) {
-      console.error("Failed to import companies", err);
-      setJobError(err.message || "Failed to import companies");
-    } finally {
-      setImportingCompanies(false);
-      if (importInputRef.current) {
-        importInputRef.current.value = "";
-      }
-    }
-  };
-
-  const handleImportButtonClick = () => {
-    if (importInputRef.current) {
-      importInputRef.current.click();
-    }
-  };
-
-  const handleImportInputChange = (event) => {
-    const file = event.target.files && event.target.files[0];
-    if (file) {
-      handleImportCompanies(file);
+      setUpdating((p) => ({ ...p, [userId]: false }));
     }
   };
 
@@ -428,757 +194,445 @@ const AdminMembershipPage = () => {
     setError("");
     try {
       const params = new URLSearchParams({ format: "csv" });
-      if (includeAll) {
-        params.set("all", "true");
-      }
+      if (includeAll) params.set("all", "true");
       const response = await fetch(`${API_BASE_URL}/api/admin/users/emails?${params.toString()}`, {
-        headers: {
-          ...getAuthHeaders(),
-          Accept: "text/csv",
-        },
+        headers: { ...getAuthHeaders(), Accept: "text/csv" },
       });
-      if (!response.ok) {
-        const text = await response.text().catch(() => "");
-        throw new Error(text || "Failed to export user emails");
-      }
+      if (!response.ok) throw new Error((await response.text().catch(() => "")) || "Failed to export");
       const blob = await response.blob();
-      const downloadUrl = window.URL.createObjectURL(blob);
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
-      link.href = downloadUrl;
+      link.href = url;
       link.download = includeAll ? "user-emails-all.csv" : "user-emails-opted-in.csv";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      window.URL.revokeObjectURL(downloadUrl);
-      setMessage(includeAll ? "Downloaded all user emails." : "Downloaded subscribed user emails.");
+      window.URL.revokeObjectURL(url);
+      setMessage(includeAll ? "Downloaded all emails." : "Downloaded opted-in emails.");
     } catch (err) {
-      console.error("Failed to export user emails", err);
-      setError(err.message || "Failed to export user emails");
+      setError(err.message || "Failed to export");
     } finally {
       setEmailExportMode(null);
     }
   };
 
-  const planOptions = useMemo(() => {
-    if (!plans.length) {
-      return [];
-    }
-    return plans.map((plan) => ({
-      value: plan.name,
-      label: plan.display_name || plan.name,
-    }));
-  }, [plans]);
+  // ── ATS Handlers ──────────────────────────────────────────
 
-  const formatPlanPreference = (value) => {
-    if (!value) {
-      return "-";
-    }
-    const normalized = String(value).toLowerCase();
-    switch (normalized) {
-      case "free":
-        return "Free";
-      case "premium":
-        return "Premium";
-      case "ultimate":
-        return "Ultimate";
-      default:
-        return value;
-    }
-  };
+  const handleNewCompanyChange = (field, value) => setNewCompany((p) => ({ ...p, [field]: value }));
 
-  const filteredUsers = useMemo(() => {
-    if (!searchTerm.trim()) {
-      return users;
-    }
-    const query = searchTerm.trim().toLowerCase();
-    return users.filter((entry) => {
-      const email = entry.email ? entry.email.toLowerCase() : "";
-      const name = entry.name ? entry.name.toLowerCase() : "";
-      return email.includes(query) || name.includes(query);
-    });
-  }, [users, searchTerm]);
-
-  const handlePlanChange = (userId, planName) => {
-    setSelectedPlans((prev) => ({ ...prev, [userId]: planName }));
-  };
-
-  const handleUpdate = async (userId) => {
-    const selectedPlanName = selectedPlans[userId];
-    if (!selectedPlanName) {
-      setError("Please select a plan before updating.");
-      return;
-    }
-
-    setUpdating((prev) => ({ ...prev, [userId]: true }));
-    setError("");
-    setMessage("");
-
+  const handleCreateCompany = async (event) => {
+    if (event) event.preventDefault();
+    setJobError("");
+    setJobMessage("");
     try {
-      const response = await fetch(`${API_BASE_URL}/api/admin/memberships/users/${userId}`, {
-        method: "PUT",
-        headers: {
-          ...getAuthHeaders(),
-        },
-        body: JSON.stringify({
-          plan_name: selectedPlanName,
-          status: selectedPlanName === "free" ? "free" : "active",
-          cancel_at_period_end: false,
-        }),
-      });
-
-      const result = await response.json();
-      if (!response.ok) {
-        throw new Error(result.error || "Failed to update membership");
-      }
-
-      if (result.user) {
-        setUsers((prev) => prev.map((entry) => (entry.id === userId ? result.user : entry)));
-        setSelectedPlans((prev) => ({ ...prev, [userId]: result.user.plan_name || selectedPlanName }));
-        setMessage(`Membership updated for ${result.user.email || "user"}.`);
-      } else {
-        setMessage("Membership updated.");
-      }
+      const payload = { ...newCompany };
+      if (!payload.name || !payload.careers_url || !payload.ats_provider) throw new Error("Name, careers url, and ATS provider are required");
+      if (typeof payload.sync_interval_minutes !== "number" || payload.sync_interval_minutes <= 0) payload.sync_interval_minutes = 180;
+      const response = await fetch(`${API_BASE_URL}/api/admin/jobs/companies`, { method: "POST", headers: getAuthHeaders(), body: JSON.stringify(payload) });
+      let data = {};
+      try { data = await response.json(); } catch { data = {}; }
+      if (!response.ok) throw new Error(data?.error || "Failed to create company");
+      setJobMessage(`Added ${data.company?.name || "company"}.`);
+      setNewCompany({ name: "", website_url: "", careers_url: "", ats_provider: payload.ats_provider, external_identifier: "", sync_interval_minutes: 180 });
+      setJobPage(1);
+      await loadJobCompanies(1);
     } catch (err) {
-      console.error("Failed to update membership", err);
-      setError(err.message || "Failed to update membership");
-    } finally {
-      setUpdating((prev) => ({ ...prev, [userId]: false }));
+      setJobError(err.message || "Failed to create company");
     }
   };
 
-  if (loading) {
-    return <div style={{ padding: "2rem" }}>Loading…</div>;
-  }
+  const handleTriggerJobSync = async (companyId) => {
+    setJobError("");
+    setJobMessage("");
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/admin/jobs/companies/${companyId}/sync`, { method: "POST", headers: getAuthHeaders() });
+      let data = {};
+      try { data = await response.json(); } catch { data = {}; }
+      if (!response.ok) throw new Error(data?.error || "Failed to trigger sync");
+      setJobMessage(`Sync started. Found ${data?.result?.jobsFound ?? data?.result?.jobs_found ?? 0} jobs.`);
+      await loadJobCompanies(jobPage);
+    } catch (err) {
+      setJobError(err.message || "Failed to trigger sync");
+    }
+  };
 
-  if (!user || !isAdmin) {
-    return <Navigate to="/" replace />;
-  }
+  const handleTriggerSyncAll = async () => {
+    setJobError("");
+    setJobMessage("");
+    setSyncingAll(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/admin/jobs/companies/sync-all`, { method: "POST", headers: getAuthHeaders() });
+      let data = {};
+      try { data = await response.json(); } catch { data = {}; }
+      if (!response.ok) throw new Error(data?.error || "Failed to sync");
+      if (data.result && typeof data.result === "object") {
+        const s = data.result;
+        setJobMessage(`Ran ${s.ran ?? s.total_companies ?? 0} companies. ${s.succeeded ?? 0} OK, ${s.failed ?? 0} failed. Jobs: ${s.total_jobs_found ?? 0} found (${s.total_jobs_created ?? 0} new, ${s.total_jobs_updated ?? 0} updated, ${s.total_jobs_closed ?? 0} closed).`);
+      } else {
+        setJobMessage(data.message || "Sync completed.");
+      }
+      await loadJobCompanies(jobPage);
+    } catch (err) {
+      setJobError(err.message || "Failed to sync");
+    } finally {
+      setSyncingAll(false);
+    }
+  };
+
+  const handleCompanyStatusChange = async (companyId, nextActive) => {
+    setJobError("");
+    setJobMessage("");
+    setJobStatusUpdating((p) => ({ ...p, [companyId]: true }));
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/admin/jobs/companies/${companyId}/status`, { method: "PATCH", headers: getAuthHeaders(), body: JSON.stringify({ is_active: nextActive }) });
+      let payload = {};
+      try { payload = await response.json(); } catch { payload = {}; }
+      if (!response.ok) throw new Error(payload?.error || "Failed to update status");
+      setJobMessage(nextActive ? "Company reactivated." : "Company paused.");
+      await loadJobCompanies(jobPage);
+    } catch (err) {
+      setJobError(err.message || "Failed to update status");
+    } finally {
+      setJobStatusUpdating((p) => { const n = { ...p }; delete n[companyId]; return n; });
+    }
+  };
+
+  const handleJobPageChange = (p) => { if (p >= 1 && p <= jobTotalPages) { setJobPage(p); loadJobCompanies(p); } };
+
+  const handleImportCompanies = async (file) => {
+    setImportErrors([]);
+    setJobError("");
+    setJobMessage("");
+    setImportingCompanies(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const headers = { ...getAuthHeaders() };
+      delete headers["Content-Type"];
+      const response = await fetch(`${API_BASE_URL}/api/admin/jobs/companies/import`, { method: "POST", headers, body: formData });
+      let payload = {};
+      try { payload = await response.json(); } catch { payload = {}; }
+      if (!response.ok) throw new Error(payload?.error || "Failed to import");
+      const summary = payload.summary;
+      if (summary?.errors) setImportErrors(summary.errors);
+      else setImportErrors([]);
+      if (summary && typeof summary === "object") {
+        setJobMessage(`Processed ${summary.processed_rows ?? summary.processed ?? 0} of ${summary.total_rows ?? summary.total ?? 0} rows. ${summary.inserted ?? 0} inserted, ${summary.updated ?? 0} updated${(summary.skipped ?? 0) > 0 ? `, ${summary.skipped} skipped` : ""}.`);
+      } else {
+        setJobMessage(payload.message || "Import completed.");
+      }
+      setJobPage(1);
+      await loadJobCompanies(1);
+    } catch (err) {
+      setJobError(err.message || "Failed to import");
+    } finally {
+      setImportingCompanies(false);
+      if (importInputRef.current) importInputRef.current.value = "";
+    }
+  };
+
+  const handleImportButtonClick = () => importInputRef.current?.click();
+  const handleImportInputChange = (e) => { const f = e.target.files?.[0]; if (f) handleImportCompanies(f); };
+
+  const formatPlanPreference = (v) => {
+    if (!v) return "-";
+    const n = String(v).toLowerCase();
+    if (n === "free") return "Free";
+    if (n === "premium") return "Premium";
+    if (n === "ultimate") return "Ultimate";
+    return v;
+  };
+
+  // ── Stats ─────────────────────────────────────────────────
+
+  const stats = useMemo(() => {
+    const total = users.length;
+    const paid = users.filter((u) => u.plan_name && u.plan_name !== "free").length;
+    const admins = users.filter((u) => u.is_admin).length;
+    const optedIn = users.filter((u) => u.marketing_opt_in).length;
+    return { total, paid, free: total - paid, admins, optedIn };
+  }, [users]);
+
+  // ── Render ────────────────────────────────────────────────
+
+  if (loading) return <div style={{ padding: "2rem" }}>Loading...</div>;
+  if (!user || !isAdmin) return <Navigate to="/" replace />;
 
   return (
     <div className="admin-membership-page">
       <SEO
         title="Admin Dashboard | Manage Users & ATS Companies | HiHired"
-        description="Monitor memberships, manage ATS integrations, and trigger job syncs from the HiHired admin dashboard."
+        description="Monitor memberships, manage ATS integrations, and trigger job syncs."
         canonical="https://hihired.org/admin/memberships"
-        keywords="hihired admin, ats sync management, resume builder admin"
+        keywords="hihired admin, ats sync management"
       />
-      <Helmet>
-        <meta name="robots" content="noindex, nofollow" />
-      </Helmet>
+      <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
 
-        <div style={{ padding: "2rem", maxWidth: "1200px", margin: "0 auto" }}>
+      <div style={{ padding: "2rem", maxWidth: "1200px", margin: "0 auto" }}>
+        {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", flexWrap: "wrap", marginBottom: "1.5rem" }}>
-          <h1 style={{ fontSize: "1.75rem", fontWeight: 700, margin: 0 }}>Membership Management</h1>
+          <h1 style={{ fontSize: "1.75rem", fontWeight: 700, margin: 0 }}>Admin Dashboard</h1>
           <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-            <Link
-              to="/admin/analytics"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-                padding: "0.65rem 1rem",
-                borderRadius: "10px",
-                border: "1px solid #2563eb",
-                color: "#ffffff",
-                background: "#2563eb",
-                fontWeight: 600,
-                textDecoration: "none",
-                boxShadow: "0 6px 14px rgba(37, 99, 235, 0.18)",
-              }}
-            >
-              View Exit Analytics
-            </Link>
-            <Link
-              to="/admin/experiments"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-                padding: "0.65rem 1rem",
-                borderRadius: "10px",
-                border: "1px solid #10b981",
-                color: "#0f172a",
-                background: "#34d399",
-                fontWeight: 700,
-                textDecoration: "none",
-                boxShadow: "0 6px 14px rgba(16, 185, 129, 0.18)",
-              }}
-            >
-              A/B Test Lab
-            </Link>
-            <Link
-              to="/admin/jobs"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-                padding: "0.65rem 1rem",
-                borderRadius: "10px",
-                border: "1px solid #f59e0b",
-                color: "#0f172a",
-                background: "#fbbf24",
-                fontWeight: 700,
-                textDecoration: "none",
-                boxShadow: "0 6px 14px rgba(245, 158, 11, 0.18)",
-              }}
-            >
-              Job Management
-            </Link>
+            <Link to="/admin/analytics" style={{ display: "inline-flex", alignItems: "center", padding: "0.5rem 1rem", borderRadius: "8px", border: "1px solid #2563eb", color: "#fff", background: "#2563eb", fontWeight: 600, textDecoration: "none", fontSize: "0.85rem" }}>Analytics</Link>
+            <Link to="/admin/experiments" style={{ display: "inline-flex", alignItems: "center", padding: "0.5rem 1rem", borderRadius: "8px", border: "1px solid #10b981", color: "#0f172a", background: "#34d399", fontWeight: 600, textDecoration: "none", fontSize: "0.85rem" }}>A/B Tests</Link>
+            <Link to="/admin/jobs" style={{ display: "inline-flex", alignItems: "center", padding: "0.5rem 1rem", borderRadius: "8px", border: "1px solid #f59e0b", color: "#0f172a", background: "#fbbf24", fontWeight: 600, textDecoration: "none", fontSize: "0.85rem" }}>Jobs</Link>
           </div>
         </div>
 
-        {error && (
-          <div style={{ background: "#fee2e2", border: "1px solid #fca5a5", color: "#b91c1c", padding: "0.75rem 1rem", borderRadius: "8px", marginBottom: "1rem" }}>
-            {error}
+        {/* Alerts */}
+        {error && <div style={{ background: "#fee2e2", border: "1px solid #fca5a5", color: "#b91c1c", padding: "0.75rem 1rem", borderRadius: "8px", marginBottom: "1rem" }}>{error}</div>}
+        {message && <div style={{ background: "#dcfce7", border: "1px solid #86efac", color: "#166534", padding: "0.75rem 1rem", borderRadius: "8px", marginBottom: "1rem" }}>{message}</div>}
+
+        {/* Stats Cards */}
+        {!loadingData && (
+          <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "1.5rem" }}>
+            <div style={cardStyle}>
+              <div style={{ fontSize: "0.75rem", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Total Users</div>
+              <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "#111827" }}>{stats.total}</div>
+            </div>
+            <div style={cardStyle}>
+              <div style={{ fontSize: "0.75rem", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Paid</div>
+              <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "#059669" }}>{stats.paid}</div>
+            </div>
+            <div style={cardStyle}>
+              <div style={{ fontSize: "0.75rem", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Free</div>
+              <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "#6b7280" }}>{stats.free}</div>
+            </div>
+            <div style={cardStyle}>
+              <div style={{ fontSize: "0.75rem", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Marketing Opt-in</div>
+              <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "#2563eb" }}>{stats.optedIn}</div>
+            </div>
+            <div style={cardStyle}>
+              <div style={{ fontSize: "0.75rem", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>ATS Companies</div>
+              <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "#f59e0b" }}>{jobTotalCount}</div>
+            </div>
           </div>
         )}
 
-        {message && (
-          <div style={{ background: "#dcfce7", border: "1px solid #86efac", color: "#166534", padding: "0.75rem 1rem", borderRadius: "8px", marginBottom: "1rem" }}>
-            {message}
-          </div>
-        )}
+        {/* Tabs */}
+        <div style={{ display: "flex", gap: "4px", borderBottom: "1px solid #e5e7eb", marginBottom: "1.5rem" }}>
+          <button type="button" onClick={() => setActiveTab("users")} style={tabStyle(activeTab === "users")}>Users ({filteredUsers.length})</button>
+          <button type="button" onClick={() => setActiveTab("ats")} style={tabStyle(activeTab === "ats")}>ATS Job Sync ({jobTotalCount})</button>
+        </div>
 
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.75rem", marginBottom: "1rem" }}>
+        {/* ═══ Users Tab ═══ */}
+        {activeTab === "users" && (
           <div>
-            <button
-              type="button"
-              onClick={loadData}
-              disabled={loadingData}
-              style={{
-                padding: "0.5rem 1rem",
-                borderRadius: "6px",
-                border: "1px solid #d1d5db",
-                background: loadingData ? "#e5e7eb" : "#ffffff",
-                color: "#111827",
-                cursor: loadingData ? "not-allowed" : "pointer",
-                fontWeight: 500,
-              }}
-            >
-              {loadingData ? "Refreshing..." : "Refresh"}
-            </button>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: "0.5rem" }}>
-              <button
-                type="button"
-                onClick={() => handleDownloadEmails(false)}
-                disabled={emailExportMode !== null}
-                style={{
-                  padding: "0.45rem 0.9rem",
-                  borderRadius: "6px",
-                  border: "1px solid #22c55e",
-                  background: emailExportMode === "opted" ? "#e5e7eb" : "#22c55e",
-                  color: emailExportMode === "opted" ? "#6b7280" : "#ffffff",
-                  cursor: emailExportMode ? "not-allowed" : "pointer",
-                  fontWeight: 500,
-                }}
-              >
-                {emailExportMode === "opted" ? "Preparing…" : "Download opted-in emails"}
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDownloadEmails(true)}
-                disabled={emailExportMode !== null}
-                style={{
-                  padding: "0.45rem 0.9rem",
-                  borderRadius: "6px",
-                  border: "1px solid #0ea5e9",
-                  background: emailExportMode === "all" ? "#e5e7eb" : "#0ea5e9",
-                  color: emailExportMode === "all" ? "#6b7280" : "#ffffff",
-                  cursor: emailExportMode ? "not-allowed" : "pointer",
-                  fontWeight: 500,
-                }}
-              >
-                {emailExportMode === "all" ? "Preparing…" : "Download all emails"}
-              </button>
+            {/* Toolbar */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.75rem", marginBottom: "1rem" }}>
+              <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                <button type="button" onClick={loadData} disabled={loadingData} style={{ padding: "0.45rem 0.9rem", borderRadius: "6px", border: "1px solid #d1d5db", background: loadingData ? "#e5e7eb" : "#fff", cursor: loadingData ? "not-allowed" : "pointer", fontWeight: 500 }}>
+                  {loadingData ? "Refreshing..." : "Refresh"}
+                </button>
+                <button type="button" onClick={() => handleDownloadEmails(false)} disabled={emailExportMode !== null} style={{ padding: "0.45rem 0.9rem", borderRadius: "6px", border: "1px solid #22c55e", background: emailExportMode === "opted" ? "#e5e7eb" : "#22c55e", color: emailExportMode === "opted" ? "#6b7280" : "#fff", cursor: emailExportMode ? "not-allowed" : "pointer", fontWeight: 500 }}>
+                  {emailExportMode === "opted" ? "Preparing..." : "Export Opted-in"}
+                </button>
+                <button type="button" onClick={() => handleDownloadEmails(true)} disabled={emailExportMode !== null} style={{ padding: "0.45rem 0.9rem", borderRadius: "6px", border: "1px solid #0ea5e9", background: emailExportMode === "all" ? "#e5e7eb" : "#0ea5e9", color: emailExportMode === "all" ? "#6b7280" : "#fff", cursor: emailExportMode ? "not-allowed" : "pointer", fontWeight: 500 }}>
+                  {emailExportMode === "all" ? "Preparing..." : "Export All"}
+                </button>
+              </div>
+              <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Search by email or name..." style={{ padding: "0.45rem 0.75rem", borderRadius: "6px", border: "1px solid #d1d5db", minWidth: "220px" }} />
             </div>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder="Search by email or name..."
-              style={{
-                padding: "0.45rem 0.75rem",
-                borderRadius: "6px",
-                border: "1px solid #d1d5db",
-                minWidth: "220px",
-                background: "#ffffff",
-              }}
-            />
-            <div style={{ color: "#6b7280", fontSize: "0.85rem" }}>
-              Signed in as {user?.email || ""}
-            </div>
-          </div>
-        </div>
 
-        {loadingData ? (
-          <div style={{ padding: "2rem", textAlign: "center", color: "#4b5563" }}>Loading memberships...</div>
-        ) : (
-          <div style={{ overflowX: "auto", background: "#ffffff", borderRadius: "12px", border: "1px solid #e5e7eb" }}>
-            <table style={{ width: "100%", borderCollapse: "separate", borderSpacing: 0 }}>
-              <thead style={{ background: "#f9fafb", textAlign: "left" }}>
-                <tr>
-                  <th style={{ padding: "0.75rem", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "#6b7280" }}>User</th>
-                  <th style={{ padding: "0.75rem", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "#6b7280" }}>Current Plan</th>
-                  <th style={{ padding: "0.75rem", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "#6b7280" }}>Billing Status</th>
-                  <th style={{ padding: "0.75rem", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "#6b7280" }}>Resume Limit</th>
-                  <th style={{ padding: "0.75rem", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "#6b7280" }}>Current Period Ends</th>
-                  <th style={{ padding: "0.75rem", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "#6b7280" }}>Marketing Opt-In</th>
-                  <th style={{ padding: "0.75rem", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "#6b7280" }}>Plan Interest</th>
-                  <th style={{ padding: "0.75rem", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "#6b7280" }}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredUsers.map((entry) => {
-                  const planSelection = selectedPlans[entry.id] || entry.plan_name || "free";
-                  const isSelf = user?.email && user.email === entry.email;
-                  return (
-                    <tr key={entry.id} style={{ borderTop: "1px solid #f3f4f6" }}>
-                      <td style={{ padding: "0.75rem", verticalAlign: "top" }}>
-                        <div style={{ fontWeight: 600, color: "#111827" }}>{entry.email}</div>
-                        <div style={{ fontSize: "0.8rem", color: "#6b7280" }}>{entry.name || "(no name)"}</div>
-                        {entry.is_admin && (
-                          <div style={{ marginTop: "0.35rem", display: "inline-block", background: "#eef2ff", color: "#4338ca", fontSize: "0.7rem", padding: "0.1rem 0.45rem", borderRadius: "999px" }}>
-                            Admin
-                          </div>
-                        )}
-                        {isSelf && !entry.is_admin && (
-                          <div style={{ marginTop: "0.35rem", display: "inline-block", background: "#fef3c7", color: "#b45309", fontSize: "0.7rem", padding: "0.1rem 0.45rem", borderRadius: "999px" }}>
-                            You
-                          </div>
-                        )}
-                      </td>
-                      <td style={{ padding: "0.75rem", verticalAlign: "top" }}>
-                        <select
-                          value={planSelection}
-                          onChange={(event) => handlePlanChange(entry.id, event.target.value)}
-                          style={{
-                            padding: "0.4rem 0.6rem",
-                            borderRadius: "6px",
-                            border: "1px solid #d1d5db",
-                            width: "100%",
-                            background: "#ffffff",
-                          }}
-                        >
-                          {planOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
-                              {option.label}
-                            </option>
-                          ))}
-                          {!planOptions.some((option) => option.value === planSelection) && (
-                            <option value={planSelection}>{planSelection}</option>
-                          )}
-                        </select>
-                        <div style={{ fontSize: "0.75rem", color: "#6b7280", marginTop: "0.25rem" }}>
-                          {entry.plan_display_name || entry.plan_name || "-"}
-                        </div>
-                      </td>
-                      <td style={{ padding: "0.75rem", verticalAlign: "top" }}>
-                        <div style={{ fontWeight: 500, color: "#111827" }}>{entry.billing_status || entry.subscription_status || "-"}</div>
-                        {entry.cancel_at_period_end && (
-                          <div style={{ fontSize: "0.75rem", color: "#b91c1c" }}>Cancels at period end</div>
-                        )}
-                      </td>
-                      <td style={{ padding: "0.75rem", verticalAlign: "top" }}>
-                        <div>{entry.resume_limit ?? "-"}</div>
-                        <div style={{ fontSize: "0.75rem", color: "#6b7280" }}>{entry.resume_period || "-"}</div>
-                      </td>
-                      <td style={{ padding: "0.75rem", verticalAlign: "top" }}>
-                        <div>{formatDate(entry.current_period_end)}</div>
-                        <div style={{ fontSize: "0.75rem", color: "#6b7280" }}>Trial ends: {formatDate(entry.trial_end_date)}</div>
-                      </td>
-                      <td style={{ padding: "0.75rem", verticalAlign: "top" }}>
-                        <div style={{ fontWeight: 500, color: entry.marketing_opt_in ? "#047857" : "#6b7280" }}>
-                          {entry.marketing_opt_in ? "Opted in" : "No"}
-                        </div>
-                      </td>
-                      <td style={{ padding: "0.75rem", verticalAlign: "top" }}>
-                        <div>{formatPlanPreference(entry.signup_plan_preference)}</div>
-                      </td>
-                      <td style={{ padding: "0.75rem", verticalAlign: "top" }}>
-                        <button
-                          type="button"
-                          onClick={() => handleUpdate(entry.id)}
-                          disabled={!!updating[entry.id]}
-                          style={{
-                            padding: "0.4rem 0.85rem",
-                            borderRadius: "6px",
-                            border: "none",
-                            background: updating[entry.id] ? "#e5e7eb" : "#2563eb",
-                            color: updating[entry.id] ? "#6b7280" : "#ffffff",
-                            cursor: updating[entry.id] ? "not-allowed" : "pointer",
-                            fontWeight: 600,
-                          }}
-                        >
-                          {updating[entry.id] ? "Updating..." : "Update"}
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            {loadingData ? (
+              <div style={{ padding: "2rem", textAlign: "center", color: "#4b5563" }}>Loading...</div>
+            ) : (
+              <div style={{ background: "#fff", borderRadius: "12px", border: "1px solid #e5e7eb" }}>
+                <div style={{ overflowX: "auto" }}>
+                  <table style={{ width: "100%", borderCollapse: "separate", borderSpacing: 0 }}>
+                    <thead style={{ background: "#f9fafb", textAlign: "left" }}>
+                      <tr>
+                        {["User", "Plan", "Status", "Limit", "Period End", "Opt-in", "Interest", "Actions"].map((h) => (
+                          <th key={h} style={{ padding: "0.65rem 0.75rem", fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "#6b7280", whiteSpace: "nowrap" }}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {paginatedUsers.map((entry) => {
+                        const planSelection = selectedPlans[entry.id] || entry.plan_name || "free";
+                        const isSelf = user?.email && user.email === entry.email;
+                        return (
+                          <tr key={entry.id} style={{ borderTop: "1px solid #f3f4f6" }}>
+                            <td style={{ padding: "0.6rem 0.75rem" }}>
+                              <div style={{ fontWeight: 600, color: "#111827", fontSize: "0.85rem" }}>{entry.email}</div>
+                              <div style={{ fontSize: "0.75rem", color: "#6b7280" }}>{entry.name || "(no name)"}</div>
+                              {entry.is_admin && <span style={{ display: "inline-block", background: "#eef2ff", color: "#4338ca", fontSize: "0.65rem", padding: "1px 6px", borderRadius: "999px", marginTop: "2px" }}>Admin</span>}
+                              {isSelf && !entry.is_admin && <span style={{ display: "inline-block", background: "#fef3c7", color: "#b45309", fontSize: "0.65rem", padding: "1px 6px", borderRadius: "999px", marginTop: "2px" }}>You</span>}
+                            </td>
+                            <td style={{ padding: "0.6rem 0.75rem" }}>
+                              <select value={planSelection} onChange={(e) => handlePlanChange(entry.id, e.target.value)} style={{ padding: "0.35rem 0.5rem", borderRadius: "6px", border: "1px solid #d1d5db", fontSize: "0.8rem", width: "100%" }}>
+                                {planOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                                {!planOptions.some((o) => o.value === planSelection) && <option value={planSelection}>{planSelection}</option>}
+                              </select>
+                            </td>
+                            <td style={{ padding: "0.6rem 0.75rem" }}>
+                              <div style={{ fontSize: "0.85rem", fontWeight: 500 }}>{entry.billing_status || entry.subscription_status || "-"}</div>
+                              {entry.cancel_at_period_end && <div style={{ fontSize: "0.7rem", color: "#b91c1c" }}>Cancels at end</div>}
+                            </td>
+                            <td style={{ padding: "0.6rem 0.75rem", fontSize: "0.85rem" }}>{entry.resume_limit ?? "-"}</td>
+                            <td style={{ padding: "0.6rem 0.75rem", fontSize: "0.85rem" }}>{formatDate(entry.current_period_end)}</td>
+                            <td style={{ padding: "0.6rem 0.75rem" }}>
+                              <span style={{ fontWeight: 500, color: entry.marketing_opt_in ? "#047857" : "#9ca3af", fontSize: "0.85rem" }}>{entry.marketing_opt_in ? "Yes" : "No"}</span>
+                            </td>
+                            <td style={{ padding: "0.6rem 0.75rem", fontSize: "0.85rem" }}>{formatPlanPreference(entry.signup_plan_preference)}</td>
+                            <td style={{ padding: "0.6rem 0.75rem" }}>
+                              <button type="button" onClick={() => handleUpdate(entry.id)} disabled={!!updating[entry.id]} style={{ padding: "0.35rem 0.7rem", borderRadius: "6px", border: "none", background: updating[entry.id] ? "#e5e7eb" : "#2563eb", color: updating[entry.id] ? "#6b7280" : "#fff", cursor: updating[entry.id] ? "not-allowed" : "pointer", fontWeight: 600, fontSize: "0.8rem" }}>
+                                {updating[entry.id] ? "..." : "Update"}
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
 
-            {filteredUsers.length === 0 && (
-              <div style={{ padding: "1.5rem", textAlign: "center", color: "#6b7280" }}>
-                {users.length === 0 ? "No users found." : "No users match your search."}
+                {filteredUsers.length === 0 && (
+                  <div style={{ padding: "1.5rem", textAlign: "center", color: "#6b7280" }}>{users.length === 0 ? "No users found." : "No users match your search."}</div>
+                )}
+
+                {/* User Pagination */}
+                {filteredUsers.length > USER_PAGE_SIZE && (
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.75rem 1rem", borderTop: "1px solid #e5e7eb" }}>
+                    <div style={{ fontSize: "0.8rem", color: "#4b5563" }}>
+                      Showing {(userPage - 1) * USER_PAGE_SIZE + 1}-{Math.min(filteredUsers.length, userPage * USER_PAGE_SIZE)} of {filteredUsers.length}
+                    </div>
+                    <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                      <button type="button" onClick={() => setUserPage((p) => Math.max(1, p - 1))} disabled={userPage <= 1} style={{ padding: "0.35rem 0.7rem", borderRadius: "6px", border: "1px solid #d1d5db", background: userPage <= 1 ? "#f3f4f6" : "#fff", color: userPage <= 1 ? "#9ca3af" : "#1f2937", cursor: userPage <= 1 ? "not-allowed" : "pointer", fontSize: "0.8rem" }}>Prev</button>
+                      <span style={{ fontSize: "0.8rem", color: "#4b5563" }}>Page {userPage} / {userTotalPages}</span>
+                      <button type="button" onClick={() => setUserPage((p) => Math.min(userTotalPages, p + 1))} disabled={userPage >= userTotalPages} style={{ padding: "0.35rem 0.7rem", borderRadius: "6px", border: "1px solid #d1d5db", background: userPage >= userTotalPages ? "#f3f4f6" : "#fff", color: userPage >= userTotalPages ? "#9ca3af" : "#1f2937", cursor: userPage >= userTotalPages ? "not-allowed" : "pointer", fontSize: "0.8rem" }}>Next</button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
         )}
 
-        <section style={{ marginTop: "2rem", marginBottom: "2rem" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.75rem", marginBottom: "0.75rem" }}>
-            <h2 style={{ fontSize: "1.25rem", fontWeight: 600 }}>ATS Job Sync</h2>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
-              <button
-                type="button"
-                onClick={handleImportButtonClick}
-                disabled={importingCompanies}
-                style={{
-                  padding: "0.45rem 0.9rem",
-                  borderRadius: "6px",
-                  border: "1px solid #d1d5db",
-                  background: importingCompanies ? "#e5e7eb" : "#ffffff",
-                  color: "#1f2937",
-                  cursor: importingCompanies ? "not-allowed" : "pointer",
-                  fontWeight: 500,
-                }}
-              >
-                {importingCompanies ? "Importing..." : "Import Companies"}
-              </button>
-              <button
-                type="button"
-                onClick={handleTriggerSyncAll}
-                disabled={syncingAll || jobLoading}
-                style={{
-                  padding: "0.45rem 0.9rem",
-                  borderRadius: "6px",
-                  border: "1px solid #2563eb",
-                  background: syncingAll || jobLoading ? "#e5e7eb" : "#2563eb",
-                  color: syncingAll || jobLoading ? "#6b7280" : "#ffffff",
-                  cursor: syncingAll || jobLoading ? "not-allowed" : "pointer",
-                  fontWeight: 600,
-                }}
-              >
-                {syncingAll ? "Syncing..." : "Sync All Companies"}
-              </button>
-              <button
-                type="button"
-                onClick={() => loadJobCompanies(jobPage)}
-                disabled={jobLoading}
-                style={{
-                  padding: "0.45rem 0.9rem",
-                  borderRadius: "6px",
-                  border: "1px solid #d1d5db",
-                  background: jobLoading ? "#e5e7eb" : "#ffffff",
-                  color: "#1f2937",
-                  cursor: jobLoading ? "not-allowed" : "pointer",
-                  fontWeight: 500,
-                }}
-              >
-                {jobLoading ? "Refreshing..." : "Refresh"}
-              </button>
-            </div>
-            <input
-              type="file"
-              accept=".csv,text/csv"
-              ref={importInputRef}
-              style={{ display: "none" }}
-              onChange={handleImportInputChange}
-            />
-          </div>
+        {/* ═══ ATS Tab ═══ */}
+        {activeTab === "ats" && (
+          <div>
+            {/* ATS Alerts */}
+            {jobError && <div style={{ background: "#fee2e2", border: "1px solid #fca5a5", color: "#b91c1c", padding: "0.75rem 1rem", borderRadius: "8px", marginBottom: "0.75rem" }}>{jobError}</div>}
+            {jobMessage && <div style={{ background: "#dbeafe", border: "1px solid #93c5fd", color: "#1d4ed8", padding: "0.75rem 1rem", borderRadius: "8px", marginBottom: "0.75rem" }}>{jobMessage}</div>}
+            {importErrors.length > 0 && (
+              <div style={{ background: "#fef3c7", border: "1px solid #fcd34d", color: "#92400e", padding: "0.75rem 1rem", borderRadius: "8px", marginBottom: "0.75rem" }}>
+                <div style={{ fontWeight: 600, marginBottom: "0.5rem" }}>Import errors:</div>
+                <ul style={{ paddingLeft: "1.25rem", margin: 0 }}>{importErrors.map((issue, i) => <li key={`${issue.row ?? i}-${issue.message}`} style={{ marginBottom: "0.25rem" }}>Row {issue.row ?? issue.Row ?? i + 1}: {issue.message}</li>)}</ul>
+              </div>
+            )}
 
-          {jobError && (
-            <div style={{ background: "#fee2e2", border: "1px solid #fca5a5", color: "#b91c1c", padding: "0.75rem 1rem", borderRadius: "8px", marginBottom: "0.75rem" }}>
-              {jobError}
+            {/* ATS Toolbar */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.75rem", marginBottom: "1rem" }}>
+              <h2 style={{ fontSize: "1.1rem", fontWeight: 600, margin: 0 }}>ATS Companies</h2>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+                <button type="button" onClick={handleImportButtonClick} disabled={importingCompanies} style={{ padding: "0.45rem 0.9rem", borderRadius: "6px", border: "1px solid #d1d5db", background: importingCompanies ? "#e5e7eb" : "#fff", cursor: importingCompanies ? "not-allowed" : "pointer", fontWeight: 500 }}>
+                  {importingCompanies ? "Importing..." : "Import CSV"}
+                </button>
+                <button type="button" onClick={handleTriggerSyncAll} disabled={syncingAll || jobLoading} style={{ padding: "0.45rem 0.9rem", borderRadius: "6px", border: "1px solid #2563eb", background: syncingAll || jobLoading ? "#e5e7eb" : "#2563eb", color: syncingAll || jobLoading ? "#6b7280" : "#fff", cursor: syncingAll || jobLoading ? "not-allowed" : "pointer", fontWeight: 600 }}>
+                  {syncingAll ? "Syncing..." : "Sync All"}
+                </button>
+                <button type="button" onClick={() => loadJobCompanies(jobPage)} disabled={jobLoading} style={{ padding: "0.45rem 0.9rem", borderRadius: "6px", border: "1px solid #d1d5db", background: jobLoading ? "#e5e7eb" : "#fff", cursor: jobLoading ? "not-allowed" : "pointer", fontWeight: 500 }}>
+                  {jobLoading ? "..." : "Refresh"}
+                </button>
+              </div>
+              <input type="file" accept=".csv,text/csv" ref={importInputRef} style={{ display: "none" }} onChange={handleImportInputChange} />
             </div>
-          )}
 
-          {jobMessage && (
-            <div style={{ background: "#dbeafe", border: "1px solid #93c5fd", color: "#1d4ed8", padding: "0.75rem 1rem", borderRadius: "8px", marginBottom: "0.75rem" }}>
-              {jobMessage}
-            </div>
-          )}
+            {/* Add Company Form */}
+            <form onSubmit={handleCreateCompany} style={{ display: "grid", gap: "0.75rem", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", background: "#fff", border: "1px solid #e5e7eb", borderRadius: "10px", padding: "1rem", marginBottom: "1rem" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.2rem" }}>
+                <label style={{ fontSize: "0.75rem", fontWeight: 600, color: "#4b5563" }}>Company Name</label>
+                <input type="text" value={newCompany.name} onChange={(e) => handleNewCompanyChange("name", e.target.value)} placeholder="Acme Corp" style={{ padding: "0.4rem 0.6rem", borderRadius: "6px", border: "1px solid #d1d5db", fontSize: "0.85rem" }} required />
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.2rem" }}>
+                <label style={{ fontSize: "0.75rem", fontWeight: 600, color: "#4b5563" }}>Careers URL</label>
+                <input type="url" value={newCompany.careers_url} onChange={(e) => handleNewCompanyChange("careers_url", e.target.value)} placeholder="https://boards.greenhouse.io/..." style={{ padding: "0.4rem 0.6rem", borderRadius: "6px", border: "1px solid #d1d5db", fontSize: "0.85rem" }} required />
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.2rem" }}>
+                <label style={{ fontSize: "0.75rem", fontWeight: 600, color: "#4b5563" }}>ATS Provider</label>
+                <select value={newCompany.ats_provider} onChange={(e) => handleNewCompanyChange("ats_provider", e.target.value)} style={{ padding: "0.4rem 0.6rem", borderRadius: "6px", border: "1px solid #d1d5db", fontSize: "0.85rem" }} required>
+                  <option value="greenhouse">Greenhouse</option>
+                  <option value="lever">Lever</option>
+                  <option value="workday">Workday</option>
+                  <option value="ashby">Ashby</option>
+                </select>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.2rem" }}>
+                <label style={{ fontSize: "0.75rem", fontWeight: 600, color: "#4b5563" }}>Board Token</label>
+                <input type="text" value={newCompany.external_identifier} onChange={(e) => handleNewCompanyChange("external_identifier", e.target.value)} placeholder="company-board" style={{ padding: "0.4rem 0.6rem", borderRadius: "6px", border: "1px solid #d1d5db", fontSize: "0.85rem" }} />
+              </div>
+              <div style={{ display: "flex", alignItems: "flex-end" }}>
+                <button type="submit" disabled={jobLoading} style={{ padding: "0.5rem 1rem", borderRadius: "6px", border: "none", background: jobLoading ? "#e5e7eb" : "#2563eb", color: jobLoading ? "#6b7280" : "#fff", fontWeight: 600, cursor: jobLoading ? "not-allowed" : "pointer", fontSize: "0.85rem" }}>
+                  {jobLoading ? "..." : "Add Company"}
+                </button>
+              </div>
+            </form>
 
-          {importErrors.length > 0 && (
-            <div style={{ background: "#fef3c7", border: "1px solid #fcd34d", color: "#92400e", padding: "0.75rem 1rem", borderRadius: "8px", marginBottom: "0.75rem" }}>
-              <div style={{ fontWeight: 600, marginBottom: "0.5rem" }}>Some rows could not be imported:</div>
-              <ul style={{ paddingLeft: "1.25rem", margin: 0 }}>
-                {importErrors.map((issue, index) => (
-                  <li key={`${issue.row ?? index}-${issue.message}`} style={{ marginBottom: "0.25rem" }}>
-                    Row {issue.row ?? issue.Row ?? index + 1}: {issue.message}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          <form
-            onSubmit={handleCreateCompany}
-            style={{
-              display: "grid",
-              gap: "0.75rem",
-              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-              background: "#ffffff",
-              border: "1px solid #e5e7eb",
-              borderRadius: "12px",
-              padding: "1rem",
-              marginBottom: "1.5rem",
-            }}
-          >
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-              <label style={{ fontSize: "0.8rem", fontWeight: 600, color: "#4b5563" }}>Company Name</label>
-              <input
-                type="text"
-                value={newCompany.name}
-                onChange={(event) => handleNewCompanyChange("name", event.target.value)}
-                placeholder="Acme Corp"
-                style={{ padding: "0.45rem 0.75rem", borderRadius: "6px", border: "1px solid #d1d5db" }}
-                required
-              />
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-              <label style={{ fontSize: "0.8rem", fontWeight: 600, color: "#4b5563" }}>Careers URL</label>
-              <input
-                type="url"
-                value={newCompany.careers_url}
-                onChange={(event) => handleNewCompanyChange("careers_url", event.target.value)}
-                placeholder="https://boards.greenhouse.io/your-board"
-                style={{ padding: "0.45rem 0.75rem", borderRadius: "6px", border: "1px solid #d1d5db" }}
-                required
-              />
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-              <label style={{ fontSize: "0.8rem", fontWeight: 600, color: "#4b5563" }}>Website URL</label>
-              <input
-                type="url"
-                value={newCompany.website_url}
-                onChange={(event) => handleNewCompanyChange("website_url", event.target.value)}
-                placeholder="https://company.com"
-                style={{ padding: "0.45rem 0.75rem", borderRadius: "6px", border: "1px solid #d1d5db" }}
-              />
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-              <label style={{ fontSize: "0.8rem", fontWeight: 600, color: "#4b5563" }}>ATS Provider</label>
-              <select
-                value={newCompany.ats_provider}
-                onChange={(event) => handleNewCompanyChange("ats_provider", event.target.value)}
-                style={{ padding: "0.45rem 0.75rem", borderRadius: "6px", border: "1px solid #d1d5db" }}
-                required
-              >
-                <option value="greenhouse">Greenhouse</option>
-                <option value="lever">Lever</option>
-                <option value="workday">Workday</option>
-                <option value="ashby">Ashby</option>
-              </select>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-              <label style={{ fontSize: "0.8rem", fontWeight: 600, color: "#4b5563" }}>Board Token / External ID</label>
-              <input
-                type="text"
-                value={newCompany.external_identifier}
-                onChange={(event) => handleNewCompanyChange("external_identifier", event.target.value)}
-                placeholder="company-board"
-                style={{ padding: "0.45rem 0.75rem", borderRadius: "6px", border: "1px solid #d1d5db" }}
-              />
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-              <label style={{ fontSize: "0.8rem", fontWeight: 600, color: "#4b5563" }}>Sync Interval (minutes)</label>
-              <input
-                type="number"
-                min="30"
-                value={newCompany.sync_interval_minutes}
-                onChange={(event) => handleNewCompanyChange("sync_interval_minutes", Number(event.target.value))}
-                style={{ padding: "0.45rem 0.75rem", borderRadius: "6px", border: "1px solid #d1d5db" }}
-              />
-            </div>
-            <div style={{ display: "flex", alignItems: "flex-end", gap: "0.5rem" }}>
-              <button
-                type="submit"
-                disabled={jobLoading}
-                style={{
-                  padding: "0.6rem 1.2rem",
-                  borderRadius: "6px",
-                  border: "none",
-                  background: jobLoading ? "#e5e7eb" : "#2563eb",
-                  color: jobLoading ? "#6b7280" : "#ffffff",
-                  fontWeight: 600,
-                  cursor: jobLoading ? "not-allowed" : "pointer",
-                }}
-              >
-                {jobLoading ? "Working..." : "Add Company"}
-              </button>
-              <button
-                type="button"
-                onClick={() => loadJobCompanies(1)}
-                disabled={jobLoading}
-                style={{
-                  padding: "0.6rem 1.2rem",
-                  borderRadius: "6px",
-                  border: "1px solid #d1d5db",
-                  background: jobLoading ? "#e5e7eb" : "#ffffff",
-                  cursor: jobLoading ? "not-allowed" : "pointer",
-                  fontWeight: 500,
-                }}
-              >
-                {jobLoading ? "Refreshing..." : "View First Page"}
-              </button>
-            </div>
-          </form>
-
-          <div style={{ overflowX: "auto", background: "#ffffff", borderRadius: "12px", border: "1px solid #e5e7eb" }}>
-            {jobLoading ? (
-              <div style={{ padding: "1.5rem", textAlign: "center", color: "#4b5563" }}>Loading companies...</div>
-            ) : jobCompanies.length === 0 ? (
-              <div style={{ padding: "1.5rem", textAlign: "center", color: "#6b7280" }}>No companies configured yet.</div>
-            ) : (
-              <div>
-                <table style={{ width: "100%", borderCollapse: "separate", borderSpacing: 0 }}>
-                  <thead style={{ background: "#f9fafb", textAlign: "left" }}>
-                    <tr>
-                      <th style={{ padding: "0.75rem", fontSize: "0.8rem", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Company</th>
-                      <th style={{ padding: "0.75rem", fontSize: "0.8rem", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>ATS</th>
-                      <th style={{ padding: "0.75rem", fontSize: "0.8rem", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Last Sync</th>
-                      <th style={{ padding: "0.75rem", fontSize: "0.8rem", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Status</th>
-                      <th style={{ padding: "0.75rem", fontSize: "0.8rem", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {jobCompanies.map((company) => (
-                      <tr key={company.id} style={{ borderBottom: "1px solid #e5e7eb" }}>
-                        <td style={{ padding: "0.75rem", verticalAlign: "top" }}>
-                          <div style={{ fontWeight: 600 }}>{company.name}</div>
-                          <div style={{ fontSize: "0.8rem", color: "#6b7280", wordBreak: "break-all" }}>
-                            <a href={company.careers_url} target="_blank" rel="noreferrer" style={{ color: "#2563eb", textDecoration: "underline" }}>
-                              {company.careers_url}
-                            </a>
-                          </div>
-                          {company.external_identifier && (
-                            <div style={{ fontSize: "0.75rem", color: "#6b7280", marginTop: "0.25rem" }}>
-                              ID: {company.external_identifier}
-                            </div>
-                          )}
-                        </td>
-                        <td style={{ padding: "0.75rem", verticalAlign: "top" }}>
-                          <div style={{ textTransform: "capitalize" }}>{company.ats_provider || "Unknown"}</div>
-                          {company.sync_interval_minutes && (
-                            <div style={{ fontSize: "0.75rem", color: "#6b7280", marginTop: "0.25rem" }}>
-                              Every {company.sync_interval_minutes} minutes
-                            </div>
-                          )}
-                        </td>
-                        <td style={{ padding: "0.75rem", verticalAlign: "top" }}>
-                          <div>{company.last_synced_at ? new Date(company.last_synced_at).toLocaleString() : "Never"}</div>
-                          {company.last_sync_status && (
-                            <div style={{ fontSize: "0.75rem", color: "#6b7280", marginTop: "0.25rem" }}>
-                              Status: {company.last_sync_status}
-                            </div>
-                          )}
-                        </td>
-                        <td style={{ padding: "0.75rem", verticalAlign: "top" }}>
-                          <div style={{ fontWeight: 600, color: company.is_active ? "#15803d" : "#b91c1c" }}>
-                            {company.is_active ? "Active" : "Paused"}
-                          </div>
-                          {company.sync_failure_count > 0 && (
-                            <div style={{ fontSize: "0.75rem", color: "#b91c1c", marginTop: "0.25rem" }}>
-                              Failures: {company.sync_failure_count}
-                            </div>
-                          )}
-                          {company.last_sync_error && (
-                            <div style={{ fontSize: "0.75rem", color: "#b91c1c", marginTop: "0.25rem", wordBreak: "break-word" }}>
-                              {company.last_sync_error}
-                            </div>
-                          )}
-                        </td>
-                        <td style={{ padding: "0.75rem", verticalAlign: "top" }}>
-                          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
-                            <button
-                              type="button"
-                              onClick={() => handleTriggerJobSync(company.id)}
-                              disabled={!company.is_active || syncingAll || !!jobStatusUpdating[company.id]}
-                              style={{
-                                padding: "0.45rem 0.9rem",
-                                borderRadius: "6px",
-                                border: "1px solid #2563eb",
-                                background: !company.is_active || syncingAll || jobStatusUpdating[company.id] ? "#e5e7eb" : "#2563eb",
-                                color: !company.is_active || syncingAll || jobStatusUpdating[company.id] ? "#6b7280" : "#fff",
-                                fontWeight: 600,
-                                cursor: !company.is_active || syncingAll || jobStatusUpdating[company.id] ? "not-allowed" : "pointer",
-                                opacity: !company.is_active || syncingAll || jobStatusUpdating[company.id] ? 0.85 : 1,
-                              }}
-                            >
-                              Trigger Sync
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleCompanyStatusChange(company.id, !company.is_active)}
-                              disabled={!!jobStatusUpdating[company.id]}
-                              style={{
-                                padding: "0.45rem 0.9rem",
-                                borderRadius: "6px",
-                                border: "1px solid",
-                                borderColor: jobStatusUpdating[company.id] ? "#d1d5db" : company.is_active ? "#f97316" : "#059669",
-                                background: jobStatusUpdating[company.id] ? "#e5e7eb" : company.is_active ? "#f97316" : "#059669",
-                                color: jobStatusUpdating[company.id] ? "#6b7280" : "#ffffff",
-                                fontWeight: 600,
-                                cursor: jobStatusUpdating[company.id] ? "not-allowed" : "pointer",
-                              }}
-                            >
-                              {company.is_active ? "Pause" : "Reactivate"}
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.75rem 1rem", borderTop: "1px solid #e5e7eb" }}>
-                  <div style={{ fontSize: "0.8rem", color: "#4b5563" }}>
-                    {jobTotalCount === 0 ? "No companies to display." : `Showing ${jobStartIndex}-${jobEndIndex} of ${jobTotalCount}`}
+            {/* Companies Table */}
+            <div style={{ background: "#fff", borderRadius: "12px", border: "1px solid #e5e7eb" }}>
+              {jobLoading ? (
+                <div style={{ padding: "1.5rem", textAlign: "center", color: "#4b5563" }}>Loading...</div>
+              ) : jobCompanies.length === 0 ? (
+                <div style={{ padding: "1.5rem", textAlign: "center", color: "#6b7280" }}>No companies configured.</div>
+              ) : (
+                <div>
+                  <div style={{ overflowX: "auto" }}>
+                    <table style={{ width: "100%", borderCollapse: "separate", borderSpacing: 0 }}>
+                      <thead style={{ background: "#f9fafb", textAlign: "left" }}>
+                        <tr>
+                          {["Company", "ATS", "Last Sync", "Status", "Actions"].map((h) => (
+                            <th key={h} style={{ padding: "0.65rem 0.75rem", fontSize: "0.8rem", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {jobCompanies.map((company) => (
+                          <tr key={company.id} style={{ borderBottom: "1px solid #e5e7eb" }}>
+                            <td style={{ padding: "0.6rem 0.75rem" }}>
+                              <div style={{ fontWeight: 600, fontSize: "0.85rem" }}>{company.name}</div>
+                              <a href={company.careers_url} target="_blank" rel="noreferrer" style={{ fontSize: "0.75rem", color: "#2563eb", wordBreak: "break-all" }}>{company.careers_url}</a>
+                              {company.external_identifier && <div style={{ fontSize: "0.7rem", color: "#6b7280", marginTop: "2px" }}>ID: {company.external_identifier}</div>}
+                            </td>
+                            <td style={{ padding: "0.6rem 0.75rem" }}>
+                              <div style={{ textTransform: "capitalize", fontSize: "0.85rem" }}>{company.ats_provider || "Unknown"}</div>
+                              {company.sync_interval_minutes && <div style={{ fontSize: "0.7rem", color: "#6b7280" }}>Every {company.sync_interval_minutes}m</div>}
+                            </td>
+                            <td style={{ padding: "0.6rem 0.75rem" }}>
+                              <div style={{ fontSize: "0.85rem" }}>{company.last_synced_at ? new Date(company.last_synced_at).toLocaleString() : "Never"}</div>
+                              {company.last_sync_status && <div style={{ fontSize: "0.7rem", color: "#6b7280" }}>{company.last_sync_status}</div>}
+                            </td>
+                            <td style={{ padding: "0.6rem 0.75rem" }}>
+                              <span style={{ fontWeight: 600, color: company.is_active ? "#15803d" : "#b91c1c", fontSize: "0.85rem" }}>{company.is_active ? "Active" : "Paused"}</span>
+                              {company.sync_failure_count > 0 && <div style={{ fontSize: "0.7rem", color: "#b91c1c" }}>Failures: {company.sync_failure_count}</div>}
+                              {company.last_sync_error && <div style={{ fontSize: "0.7rem", color: "#b91c1c", wordBreak: "break-word" }}>{company.last_sync_error}</div>}
+                            </td>
+                            <td style={{ padding: "0.6rem 0.75rem" }}>
+                              <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
+                                <button type="button" onClick={() => handleTriggerJobSync(company.id)} disabled={!company.is_active || syncingAll || !!jobStatusUpdating[company.id]} style={{ padding: "0.35rem 0.7rem", borderRadius: "6px", border: "none", background: !company.is_active || syncingAll ? "#e5e7eb" : "#2563eb", color: !company.is_active || syncingAll ? "#6b7280" : "#fff", fontWeight: 600, cursor: !company.is_active || syncingAll ? "not-allowed" : "pointer", fontSize: "0.8rem" }}>Sync</button>
+                                <button type="button" onClick={() => handleCompanyStatusChange(company.id, !company.is_active)} disabled={!!jobStatusUpdating[company.id]} style={{ padding: "0.35rem 0.7rem", borderRadius: "6px", border: "none", background: jobStatusUpdating[company.id] ? "#e5e7eb" : company.is_active ? "#f97316" : "#059669", color: jobStatusUpdating[company.id] ? "#6b7280" : "#fff", fontWeight: 600, cursor: jobStatusUpdating[company.id] ? "not-allowed" : "pointer", fontSize: "0.8rem" }}>{company.is_active ? "Pause" : "Resume"}</button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                    <button
-                      type="button"
-                      onClick={() => handleJobPageChange(jobPage - 1)}
-                      disabled={jobPage <= 1 || jobLoading}
-                      style={{
-                        padding: "0.4rem 0.9rem",
-                        borderRadius: "6px",
-                        border: "1px solid #d1d5db",
-                        background: jobPage <= 1 || jobLoading ? "#f3f4f6" : "#ffffff",
-                        color: jobPage <= 1 || jobLoading ? "#9ca3af" : "#1f2937",
-                        cursor: jobPage <= 1 || jobLoading ? "not-allowed" : "pointer",
-                      }}
-                    >
-                      Previous
-                    </button>
-                    <div style={{ fontSize: "0.8rem", color: "#4b5563" }}>
-                      Page {jobTotalCount === 0 ? 1 : jobPage} of {Math.max(1, jobTotalPages)}
+
+                  {/* ATS Pagination */}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.75rem 1rem", borderTop: "1px solid #e5e7eb" }}>
+                    <div style={{ fontSize: "0.8rem", color: "#4b5563" }}>{jobTotalCount === 0 ? "No companies." : `Showing ${jobStartIndex}-${jobEndIndex} of ${jobTotalCount}`}</div>
+                    <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                      <button type="button" onClick={() => handleJobPageChange(jobPage - 1)} disabled={jobPage <= 1 || jobLoading} style={{ padding: "0.35rem 0.7rem", borderRadius: "6px", border: "1px solid #d1d5db", background: jobPage <= 1 ? "#f3f4f6" : "#fff", color: jobPage <= 1 ? "#9ca3af" : "#1f2937", cursor: jobPage <= 1 ? "not-allowed" : "pointer", fontSize: "0.8rem" }}>Prev</button>
+                      <span style={{ fontSize: "0.8rem", color: "#4b5563" }}>Page {jobTotalCount === 0 ? 1 : jobPage} / {Math.max(1, jobTotalPages)}</span>
+                      <button type="button" onClick={() => handleJobPageChange(jobPage + 1)} disabled={jobPage >= jobTotalPages || jobLoading || jobTotalCount === 0} style={{ padding: "0.35rem 0.7rem", borderRadius: "6px", border: "1px solid #d1d5db", background: jobPage >= jobTotalPages ? "#f3f4f6" : "#fff", color: jobPage >= jobTotalPages ? "#9ca3af" : "#1f2937", cursor: jobPage >= jobTotalPages ? "not-allowed" : "pointer", fontSize: "0.8rem" }}>Next</button>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => handleJobPageChange(jobPage + 1)}
-                      disabled={jobPage >= jobTotalPages || jobLoading || jobTotalCount === 0}
-                      style={{
-                        padding: "0.4rem 0.9rem",
-                        borderRadius: "6px",
-                        border: "1px solid #d1d5db",
-                        background: jobPage >= jobTotalPages || jobLoading || jobTotalCount === 0 ? "#f3f4f6" : "#ffffff",
-                        color: jobPage >= jobTotalPages || jobLoading || jobTotalCount === 0 ? "#9ca3af" : "#1f2937",
-                        cursor: jobPage >= jobTotalPages || jobLoading || jobTotalCount === 0 ? "not-allowed" : "pointer",
-                      }}
-                    >
-                      Next
-                    </button>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
-        </section>
+        )}
       </div>
     </div>
   );
