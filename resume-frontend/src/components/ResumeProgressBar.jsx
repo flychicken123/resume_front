@@ -1,16 +1,17 @@
-import React, { useMemo, Component } from 'react';
+import React, { useMemo, useState, useRef, useCallback, Component } from 'react';
+import { getAPIBaseURL } from '../api';
+
+const API_BASE_URL = getAPIBaseURL();
 
 const SECTIONS = [
-  { key: 'personal',   label: 'Personal',       stepId: 3, suggestion: 'Start by adding your name and contact info' },
-  { key: 'experience', label: 'Experience',      stepId: 5, suggestion: 'Add your work experience — it\'s the most impactful section' },
-  { key: 'education',  label: 'Education',       stepId: 7, suggestion: 'Include your education background' },
-  { key: 'skills',     label: 'Skills',          stepId: 8, suggestion: 'List your key skills to help match with jobs' },
-  { key: 'summary',    label: 'Summary',         stepId: 9, suggestion: 'Add a professional summary to make a strong first impression' },
-  { key: 'jobDesc',    label: 'Job Description', stepId: 4, suggestion: 'Add a job description to tailor your resume' },
-  { key: 'projects',   label: 'Projects',        stepId: 6, suggestion: 'Showcase your projects to stand out' },
+  { key: 'personal',   label: 'Personal Details',  stepId: 3 },
+  { key: 'experience', label: 'Experience',         stepId: 5 },
+  { key: 'education',  label: 'Education',          stepId: 7 },
+  { key: 'skills',     label: 'Skills',             stepId: 8 },
+  { key: 'summary',    label: 'Summary',            stepId: 9 },
+  { key: 'jobDesc',    label: 'Job Description',    stepId: 4 },
+  { key: 'projects',   label: 'Projects',           stepId: 6 },
 ];
-
-const PRIORITY = ['experience', 'skills', 'education', 'summary', 'personal', 'jobDesc', 'projects'];
 
 function checkCompletion(resumeData, jobDescriptions) {
   const d = resumeData || {};
@@ -27,24 +28,67 @@ function checkCompletion(resumeData, jobDescriptions) {
 
 const ResumeProgressBar = ({ resumeData, jobDescriptions, onSectionClick }) => {
   const completion = useMemo(() => checkCompletion(resumeData, jobDescriptions), [resumeData, jobDescriptions]);
-
   const completedCount = Object.values(completion).filter(Boolean).length;
   const total = SECTIONS.length;
   const pct = Math.round((completedCount / total) * 100);
 
-  const suggestion = useMemo(() => {
-    if (completedCount === total) return 'Your resume is complete! Preview and download it.';
-    for (const key of PRIORITY) {
-      if (!completion[key]) {
-        return SECTIONS.find(s => s.key === key)?.suggestion || '';
-      }
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [hint, setHint] = useState('');
+  const [loading, setLoading] = useState(false);
+  const hintCacheRef = useRef({ key: '', hint: '' });
+  const hoverTimerRef = useRef(null);
+
+  const missing = SECTIONS.filter(s => !completion[s.key]).map(s => s.label);
+  const complete = SECTIONS.filter(s => completion[s.key]).map(s => s.label);
+  const cacheKey = missing.join(',');
+
+  const fetchHint = useCallback(async () => {
+    if (missing.length === 0) {
+      setHint('Your resume is complete! Preview and download it.');
+      return;
     }
-    return '';
-  }, [completion, completedCount, total]);
+    if (hintCacheRef.current.key === cacheKey) {
+      setHint(hintCacheRef.current.hint);
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/resume/progress-hint`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ missing, complete }),
+      });
+      const data = await res.json();
+      const h = data.hint || `Consider adding your ${missing[0]} next.`;
+      hintCacheRef.current = { key: cacheKey, hint: h };
+      setHint(h);
+    } catch {
+      setHint(`Consider adding your ${missing[0]} next.`);
+    } finally {
+      setLoading(false);
+    }
+  }, [missing, complete, cacheKey]);
+
+  const handleMouseEnter = () => {
+    hoverTimerRef.current = setTimeout(() => {
+      setShowTooltip(true);
+      fetchHint();
+    }, 300);
+  };
+
+  const handleMouseLeave = () => {
+    clearTimeout(hoverTimerRef.current);
+    setShowTooltip(false);
+  };
 
   return (
-    <div className="resume-progress-bar">
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '6px' }}>
+    <div
+      className="resume-progress-bar"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      style={{ position: 'relative' }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         <div style={{ flex: 1, height: '8px', borderRadius: '4px', background: '#e5e7eb', overflow: 'hidden' }}>
           <div style={{
             width: `${pct}%`,
@@ -55,36 +99,41 @@ const ResumeProgressBar = ({ resumeData, jobDescriptions, onSectionClick }) => {
           }} />
         </div>
         <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#374151', whiteSpace: 'nowrap' }}>
-          {completedCount}/{total} sections
+          {pct}%
         </span>
       </div>
 
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '4px' }}>
-        {SECTIONS.map(s => {
-          const done = completion[s.key];
-          return (
-            <button
-              key={s.key}
-              onClick={() => onSectionClick(s.stepId)}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: '4px',
-                padding: '2px 10px', borderRadius: '12px', border: 'none',
-                fontSize: '0.75rem', fontWeight: 500, cursor: 'pointer',
-                background: done ? '#d1fae5' : '#f3f4f6',
-                color: done ? '#065f46' : '#6b7280',
-                transition: 'all 0.2s',
-              }}
-            >
-              <span style={{ fontSize: '0.7rem' }}>{done ? '✓' : '○'}</span>
-              {s.label}
-            </button>
-          );
-        })}
-      </div>
-
-      {suggestion && (
-        <div style={{ fontSize: '0.78rem', color: '#6b7280', fontStyle: 'italic' }}>
-          💡 {suggestion}
+      {showTooltip && (
+        <div style={{
+          position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px',
+          background: '#fff', border: '1px solid #e5e7eb', borderRadius: '10px',
+          padding: '12px 16px', boxShadow: '0 4px 16px rgba(0,0,0,0.10)', zIndex: 50,
+        }}>
+          <div style={{ fontSize: '0.78rem', color: '#374151', marginBottom: '8px', fontWeight: 600 }}>
+            {loading ? 'Thinking...' : `💡 ${hint}`}
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+            {SECTIONS.map(s => {
+              const done = completion[s.key];
+              return (
+                <button
+                  key={s.key}
+                  onClick={() => { onSectionClick(s.stepId); setShowTooltip(false); }}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '4px',
+                    padding: '3px 10px', borderRadius: '12px', border: 'none',
+                    fontSize: '0.72rem', fontWeight: 500, cursor: 'pointer',
+                    background: done ? '#d1fae5' : '#f3f4f6',
+                    color: done ? '#065f46' : '#6b7280',
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  <span style={{ fontSize: '0.65rem' }}>{done ? '✓' : '○'}</span>
+                  {s.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>
