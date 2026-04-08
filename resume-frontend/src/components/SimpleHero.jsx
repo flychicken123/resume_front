@@ -67,14 +67,26 @@ const SimpleHero = ({ onCreateClick }) => {
         </div>
 
         <div className="hero-right">
-          <div className="resume-preview">
-            <img
-              src={resumePreviewSrc}
-              alt="HiHired resume preview"
-              className="hero-preview-image"
-            />
-            <div className="hero-preview-badge">
-              Live preview as you type
+          <div className="hero-previews">
+            <div className="resume-preview">
+              <img
+                src={resumePreviewSrc}
+                alt="HiHired resume preview"
+                className="hero-preview-image"
+              />
+              <div className="hero-preview-badge">
+                Live preview as you type
+              </div>
+            </div>
+            <div className="resume-preview">
+              <img
+                src="/templates/tracker.png"
+                alt="HiHired application tracker"
+                className="hero-preview-image"
+              />
+              <div className="hero-preview-badge">
+                Track your applications
+              </div>
             </div>
           </div>
         </div>
