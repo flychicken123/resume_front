@@ -36,8 +36,8 @@ const SimpleHero = ({ onCreateClick }) => {
             Land more interviews with a resume tailored to each job
           </h1>
           <p className="hero-description">
-            Import your resume, paste a job description, and get an ATS-optimized
-            version in under 5 minutes. Free to start.
+            Stop juggling 10 tabs to job hunt. Build your resume, match with jobs,
+            auto-fill applications, and track everything — powered by AI, free to start.
           </p>
 
           <div className="hero-primary-cta">
