@@ -18,7 +18,7 @@ function checkCompletion(resumeData, jobDescriptions) {
     personal:   !!(d.name?.trim() && d.email?.trim()),
     experience: Array.isArray(d.experiences) && d.experiences.some(e => e.jobTitle?.trim()),
     education:  Array.isArray(d.education) && d.education.some(e => e.school?.trim()),
-    skills:     !!((d.skills || d.skillsCategorized || '').trim()),
+    skills:     !!(typeof d.skills === 'string' ? d.skills.trim() : typeof d.skillsCategorized === 'string' ? d.skillsCategorized.trim() : Array.isArray(d.skills) ? d.skills.length > 0 : false),
     summary:    !!(d.summary?.trim()),
     jobDesc:    Array.isArray(jobDescriptions) && jobDescriptions.length > 0,
     projects:   Array.isArray(d.projects) && d.projects.some(p => p.projectName?.trim()),
