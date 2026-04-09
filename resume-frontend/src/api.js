@@ -1421,14 +1421,7 @@ export async function extractImpactKeywordsAI(experiences) {
     experiences: experiences.map((exp, idx) => ({
       id: `exp-${idx}`,
       description: exp.description || '',
-      projects: Array.isArray(exp.projectsForRole)
-        ? exp.projectsForRole.map((proj, projIdx) => ({
-            id: `proj-${idx}-${projIdx}`,
-            name: proj.projectName || '',
-            description: proj.description || '',
-            technologies: proj.technologies || '',
-          }))
-        : [],
+      projects: [],
     })),
   };
 

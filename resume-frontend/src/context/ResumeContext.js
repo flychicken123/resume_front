@@ -326,24 +326,18 @@ export const ResumeProvider = ({ children }) => {
 
       // Only add experiences if they exist in the imported data
       if (Array.isArray(structured.experience) && structured.experience.length > 0) {
-        mapped.experiences = structured.experience.map((e) => ({
-          jobTitle: e.role || '',
-          company: e.company || '',
-          city: (e.location || '').split(',')[0] || '',
-          state: (e.location || '').split(',')[1]?.trim() || '',
-          startDate: e.startDate || '',
-          endDate: e.endDate || '',
-          currentlyWorking: (e.endDate || '').toLowerCase() === 'present',
-          description: Array.isArray(e.bullets) ? e.bullets.join('\n') : (e.description || ''),
-          projectsForRole: Array.isArray(e.projectsForRole)
-            ? e.projectsForRole.map((p) => ({
-                projectName: p.projectName || '',
-                description: Array.isArray(p.bullets) ? p.bullets.join('\n') : (p.description || ''),
-                technologies: p.technologies || '',
-                projectUrl: p.projectUrl || ''
-              }))
-            : []
-        }));
+        mapped.experiences = structured.experience.map((e) => {
+          return {
+            jobTitle: e.role || '',
+            company: e.company || '',
+            city: (e.location || '').split(',')[0] || '',
+            state: (e.location || '').split(',')[1]?.trim() || '',
+            startDate: e.startDate || '',
+            endDate: e.endDate || '',
+            currentlyWorking: (e.endDate || '').toLowerCase() === 'present',
+            description: Array.isArray(e.bullets) ? e.bullets.join('\n') : (e.description || ''),
+          };
+        });
       }
 
       // Only add education if it exists in the imported data
@@ -376,15 +370,15 @@ export const ResumeProvider = ({ children }) => {
         }];
       }
 
-      // Only add projects if they exist in the imported data
-      if (Array.isArray(structured.projects) && structured.projects.length > 0) {
-        mapped.projects = structured.projects.map((proj) => ({
-          projectName: proj.projectName || '',
-          description: Array.isArray(proj.bullets) ? proj.bullets.join('\n') : (proj.description || ''),
-          technologies: Array.isArray(proj.technologies) ? proj.technologies.join(', ') : (proj.technologies || ''),
-          projectUrl: proj.projectUrl || ''
-        }));
-      }
+      // Add standalone projects from the imported data
+      mapped.projects = Array.isArray(structured.projects)
+        ? structured.projects.map((proj) => ({
+            projectName: proj.projectName || '',
+            description: Array.isArray(proj.bullets) ? proj.bullets.join('\n') : (proj.description || ''),
+            technologies: Array.isArray(proj.technologies) ? proj.technologies.join(', ') : (proj.technologies || ''),
+            projectUrl: proj.projectUrl || ''
+          }))
+        : [];
 
       console.log('Mapped data:', mapped);
       setData(normalizeResumeData(mapped));

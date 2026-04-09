@@ -2771,30 +2771,10 @@ const renderExperiences = (experiences, styles) => {
             )}
           </>
         );
-        const projectsForRole = Array.isArray(exp.projectsForRole) ? exp.projectsForRole : [];
-        const hasRoleProjects = projectsForRole.some(
-          (p) => p && (p.projectName || p.description || p.technologies || p.projectUrl)
-        );
         return (
           <div key={idx} style={styles.item} className={experienceClassName}>
             {isAttorneyTemplate ? renderAttorneyHeader() : renderStandardHeader()}
             {descriptionContent}
-            {hasRoleProjects && (
-              <div style={{ marginTop: '4px' }}>
-                {renderProjects(
-                  projectsForRole,
-                  {
-                    ...styles,
-                    item: { ...(styles.item || {}), marginTop: '2px' },
-                    company: {
-                      ...(styles.company || {}),
-                      fontStyle: 'italic',
-                    },
-                  },
-                  resolvedExperienceIndex
-                )}
-              </div>
-            )}
           </div>
         );
       }

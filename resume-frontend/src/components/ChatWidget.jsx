@@ -1502,7 +1502,6 @@ const clampLauncherPosition = useCallback(
                 endDate: resolveStringField(current.endDate, incoming.endDate),
                 currentlyWorking: resolveBooleanField(current.currentlyWorking, incoming.currentlyWorking),
                 description: resolveStringField(current.description, incoming.description),
-                projectsForRole: mergeProjects(current.projectsForRole, incoming.projectsForRole),
               };
 
               merged = true;
@@ -1533,11 +1532,7 @@ const clampLauncherPosition = useCallback(
         const summaryLines = parsedExperiences.map((exp, index) => {
           const headerParts = [exp.jobTitle, exp.company].filter(Boolean);
           const header = headerParts.length ? headerParts.join(' at ') : `Role ${index + 1}`;
-          const projectNames = Array.isArray(exp.projectsForRole)
-            ? exp.projectsForRole.map((p) => p.projectName).filter(Boolean)
-            : [];
-          const projectsLabel = projectNames.length ? `projects: ${projectNames.join(', ')}` : null;
-          return [header, projectsLabel].filter(Boolean).join(' — ');
+          return header;
         });
 
         const confirmation =
