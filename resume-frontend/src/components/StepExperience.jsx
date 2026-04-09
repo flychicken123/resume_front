@@ -1070,6 +1070,173 @@ const StepExperience = () => {
                 {loadingIndex === idx ? 'Checking...' : aiMode[idx] ? '✓ AI Enhanced' : '✨ Check with AI'}
               </button>
             </div>
+
+            {/* Role Projects Section */}
+            <div style={{ marginTop: '1.5rem', borderTop: '1px solid #e5e7eb', paddingTop: '1rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <label style={{ fontWeight: 500, color: '#374151', fontSize: '0.875rem' }}>
+                  Projects for this Role
+                </label>
+              </div>
+              <p style={{ color: '#9ca3af', fontSize: '0.8rem', marginBottom: '0.75rem', marginTop: 0 }}>
+                Add specific projects you worked on at this company. These appear as sub-entries under this role.
+              </p>
+
+              {getProjectsForExperience(idx).map((project, pIdx) => (
+                <div
+                  key={pIdx}
+                  style={{
+                    background: '#f9fafb',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '6px',
+                    padding: '1rem',
+                    marginBottom: '0.75rem',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                    <span style={{ fontSize: '0.8rem', color: '#6b7280', fontWeight: 500 }}>
+                      Project {pIdx + 1}
+                    </span>
+                    <div style={{ display: 'flex', gap: '0.25rem' }}>
+                      <button
+                        onClick={() => moveExperienceProjectRow(idx, pIdx, pIdx - 1)}
+                        disabled={pIdx === 0}
+                        style={{
+                          background: pIdx === 0 ? '#f3f4f6' : '#e0f2fe',
+                          color: pIdx === 0 ? '#9ca3af' : '#0369a1',
+                          border: '1px solid',
+                          borderColor: pIdx === 0 ? '#e5e7eb' : '#bae6fd',
+                          borderRadius: '4px',
+                          padding: '0.15rem 0.4rem',
+                          fontSize: '0.7rem',
+                          cursor: pIdx === 0 ? 'not-allowed' : 'pointer',
+                        }}
+                      >↑</button>
+                      <button
+                        onClick={() => moveExperienceProjectRow(idx, pIdx, pIdx + 1)}
+                        disabled={pIdx === getProjectsForExperience(idx).length - 1}
+                        style={{
+                          background: pIdx === getProjectsForExperience(idx).length - 1 ? '#f3f4f6' : '#e0f2fe',
+                          color: pIdx === getProjectsForExperience(idx).length - 1 ? '#9ca3af' : '#0369a1',
+                          border: '1px solid',
+                          borderColor: pIdx === getProjectsForExperience(idx).length - 1 ? '#e5e7eb' : '#bae6fd',
+                          borderRadius: '4px',
+                          padding: '0.15rem 0.4rem',
+                          fontSize: '0.7rem',
+                          cursor: pIdx === getProjectsForExperience(idx).length - 1 ? 'not-allowed' : 'pointer',
+                        }}
+                      >↓</button>
+                      {getProjectsForExperience(idx).length > 1 && (
+                        <button
+                          onClick={() => removeExperienceProjectRow(idx, pIdx)}
+                          style={{
+                            background: '#fee2e2',
+                            color: '#dc2626',
+                            border: '1px solid #fecaca',
+                            borderRadius: '4px',
+                            padding: '0.15rem 0.4rem',
+                            fontSize: '0.7rem',
+                            cursor: 'pointer',
+                          }}
+                        >×</button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.8rem', color: '#6b7280', marginBottom: '0.25rem' }}>
+                        Project Name
+                      </label>
+                      <input
+                        type="text"
+                        value={project.projectName || ''}
+                        onChange={(e) => handleProjectFieldChange(idx, pIdx, 'projectName', e.target.value)}
+                        placeholder="e.g., Real-time monitoring system"
+                        style={{
+                          width: '100%',
+                          padding: '0.5rem',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '4px',
+                          fontSize: '0.875rem',
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.8rem', color: '#6b7280', marginBottom: '0.25rem' }}>
+                        Technologies
+                      </label>
+                      <input
+                        type="text"
+                        value={project.technologies || ''}
+                        onChange={(e) => handleProjectFieldChange(idx, pIdx, 'technologies', e.target.value)}
+                        placeholder="e.g., Go, Kafka, React"
+                        style={{
+                          width: '100%',
+                          padding: '0.5rem',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '4px',
+                          fontSize: '0.875rem',
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ marginBottom: '0.5rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.8rem', color: '#6b7280', marginBottom: '0.25rem' }}>
+                      Description
+                    </label>
+                    <textarea
+                      rows="3"
+                      value={project.description || ''}
+                      onChange={(e) => handleProjectFieldChange(idx, pIdx, 'description', e.target.value)}
+                      placeholder="Describe what you built and the impact..."
+                      style={{
+                        width: '100%',
+                        padding: '0.5rem',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '4px',
+                        fontSize: '0.875rem',
+                        resize: 'vertical',
+                      }}
+                    />
+                  </div>
+
+                  <button
+                    onClick={() => checkProjectWithAI(idx, pIdx)}
+                    disabled={projectLoading[`${idx}-${pIdx}`] || !(project.description || '').trim()}
+                    style={{
+                      background: projectAiMode[`${idx}-${pIdx}`] ? '#10b981' : '#8b5cf6',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      padding: '0.35rem 0.75rem',
+                      fontSize: '0.8rem',
+                      cursor: projectLoading[`${idx}-${pIdx}`] || !(project.description || '').trim() ? 'not-allowed' : 'pointer',
+                      opacity: projectLoading[`${idx}-${pIdx}`] || !(project.description || '').trim() ? 0.5 : 1,
+                    }}
+                  >
+                    {projectLoading[`${idx}-${pIdx}`] ? 'Checking...' : projectAiMode[`${idx}-${pIdx}`] ? '✓ AI Enhanced' : '✨ Check with AI'}
+                  </button>
+                </div>
+              ))}
+
+              <button
+                onClick={() => addExperienceProjectRow(idx)}
+                style={{
+                  background: 'none',
+                  color: '#6b7280',
+                  border: '1px dashed #d1d5db',
+                  borderRadius: '6px',
+                  padding: '0.5rem',
+                  width: '100%',
+                  fontSize: '0.8rem',
+                  cursor: 'pointer',
+                }}
+              >
+                + Add Project
+              </button>
+            </div>
           </div>
         ))
       )}
