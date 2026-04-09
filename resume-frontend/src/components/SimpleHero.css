@@ -104,18 +104,7 @@
 
 /* Right Side - Resume Preview */
 .hero-right {
-  flex: 0 0 780px;
-}
-
-.hero-previews {
-  display: flex;
-  gap: 16px;
-  align-items: flex-start;
-}
-
-.hero-previews .resume-preview {
-  flex: 1;
-  min-width: 0;
+  flex: 0 0 420px;
 }
 
 .resume-preview {
@@ -167,10 +156,6 @@
     margin: 0 auto;
   }
 
-  .hero-previews {
-    flex-direction: column;
-    gap: 20px;
-  }
 
   .hero-headline {
     font-size: 36px;
