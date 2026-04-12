@@ -13,7 +13,7 @@ const getAPIBaseURL = () => {
     return window.location.origin;
   }
   // Fallback for SSR/build-time
-  return (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) || 'http://localhost:8081';
+  return process.env.REACT_APP_API_URL || 'http://localhost:8081';
 };
 
 const API_BASE_URL = getAPIBaseURL();
