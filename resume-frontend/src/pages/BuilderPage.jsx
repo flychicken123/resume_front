@@ -156,11 +156,12 @@ function getFormatStyles(templateId, fontSizeMultiplier) {
 function ResumePreview({ templateId, fontSizeMultiplier, data }) {
   const s = getFormatStyles(templateId, fontSizeMultiplier);
   const d = data;
+  const asArray = (v) => Array.isArray(v) ? v : v ? [v] : [];
 
-  const skillsList = d.skills ? d.skills.split(',').map(sk => sk.trim()).filter(Boolean) : [];
-  const experienceList = (d.experiences || []).filter(e => e.jobTitle || e.company);
-  const projectList = (d.projects || []).filter(p => p.projectName);
-  const eduList = (d.education || []).filter(e => e.school);
+  const skillsList = d.skills ? (typeof d.skills === 'string' ? d.skills.split(',') : Array.isArray(d.skills) ? d.skills : []).map(sk => String(sk).trim()).filter(Boolean) : [];
+  const experienceList = asArray(d.experiences).filter(e => e.jobTitle || e.company);
+  const projectList = asArray(d.projects).filter(p => p.projectName);
+  const eduList = asArray(d.education).filter(e => e.school);
   const contactParts = [d.email, d.phone].filter(Boolean).join(' | ');
 
   if (s.isAttorney) {
@@ -385,6 +386,12 @@ export default function BuilderPage() {
     jobDescription: '',
     coverLetter: '',
   };
+
+  // Ensure array fields are always arrays (backend may return objects for single items)
+  const toArray = (v) => Array.isArray(v) ? v : v ? [v] : [];
+  rd.experiences = toArray(rd.experiences);
+  rd.projects = toArray(rd.projects);
+  rd.education = toArray(rd.education);
 
   // Template/font state derived from resumeData
   const selectedTemplate = rd.selectedFormat || 'classic-professional';
