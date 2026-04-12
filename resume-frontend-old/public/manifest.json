@@ -1,0 +1,13 @@
+{
+  "short_name": "HiHired",
+  "name": "HiHired - AI Resume Builder",
+  "description": "Free AI-powered resume builder to create professional resumes",
+  "icons": [],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#667eea",
+  "background_color": "#ffffff",
+  "categories": ["productivity", "business"],
+  "lang": "en",
+  "orientation": "portrait-primary"
+} 

@@ -1,0 +1,160 @@
+.hero {
+  padding: 80px 0 60px;
+  text-align: center;
+}
+
+.heroBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 120, 50, 0.1);
+  color: #e8590c;
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+
+.heroTitle {
+  font-size: 3.2rem;
+  font-weight: 800;
+  line-height: 1.15;
+  max-width: 720px;
+  margin: 0 auto 20px;
+  color: #1a1b1e;
+}
+
+.heroHighlight {
+  background: linear-gradient(135deg, #e8590c 0%, #d6336c 50%, #7048e8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.heroSubtitle {
+  color: #868e96;
+  font-size: 1.15rem;
+  max-width: 560px;
+  margin: 0 auto 32px;
+  line-height: 1.6;
+}
+
+.trusted {
+  padding: 40px 0;
+  text-align: center;
+  border-top: 1px solid #e9ecef;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.trustedLabel {
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #adb5bd;
+  margin-bottom: 16px;
+}
+
+.trustedLogos {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.trustedName {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #ced4da;
+}
+
+.section {
+  padding: 80px 0;
+}
+
+.sectionAlt {
+  padding: 80px 0;
+  background: #f8f9fa;
+}
+
+.sectionTitle {
+  font-size: 2.2rem;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 8px;
+  color: #1a1b1e;
+}
+
+.sectionSubtitle {
+  text-align: center;
+  color: #868e96;
+  font-size: 1.05rem;
+  max-width: 560px;
+  margin: 0 auto 48px;
+  line-height: 1.6;
+}
+
+.stepCard {
+  text-align: center;
+  padding: 32px 24px;
+}
+
+.stepNumber {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e8590c, #d6336c);
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.featureCard {
+  padding: 28px;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+  background: #fff;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.featureCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.ctaSection {
+  padding: 80px 0;
+  background: #1a1b1e;
+  text-align: center;
+}
+
+.footer {
+  padding: 40px 0;
+  border-top: 1px solid #e9ecef;
+  text-align: center;
+  color: #868e96;
+  font-size: 0.85rem;
+}
+
+.footerLinks {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 12px;
+}
+
+.footerLink {
+  color: #868e96;
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+
+.footerLink:hover {
+  color: #495057;
+}

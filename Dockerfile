@@ -54,9 +54,9 @@ RUN npm cache clean --force \
 # Copy source code from resume-frontend directory
 COPY resume-frontend/ .
 
-# Build the React app with environment variables (includes react-snap + fix-canonical)
+# Build the app with environment variables
 ARG REACT_APP_API_URL
-ENV REACT_APP_API_URL=$REACT_APP_API_URL
+ENV VITE_API_URL=$REACT_APP_API_URL
 RUN npm run build --loglevel verbose \
     || (echo "npm build failed; dumping npm-debug.log (if any)" \
         && if [ -f npm-debug.log ]; then cat npm-debug.log; fi \
@@ -67,5 +67,5 @@ RUN npm install -g serve
 
 EXPOSE 3000
 
-# Start the application
-CMD ["serve", "-s", "build", "-l", "3000"]
+# Vite outputs to dist/ instead of build/
+CMD ["serve", "-s", "dist", "-l", "3000"]

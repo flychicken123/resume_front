@@ -1,0 +1,176 @@
+.ads-rewards-page {
+  padding: 80px 16px 120px;
+  max-width: 600px;
+  margin: 0 auto;
+  color: #0f172a;
+}
+
+.ads-rewards-loading {
+  text-align: center;
+  padding: 40px;
+  color: #64748b;
+}
+
+.ads-rewards-container {
+  background: #fff;
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  border: 1px solid #e2e8f0;
+}
+
+.ads-rewards-page h1 {
+  margin: 0 0 8px;
+  font-size: 1.75rem;
+  text-align: center;
+}
+
+.ads-rewards-subtitle {
+  text-align: center;
+  color: #64748b;
+  margin-bottom: 24px;
+}
+
+.ads-rewards-message {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.ads-rewards-message--success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.ads-rewards-message--error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.ads-rewards-message--info {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.ads-rewards-usage {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.ads-rewards-usage-label {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.ads-rewards-usage-stats {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.ads-rewards-usage-used {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.ads-rewards-usage-remaining {
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.ads-rewards-action {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.ads-rewards-watch-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 32px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.ads-rewards-watch-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+}
+
+.ads-rewards-watch-btn:active {
+  transform: translateY(0);
+}
+
+.ads-rewards-cooldown {
+  text-align: center;
+}
+
+.ads-rewards-cooldown p {
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.ads-rewards-timer {
+  display: inline-block;
+  padding: 12px 24px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #475569;
+  font-variant-numeric: tabular-nums;
+}
+
+.ads-rewards-info {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 24px;
+}
+
+.ads-rewards-info h3 {
+  margin: 0 0 12px;
+  font-size: 1rem;
+  color: #334155;
+}
+
+.ads-rewards-info ul {
+  margin: 0;
+  padding-left: 20px;
+  color: #64748b;
+}
+
+.ads-rewards-info li {
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.ads-rewards-info li:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 640px) {
+  .ads-rewards-page {
+    padding-top: 60px;
+  }
+
+  .ads-rewards-container {
+    padding: 24px;
+  }
+
+  .ads-rewards-page h1 {
+    font-size: 1.5rem;
+  }
+}

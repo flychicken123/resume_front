@@ -1,0 +1,143 @@
+.resume-showcase {
+  padding: 60px 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.showcase-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.showcase-title {
+  font-size: 36px;
+  font-weight: 700;
+  color: #1a202c;
+  margin-bottom: 15px;
+}
+
+.showcase-subtitle {
+  font-size: 18px;
+  color: #64748b;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.resume-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  margin-bottom: 50px;
+}
+
+.resume-example {
+  display: flex;
+  align-items: stretch;
+  gap: 32px;
+  background: white;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.resume-example:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+}
+
+.resume-example .template-thumbnail-wrapper {
+  flex-shrink: 0;
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.12);
+}
+
+.resume-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+}
+
+.resume-name {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.resume-description {
+  font-size: 16px;
+  color: #475569;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.showcase-benefits {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap;
+  padding: 30px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-radius: 16px;
+}
+
+.benefit {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.benefit-icon {
+  font-size: 24px;
+}
+
+.benefit-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: #334155;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .resume-showcase {
+    padding: 40px 15px;
+  }
+
+  .showcase-title {
+    font-size: 28px;
+  }
+
+  .showcase-subtitle {
+    font-size: 16px;
+  }
+
+  .resume-example {
+    flex-direction: column;
+    gap: 20px;
+    padding: 22px;
+  }
+
+  .resume-example .template-thumbnail-wrapper {
+    width: 100%;
+  }
+
+  .showcase-benefits {
+    gap: 20px;
+    padding: 20px;
+  }
+
+  .benefit {
+    flex-basis: calc(50% - 10px);
+  }
+}
+
+@media (max-width: 480px) {
+  .showcase-title {
+    font-size: 24px;
+  }
+
+  .benefit {
+    flex-basis: 100%;
+  }
+}
