@@ -51,4 +51,4 @@ coverage/
 .npm
 
 # Optional eslint cache
-.eslintcache 
+.eslintcache resume-frontend-new/
