@@ -27,6 +27,16 @@ export default function ChatWidget() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Auto-dismiss tooltip after 5 seconds
+  useEffect(() => {
+    if (showTooltip) {
+      const timer = setTimeout(() => {
+        setShowTooltip(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showTooltip]);
+
   const sendMessage = (text) => {
     if (!text.trim()) return;
     const userMsg = { role: 'user', text: text.trim() };

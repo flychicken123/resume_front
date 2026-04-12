@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import {
   Container, Title, Text, Button, Group, Stack, SimpleGrid,
   Accordion, ThemeIcon, Paper, Box,
@@ -51,6 +52,13 @@ const faqs = [
 export default function HomePage() {
   const navigate = useNavigate();
 
+  const scrollToSection = (id) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <>
       <Navbar />
@@ -75,7 +83,7 @@ export default function HomePage() {
               <Button size="lg" color="orange" onClick={() => navigate('/builder')}>
                 Build Your Resume Free →
               </Button>
-              <Button size="lg" variant="default">
+              <Button size="lg" variant="default" onClick={() => scrollToSection('how-it-works')}>
                 See How It Works
               </Button>
             </Group>
@@ -96,7 +104,7 @@ export default function HomePage() {
       </Box>
 
       {/* HOW IT WORKS */}
-      <Box className={classes.sectionAlt}>
+      <Box id="how-it-works" className={classes.sectionAlt}>
         <Container size="lg">
           <div className={classes.sectionTitle}>How it works</div>
           <p className={classes.sectionSubtitle}>
@@ -115,7 +123,7 @@ export default function HomePage() {
       </Box>
 
       {/* FEATURES */}
-      <Box className={classes.section}>
+      <Box id="features" className={classes.section}>
         <Container size="lg">
           <div className={classes.sectionTitle}>What you get</div>
           <p className={classes.sectionSubtitle}>
@@ -177,13 +185,13 @@ export default function HomePage() {
       <Box className={classes.footer}>
         <Container size="lg">
           <div className={classes.footerLinks}>
-            <a href="#" className={classes.footerLink}>About</a>
-            <a href="#" className={classes.footerLink}>Blog</a>
-            <a href="#" className={classes.footerLink}>Pricing</a>
-            <a href="#" className={classes.footerLink}>Privacy</a>
-            <a href="#" className={classes.footerLink}>Terms</a>
+            <Link to="/" className={classes.footerLink}>About</Link>
+            <Link to="/" className={classes.footerLink}>Blog</Link>
+            <Link to="/" className={classes.footerLink}>Pricing</Link>
+            <Link to="/" className={classes.footerLink}>Privacy</Link>
+            <Link to="/" className={classes.footerLink}>Terms</Link>
           </div>
-          <Text size="xs" c="dimmed">© 2025 HiHired. All rights reserved.</Text>
+          <Text size="xs" c="dimmed">© {new Date().getFullYear()} HiHired. All rights reserved.</Text>
         </Container>
       </Box>
     </>
