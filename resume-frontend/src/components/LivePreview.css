@@ -574,10 +574,7 @@
   outline-offset: 3px;
 }
 
-.page-wrapper:focus-within {
-  outline: 3px solid #3b82f6;
-  outline-offset: 3px;
-}
+/* .page-wrapper:focus-within removed — caused blue border in plugin-generated PDFs */
 
 /* Dark Mode Support */
 
