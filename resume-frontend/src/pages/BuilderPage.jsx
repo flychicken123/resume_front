@@ -800,6 +800,7 @@ function BuilderPage() {
   );
   const [subscriptionData, setSubscriptionData] = useState(null);
   const [downloadNotice, setDownloadNotice] = useState(null);
+  const [savePluginStatus, setSavePluginStatus] = useState(null); // null | 'saving' | 'saved' | 'error'
   const [userRequestedImport, setUserRequestedImport] = useState(false);
   const [jobMatches, setJobMatches] = useState([]);
   const [jobMatchesHash, setJobMatchesHash] = useState(null);
@@ -2313,7 +2314,92 @@ function BuilderPage() {
 
   // Function to format date
   // API base URL function
-  
+
+  // Save current resume HTML for the Chrome extension plugin (no PDF generated)
+  const handleSaveForPlugin = async () => {
+    if (!user) {
+      alert('Please log in first.');
+      setShowAuthModal(true);
+      return;
+    }
+    setSavePluginStatus('saving');
+    let styleOverride = null;
+    try {
+      // Temporarily remove page-height limits so all content is visible
+      styleOverride = document.createElement('style');
+      styleOverride.innerHTML = `
+        .page-wrapper { height: auto !important; max-height: none !important; overflow: visible !important; }
+        .page-content { height: auto !important; max-height: none !important; overflow: visible !important; }
+        .single-page-container { height: auto !important; max-height: none !important; overflow: visible !important; }
+      `;
+      document.head.appendChild(styleOverride);
+      await new Promise(r => setTimeout(r, 120));
+
+      const container = document.querySelector('.live-preview-container');
+      if (!container) throw new Error('Resume preview not found. Please navigate to the preview step.');
+
+      const cloned = container.cloneNode(true);
+      // Remove interactive elements from clone
+      cloned.querySelectorAll('button, [data-download], [class*="download-btn"], [class*="control-panel"]').forEach(el => el.remove());
+      cloned.style.height = 'auto';
+      cloned.style.overflow = 'visible';
+      cloned.style.boxShadow = 'none';
+
+      // Extract all CSS rules relevant to the resume template
+      let cssText = '';
+      for (const sheet of document.styleSheets) {
+        try {
+          for (const rule of sheet.cssRules || []) {
+            const txt = rule.cssText || '';
+            if (
+              txt.includes('live-preview') || txt.includes('page-wrapper') ||
+              txt.includes('page-content') || txt.includes('single-page') ||
+              txt.includes('experience') || txt.includes('education') ||
+              txt.includes('section') || txt.includes('resume-') ||
+              txt.includes('template') || txt.includes('skill')
+            ) {
+              cssText += txt + '\n';
+            }
+          }
+        } catch (_) { /* cross-origin sheet */ }
+      }
+
+      document.head.removeChild(styleOverride);
+      styleOverride = null;
+
+      const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>${data.name || 'Resume'}</title>
+  <style>body { margin: 0; padding: 0; background: white; }</style>
+  <style>${cssText}</style>
+</head>
+<body>${cloned.outerHTML}</body>
+</html>`;
+
+      const blob = new Blob([html], { type: 'text/html' });
+      const formData = new FormData();
+      formData.append('html', blob, 'resume.html');
+
+      const token = localStorage.getItem('resumeToken');
+      const resp = await fetch(`${getAPIBaseURL()}/api/resume/save-html`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      if (!resp.ok) throw new Error('Server error');
+
+      setSavePluginStatus('saved');
+    } catch (e) {
+      console.error('Save for plugin failed:', e);
+      if (styleOverride && styleOverride.parentNode) styleOverride.parentNode.removeChild(styleOverride);
+      setSavePluginStatus('error');
+    } finally {
+      setTimeout(() => setSavePluginStatus(null), 3000);
+    }
+  };
+
   // Handler for view resume action
   const handleViewResume = async () => {
     let styleOverride = null;
@@ -4562,7 +4648,7 @@ function BuilderPage() {
           }}
         >
           {step !== STEP_IDS.COVER_LETTER && step !== STEP_IDS.TRACKING && (
-            <LivePreview onDownload={handleViewResume} downloadNotice={downloadNotice} />
+            <LivePreview onDownload={handleViewResume} downloadNotice={downloadNotice} onSaveForPlugin={handleSaveForPlugin} savePluginStatus={savePluginStatus} />
           )}
           {step === STEP_IDS.COVER_LETTER && (
             <div style={{

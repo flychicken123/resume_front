@@ -3,7 +3,7 @@ import { useResume } from '../context/ResumeContext';
 import { TEMPLATE_SLUGS, DEFAULT_TEMPLATE_ID, normalizeTemplateId } from '../constants/templates';
 import './LivePreview.css';
 const LIVE_PREVIEW_BUILD = '2026-02-14-v3';
-const LivePreview = ({ isVisible = true, onToggle, onDownload, downloadNotice }) => {
+const LivePreview = ({ isVisible = true, onToggle, onDownload, downloadNotice, onSaveForPlugin, savePluginStatus }) => {
   const isBrowser = typeof window !== 'undefined';
   const DEBUG_PAGINATION = isBrowser && (
     process.env.REACT_APP_DEBUG_PAGINATION === 'true' ||
@@ -3713,29 +3713,58 @@ const renderAttorneySummaryBlock = (summaryValue) => {
     <div className={`live-preview-container${isPreviewHighlightActive ? ' preview-updating' : ''}`}>
       {/* Download PDF Button */}
       {onDownload && (
-        <div style={{ 
-          textAlign: 'center', 
+        <div style={{
+          textAlign: 'center',
           marginBottom: '20px',
           padding: '15px',
           background: 'white',
           borderRadius: '10px',
           boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
         }}>
-          <button
-            onClick={onDownload}
-            style={{ 
-              backgroundColor: '#ef4444', 
-              color: 'white',
-              padding: '12px 24px',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              fontSize: '16px'
-            }}
-          >
-            📄 Generate Resume
-          </button>
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button
+              onClick={onDownload}
+              style={{
+                backgroundColor: '#ef4444',
+                color: 'white',
+                padding: '12px 24px',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                fontSize: '16px'
+              }}
+            >
+              📄 Generate Resume
+            </button>
+            {onSaveForPlugin && (
+              <button
+                onClick={onSaveForPlugin}
+                disabled={savePluginStatus === 'saving'}
+                title="Save this resume as your plugin template so the HiHired Chrome extension can tailor it for job applications"
+                style={{
+                  backgroundColor: savePluginStatus === 'saved' ? '#059669'
+                                  : savePluginStatus === 'error' ? '#dc2626'
+                                  : '#7c3aed',
+                  color: 'white',
+                  padding: '12px 20px',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: savePluginStatus === 'saving' ? 'default' : 'pointer',
+                  fontWeight: 'bold',
+                  fontSize: '15px',
+                  opacity: savePluginStatus === 'saving' ? 0.7 : 1,
+                  transition: 'background-color 0.2s',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {savePluginStatus === 'saving' ? '⏳ Saving...'
+                : savePluginStatus === 'saved'  ? '✅ Saved for Plugin'
+                : savePluginStatus === 'error'  ? '❌ Save Failed'
+                : '🔌 Save for Plugin'}
+              </button>
+            )}
+          </div>
           {downloadNotice && (
             <div
               style={{
