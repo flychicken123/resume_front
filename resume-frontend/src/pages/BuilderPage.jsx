@@ -2341,15 +2341,18 @@ function BuilderPage() {
       if (!previewElement) throw new Error('Resume preview not found. Please navigate to the preview step.');
 
       const clonedElement = previewElement.cloneNode(true);
-      clonedElement.querySelectorAll('button').forEach(btn => btn.remove());
+      // Strip all non-resume UI: buttons, notices, links, overlays
+      clonedElement.querySelectorAll('button, a').forEach(el => el.remove());
       // Clean the outer wrapper for PDF rendering
       clonedElement.style.cssText = 'background:#ffffff;padding:0;margin:0;height:auto;border:none;box-shadow:none;';
 
-      // Remove preview-only UI overlays
+      // Remove preview-only UI overlays and the download notice bar
       ['.page-header', '.page-number', '.page-break-indicator', '.page-boundary-line',
        '.page-size-indicator', '.page-corner-indicator', '.page-margin-guide',
        '.page-break-line', '.page-content-area', '.page-navigation', '.page-info']
         .forEach(sel => clonedElement.querySelectorAll(sel).forEach(el => el.remove()));
+      // Remove the download-notice / "Open resume manually" bar (direct child div with notice styling)
+      clonedElement.querySelectorAll('div[style*="e0f2fe"], div[style*="fef3c7"]').forEach(el => el.remove());
 
       document.head.removeChild(styleOverride);
       styleOverride = null;
