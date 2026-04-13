@@ -2316,8 +2316,8 @@ function BuilderPage() {
   // API base URL function
 
   // Save current resume HTML for the Chrome extension plugin (no PDF generated).
-  // Uses the exact same HTML capture logic as handleViewResume so the plugin
-  // gets pixel-identical rendering (same font, template, CSS overrides).
+  // The cloned DOM already carries all inline styles from the live preview.
+  // We only need the template font + clean PDF overrides — no CSS extraction.
   const handleSaveForPlugin = async () => {
     if (!user) {
       alert('Please log in first.');
@@ -2340,101 +2340,21 @@ function BuilderPage() {
       const previewElement = document.querySelector('.live-preview-container');
       if (!previewElement) throw new Error('Resume preview not found. Please navigate to the preview step.');
 
-      // --- Same DOM processing as handleViewResume ---
       const clonedElement = previewElement.cloneNode(true);
       clonedElement.querySelectorAll('button').forEach(btn => btn.remove());
+      // Clean the outer wrapper for PDF rendering
+      clonedElement.style.cssText = 'background:#ffffff;padding:0;margin:0;height:auto;border:none;box-shadow:none;';
 
-      if (clonedElement.className === 'live-preview-container') {
-        clonedElement.style.padding = '0';
-        clonedElement.style.margin = '0';
-        clonedElement.style.minHeight = 'auto';
-        clonedElement.style.height = 'auto';
-        clonedElement.style.background = '#ffffff';
-        clonedElement.style.boxShadow = 'none';
-        clonedElement.style.border = 'none';
-      }
-
-      const overlaySelectors = [
-        '.page-header', '.page-number', '.page-break-indicator', '.page-boundary-line',
-        '.page-size-indicator', '.page-corner-indicator', '.page-margin-guide',
-        '.page-break-line', '.page-content-area', '.page-navigation', '.page-info',
-      ];
-      overlaySelectors.forEach(sel => clonedElement.querySelectorAll(sel).forEach(el => el.remove()));
-
-      const normalizeElementSizing = (element) => {
-        if (!element || !element.style) return;
-        element.style.setProperty('height', 'auto', 'important');
-        element.style.setProperty('max-height', 'none', 'important');
-        element.style.setProperty('min-height', '0', 'important');
-        element.style.removeProperty('transform');
-        element.style.removeProperty('-webkit-transform');
-        Array.from(element.children || []).forEach(child => normalizeElementSizing(child));
-      };
-
-      const singlePageContainer = clonedElement.querySelector('.single-page-container');
-      const multiPageContainer = clonedElement.querySelector('.multi-page-container');
-
-      if (singlePageContainer && (!multiPageContainer || multiPageContainer.childElementCount === 0)) {
-        const containerClone = singlePageContainer.cloneNode(true);
-        normalizeElementSizing(containerClone);
-        containerClone.style.padding = '12px 20px 20px 20px';
-        containerClone.style.margin = '0';
-        containerClone.style.border = 'none';
-        containerClone.style.boxShadow = 'none';
-        containerClone.style.borderRadius = '0';
-        containerClone.style.background = '#ffffff';
-        const cleanRoot = document.createElement('div');
-        cleanRoot.className = 'pdf-single-page-root';
-        cleanRoot.style.cssText = 'background:#ffffff;color:#000;margin:0;padding:0;box-sizing:border-box;';
-        cleanRoot.appendChild(containerClone);
-        clonedElement.innerHTML = '';
-        clonedElement.appendChild(cleanRoot);
-      } else if (multiPageContainer) {
-        const pageWrappers = multiPageContainer.querySelectorAll('.page-wrapper');
-        const combinedContent = document.createElement('div');
-        combinedContent.className = 'multi-page-pdf-container';
-        combinedContent.style.cssText = 'background: white; color: black; padding: 16px 20px 20px 20px; margin: 0; box-sizing: border-box;';
-        Array.from(pageWrappers).forEach(wrapper => {
-          const pageContent = wrapper.querySelector('.page-content') || wrapper;
-          const contentClone = pageContent.cloneNode(true);
-          normalizeElementSizing(contentClone);
-          contentClone.style.background = 'white';
-          contentClone.style.color = 'black';
-          combinedContent.appendChild(contentClone);
-        });
-        multiPageContainer.parentNode.replaceChild(combinedContent, multiPageContainer);
-      }
-
-      normalizeElementSizing(clonedElement);
+      // Remove preview-only UI overlays
+      ['.page-header', '.page-number', '.page-break-indicator', '.page-boundary-line',
+       '.page-size-indicator', '.page-corner-indicator', '.page-margin-guide',
+       '.page-break-line', '.page-content-area', '.page-navigation', '.page-info']
+        .forEach(sel => clonedElement.querySelectorAll(sel).forEach(el => el.remove()));
 
       document.head.removeChild(styleOverride);
       styleOverride = null;
 
-      // --- Same CSS extraction as handleViewResume (narrow selectors only) ---
-      const cssRules = [];
-      Array.from(document.styleSheets).forEach(sheet => {
-        try {
-          Array.from(sheet.cssRules).forEach(rule => {
-            if (rule.type === CSSRule.STYLE_RULE) {
-              const selector = rule.selectorText || '';
-              if (
-                selector.includes('.live-preview-container') ||
-                selector.includes('.page-wrapper') ||
-                selector.includes('.single-page-container') ||
-                selector.includes('.page-content')
-              ) {
-                cssRules.push(rule.cssText);
-              }
-            }
-          });
-        } catch (_) { /* cross-origin sheet */ }
-      });
-      const cleanedCssText = cssRules.join('\n')
-        .replace(/box-shadow\s*:[^;]+;?/gi, '')
-        .replace(/-webkit-box-shadow\s*:[^;]+;?/gi, '')
-        .replace(/border-radius\s*:[^;]+;?/gi, '');
-
-      // --- Same template font as handleViewResume ---
+      // Template font — must match LivePreview.jsx rendering
       const templateFont = (() => {
         switch (selectedFormat || DEFAULT_TEMPLATE_ID) {
           case TEMPLATE_SLUGS.CLASSIC_PROFESSIONAL: return "'Calibri', 'Arial', sans-serif";
@@ -2450,17 +2370,9 @@ function BuilderPage() {
 <head>
   <meta charset="UTF-8">
   <title>${data.name || 'Resume'}</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>body { font-family: ${templateFont}; margin: 0; padding: 0; background: white; }</style>
-  <style>${cleanedCssText}</style>
   <style>
-    /* PDF-safe overrides — must come last */
-    .live-preview-container { background: #ffffff !important; padding: 0 !important; margin: 0 !important; }
-    .page-wrapper:focus-within, .single-page-container:focus-within, *:focus-within { outline: none !important; box-shadow: none !important; }
-    .live-preview-container, .single-page-container { border: none !important; box-shadow: none !important; outline: none !important; }
-    .multi-page-pdf-container, .multi-page-pdf-container * { font-family: ${templateFont} !important; }
+    body { font-family: ${templateFont}; margin: 0; padding: 0; background: white; }
+    * { box-sizing: border-box; }
     button { display: none !important; }
   </style>
 </head>
