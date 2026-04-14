@@ -1,13 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useResume } from '../context/ResumeContext';
 import { getAPIBaseURL } from '../api';
+
+const ACCEPTED = '.pdf,.doc,.docx,.txt';
 
 const ImportResumeModal = ({ onClose }) => {
   const navigate = useNavigate();
   const { applyImportedData } = useResume();
   const [file, setFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef(null);
 
   const handleUpload = async () => {
     if (!file) {
@@ -159,8 +163,42 @@ const ImportResumeModal = ({ onClose }) => {
         <button onClick={onClose} aria-label="Close" style={{position:'absolute', top:12, right:12, background:'none', border:'none', fontSize:22, cursor:'pointer'}}>×</button>
         <h3 style={{marginTop:0, marginBottom:'0.75rem'}}>Import Your Existing Resume</h3>
         <p style={{color:'#6b7280', marginTop:0}}>Save time by importing your current resume, or start manually.</p>
-        <div style={{border:'1px dashed #d1d5db', borderRadius:8, padding:'1rem', marginBottom:'1rem'}}>
-          <input type="file" accept=".pdf,.doc,.docx,.txt" onChange={(e)=>setFile(e.target.files?.[0]||null)} />
+        <div
+          onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+          onDragLeave={() => setIsDragging(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setIsDragging(false);
+            const dropped = e.dataTransfer.files?.[0];
+            if (dropped) { setFile(dropped); }
+          }}
+          onClick={() => fileInputRef.current?.click()}
+          style={{
+            border: isDragging ? '2px dashed #3b82f6' : '2px dashed #d1d5db',
+            borderRadius: 8,
+            padding: '2rem 1rem',
+            marginBottom: '1rem',
+            textAlign: 'center',
+            cursor: 'pointer',
+            background: isDragging ? '#eff6ff' : '#fafafa',
+            transition: 'all 0.15s',
+          }}
+        >
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept={ACCEPTED}
+            onChange={(e) => setFile(e.target.files?.[0] || null)}
+            style={{ display: 'none' }}
+          />
+          {file ? (
+            <div style={{ color: '#1e40af', fontWeight: 600 }}>{file.name}</div>
+          ) : (
+            <div style={{ color: '#6b7280' }}>
+              Drag & drop your resume here, or <span style={{ color: '#3b82f6', textDecoration: 'underline' }}>click to browse</span>
+              <div style={{ fontSize: 12, marginTop: 6, color: '#9ca3af' }}>Accepted: PDF, DOC, DOCX, TXT</div>
+            </div>
+          )}
         </div>
         <div style={{display:'flex', gap:'0.75rem', justifyContent:'center'}}>
           <button type="button" onClick={handleManual} disabled={isLoading} style={{padding:'0.75rem 1rem', border:'2px solid #d1d5db', borderRadius:8, background:'white', cursor:'pointer', minWidth:160}}>Start Manually</button>
