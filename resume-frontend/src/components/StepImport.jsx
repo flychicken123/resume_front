@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { parseResumeFile, getAPIBaseURL } from '../api';
 import { useFeedback } from '../context/FeedbackContext';
 import { setLastStep } from '../utils/exitTracking';
@@ -10,6 +10,14 @@ const StepImport = ({ onSkip }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [selectedFileName, setSelectedFileName] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
+  // Prevent browser from opening files dropped outside the drop zone
+  useEffect(() => {
+    const block = (e) => e.preventDefault();
+    document.addEventListener('dragover', block);
+    document.addEventListener('drop', block);
+    return () => { document.removeEventListener('dragover', block); document.removeEventListener('drop', block); };
+  }, []);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [historyImportError, setHistoryImportError] = useState('');
   const [historyImportingId, setHistoryImportingId] = useState(null);
@@ -218,22 +226,31 @@ const StepImport = ({ onSkip }) => {
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <label
             htmlFor="resume-file-input"
+            onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); }}
+            onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); }}
+            onDrop={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsDragging(false);
+              const dropped = e.dataTransfer.files?.[0];
+              if (dropped && !loading) importFromFile(dropped);
+            }}
             style={{
               display: 'inline-flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '0.75rem',
-              border: '2px dashed #94a3b8',
+              border: isDragging ? '2px dashed #3b82f6' : '2px dashed #94a3b8',
               borderRadius: '12px',
               padding: '2rem',
               width: '100%',
               maxWidth: '420px',
               margin: '0 auto',
               cursor: loading ? 'wait' : 'pointer',
-              background: '#f8fafc',
+              background: isDragging ? '#eff6ff' : '#f8fafc',
               color: '#1f2937',
-              transition: 'border-color 0.2s ease',
+              transition: 'border-color 0.2s ease, background 0.2s ease',
             }}
           >
             <span style={{ fontSize: '1rem', fontWeight: 600 }}>Upload your resume (PDF, DOC, DOCX)</span>
