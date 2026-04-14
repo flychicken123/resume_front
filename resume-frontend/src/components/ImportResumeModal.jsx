@@ -158,7 +158,10 @@ const ImportResumeModal = ({ onClose }) => {
   };
 
   return (
-    <div style={{position:'fixed', top:0, left:0, width:'100vw', height:'100vh', background:'rgba(0,0,0,0.25)', zIndex:210, display:'flex', alignItems:'center', justifyContent:'center'}}>
+    <div
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={(e) => e.preventDefault()}
+      style={{position:'fixed', top:0, left:0, width:'100vw', height:'100vh', background:'rgba(0,0,0,0.25)', zIndex:210, display:'flex', alignItems:'center', justifyContent:'center'}}>
       <div style={{background:'white', borderRadius:12, padding:'1.75rem', width:'92%', maxWidth:520, position:'relative', boxShadow:'0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)'}}>
         <button onClick={onClose} aria-label="Close" style={{position:'absolute', top:12, right:12, background:'none', border:'none', fontSize:22, cursor:'pointer'}}>×</button>
         <h3 style={{marginTop:0, marginBottom:'0.75rem'}}>Import Your Existing Resume</h3>
