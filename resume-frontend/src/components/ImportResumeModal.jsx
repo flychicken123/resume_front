@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useResume } from '../context/ResumeContext';
 import { getAPIBaseURL } from '../api';
@@ -12,6 +12,17 @@ const ImportResumeModal = ({ onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef(null);
+
+  // Block browser from opening dropped files anywhere on the page
+  useEffect(() => {
+    const block = (e) => e.preventDefault();
+    document.addEventListener('dragover', block);
+    document.addEventListener('drop', block);
+    return () => {
+      document.removeEventListener('dragover', block);
+      document.removeEventListener('drop', block);
+    };
+  }, []);
 
   const handleUpload = async () => {
     if (!file) {
