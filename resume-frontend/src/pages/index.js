@@ -12,3 +12,4 @@ export { default as ContactPage } from './ContactPage';
 export { default as AdsRewardsPage } from './AdsRewardsPage';
 export { default as AdminJobsPage } from './AdminJobsPage';
 export { default as TemplatesPage } from './TemplatesPage';
+export { default as ClawPoolSupportPage } from './ClawPoolSupportPage';
