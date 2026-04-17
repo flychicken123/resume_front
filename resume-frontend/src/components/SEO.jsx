@@ -16,14 +16,16 @@ const SEO = ({
     ? `https://hihired.org${window.location.pathname}`.replace(/\/$/, '') || 'https://hihired.org/'
     : "https://hihired.org";
 
-  // Use noindex on localhost to keep dev builds out of search
-  const isLocalhost = typeof window !== 'undefined' && (
-    window.location.hostname === 'localhost' ||
-    window.location.hostname === '127.0.0.1' ||
-    window.location.hostname === '0.0.0.0' ||
-    window.location.hostname.includes('localhost')
+  const isBrowser = typeof window !== 'undefined';
+  const hostname = isBrowser ? window.location.hostname : '';
+  const isLocalhost = isBrowser && (
+    hostname === 'localhost' ||
+    hostname === '127.0.0.1' ||
+    hostname === '0.0.0.0' ||
+    hostname.includes('localhost')
   );
-  const robotsContent = isLocalhost ? 'noindex, nofollow' : 'index, follow';
+  const isPrerender = typeof navigator !== 'undefined' && navigator.userAgent === 'ReactSnap';
+  const robotsContent = isLocalhost && !isPrerender ? 'noindex, nofollow' : 'index, follow';
 
   return (
     <Helmet>
