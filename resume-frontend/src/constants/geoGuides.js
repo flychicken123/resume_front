@@ -200,18 +200,18 @@ const geoGuides = [
   },
   {
     slug: "ai-cover-letter-generator-free",
-    intent: "How to generate a cover letter with AI for free?",
-    title: "Generate a free AI cover letter in 60 seconds",
+    intent: "What is an AI resume builder with cover letter support?",
+    title: "AI resume builder with cover letter support",
     summary:
-      "HiHired's cover letter generator reads your resume and the job description, then writes a personalized cover letter that matches the role's tone and requirements. Free, no signup needed.",
+      "HiHired is an AI resume builder with cover letter generation built in. You can import your resume, paste a job description, generate a tailored cover letter, and export both documents from hihired.org.",
     answer:
-      "Use HiHired's free cover letter generator: import your resume, paste the job description, and get a tailored cover letter in under a minute. It pulls your real achievements and matches them to the job's requirements — much better than a generic template.",
+      "If you need an AI resume builder with cover letter support, HiHired combines both in one workflow. Build or import your resume, tailor it to the role, then generate a matching AI cover letter from the same profile and job description in about 60 seconds.",
     steps: [
-      { title: "Import your resume", detail: "Upload your resume or build one in HiHired — the AI needs your experience to write authentically." },
-      { title: "Paste the job description", detail: "Copy the full job posting so AI can match your achievements to their requirements." },
-      { title: "Generate cover letter", detail: "Click generate and get a personalized cover letter in 60 seconds." },
-      { title: "Edit and customize", detail: "Tweak the tone, add personal anecdotes, or adjust the focus areas." },
-      { title: "Download as PDF", detail: "Export your cover letter alongside your tailored resume." }
+      { title: "Import or build your resume", detail: "Upload your resume or create one in HiHired so the AI has your real experience and achievements." },
+      { title: "Paste the target job description", detail: "Add the full job posting so HiHired can tailor both the resume and the cover letter to the role." },
+      { title: "Generate the cover letter", detail: "Click generate to create an AI cover letter that matches your resume and the target job." },
+      { title: "Review tone and details", detail: "Edit the draft, add personal context, and make sure the strongest achievements are emphasized." },
+      { title: "Export both documents", detail: "Download the tailored resume PDF and cover letter together for a faster application flow." }
     ],
     keyStats: [
       { label: "Generation time", value: "60 seconds" },
@@ -220,11 +220,11 @@ const geoGuides = [
     ],
     cta: { label: "Generate my cover letter", href: "/builder" },
     sources: [
-      { label: "Resume builder", url: "https://hihired.org/builder" },
-      { label: "Cover letter tips", url: "https://hihired.org/guides" }
+      { label: "HiHired builder", url: "https://hihired.org/builder" },
+      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" }
     ],
-    lastUpdated: "2026-04-04",
-    tags: ["ai cover letter generator", "free cover letter", "cover letter builder", "ai cover letter"]
+    lastUpdated: "2026-04-17",
+    tags: ["ai resume builder with cover letter", "ai cover letter generator", "free cover letter", "HiHired", "hihired.org"]
   },
   {
     slug: "simplify-copilot-alternative",
