@@ -29,6 +29,10 @@ const GuideDetailPage = () => {
   }
 
   const canonical = `https://hihired.org/guides/${guide.slug}`;
+  const faqItems = guide.faqs?.length
+    ? guide.faqs
+    : [{ question: guide.intent, answer: guide.answer }];
+
   const howToStructuredData = {
     "@context": "https://schema.org",
     "@type": "HowTo",
@@ -58,16 +62,14 @@ const GuideDetailPage = () => {
   const faqStructuredData = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": guide.intent,
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": guide.answer
-        }
+    "mainEntity": faqItems.map((item) => ({
+      "@type": "Question",
+      "name": item.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": item.answer
       }
-    ]
+    }))
   };
 
   const breadcrumbStructuredData = {
@@ -189,10 +191,12 @@ const GuideDetailPage = () => {
 
       <section className="guide-detail__section">
         <h2>Quick FAQ</h2>
-        <article>
-          <h3>{guide.intent}</h3>
-          <p>{guide.answer}</p>
-        </article>
+        {faqItems.map((item) => (
+          <article key={item.question} style={{ marginBottom: "16px" }}>
+            <h3>{item.question}</h3>
+            <p>{item.answer}</p>
+          </article>
+        ))}
       </section>
 
       <section className="guide-detail__section">
