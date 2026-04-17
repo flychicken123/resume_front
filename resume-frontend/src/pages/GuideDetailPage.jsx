@@ -89,6 +89,24 @@ const GuideDetailPage = () => {
     ]
   };
 
+  const relatedGuides = geoGuides
+    .filter((item) => item.slug !== guide.slug)
+    .map((item) => {
+      const sharedTags = (item.tags || []).filter((tag) => guide.tags.includes(tag)).length;
+      const sharedIntent = item.intent
+        .toLowerCase()
+        .split(/\W+/)
+        .filter(Boolean)
+        .filter((token) => guide.intent.toLowerCase().includes(token)).length;
+
+      return {
+        ...item,
+        relevanceScore: sharedTags * 3 + sharedIntent,
+      };
+    })
+    .sort((a, b) => b.relevanceScore - a.relevanceScore)
+    .slice(0, 3);
+
   return (
     <main className="guides-page guide-detail">
       <SEO
@@ -164,6 +182,26 @@ const GuideDetailPage = () => {
           {guide.sources.map((source) => (
             <li key={source.url}>
               <a href={source.url}>{source.label}</a>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="guide-detail__section">
+        <h2>Quick FAQ</h2>
+        <article>
+          <h3>{guide.intent}</h3>
+          <p>{guide.answer}</p>
+        </article>
+      </section>
+
+      <section className="guide-detail__section">
+        <h2>Related guides</h2>
+        <ul className="guide-detail__sources">
+          {relatedGuides.map((item) => (
+            <li key={item.slug}>
+              <Link to={`/guides/${item.slug}`}>{item.title}</Link>
+              <p>{item.summary}</p>
             </li>
           ))}
         </ul>
