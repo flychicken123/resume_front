@@ -29,7 +29,7 @@ const GuideDetailPage = () => {
   }
 
   const canonical = `https://hihired.org/guides/${guide.slug}`;
-  const structuredData = {
+  const howToStructuredData = {
     "@context": "https://schema.org",
     "@type": "HowTo",
     "name": guide.title,
@@ -55,6 +55,40 @@ const GuideDetailPage = () => {
     "dateModified": guide.lastUpdated
   };
 
+  const faqStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": guide.intent,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": guide.answer
+        }
+      }
+    ]
+  };
+
+  const breadcrumbStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Guides",
+        "item": "https://hihired.org/guides"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": guide.title,
+        "item": canonical
+      }
+    ]
+  };
+
   return (
     <main className="guides-page guide-detail">
       <SEO
@@ -66,7 +100,13 @@ const GuideDetailPage = () => {
       />
       <Helmet>
         <script type="application/ld+json">
-          {JSON.stringify(structuredData)}
+          {JSON.stringify(howToStructuredData)}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify(faqStructuredData)}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify(breadcrumbStructuredData)}
         </script>
       </Helmet>
 
