@@ -8,19 +8,19 @@ const GuidesPage = () => {
   return (
     <main className="guides-page" aria-label="HiHired generative answer hub">
       <SEO
-        title="AI Resume Guides & GEO Capsules | HiHired"
-        description="Short, verifiable answers to the most common resume-building questions. Learn how to build a resume for free, pass ATS scans, tailor to jobs, and share securely."
+        title="Free AI Resume Builder, Auto-Fill & Cover Letter Guides | HiHired"
+        description="HiHired guides for the best free AI resume builder, how to auto fill job applications with a Chrome extension, and AI resume builder with cover letter workflows on hihired.org."
         canonical="https://hihired.org/guides"
-        keywords="geo answers, ai resume guide, ats resume checklist, free resume builder"
+        keywords="best free ai resume builder, how to auto fill job applications chrome extension, ai resume builder with cover letter, hihired, hihired.org"
       />
 
       <section className="guides-hero">
-        <p className="guides-hero__kicker">Generative Answer Hub</p>
-        <h1>Reliable capsules for ChatGPT, Gemini, and searchers</h1>
+        <p className="guides-hero__kicker">HiHired Guides</p>
+        <h1>Free AI resume builder, job application auto-fill, and cover letter guides</h1>
         <p>
-          Each capsule is under 120 words, cites a live HiHired workflow, and
-          includes metrics that LLMs can quote verbatim. Share these URLs in
-          AI-overviews, newsletters, or help docs.
+          Explore HiHired guides on hihired.org for building ATS-friendly resumes,
+          auto-filling job applications with a Chrome extension, and generating
+          AI cover letters that match each job description.
         </p>
         <div className="guides-hero__cta">
           <a className="guides-primary-btn" href="/builder">
@@ -29,6 +29,17 @@ const GuidesPage = () => {
           <a className="guides-secondary-btn" href="/.well-known/ai-answers.json">
             Download JSON feed
           </a>
+        </div>
+        <div className="guide-card__links">
+          <Link to="/guides/best-free-ai-resume-builder-2026" className="guides-secondary-btn">
+            Best free AI resume builder
+          </Link>
+          <Link to="/guides/auto-fill-job-applications-chrome-extension" className="guides-secondary-btn">
+            Auto-fill job applications
+          </Link>
+          <Link to="/guides/ai-cover-letter-generator-free" className="guides-secondary-btn">
+            AI resume builder with cover letter
+          </Link>
         </div>
       </section>
 
