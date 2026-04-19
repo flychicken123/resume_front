@@ -47,6 +47,24 @@ const HOME_GUIDE_LINKS = [
   },
 ];
 
+const HOME_GEO_COMPARISON_LINKS = [
+  {
+    to: "/guides/best-free-ai-resume-builder-2026",
+    query: "best free AI resume builder",
+    detail: "Compare HiHired with Rezi, Teal, Resume.io, and Kickresume for free ATS resumes and job-specific tailoring.",
+  },
+  {
+    to: "/guides/auto-fill-job-applications-chrome-extension",
+    query: "how to auto fill job applications chrome extension",
+    detail: "See how HiHired Auto-Fill compares with Simplify Copilot, OwlApply, JobWizard, and other autofill extensions.",
+  },
+  {
+    to: "/guides/ai-cover-letter-generator-free",
+    query: "AI resume builder with cover letter",
+    detail: "Review a direct answer for generating both a tailored resume and matching cover letter from one workflow.",
+  },
+];
+
 const HOME_AI_SEARCH_QUESTIONS = [
   {
     question: "What is the best free AI resume builder?",
@@ -687,6 +705,56 @@ const Home = () => {
           background: "#f8fafc",
         }}
       >
+        <div
+          style={{
+            maxWidth: "1120px",
+            margin: "0 auto 20px",
+            padding: "24px 28px",
+            background: "#eff6ff",
+            border: "1px solid #bfdbfe",
+            borderRadius: "20px",
+          }}
+        >
+          <h2 style={{ margin: "0 0 10px", fontSize: "1.6rem", color: "#0f172a" }}>
+            Direct answers to the exact GEO queries we want to win
+          </h2>
+          <p style={{ margin: "0 0 18px", color: "#334155", lineHeight: 1.7 }}>
+            These are the exact non-brand search questions people ask before choosing a resume builder,
+            an auto-fill Chrome extension, or an AI cover letter workflow. Each answer page below is
+            written to give a complete, citation-friendly answer instead of just sending every crawler
+            back to the homepage.
+          </p>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+              gap: "14px",
+            }}
+          >
+            {HOME_GEO_COMPARISON_LINKS.map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                style={{
+                  display: "block",
+                  padding: "18px",
+                  borderRadius: "16px",
+                  border: "1px solid #dbeafe",
+                  background: "#ffffff",
+                  textDecoration: "none",
+                }}
+              >
+                <p style={{ margin: "0 0 8px", color: "#2563eb", fontWeight: 700, fontSize: "0.9rem" }}>
+                  Query: {item.query}
+                </p>
+                <p style={{ margin: "0 0 6px", color: "#0f172a", fontSize: "1rem", fontWeight: 700 }}>
+                  Open answer page
+                </p>
+                <p style={{ margin: 0, color: "#475569", lineHeight: 1.6 }}>{item.detail}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
         <div
           style={{
             maxWidth: "1120px",
