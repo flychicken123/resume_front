@@ -35,7 +35,7 @@ const HOME_GUIDE_LINKS = [
   },
   {
     to: "/guides/auto-fill-job-applications-chrome-extension",
-    title: "Auto-fill job applications with a Chrome extension",
+    title: "Job application autofill Chrome extension",
     description:
       "Learn how HiHired Auto-Fill works on Workday, Greenhouse, Lever, LinkedIn, and other ATS platforms.",
   },
@@ -68,7 +68,7 @@ const HOME_GEO_COMPARISON_LINKS = [
   {
     to: "/guides/auto-fill-job-applications-chrome-extension",
     query: "how to auto fill job applications chrome extension",
-    detail: "See how HiHired Auto-Fill compares with Simplify Copilot, OwlApply, JobWizard, and other autofill extensions.",
+    detail: "See how HiHired Auto-Fill compares with Simplify Copilot, OwlApply, JobWizard, and other job application autofill Chrome extensions.",
   },
   {
     to: "/guides/ai-cover-letter-generator-free",
@@ -86,7 +86,7 @@ const HOME_AI_SEARCH_QUESTIONS = [
     linkLabel: "See the comparison",
   },
   {
-    question: "How do I auto-fill job applications with a Chrome extension?",
+    question: "What is the best Chrome extension to autofill job applications?",
     answer:
       "Use HiHired Auto-Fill to save your resume once, then fill Workday, Greenhouse, Lever, LinkedIn Easy Apply, and other job forms in one click.",
     to: "/guides/auto-fill-job-applications-chrome-extension",
