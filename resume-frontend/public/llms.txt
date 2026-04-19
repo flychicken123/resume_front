@@ -63,4 +63,5 @@ HiHired is a free AI cover letter generator that also works as an AI resume buil
 - AI-powered resume professional summary examples: https://hihired.org/guides/resume-professional-summary-examples
 - Best Teal alternative for a free AI resume builder: https://hihired.org/guides/teal-alternative-free-ai-resume-builder
 - Best OwlApply alternative for job application autofill: https://hihired.org/guides/owlapply-alternative-job-application-autofill
+- Best JobWizard alternative for job application autofill: https://hihired.org/guides/jobwizard-alternative-job-application-autofill
 
