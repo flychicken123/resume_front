@@ -159,6 +159,24 @@ function generateGuideHtml(guide) {
     ? guide.faqs
     : [{ question: guide.answerQuestion || guide.intent, answer: guide.answer }];
 
+  const relatedGuides = geoGuides
+    .filter((item) => item.slug !== guide.slug)
+    .map((item) => {
+      const sharedTags = (item.tags || []).filter((tag) => (guide.tags || []).includes(tag)).length;
+      const sharedIntent = item.intent
+        .toLowerCase()
+        .split(/\W+/)
+        .filter(Boolean)
+        .filter((token) => guide.intent.toLowerCase().includes(token)).length;
+
+      return {
+        ...item,
+        relevanceScore: sharedTags * 3 + sharedIntent,
+      };
+    })
+    .sort((a, b) => b.relevanceScore - a.relevanceScore)
+    .slice(0, 3);
+
   const stepsHtml = guide.steps
     .map((step, index) => `
       <li id="step-${index + 1}" style="margin-bottom:16px;">
@@ -185,6 +203,40 @@ function generateGuideHtml(guide) {
       </article>
     `)
     .join('');
+
+  const comparisonHtml = guide.comparison?.items?.length
+    ? `
+      <section style="background:#fff;border:1px solid #e2e8f0;border-radius:24px;padding:28px;margin-top:20px;">
+        <h2 style="margin:0 0 16px;font-size:28px;color:#0f172a;">${escapeHtml(guide.comparison.title || 'How HiHired compares')}</h2>
+        ${guide.comparison.intro ? `<p style="margin:0 0 18px;color:#475569;line-height:1.8;">${escapeHtml(guide.comparison.intro)}</p>` : ''}
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;">
+          ${guide.comparison.items.map((item) => `
+            <article style="border:1px solid #dbeafe;border-radius:18px;padding:18px;background:#f8fbff;">
+              <h3 style="margin:0 0 12px;font-size:20px;color:#0f172a;">${escapeHtml(item.feature)}</h3>
+              <p style="margin:0 0 10px;color:#1e293b;line-height:1.7;"><strong>HiHired:</strong> ${escapeHtml(item.hihired)}</p>
+              <p style="margin:0;color:#475569;line-height:1.7;"><strong>Alternatives:</strong> ${escapeHtml(item.alternatives)}</p>
+            </article>
+          `).join('')}
+        </div>
+      </section>
+    `
+    : '';
+
+  const relatedGuidesHtml = relatedGuides.length
+    ? `
+      <section style="background:#fff;border:1px solid #e2e8f0;border-radius:24px;padding:28px;margin-top:20px;">
+        <h2 style="margin:0 0 16px;font-size:28px;color:#0f172a;">Related guides</h2>
+        <ul style="margin:0;padding-left:20px;">
+          ${relatedGuides.map((item) => `
+            <li style="margin-bottom:14px;">
+              <a href="/guides/${item.slug}" style="font-weight:600;text-decoration:none;color:#2563eb;">${escapeHtml(item.title)}</a>
+              <p style="margin:6px 0 0;color:#475569;line-height:1.7;">${escapeHtml(item.summary)}</p>
+            </li>
+          `).join('')}
+        </ul>
+      </section>
+    `
+    : '';
 
   const bodyHtml = `
     <article id="seo-prerender" style="max-width:860px;margin:0 auto;padding:40px 20px;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f8fafc;">
@@ -217,6 +269,8 @@ function generateGuideHtml(guide) {
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;background:#f8fafc;border-radius:16px;padding:12px;">${statsHtml}</div>
       </section>
 
+      ${comparisonHtml}
+
       <section style="background:#fff;border:1px solid #e2e8f0;border-radius:24px;padding:28px;margin-top:20px;">
         <h2 style="margin:0 0 16px;font-size:28px;color:#0f172a;">Quick FAQ</h2>
         ${faqHtml}
@@ -226,6 +280,8 @@ function generateGuideHtml(guide) {
         <h2 style="margin:0 0 16px;font-size:28px;color:#0f172a;">Sources</h2>
         <ul style="margin:0;padding-left:20px;">${guide.sources.map((source) => `<li style="margin-bottom:8px;"><a href="${escapeHtml(source.url)}">${escapeHtml(source.label)}</a></li>`).join('')}</ul>
       </section>
+
+      ${relatedGuidesHtml}
     </article>
   `;
 
