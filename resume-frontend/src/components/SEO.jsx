@@ -12,9 +12,12 @@ const SEO = ({
   const defaultTitle = "HiHired - Free AI Resume Builder | Build Professional Resumes Online";
   const defaultDescription = "Free AI resume builder. Create ATS-friendly resumes in minutes. No registration required. Download PDF instantly.";
   const defaultKeywords = "resume builder, AI resume builder, free resume builder, professional resume, resume maker, build resume, write resume, create resume, resume template, ATS resume, job resume, career resume, online resume builder";
-  const defaultCanonical = typeof window !== 'undefined' 
-    ? `https://hihired.org${window.location.pathname}`.replace(/\/$/, '') || 'https://hihired.org/'
-    : "https://hihired.org";
+  const defaultCanonical = typeof window !== 'undefined'
+    ? (() => {
+        const pathname = window.location.pathname || '/';
+        return pathname === '/' ? 'https://hihired.org/' : `https://hihired.org${pathname.replace(/\/$/, '')}`;
+      })()
+    : "https://hihired.org/";
 
   const isBrowser = typeof window !== 'undefined';
   const hostname = isBrowser ? window.location.hostname : '';
@@ -86,7 +89,14 @@ const SEO = ({
           "@type": "Organization",
           "name": "HiHired",
           "url": "https://hihired.org"
-        }
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "HiHired",
+          "url": "https://hihired.org"
+        },
+        "mainEntityOfPage": canonical || defaultCanonical
+      }
       })}
       </script>
     </Helmet>
