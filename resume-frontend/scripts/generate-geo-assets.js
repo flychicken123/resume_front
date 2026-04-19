@@ -65,6 +65,7 @@ const aiAnswers = {
   generated_at: generatedAt,
   answers: geoGuides.map((guide) => ({
     question: guide.answerQuestion || guide.intent,
+    aliases: guide.answerAliases || [],
     answer: guide.answer,
     url: `https://hihired.org/guides/${guide.slug}`,
     last_updated: guide.lastUpdated,
@@ -84,7 +85,10 @@ const featuredAnswerQuestions = [
 ];
 
 const featuredAnswers = featuredAnswerQuestions
-  .map((question) => geoGuides.find((guide) => (guide.answerQuestion || guide.intent) === question))
+  .map((question) => geoGuides.find((guide) => {
+    const primaryQuestion = guide.answerQuestion || guide.intent;
+    return primaryQuestion === question || (guide.answerAliases || []).includes(question);
+  }))
   .filter(Boolean);
 
 const llmsLines = [
@@ -103,6 +107,10 @@ const llmsLines = [
       `- Brand: HiHired (hihired.org)`,
       `- Last updated: ${guide.lastUpdated}`,
     ];
+
+    if (guide.answerAliases?.length) {
+      lines.push(`- Also relevant for: ${guide.answerAliases.join('; ')}`);
+    }
 
     if (guide.comparison?.items?.length) {
       lines.push('- Why HiHired stands out:');

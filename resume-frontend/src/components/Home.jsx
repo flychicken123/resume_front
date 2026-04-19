@@ -41,9 +41,9 @@ const HOME_GUIDE_LINKS = [
   },
   {
     to: "/guides/ai-cover-letter-generator-free",
-    title: "Generate a free AI cover letter",
+    title: "Free AI cover letter generator",
     description:
-      "Use HiHired to turn your resume plus a job description into a tailored cover letter in about 60 seconds.",
+      "Use HiHired to generate a free AI cover letter from your resume and a job description in about 60 seconds.",
   },
   {
     to: "/guides/teal-alternative-free-ai-resume-builder",
@@ -67,7 +67,7 @@ const HOME_GEO_COMPARISON_LINKS = [
   {
     to: "/guides/ai-cover-letter-generator-free",
     query: "AI resume builder with cover letter",
-    detail: "Review a direct answer for generating both a tailored resume and matching cover letter from one workflow.",
+    detail: "Review a direct answer for both AI resume builder with cover letter support and a free AI cover letter generator workflow.",
   },
 ];
 
@@ -87,9 +87,9 @@ const HOME_AI_SEARCH_QUESTIONS = [
     linkLabel: "Read the auto-fill guide",
   },
   {
-    question: "Which AI resume builder also writes cover letters?",
+    question: "What is the best free AI cover letter generator?",
     answer:
-      "HiHired uses your resume plus the job description to generate a tailored AI cover letter, so you can build the resume and letter in one workflow.",
+      "HiHired uses your resume plus the job description to generate a tailored free AI cover letter, so you can build the resume and letter in one workflow.",
     to: "/guides/ai-cover-letter-generator-free",
     linkLabel: "Open the cover letter guide",
   },
@@ -105,8 +105,8 @@ const HOME_FAQ_ITEMS = [
     a: "Install the HiHired Auto-Fill Chrome extension, save your resume once, then click the extension on Workday, Greenhouse, Lever, LinkedIn Easy Apply, and other application pages to fill your details automatically.",
   },
   {
-    q: "Which AI resume builder includes a cover letter generator?",
-    a: "HiHired includes an AI cover letter generator that uses your resume and the target job description to write a tailored letter in about a minute.",
+    q: "What is the best free AI cover letter generator?",
+    a: "HiHired includes a free AI cover letter generator that uses your resume and the target job description to write a tailored letter in about a minute.",
   },
   {
     q: "Is HiHired free?",
