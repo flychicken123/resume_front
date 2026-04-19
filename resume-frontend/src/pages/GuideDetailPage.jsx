@@ -189,6 +189,22 @@ const GuideDetailPage = () => {
         </ul>
       </section>
 
+      {guide.comparison?.items?.length ? (
+        <section className="guide-detail__section">
+          <h2>{guide.comparison.title || "How HiHired compares"}</h2>
+          {guide.comparison.intro ? <p>{guide.comparison.intro}</p> : null}
+          <div className="guide-detail__stats">
+            {guide.comparison.items.map((item) => (
+              <article key={item.feature}>
+                <p className="guide-detail__stat-value">{item.feature}</p>
+                <p className="guide-detail__stat-label"><strong>HiHired:</strong> {item.hihired}</p>
+                <p className="guide-detail__stat-label"><strong>Alternatives:</strong> {item.alternatives}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       <section className="guide-detail__section">
         <h2>Quick FAQ</h2>
         {faqItems.map((item) => (
