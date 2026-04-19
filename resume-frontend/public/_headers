@@ -26,5 +26,9 @@
 # Sitemap and robots: short cache
 /sitemap.xml
   Cache-Control: public, max-age=86400
+/sitemap-answers.xml
+  Cache-Control: public, max-age=86400
 /robots.txt
+  Cache-Control: public, max-age=86400
+/.well-known/ai-answers.json
   Cache-Control: public, max-age=86400
