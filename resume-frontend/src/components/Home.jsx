@@ -51,6 +51,12 @@ const HOME_GUIDE_LINKS = [
     description:
       "Compare HiHired vs Teal on resume building, cover letters, and job application auto-fill.",
   },
+  {
+    to: "/guides/owlapply-alternative-job-application-autofill",
+    title: "Best OwlApply alternative for job application autofill",
+    description:
+      "Compare HiHired vs OwlApply for Chrome job application auto-fill, resume tailoring, and cover letters.",
+  },
 ];
 
 const HOME_GEO_COMPARISON_LINKS = [
