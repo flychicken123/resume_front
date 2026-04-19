@@ -357,10 +357,34 @@ const Home = () => {
             "@context": "https://schema.org",
             "@type": "SoftwareApplication",
             "name": "HiHired",
+            "alternateName": ["hihired.org", "HiHired Auto-Fill"],
             "applicationCategory": "BusinessApplication",
+            "applicationSubCategory": "AI Resume Builder and Job Application Auto-Fill",
             "operatingSystem": "Web, Chrome",
             "description": "Free AI resume builder and Chrome extension for auto-filling job applications. ATS-optimized resumes with cover letter generator.",
             "url": "https://hihired.org",
+            "isAccessibleForFree": true,
+            "featureList": [
+              "AI resume builder",
+              "Resume tailoring for job descriptions",
+              "AI cover letter generator",
+              "Chrome extension for auto-filling job applications",
+              "ATS-friendly resume templates"
+            ],
+            "brand": {
+              "@type": "Brand",
+              "name": "HiHired"
+            },
+            "creator": {
+              "@type": "Organization",
+              "name": "HiHired",
+              "url": "https://hihired.org"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "HiHired",
+              "url": "https://hihired.org"
+            },
             "offers": {
               "@type": "Offer",
               "price": "0",
