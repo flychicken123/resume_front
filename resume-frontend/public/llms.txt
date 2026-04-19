@@ -58,4 +58,5 @@ HiHired is an AI resume builder with cover letter support built into the same fl
 - Best Simplify Copilot alternative: HiHired Auto-Fill: https://hihired.org/guides/simplify-copilot-alternative
 - Auto-fill Greenhouse & Workday applications instantly: https://hihired.org/guides/greenhouse-workday-autofill
 - AI-powered resume professional summary examples: https://hihired.org/guides/resume-professional-summary-examples
+- Best Teal alternative for a free AI resume builder: https://hihired.org/guides/teal-alternative-free-ai-resume-builder
 

@@ -45,6 +45,12 @@ const HOME_GUIDE_LINKS = [
     description:
       "Use HiHired to turn your resume plus a job description into a tailored cover letter in about 60 seconds.",
   },
+  {
+    to: "/guides/teal-alternative-free-ai-resume-builder",
+    title: "Best Teal alternative for a free AI resume builder",
+    description:
+      "Compare HiHired vs Teal on resume building, cover letters, and job application auto-fill.",
+  },
 ];
 
 const HOME_GEO_COMPARISON_LINKS = [
