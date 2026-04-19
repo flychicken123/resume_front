@@ -23,6 +23,35 @@ fs.unlinkSync(tmpPath);
 const publicDir = path.join(__dirname, '..', 'public');
 const templateHtml = fs.readFileSync(path.join(publicDir, 'index.html'), 'utf-8');
 
+const organizationStructuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'HiHired',
+  alternateName: ['hihired.org', 'HiHired Auto-Fill'],
+  url: 'https://hihired.org',
+  logo: 'https://hihired.org/favicon.svg',
+  description: 'HiHired is a free AI resume builder and Chrome job application auto-fill tool for ATS-friendly resumes, cover letters, and faster job applications.',
+};
+
+const websiteStructuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'HiHired',
+  alternateName: 'hihired.org',
+  url: 'https://hihired.org',
+  description: 'HiHired helps job seekers build ATS-friendly resumes, tailor resumes to job descriptions, generate cover letters, and auto-fill job applications.',
+  publisher: {
+    '@type': 'Organization',
+    name: 'HiHired',
+    url: 'https://hihired.org',
+  },
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: 'https://hihired.org/guides',
+    'query-input': 'required name=search_term_string',
+  },
+};
+
 function escapeHtml(str = '') {
   return String(str)
     .replace(/&/g, '&amp;')
@@ -146,7 +175,7 @@ function generateGuidesIndexHtml() {
 
   let html = templateHtml;
   html = replaceMeta(html, title, description, canonical);
-  html = injectStructuredData(html, [collectionStructuredData, faqStructuredData]);
+  html = injectStructuredData(html, [organizationStructuredData, websiteStructuredData, collectionStructuredData, faqStructuredData]);
   html = html.replace('<div id="root"></div>', `<div id="root">${bodyHtml}</div>`);
   return html;
 }
@@ -355,7 +384,7 @@ function generateGuideHtml(guide) {
 
   let html = templateHtml;
   html = replaceMeta(html, title, description, canonical, 'article');
-  html = injectStructuredData(html, [articleStructuredData, howToStructuredData, faqStructuredData]);
+  html = injectStructuredData(html, [organizationStructuredData, websiteStructuredData, articleStructuredData, howToStructuredData, faqStructuredData]);
   html = html.replace('<div id="root"></div>', `<div id="root">${bodyHtml}</div>`);
   return html;
 }

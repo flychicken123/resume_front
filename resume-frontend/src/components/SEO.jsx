@@ -29,32 +29,62 @@ const SEO = ({
   );
   const isPrerender = typeof navigator !== 'undefined' && navigator.userAgent === 'ReactSnap';
   const robotsContent = isLocalhost && !isPrerender ? 'noindex, nofollow' : 'index, follow';
+  const resolvedTitle = title || defaultTitle;
+  const resolvedDescription = description || defaultDescription;
+  const resolvedCanonical = canonical || defaultCanonical;
+  const organizationStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "HiHired",
+    "alternateName": ["hihired.org", "HiHired Auto-Fill"],
+    "url": "https://hihired.org",
+    "logo": "https://hihired.org/favicon.svg",
+    "description": "HiHired is a free AI resume builder and Chrome job application auto-fill tool for ATS-friendly resumes, cover letters, and faster job applications.",
+  };
+  const websiteStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "HiHired",
+    "alternateName": "hihired.org",
+    "url": "https://hihired.org",
+    "description": "HiHired helps job seekers build ATS-friendly resumes, tailor resumes to job descriptions, generate cover letters, and auto-fill job applications.",
+    "publisher": {
+      "@type": "Organization",
+      "name": "HiHired",
+      "url": "https://hihired.org"
+    },
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://hihired.org/guides",
+      "query-input": "required name=search_term_string"
+    }
+  };
 
   return (
     <Helmet>
       {/* Primary Meta Tags */}
-      <title>{title || defaultTitle}</title>
-      <meta name="title" content={title || defaultTitle} />
-      <meta name="description" content={description || defaultDescription} />
+      <title>{resolvedTitle}</title>
+      <meta name="title" content={resolvedTitle} />
+      <meta name="description" content={resolvedDescription} />
       <meta name="keywords" content={keywords || defaultKeywords} />
       
       {/* Canonical URL */}
-      <link rel="canonical" href={canonical || defaultCanonical} />
+      <link rel="canonical" href={resolvedCanonical} />
       <meta property="og:locale" content="en_US" />
       
       {/* Open Graph / Facebook */}
       <meta property="og:type" content={ogType} />
-      <meta property="og:url" content={canonical || defaultCanonical} />
-      <meta property="og:title" content={title || defaultTitle} />
-      <meta property="og:description" content={description || defaultDescription} />
+      <meta property="og:url" content={resolvedCanonical} />
+      <meta property="og:title" content={resolvedTitle} />
+      <meta property="og:description" content={resolvedDescription} />
       <meta property="og:image" content={ogImage} />
       <meta property="og:site_name" content="HiHired" />
       
       {/* Twitter */}
       <meta property="twitter:card" content="summary_large_image" />
-      <meta property="twitter:url" content={canonical || defaultCanonical} />
-      <meta property="twitter:title" content={title || defaultTitle} />
-      <meta property="twitter:description" content={description || defaultDescription} />
+      <meta property="twitter:url" content={resolvedCanonical} />
+      <meta property="twitter:title" content={resolvedTitle} />
+      <meta property="twitter:description" content={resolvedDescription} />
       <meta property="twitter:image" content={ogImage} />
       
       {/* Additional SEO Meta Tags */}
@@ -71,8 +101,8 @@ const SEO = ({
         "@context": "https://schema.org",
         "@type": "WebApplication",
         "name": "HiHired",
-        "description": description || defaultDescription,
-        "url": canonical || defaultCanonical,
+        "description": resolvedDescription,
+        "url": resolvedCanonical,
         "applicationCategory": "ProductivityApplication",
         "operatingSystem": "Web Browser",
         "offers": {
@@ -95,8 +125,14 @@ const SEO = ({
           "name": "HiHired",
           "url": "https://hihired.org"
         },
-        "mainEntityOfPage": canonical || defaultCanonical
+        "mainEntityOfPage": resolvedCanonical
       })}
+      </script>
+      <script type="application/ld+json">
+      {JSON.stringify(organizationStructuredData)}
+      </script>
+      <script type="application/ld+json">
+      {JSON.stringify(websiteStructuredData)}
       </script>
     </Helmet>
   );
