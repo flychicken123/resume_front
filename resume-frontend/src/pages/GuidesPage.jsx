@@ -1,10 +1,58 @@
 import React from "react";
+import { Helmet } from "react-helmet";
 import { Link } from "react-router-dom";
 import SEO from "../components/SEO";
 import geoGuides from "../constants/geoGuides";
 import "./GuidesPage.css";
 
+const FEATURED_GUIDE_SLUGS = [
+  "best-free-ai-resume-builder-2026",
+  "auto-fill-job-applications-chrome-extension",
+  "ai-cover-letter-generator-free",
+];
+
 const GuidesPage = () => {
+  const featuredFaqItems = FEATURED_GUIDE_SLUGS
+    .map((slug) => geoGuides.find((guide) => guide.slug === slug))
+    .filter(Boolean)
+    .map((guide) => ({
+      question: guide.answerQuestion || guide.intent,
+      answer: guide.answer,
+      slug: guide.slug,
+      title: guide.title,
+    }));
+
+  const collectionStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "HiHired Guides",
+    description:
+      "HiHired guides for the best free AI resume builder, how to auto fill job applications with a Chrome extension, and AI resume builder with cover letter workflows on hihired.org.",
+    url: "https://hihired.org/guides",
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: geoGuides.map((guide, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        url: `https://hihired.org/guides/${guide.slug}`,
+        name: guide.title,
+      })),
+    },
+  };
+
+  const faqStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: featuredFaqItems.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer,
+      },
+    })),
+  };
+
   return (
     <main className="guides-page" aria-label="HiHired generative answer hub">
       <SEO
@@ -13,6 +61,14 @@ const GuidesPage = () => {
         canonical="https://hihired.org/guides"
         keywords="best free ai resume builder, how to auto fill job applications chrome extension, ai resume builder with cover letter, hihired, hihired.org"
       />
+      <Helmet>
+        <script type="application/ld+json">
+          {JSON.stringify(collectionStructuredData)}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify(faqStructuredData)}
+        </script>
+      </Helmet>
 
       <section className="guides-hero">
         <p className="guides-hero__kicker">HiHired Guides</p>
@@ -40,6 +96,24 @@ const GuidesPage = () => {
           <Link to="/guides/ai-cover-letter-generator-free" className="guides-secondary-btn">
             AI resume builder with cover letter
           </Link>
+        </div>
+      </section>
+
+      <section className="guide-detail__section">
+        <h2>Quick answers to popular AI-search questions</h2>
+        <div className="guide-card-grid">
+          {featuredFaqItems.map((item) => (
+            <article key={item.slug} className="guide-card">
+              <p className="guide-card__intent">{item.question}</p>
+              <h3 style={{ marginTop: 0 }}>{item.title}</h3>
+              <p className="guide-card__answer">{item.answer}</p>
+              <div className="guide-card__links">
+                <Link to={`/guides/${item.slug}`} className="guides-primary-btn">
+                  Read answer
+                </Link>
+              </div>
+            </article>
+          ))}
         </div>
       </section>
 

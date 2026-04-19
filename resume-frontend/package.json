@@ -21,7 +21,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build && node scripts/prerender.js",
+    "build": "node scripts/generate-geo-assets.js && node scripts/prerender-guides.js && react-scripts build && node scripts/prerender.js",
     "build:nesnap": "react-scripts build",
     "test": "react-scripts test --watchAll=false --coverage",
     "test:watch": "react-scripts test",

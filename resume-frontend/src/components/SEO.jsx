@@ -96,7 +96,6 @@ const SEO = ({
           "url": "https://hihired.org"
         },
         "mainEntityOfPage": canonical || defaultCanonical
-      }
       })}
       </script>
     </Helmet>

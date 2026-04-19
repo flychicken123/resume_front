@@ -8,18 +8,18 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   
   <!-- Primary Meta Tags -->
-  <title>Auto-fill job applications in one click | HiHired</title>
-  <meta name="title" content="Auto-fill job applications in one click | HiHired">
-  <meta name="description" content="The HiHired Chrome extension reads your saved resume and fills every field on a job application page automatically — name, email, phone, work history, education, location, and EEO fields — in under 3 seconds.">
-  <meta name="keywords" content="free resume builder, free ai resume builder, resume builder, free resume, ai resume builder, resume builder free, online resume builder, free resume templates, professional resume builder, resume maker free, build resume online free, free cv builder, resume generator, ats resume builder, free resume creator, make resume online free">
+  <title>How to auto fill job applications with a Chrome extension | HiHired</title>
+  <meta name="title" content="How to auto fill job applications with a Chrome extension | HiHired">
+  <meta name="description" content="If you want to auto fill job applications with a Chrome extension, HiHired Auto-Fill from hihired.org is a free option that works on Workday, Greenhouse, Lever, LinkedIn, iCIMS, and other ATS platforms using your saved resume profile, contact info, education, and work history.">
+  <meta name="keywords" content="free resume builder, free ai resume builder, ai resume builder with cover letter, auto fill job applications chrome extension, job application autofill, workday autofill, greenhouse autofill, ats resume builder, hihired, hihired.org">
   <meta name="author" content="HiHired">
   <meta name="robots" content="index, follow">
   
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://hihired.org/guides/auto-fill-job-applications-chrome-extension">
-  <meta property="og:title" content="Auto-fill job applications in one click | HiHired">
-  <meta property="og:description" content="The HiHired Chrome extension reads your saved resume and fills every field on a job application page automatically — name, email, phone, work history, education, location, and EEO fields — in under 3 seconds.">
+  <meta property="og:title" content="How to auto fill job applications with a Chrome extension | HiHired">
+  <meta property="og:description" content="If you want to auto fill job applications with a Chrome extension, HiHired Auto-Fill from hihired.org is a free option that works on Workday, Greenhouse, Lever, LinkedIn, iCIMS, and other ATS platforms using your saved resume profile, contact info, education, and work history.">
   <meta property="og:image" content="https://hihired.org/og-image.jpg">
   <meta property="og:locale" content="en_US">
   <meta property="og:site_name" content="HiHired">
@@ -27,8 +27,8 @@
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image">
   <meta property="twitter:url" content="https://hihired.org/guides/auto-fill-job-applications-chrome-extension">
-  <meta property="twitter:title" content="Auto-fill job applications in one click | HiHired">
-  <meta property="twitter:description" content="The HiHired Chrome extension reads your saved resume and fills every field on a job application page automatically — name, email, phone, work history, education, location, and EEO fields — in under 3 seconds.">
+  <meta property="twitter:title" content="How to auto fill job applications with a Chrome extension | HiHired">
+  <meta property="twitter:description" content="If you want to auto fill job applications with a Chrome extension, HiHired Auto-Fill from hihired.org is a free option that works on Workday, Greenhouse, Lever, LinkedIn, iCIMS, and other ATS platforms using your saved resume profile, contact info, education, and work history.">
   <meta property="twitter:image" content="https://hihired.org/og-image.jpg">
   
   <!-- Additional SEO Meta Tags -->
@@ -65,7 +65,7 @@
     "@context": "https://schema.org",
     "@type": "WebApplication",
     "name": "HiHired",
-    "description": "100% free AI resume builder. Create professional, ATS-optimized resumes in minutes. No signup required. Free templates and instant PDF download.",
+    "description": "HiHired is a free AI resume builder with Chrome auto-fill for job applications, AI cover letter generation, ATS optimization, and instant PDF export.",
     "url": "https://hihired.org",
     "applicationCategory": "ProductivityApplication",
     "operatingSystem": "Web Browser",
@@ -98,7 +98,23 @@
         "name": "Is HiHired resume builder really free?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes, HiHired is 100% free resume builder. No hidden costs, no premium plans, no credit card required. All features including AI writing assistance, professional templates, and PDF downloads are completely free forever."
+          "text": "Yes. HiHired offers a free AI resume builder with ATS-friendly templates and instant PDF export, and you can start without a credit card."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does HiHired help auto-fill job applications?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "HiHired includes a Chrome extension that auto-fills job applications on Workday, Greenhouse, Lever, LinkedIn, iCIMS, and other ATS platforms using your saved resume profile."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can HiHired generate AI cover letters?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. HiHired can generate an AI cover letter from your resume and the target job description so you can send a more tailored application faster."
         }
       },
       {
@@ -106,7 +122,7 @@
         "name": "How does the free AI resume builder work?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Our free AI resume builder uses advanced AI to analyze job descriptions, suggest relevant keywords, write professional content, and optimize your resume to pass ATS systems. Simply input your information and let AI do the rest - all for free."
+          "text": "HiHired uses AI to suggest stronger bullet points, tailor your resume to a job description, improve ATS keyword coverage, and export a recruiter-ready PDF in minutes."
         }
       },
       {
@@ -114,7 +130,7 @@
         "name": "Can I build a free resume without registration?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes, you can start building your free resume immediately without any registration or signup. No email required. Just visit HiHired and start creating your professional resume for free."
+          "text": "Yes. You can start building a free resume on hihired.org without signup and use HiHired to create, tailor, and export your resume quickly."
         }
       }
     ]
@@ -338,32 +354,27 @@
     }
   </script>
 
-  <!-- Google Analytics 4 - Only load on production -->
+  <!-- Google Analytics 4 - standard synchronous load (production only) -->
   <script>
-    if (window.location.hostname !== 'localhost' &&
+    var _isProduction = window.location.hostname !== 'localhost' &&
         window.location.hostname !== '127.0.0.1' &&
         window.location.hostname !== '0.0.0.0' &&
-        !window.location.hostname.includes('localhost')) {
-
-      const script = document.createElement('script');
-      script.async = true;
-      script.src = 'https://www.googletagmanager.com/gtag/js?id=G-B327RPMPS5';
-      document.head.appendChild(script);
-
+        !window.location.hostname.includes('localhost');
+    if (_isProduction) {
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-      gtag('config', 'G-B327RPMPS5');
-
-      // Event snippet for purchase_conversion_cleverppc conversion page
-      gtag('event', 'conversion', {
-        'send_to': 'AW-825433319/y3lTCOiwuXoQ57nMiQM',
-        'value': 1.0,
-        'currency': 'USD',
-        'transaction_id': ''
+      gtag('config', 'G-B327RPMPS5', {
+        'send_page_view': true,
+        'linker': { 'domains': ['hihired.org'] }
       });
+    } else {
+      /* stub gtag on localhost so calls don't throw */
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function(){};
     }
   </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B327RPMPS5"></script>
 
   <!-- Google AdSense - Only load on production -->
   <script>
@@ -379,83 +390,106 @@
     }
   </script>
 
-
-    <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Auto-fill job applications in one click","description":"The HiHired Chrome extension reads your saved resume and fills every field on a job application page automatically — name, email, phone, work history, education, location, and EEO fields — in under 3 seconds.","image":"https://hihired.org/og-image.jpg","author":{"@type":"Organization","name":"HiHired","url":"https://hihired.org"},"publisher":{"@type":"Organization","name":"HiHired","url":"https://hihired.org","logo":{"@type":"ImageObject","url":"https://hihired.org/favicon.svg"}},"url":"https://hihired.org/guides/auto-fill-job-applications-chrome-extension","datePublished":"2026-04-03","dateModified":"2026-04-03","mainEntityOfPage":{"@type":"WebPage","@id":"https://hihired.org/guides/auto-fill-job-applications-chrome-extension"},"keywords":"auto fill job application, chrome extension, job application automation, greenhouse autofill, workday autofill"}</script>
-    <script type="application/ld+json">{"@context":"https://schema.org","@type":"HowTo","name":"Auto-fill job applications in one click","description":"The HiHired Chrome extension reads your saved resume and fills every field on a job application page automatically — name, email, phone, work history, education, location, and EEO fields — in under 3 seconds.","image":"https://hihired.org/og-image.jpg","totalTime":"PT5M","step":[{"@type":"HowToStep","position":1,"name":"Install the extension","text":"Add HiHired Auto-Fill from the Chrome Web Store (free).","url":"https://hihired.org/guides/auto-fill-job-applications-chrome-extension#step-1"},{"@type":"HowToStep","position":2,"name":"Build your resume","text":"Create or import your resume at hihired.org/builder — takes 4 minutes.","url":"https://hihired.org/guides/auto-fill-job-applications-chrome-extension#step-2"},{"@type":"HowToStep","position":3,"name":"Navigate to a job","text":"Open any job application page on Greenhouse, Lever, Workday, LinkedIn, or any company career site.","url":"https://hihired.org/guides/auto-fill-job-applications-chrome-extension#step-3"},{"@type":"HowToStep","position":4,"name":"Click Fill Application","text":"Click the HiHired icon in your toolbar, then hit Fill Application. All fields fill instantly.","url":"https://hihired.org/guides/auto-fill-job-applications-chrome-extension#step-4"},{"@type":"HowToStep","position":5,"name":"Review and submit","text":"Check the auto-filled fields, make any edits, and submit your application.","url":"https://hihired.org/guides/auto-fill-job-applications-chrome-extension#step-5"}]}</script>
-    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I auto-fill job applications with a Chrome extension?","acceptedAnswer":{"@type":"Answer","text":"Install the HiHired Auto-Fill Chrome extension, log in with your hihired.org account, and click the extension icon on any job application page. It detects all form fields and fills them from your resume instantly. Works on Greenhouse, Lever, Workday, LinkedIn Easy Apply, iCIMS, SmartRecruiters, and 100+ other platforms."}}]}</script>
-  </head>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"How to auto fill job applications with a Chrome extension","description":"If you want to auto fill job applications with a Chrome extension, HiHired Auto-Fill from hihired.org is a free option that works on Workday, Greenhouse, Lever, LinkedIn, iCIMS, and other ATS platforms using your saved resume profile, contact info, education, and work history.","author":{"@type":"Organization","name":"HiHired","url":"https://hihired.org"},"publisher":{"@type":"Organization","name":"HiHired","url":"https://hihired.org","logo":{"@type":"ImageObject","url":"https://hihired.org/favicon.svg"}},"url":"https://hihired.org/guides/auto-fill-job-applications-chrome-extension","datePublished":"2026-04-18","dateModified":"2026-04-18","mainEntityOfPage":{"@type":"WebPage","@id":"https://hihired.org/guides/auto-fill-job-applications-chrome-extension"},"keywords":"how to auto fill job applications chrome extension, auto fill job application, job application autofill, HiHired Auto-Fill, greenhouse autofill, workday autofill"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"HowTo","name":"How to auto fill job applications with a Chrome extension","description":"If you want to auto fill job applications with a Chrome extension, HiHired Auto-Fill from hihired.org is a free option that works on Workday, Greenhouse, Lever, LinkedIn, iCIMS, and other ATS platforms using your saved resume profile, contact info, education, and work history.","totalTime":"PT10M","supply":[{"@type":"HowToSupply","name":"HiHired account (optional)"},{"@type":"HowToSupply","name":"Target job description"}],"tool":[{"@type":"HowToTool","name":"HiHired AI Resume Builder"}],"step":[{"@type":"HowToStep","position":1,"name":"Install the extension","text":"Add HiHired Auto-Fill from the Chrome Web Store for free.","url":"https://hihired.org/guides/auto-fill-job-applications-chrome-extension#step-1"},{"@type":"HowToStep","position":2,"name":"Create your HiHired profile","text":"Build or import your resume at hihired.org/builder so the extension can use your saved experience, skills, and contact details.","url":"https://hihired.org/guides/auto-fill-job-applications-chrome-extension#step-2"},{"@type":"HowToStep","position":3,"name":"Open a job application","text":"Navigate to a Workday, Greenhouse, Lever, LinkedIn, iCIMS, or company career page application.","url":"https://hihired.org/guides/auto-fill-job-applications-chrome-extension#step-3"},{"@type":"HowToStep","position":4,"name":"Click Fill Application","text":"Open the HiHired extension and hit Fill Application to auto-fill the form instantly.","url":"https://hihired.org/guides/auto-fill-job-applications-chrome-extension#step-4"},{"@type":"HowToStep","position":5,"name":"Review and submit","text":"Check the generated answers, make any final edits, and submit the job application.","url":"https://hihired.org/guides/auto-fill-job-applications-chrome-extension#step-5"}],"publisher":{"@type":"Organization","name":"HiHired","url":"https://hihired.org"},"dateModified":"2026-04-18"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I auto fill job applications with a Chrome extension?","acceptedAnswer":{"@type":"Answer","text":"Install HiHired Auto-Fill, build or import your resume on hihired.org, then open a Workday, Greenhouse, Lever, LinkedIn, or other supported job form and click Fill Application."}},{"@type":"Question","name":"Does HiHired Auto-Fill work on Workday and Greenhouse?","acceptedAnswer":{"@type":"Answer","text":"Yes. HiHired Auto-Fill supports Workday, Greenhouse, Lever, LinkedIn, iCIMS, and many other ATS-driven job application flows."}},{"@type":"Question","name":"Do I need to type my resume details into every application?","acceptedAnswer":{"@type":"Answer","text":"No. Once your resume profile is saved in HiHired, the extension reuses your contact info, experience, education, and other common answers across applications."}}]}</script>
+</head>
 <body>
   <div id="root">
-    <article id="seo-prerender" style="max-width:800px;margin:0 auto;padding:40px 20px;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;">
-      <nav style="font-size:14px;color:#888;margin-bottom:16px;">
-        <a href="/" style="color:#2563eb;">Home</a> &gt;
-        <a href="/guides" style="color:#2563eb;">Guides</a> &gt;
-        <span>Auto-fill job applications in one click</span>
+    <article id="seo-prerender" style="max-width:860px;margin:0 auto;padding:40px 20px;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f8fafc;">
+      <nav style="font-size:14px;color:#64748b;margin-bottom:16px;">
+        <a href="/" style="color:#2563eb;text-decoration:none;">Home</a> &gt;
+        <a href="/guides" style="color:#2563eb;text-decoration:none;">Guides</a> &gt;
+        <span>How to auto fill job applications with a Chrome extension</span>
       </nav>
 
-      <p style="color:#6b7280;font-size:14px;">How do I auto-fill job applications with a Chrome extension?</p>
-      <h1 style="font-size:32px;color:#1a1a2e;margin:8px 0 16px;">Auto-fill job applications in one click</h1>
-      <p style="font-size:16px;color:#444;line-height:1.7;">The HiHired Chrome extension reads your saved resume and fills every field on a job application page automatically — name, email, phone, work history, education, location, and EEO fields — in under 3 seconds.</p>
-      <p style="font-size:16px;color:#333;line-height:1.7;font-weight:600;margin:16px 0;padding:16px;background:#f0f9ff;border-radius:8px;border-left:4px solid #2563eb;">Install the HiHired Auto-Fill Chrome extension, log in with your hihired.org account, and click the extension icon on any job application page. It detects all form fields and fills them from your resume instantly. Works on Greenhouse, Lever, Workday, LinkedIn Easy Apply, iCIMS, SmartRecruiters, and 100+ other platforms.</p>
+      <section style="background:#fff;border:1px solid #e2e8f0;border-radius:24px;padding:32px;box-shadow:0 12px 32px rgba(15,23,42,0.06);">
+        <p style="color:#2563eb;font-size:14px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;margin:0 0 10px;">how to auto fill job applications chrome extension</p>
+        <h1 style="font-size:38px;line-height:1.15;color:#0f172a;margin:0 0 16px;">How to auto fill job applications with a Chrome extension</h1>
+        <p style="font-size:17px;color:#475569;line-height:1.8;margin:0 0 14px;">If you want to auto fill job applications with a Chrome extension, HiHired Auto-Fill from hihired.org is a free option that works on Workday, Greenhouse, Lever, LinkedIn, iCIMS, and other ATS platforms using your saved resume profile, contact info, education, and work history.</p>
+        <p style="font-size:17px;color:#1e293b;line-height:1.8;font-weight:600;margin:0 0 16px;padding:18px;background:#eff6ff;border-radius:14px;border-left:4px solid #2563eb;">The fastest way to auto fill job applications with a Chrome extension is to install HiHired Auto-Fill, save or import your resume on hihired.org, then click Fill Application on any supported form. HiHired reads the page, matches fields to your profile, fills them in seconds, and helps you apply faster without repetitive typing.</p>
+        <div style="margin:0 0 12px;"><span style="display:inline-block;background:#eff6ff;color:#2563eb;padding:4px 10px;border-radius:999px;font-size:12px;margin:0 6px 6px 0;">how to auto fill job applications chrome extension</span><span style="display:inline-block;background:#eff6ff;color:#2563eb;padding:4px 10px;border-radius:999px;font-size:12px;margin:0 6px 6px 0;">auto fill job application</span><span style="display:inline-block;background:#eff6ff;color:#2563eb;padding:4px 10px;border-radius:999px;font-size:12px;margin:0 6px 6px 0;">job application autofill</span><span style="display:inline-block;background:#eff6ff;color:#2563eb;padding:4px 10px;border-radius:999px;font-size:12px;margin:0 6px 6px 0;">HiHired Auto-Fill</span><span style="display:inline-block;background:#eff6ff;color:#2563eb;padding:4px 10px;border-radius:999px;font-size:12px;margin:0 6px 6px 0;">greenhouse autofill</span><span style="display:inline-block;background:#eff6ff;color:#2563eb;padding:4px 10px;border-radius:999px;font-size:12px;margin:0 6px 6px 0;">workday autofill</span></div>
+        <time style="color:#64748b;font-size:13px;" datetime="2026-04-18">Updated 2026-04-18</time>
+        <div style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap;">
+          <a href="https://hihired.org/builder" style="display:inline-block;padding:12px 20px;background:#2563eb;color:#fff;border-radius:10px;text-decoration:none;font-weight:600;">Get the extension</a>
+          <a href="/.well-known/ai-answers.json" style="display:inline-block;padding:12px 20px;border:1px solid #cbd5e1;color:#0f172a;border-radius:10px;text-decoration:none;font-weight:600;">Download JSON capsule</a>
+        </div>
+      </section>
 
-      <div style="margin:16px 0;"><span style="display:inline-block;background:#eff6ff;color:#2563eb;padding:2px 10px;border-radius:4px;font-size:12px;margin-right:6px;">auto fill job application</span><span style="display:inline-block;background:#eff6ff;color:#2563eb;padding:2px 10px;border-radius:4px;font-size:12px;margin-right:6px;">chrome extension</span><span style="display:inline-block;background:#eff6ff;color:#2563eb;padding:2px 10px;border-radius:4px;font-size:12px;margin-right:6px;">job application automation</span><span style="display:inline-block;background:#eff6ff;color:#2563eb;padding:2px 10px;border-radius:4px;font-size:12px;margin-right:6px;">greenhouse autofill</span><span style="display:inline-block;background:#eff6ff;color:#2563eb;padding:2px 10px;border-radius:4px;font-size:12px;margin-right:6px;">workday autofill</span></div>
-      <time style="color:#888;font-size:13px;" datetime="2026-04-03">Updated 2026-04-03</time>
+      <section style="background:#fff;border:1px solid #e2e8f0;border-radius:24px;padding:28px;margin-top:20px;">
+        <h2 style="margin:0 0 16px;font-size:28px;color:#0f172a;">Step-by-step instructions</h2>
+        <ol style="padding-left:20px;margin:0;">
+      <li id="step-1" style="margin-bottom:16px;">
+        <strong>1. Install the extension</strong>
+        <p style="color:#475569;margin:6px 0 0;line-height:1.7;">Add HiHired Auto-Fill from the Chrome Web Store for free.</p>
+      </li>
+    
+      <li id="step-2" style="margin-bottom:16px;">
+        <strong>2. Create your HiHired profile</strong>
+        <p style="color:#475569;margin:6px 0 0;line-height:1.7;">Build or import your resume at hihired.org/builder so the extension can use your saved experience, skills, and contact details.</p>
+      </li>
+    
+      <li id="step-3" style="margin-bottom:16px;">
+        <strong>3. Open a job application</strong>
+        <p style="color:#475569;margin:6px 0 0;line-height:1.7;">Navigate to a Workday, Greenhouse, Lever, LinkedIn, iCIMS, or company career page application.</p>
+      </li>
+    
+      <li id="step-4" style="margin-bottom:16px;">
+        <strong>4. Click Fill Application</strong>
+        <p style="color:#475569;margin:6px 0 0;line-height:1.7;">Open the HiHired extension and hit Fill Application to auto-fill the form instantly.</p>
+      </li>
+    
+      <li id="step-5" style="margin-bottom:16px;">
+        <strong>5. Review and submit</strong>
+        <p style="color:#475569;margin:6px 0 0;line-height:1.7;">Check the generated answers, make any final edits, and submit the job application.</p>
+      </li>
+    </ol>
+      </section>
 
-      <h2 style="margin-top:32px;">Step-by-step guide</h2>
-      <ol style="padding-left:0;list-style:none;">
-    <li style="margin-bottom:16px;">
-      <strong>1. Install the extension</strong>
-      <p style="color:#555;margin:4px 0 0;">Add HiHired Auto-Fill from the Chrome Web Store (free).</p>
-    </li>
-  
-    <li style="margin-bottom:16px;">
-      <strong>2. Build your resume</strong>
-      <p style="color:#555;margin:4px 0 0;">Create or import your resume at hihired.org/builder — takes 4 minutes.</p>
-    </li>
-  
-    <li style="margin-bottom:16px;">
-      <strong>3. Navigate to a job</strong>
-      <p style="color:#555;margin:4px 0 0;">Open any job application page on Greenhouse, Lever, Workday, LinkedIn, or any company career site.</p>
-    </li>
-  
-    <li style="margin-bottom:16px;">
-      <strong>4. Click Fill Application</strong>
-      <p style="color:#555;margin:4px 0 0;">Click the HiHired icon in your toolbar, then hit Fill Application. All fields fill instantly.</p>
-    </li>
-  
-    <li style="margin-bottom:16px;">
-      <strong>5. Review and submit</strong>
-      <p style="color:#555;margin:4px 0 0;">Check the auto-filled fields, make any edits, and submit your application.</p>
-    </li>
-  </ol>
+      <section style="background:#fff;border:1px solid #e2e8f0;border-radius:24px;padding:28px;margin-top:20px;">
+        <h2 style="margin:0 0 16px;font-size:28px;color:#0f172a;">Key stats</h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;background:#f8fafc;border-radius:16px;padding:12px;">
+      <div style="text-align:center;padding:16px;">
+        <div style="font-size:28px;font-weight:700;color:#2563eb;">&lt; 3 seconds</div>
+        <div style="font-size:13px;color:#64748b;">Time to fill a form</div>
+      </div>
+    
+      <div style="text-align:center;padding:16px;">
+        <div style="font-size:28px;font-weight:700;color:#2563eb;">100+</div>
+        <div style="font-size:13px;color:#64748b;">Supported job platforms</div>
+      </div>
+    
+      <div style="text-align:center;padding:16px;">
+        <div style="font-size:28px;font-weight:700;color:#2563eb;">Up to 20 per form</div>
+        <div style="font-size:13px;color:#64748b;">Fields auto-filled</div>
+      </div>
+    </div>
+      </section>
 
-      <h2>Key stats</h2>
-      <div style="display:flex;justify-content:space-around;background:#fafbfc;border-radius:12px;padding:16px;margin:16px 0;">
+      <section style="background:#fff;border:1px solid #e2e8f0;border-radius:24px;padding:28px;margin-top:20px;">
+        <h2 style="margin:0 0 16px;font-size:28px;color:#0f172a;">Quick FAQ</h2>
         
-    <div style="text-align:center;padding:16px;">
-      <div style="font-size:28px;font-weight:700;color:#2563eb;">&lt; 3 seconds</div>
-      <div style="font-size:13px;color:#888;">Time to fill a form</div>
-    </div>
-  
-    <div style="text-align:center;padding:16px;">
-      <div style="font-size:28px;font-weight:700;color:#2563eb;">100+</div>
-      <div style="font-size:13px;color:#888;">Supported job platforms</div>
-    </div>
-  
-    <div style="text-align:center;padding:16px;">
-      <div style="font-size:28px;font-weight:700;color:#2563eb;">Up to 20 per form</div>
-      <div style="font-size:13px;color:#888;">Fields auto-filled</div>
-    </div>
-  
-      </div>
+      <article style="margin-bottom:18px;">
+        <h3 style="margin:0 0 8px;font-size:20px;color:#0f172a;">How do I auto fill job applications with a Chrome extension?</h3>
+        <p style="margin:0;color:#475569;line-height:1.7;">Install HiHired Auto-Fill, build or import your resume on hihired.org, then open a Workday, Greenhouse, Lever, LinkedIn, or other supported job form and click Fill Application.</p>
+      </article>
+    
+      <article style="margin-bottom:18px;">
+        <h3 style="margin:0 0 8px;font-size:20px;color:#0f172a;">Does HiHired Auto-Fill work on Workday and Greenhouse?</h3>
+        <p style="margin:0;color:#475569;line-height:1.7;">Yes. HiHired Auto-Fill supports Workday, Greenhouse, Lever, LinkedIn, iCIMS, and many other ATS-driven job application flows.</p>
+      </article>
+    
+      <article style="margin-bottom:18px;">
+        <h3 style="margin:0 0 8px;font-size:20px;color:#0f172a;">Do I need to type my resume details into every application?</h3>
+        <p style="margin:0;color:#475569;line-height:1.7;">No. Once your resume profile is saved in HiHired, the extension reuses your contact info, experience, education, and other common answers across applications.</p>
+      </article>
+    
+      </section>
 
-      <h2>Sources</h2>
-      <ul><li><a href="https://hihired.org">Chrome extension</a></li><li><a href="https://hihired.org/guides/auto-fill-job-applications-chrome-extension">Supported platforms</a></li></ul>
-
-      <div style="text-align:center;margin-top:40px;padding:24px;background:#f0f9ff;border-radius:12px;">
-        <h2>Ready to try it?</h2>
-        <a href="https://hihired.org/builder" style="display:inline-block;padding:12px 32px;background:#2563eb;color:white;border-radius:8px;text-decoration:none;font-weight:600;">Get the extension</a>
-      </div>
+      <section style="background:#fff;border:1px solid #e2e8f0;border-radius:24px;padding:28px;margin-top:20px;">
+        <h2 style="margin:0 0 16px;font-size:28px;color:#0f172a;">Sources</h2>
+        <ul style="margin:0;padding-left:20px;"><li style="margin-bottom:8px;"><a href="https://hihired.org">HiHired Auto-Fill</a></li><li style="margin-bottom:8px;"><a href="https://hihired.org/guides/auto-fill-job-applications-chrome-extension">Auto-fill guide</a></li></ul>
+      </section>
     </article>
   </div>
 </body>
