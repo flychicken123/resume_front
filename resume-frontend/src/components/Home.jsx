@@ -100,6 +100,12 @@ const HOME_GUIDE_LINKS = [
       "Compare HiHired vs Jobscan on ATS resumes, cover letters, and job application auto-fill.",
   },
   {
+    to: "/guides/myperfectresume-alternative-free-ai-resume-builder",
+    title: "Best MyPerfectResume alternative for a free AI resume builder",
+    description:
+      "Compare HiHired vs MyPerfectResume on ATS resumes, cover letters, and job application auto-fill.",
+  },
+  {
     to: "/guides/careerflow-alternative-job-application-autofill",
     title: "Best Careerflow alternative for job application autofill",
     description:
