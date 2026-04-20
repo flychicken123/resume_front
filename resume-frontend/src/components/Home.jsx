@@ -76,6 +76,12 @@ const HOME_GUIDE_LINKS = [
       "Compare HiHired vs JobCopilot for Chrome job application auto-fill, resume tailoring, and cover letters.",
   },
   {
+    to: "/guides/speedyapply-alternative-job-application-autofill",
+    title: "Best SpeedyApply alternative for job application autofill",
+    description:
+      "Compare HiHired vs SpeedyApply for Chrome job application auto-fill, resume tailoring, and cover letters.",
+  },
+  {
     to: "/guides/owlapply-alternative-job-application-autofill",
     title: "Best OwlApply alternative for job application autofill",
     description:
