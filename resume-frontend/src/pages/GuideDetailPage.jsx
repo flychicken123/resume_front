@@ -91,6 +91,44 @@ const GuideDetailPage = () => {
     ]
   };
 
+  const articleStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": guide.title,
+    "description": guide.summary,
+    "url": canonical,
+    "mainEntityOfPage": canonical,
+    "dateModified": guide.lastUpdated,
+    "datePublished": guide.lastUpdated,
+    "author": {
+      "@type": "Organization",
+      "name": "HiHired",
+      "url": "https://hihired.org"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "HiHired",
+      "url": "https://hihired.org",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://hihired.org/favicon.svg"
+      }
+    },
+    "about": [
+      {
+        "@type": "Thing",
+        "name": guide.answerQuestion || guide.intent
+      },
+      {
+        "@type": "SoftwareApplication",
+        "name": "HiHired",
+        "url": "https://hihired.org",
+        "applicationCategory": "BusinessApplication"
+      }
+    ],
+    "keywords": guide.tags?.join(", ")
+  };
+
   const relatedGuides = geoGuides
     .filter((item) => item.slug !== guide.slug)
     .map((item) => {
@@ -127,6 +165,9 @@ const GuideDetailPage = () => {
         </script>
         <script type="application/ld+json">
           {JSON.stringify(breadcrumbStructuredData)}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify(articleStructuredData)}
         </script>
       </Helmet>
 
