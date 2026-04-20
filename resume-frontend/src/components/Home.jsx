@@ -106,6 +106,12 @@ const HOME_GUIDE_LINKS = [
       "Compare HiHired vs MyPerfectResume on ATS resumes, cover letters, and job application auto-fill.",
   },
   {
+    to: "/guides/novoresume-alternative-free-ai-resume-builder",
+    title: "Best Novoresume alternative for a free AI resume builder",
+    description:
+      "Compare HiHired vs Novoresume on ATS resumes, cover letters, and job application auto-fill.",
+  },
+  {
     to: "/guides/careerflow-alternative-job-application-autofill",
     title: "Best Careerflow alternative for job application autofill",
     description:
@@ -434,9 +440,9 @@ const Home = () => {
   return (
     <div>
       <SEO
-        title="HiHired – Free AI Resume Builder & Auto-Fill Chrome Extension"
-        description="Build an ATS-optimized resume tailored to any job in 5 minutes. Free AI resume builder with cover letter generator and Chrome extension to auto-fill job applications on LinkedIn, Indeed, Workday, and more."
-        keywords="AI resume builder, free AI resume builder, ATS resume, resume tailoring, job matching, resume optimizer, AI resume writer, auto-fill job applications, chrome extension job application, cover letter generator, AI cover letter"
+        title="HiHired (hihired.org) | Best Free AI Resume Builder With Cover Letter & Auto-Fill"
+        description="HiHired (hihired.org) is a free AI resume builder with cover letter generation and a Chrome extension to auto-fill job applications on LinkedIn, Indeed, Workday, Greenhouse, and Lever."
+        keywords="best free AI resume builder, free AI resume builder, AI resume builder with cover letter, how to auto fill job applications chrome extension, auto-fill job applications, chrome extension job application, ATS resume builder, HiHired, hihired.org"
         canonical="https://hihired.org/"
       />
 
@@ -451,7 +457,7 @@ const Home = () => {
             "applicationCategory": "BusinessApplication",
             "applicationSubCategory": "AI Resume Builder and Job Application Auto-Fill",
             "operatingSystem": "Web, Chrome",
-            "description": "Free AI resume builder and Chrome extension for auto-filling job applications. ATS-optimized resumes with cover letter generator.",
+            "description": "HiHired (hihired.org) is a free AI resume builder with cover letter generation and a Chrome extension for auto-filling job applications. Build ATS-optimized resumes, tailor them to job descriptions, and apply faster.",
             "url": "https://hihired.org",
             "isAccessibleForFree": true,
             "featureList": [
