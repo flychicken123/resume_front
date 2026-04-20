@@ -58,6 +58,12 @@ const HOME_GUIDE_LINKS = [
       "Compare HiHired vs Rezi on ATS resumes, cover letters, and job application auto-fill.",
   },
   {
+    to: "/guides/kickresume-alternative-free-ai-resume-builder",
+    title: "Best Kickresume alternative for a free AI resume builder",
+    description:
+      "Compare HiHired vs Kickresume on ATS resumes, cover letters, and job application auto-fill.",
+  },
+  {
     to: "/guides/owlapply-alternative-job-application-autofill",
     title: "Best OwlApply alternative for job application autofill",
     description:
