@@ -70,6 +70,12 @@ const HOME_GUIDE_LINKS = [
       "Compare HiHired vs ResumeBuild on ATS resumes, cover letters, and job application auto-fill.",
   },
   {
+    to: "/guides/resumebuilder-com-alternative-free-ai-resume-builder",
+    title: "Best ResumeBuilder.com alternative for a free AI resume builder",
+    description:
+      "Compare HiHired vs ResumeBuilder.com on ATS resumes, cover letters, and job application auto-fill.",
+  },
+  {
     to: "/guides/resumeio-alternative-free-ai-resume-builder",
     title: "Best Resume.io alternative for a free AI resume builder",
     description:
