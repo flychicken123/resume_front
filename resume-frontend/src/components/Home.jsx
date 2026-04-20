@@ -100,6 +100,12 @@ const HOME_GUIDE_LINKS = [
       "Compare HiHired vs Jobscan on ATS resumes, cover letters, and job application auto-fill.",
   },
   {
+    to: "/guides/careerflow-alternative-job-application-autofill",
+    title: "Best Careerflow alternative for job application autofill",
+    description:
+      "Compare HiHired vs Careerflow on Chrome job application auto-fill, resume tailoring, and cover letters.",
+  },
+  {
     to: "/guides/jobcopilot-alternative-job-application-autofill",
     title: "Best JobCopilot alternative for job application autofill",
     description:
