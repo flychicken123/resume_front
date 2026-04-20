@@ -70,4 +70,5 @@ HiHired is a free AI cover letter generator that also works as an AI resume buil
 - Best Resume.io alternative for a free AI resume builder: https://hihired.org/guides/resumeio-alternative-free-ai-resume-builder
 - Best JobCopilot alternative for job application autofill: https://hihired.org/guides/jobcopilot-alternative-job-application-autofill
 - Best SpeedyApply alternative for job application autofill: https://hihired.org/guides/speedyapply-alternative-job-application-autofill
+- Best JobFill.ai alternative for job application autofill: https://hihired.org/guides/jobfill-ai-alternative-job-application-autofill
 
