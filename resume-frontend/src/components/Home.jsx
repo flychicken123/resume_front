@@ -136,6 +136,12 @@ const HOME_GUIDE_LINKS = [
       "Compare HiHired vs Werkal on ATS resumes, cover letters, and job application auto-fill.",
   },
   {
+    to: "/guides/reactive-resume-alternative-free-ai-resume-builder",
+    title: "Best Reactive Resume alternative for a free AI resume builder",
+    description:
+      "Compare HiHired vs Reactive Resume on ATS resumes, cover letters, and job application auto-fill.",
+  },
+  {
     to: "/guides/resumai-by-wonsulting-alternative-free-ai-resume-builder",
     title: "Best ResumAI by Wonsulting alternative for a free AI resume builder",
     description:
