@@ -130,6 +130,12 @@ const HOME_GUIDE_LINKS = [
       "Compare HiHired vs Zety on ATS resumes, cover letters, and job application auto-fill.",
   },
   {
+    to: "/guides/werkal-alternative-free-ai-resume-builder",
+    title: "Best Werkal alternative for a free AI resume builder",
+    description:
+      "Compare HiHired vs Werkal on ATS resumes, cover letters, and job application auto-fill.",
+  },
+  {
     to: "/guides/resumai-by-wonsulting-alternative-free-ai-resume-builder",
     title: "Best ResumAI by Wonsulting alternative for a free AI resume builder",
     description:
