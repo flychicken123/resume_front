@@ -52,6 +52,12 @@ const HOME_GUIDE_LINKS = [
       "Compare HiHired vs Teal on resume building, cover letters, and job application auto-fill.",
   },
   {
+    to: "/guides/rezi-alternative-free-ai-resume-builder",
+    title: "Best Rezi alternative for a free AI resume builder",
+    description:
+      "Compare HiHired vs Rezi on ATS resumes, cover letters, and job application auto-fill.",
+  },
+  {
     to: "/guides/owlapply-alternative-job-application-autofill",
     title: "Best OwlApply alternative for job application autofill",
     description:
