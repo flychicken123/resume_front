@@ -64,6 +64,12 @@ const HOME_GUIDE_LINKS = [
       "Compare HiHired vs Kickresume on ATS resumes, cover letters, and job application auto-fill.",
   },
   {
+    to: "/guides/resumebuild-alternative-free-ai-resume-builder",
+    title: "Best ResumeBuild alternative for a free AI resume builder",
+    description:
+      "Compare HiHired vs ResumeBuild on ATS resumes, cover letters, and job application auto-fill.",
+  },
+  {
     to: "/guides/owlapply-alternative-job-application-autofill",
     title: "Best OwlApply alternative for job application autofill",
     description:

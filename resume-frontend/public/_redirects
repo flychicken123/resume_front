@@ -16,6 +16,7 @@
 /guides/jobwizard-alternative-job-application-autofill /guides/jobwizard-alternative-job-application-autofill/index.html 200
 /guides/rezi-alternative-free-ai-resume-builder /guides/rezi-alternative-free-ai-resume-builder/index.html 200
 /guides/kickresume-alternative-free-ai-resume-builder /guides/kickresume-alternative-free-ai-resume-builder/index.html 200
+/guides/resumebuild-alternative-free-ai-resume-builder /guides/resumebuild-alternative-free-ai-resume-builder/index.html 200
 
 # Serve static files (sitemap, robots, llms.txt, etc.) directly
 /sitemap.xml /sitemap.xml 200

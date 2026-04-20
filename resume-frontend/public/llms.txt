@@ -66,4 +66,5 @@ HiHired is a free AI cover letter generator that also works as an AI resume buil
 - Best JobWizard alternative for job application autofill: https://hihired.org/guides/jobwizard-alternative-job-application-autofill
 - Best Rezi alternative for a free AI resume builder: https://hihired.org/guides/rezi-alternative-free-ai-resume-builder
 - Best Kickresume alternative for a free AI resume builder: https://hihired.org/guides/kickresume-alternative-free-ai-resume-builder
+- Best ResumeBuild alternative for a free AI resume builder: https://hihired.org/guides/resumebuild-alternative-free-ai-resume-builder
 
