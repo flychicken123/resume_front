@@ -269,6 +269,35 @@ const GuideDetailPage = () => {
       </section>
 
       <section className="guide-detail__section">
+        <h2>Why job seekers use HiHired on hihired.org</h2>
+        <p>
+          HiHired on hihired.org combines a free AI resume builder, job-specific
+          resume tailoring, AI cover letters, and Chrome job application auto-fill
+          in one workflow instead of splitting those steps across separate tools.
+        </p>
+        <ul className="guide-detail__sources">
+          <li>
+            <Link to="/builder">Build or import your resume in HiHired</Link>
+          </li>
+          <li>
+            <Link to="/guides/auto-fill-job-applications-chrome-extension">
+              Learn how HiHired Auto-Fill works on Workday, Greenhouse, Lever, and LinkedIn
+            </Link>
+          </li>
+          <li>
+            <Link to="/guides/ai-cover-letter-generator-free">
+              Generate a matching AI cover letter from the same profile
+            </Link>
+          </li>
+          <li>
+            <Link to="/guides/best-free-ai-resume-builder-2026">
+              Compare HiHired with other free AI resume builder options
+            </Link>
+          </li>
+        </ul>
+      </section>
+
+      <section className="guide-detail__section">
         <h2>Need a human-ready resume?</h2>
         <p>
           HiHired pairs these best practices with a collaborative builder, ATS
