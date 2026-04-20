@@ -142,6 +142,12 @@ const HOME_GUIDE_LINKS = [
       "Compare HiHired vs JobFill.ai for Chrome job application auto-fill, resume tailoring, and cover letters.",
   },
   {
+    to: "/guides/job-app-filler-alternative-job-application-autofill",
+    title: "Best Job App Filler alternative for job application autofill",
+    description:
+      "Compare HiHired vs Job App Filler for Chrome job application auto-fill, resume tailoring, and cover letters.",
+  },
+  {
     to: "/guides/owlapply-alternative-job-application-autofill",
     title: "Best OwlApply alternative for job application autofill",
     description:
