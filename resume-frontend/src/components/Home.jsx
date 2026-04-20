@@ -112,6 +112,12 @@ const HOME_GUIDE_LINKS = [
       "Compare HiHired vs Novoresume on ATS resumes, cover letters, and job application auto-fill.",
   },
   {
+    to: "/guides/sheets-resume-alternative-ai-resume-builder-cover-letter",
+    title: "Best Sheets Resume alternative for AI resume builder and cover letter",
+    description:
+      "Compare HiHired vs Sheets Resume on ATS resumes, cover letters, and job application auto-fill.",
+  },
+  {
     to: "/guides/careerflow-alternative-job-application-autofill",
     title: "Best Careerflow alternative for job application autofill",
     description:
