@@ -106,6 +106,12 @@ const HOME_GUIDE_LINKS = [
       "Compare HiHired vs Careerflow on Chrome job application auto-fill, resume tailoring, and cover letters.",
   },
   {
+    to: "/guides/jobright-alternative-job-application-autofill",
+    title: "Best Jobright alternative for job application autofill",
+    description:
+      "Compare HiHired vs Jobright on Chrome job application auto-fill, resume tailoring, and cover letters.",
+  },
+  {
     to: "/guides/jobcopilot-alternative-job-application-autofill",
     title: "Best JobCopilot alternative for job application autofill",
     description:
