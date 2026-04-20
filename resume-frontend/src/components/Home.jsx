@@ -136,6 +136,12 @@ const HOME_GUIDE_LINKS = [
       "Compare HiHired vs ResumAI by Wonsulting on ATS resumes, cover letters, and job application auto-fill.",
   },
   {
+    to: "/guides/cv-lite-alternative-ai-resume-builder-cover-letter",
+    title: "Best CV Lite alternative for AI resume builder and cover letter",
+    description:
+      "Compare HiHired vs CV Lite on ATS resumes, cover letters, and job application auto-fill.",
+  },
+  {
     to: "/guides/aiapply-alternative-ai-resume-builder-cover-letter",
     title: "Best AIApply alternative for AI resume builder and cover letter",
     description:
