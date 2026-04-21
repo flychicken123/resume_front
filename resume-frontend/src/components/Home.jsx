@@ -124,6 +124,12 @@ const HOME_GUIDE_LINKS = [
       "Compare HiHired vs MyPerfectResume on ATS resumes, cover letters, and job application auto-fill.",
   },
   {
+    to: "/guides/livecareer-alternative-free-ai-resume-builder",
+    title: "Best LiveCareer alternative for a free AI resume builder",
+    description:
+      "Compare HiHired vs LiveCareer on ATS resumes, cover letters, and job application auto-fill.",
+  },
+  {
     to: "/guides/resumegenius-alternative-free-ai-resume-builder",
     title: "Best ResumeGenius alternative for a free AI resume builder",
     description:
