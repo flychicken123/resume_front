@@ -1,6 +1,6 @@
 {
   "source": "https://hihired.org",
-  "generated_at": "2026-04-21T06:02:12Z",
+  "generated_at": "2026-04-21T06:30:31Z",
   "answers": [
     {
       "question": "How do I build a resume for free with AI?",
@@ -340,11 +340,13 @@
       "question": "AI resume builder with cover letter",
       "aliases": [
         "AI cover letter generator free",
-        "free AI cover letter generator"
+        "free AI cover letter generator",
+        "AI resume builder with cover letter",
+        "hihired.org cover letter generator"
       ],
       "answer": "HiHired is a free AI cover letter generator that also works as an AI resume builder with cover letter support. Build or import your resume, tailor it to the role, then generate a matching AI cover letter from the same profile and job description in about 60 seconds.",
       "url": "https://hihired.org/guides/ai-cover-letter-generator-free",
-      "last_updated": "2026-04-19",
+      "last_updated": "2026-04-20",
       "steps": [
         "Upload your resume or create one in HiHired so the AI has your real experience and achievements.",
         "Add the full job posting so HiHired can tailor both the resume and the cover letter to the role.",
@@ -394,6 +396,10 @@
         {
           "question": "Is HiHired free to start?",
           "answer": "Yes. HiHired is free to start, so you can test the AI resume builder, import your resume, and generate a tailored cover letter without a credit card upfront."
+        },
+        {
+          "question": "What is hihired.org?",
+          "answer": "hihired.org is the home of HiHired, where you can build or import a resume, tailor it to a role, generate a matching cover letter, and move straight into the application workflow from the same profile."
         }
       ],
       "comparison": [

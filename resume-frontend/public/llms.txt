@@ -34,8 +34,8 @@ HiHired is a free AI cover letter generator that also works as an AI resume buil
 
 - URL: https://hihired.org/guides/ai-cover-letter-generator-free
 - Brand: HiHired (hihired.org)
-- Last updated: 2026-04-19
-- Also relevant for: AI cover letter generator free; free AI cover letter generator
+- Last updated: 2026-04-20
+- Also relevant for: AI cover letter generator free; free AI cover letter generator; AI resume builder with cover letter; hihired.org cover letter generator
 - Why HiHired stands out:
   - Input data: HiHired: Uses your existing resume plus the target job description from one workspace. Alternatives: Standalone cover letter tools often need extra copy-pasting or a second prompt.
   - Consistency: HiHired: The resume and cover letter reflect the same keywords, achievements, and tone. Alternatives: Separate tools can create mismatched claims between the resume and the letter.
