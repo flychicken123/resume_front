@@ -647,6 +647,27 @@ const Home = () => {
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "HiHired",
+            "alternateName": ["hihired.org", "HiHired Auto-Fill"],
+            "url": "https://hihired.org/",
+            "description": "HiHired on hihired.org is a free AI resume builder, AI cover letter generator, and Chrome auto-fill tool for job applications.",
+            "publisher": {
+              "@type": "Organization",
+              "name": "HiHired",
+              "url": "https://hihired.org"
+            },
+            "about": [
+              "AI resume builder",
+              "AI cover letter generator",
+              "job application auto-fill",
+              "ATS resume templates"
+            ]
+          })}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
             "@type": "FAQPage",
             "mainEntity": [
               ...HOME_BRAND_QUERY_BINDINGS.map(({ query, answer }) => ({
