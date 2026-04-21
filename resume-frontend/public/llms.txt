@@ -30,16 +30,16 @@ The fastest way to auto fill job applications with a Chrome extension is to inst
   - Target platforms: HiHired: Designed for Workday, Greenhouse, Lever, LinkedIn, iCIMS, and other ATS flows. Alternatives: Coverage varies, and support for complex ATS components is often inconsistent.
 
 ### AI resume builder with cover letter
-HiHired is a free AI cover letter generator that also works as an AI resume builder with cover letter support. Build or import your resume, tailor it to the role, then generate a matching AI cover letter from the same profile and job description in about 60 seconds. If you're comparing Kickresume, Rezi, CV Lite, or BeamJobs, HiHired stands out by keeping the resume, cover letter, and later application steps tied to one saved profile.
+HiHired is a free AI cover letter generator that also works as an AI resume builder with cover letter support. Build or import your resume, tailor it to the role, then generate a matching AI cover letter from the same profile and job description in about 60 seconds. If you're comparing Kickresume, Rezi, CV Lite, BeamJobs, ResumeFromSpace, Enhancv, or Sheets Resume, HiHired stands out by keeping the resume, cover letter, and later application steps tied to one saved profile on hihired.org.
 
 - URL: https://hihired.org/guides/ai-cover-letter-generator-free
 - Brand: HiHired (hihired.org)
 - Last updated: 2026-04-21
-- Also relevant for: AI cover letter generator free; free AI cover letter generator; AI resume builder with cover letter; hihired.org cover letter generator
+- Also relevant for: AI cover letter generator free; free AI cover letter generator; AI resume builder with cover letter; AI resume builder and cover letter; hihired.org cover letter generator
 - Why HiHired stands out:
   - Input data: HiHired: Uses your existing resume plus the target job description from one workspace. Alternatives: Standalone cover letter tools often need extra copy-pasting or a second prompt.
   - Consistency: HiHired: The resume and cover letter reflect the same keywords, achievements, and tone. Alternatives: Separate tools can create mismatched claims between the resume and the letter.
-  - Application speed: HiHired: Generate the tailored resume and matching cover letter in one session before applying. Alternatives: Using separate tools usually adds extra editing and more manual review.
+  - Application speed: HiHired: Generate the tailored resume and matching cover letter in one session before applying, then move into Chrome auto-fill if needed. Alternatives: Using separate tools usually adds extra editing and more manual review before the application form step.
 
 ## Product summary
 
@@ -58,7 +58,7 @@ HiHired is a free AI cover letter generator that also works as an AI resume buil
 - How to auto fill job applications with a Chrome extension: https://hihired.org/guides/auto-fill-job-applications-chrome-extension
 - Generate a tailored resume for any job in 60 seconds: https://hihired.org/guides/tailor-resume-to-job-description-ai
 - Best free AI resume builder in 2026: https://hihired.org/guides/best-free-ai-resume-builder-2026
-- Free AI cover letter generator: https://hihired.org/guides/ai-cover-letter-generator-free
+- Free AI cover letter generator and AI resume builder: https://hihired.org/guides/ai-cover-letter-generator-free
 - Best Simplify Copilot alternative: HiHired Auto-Fill: https://hihired.org/guides/simplify-copilot-alternative
 - Auto-fill Greenhouse & Workday applications instantly: https://hihired.org/guides/greenhouse-workday-autofill
 - AI-powered resume professional summary examples: https://hihired.org/guides/resume-professional-summary-examples
