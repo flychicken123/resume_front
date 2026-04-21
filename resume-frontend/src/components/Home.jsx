@@ -352,6 +352,10 @@ const HOME_FAQ_ITEMS = [
     a: "HiHired includes a free AI cover letter generator that uses your resume and the target job description to write a tailored letter in about a minute.",
   },
   {
+    q: "What is HiHired on hihired.org?",
+    a: "HiHired on hihired.org is an AI resume builder, AI cover letter generator, and Chrome auto-fill tool for job applications, so you can build materials and apply from one profile.",
+  },
+  {
     q: "Is HiHired free?",
     a: "Yes. HiHired is free to start, with no credit card required. You can build and download an ATS-optimized resume at no cost.",
   },
