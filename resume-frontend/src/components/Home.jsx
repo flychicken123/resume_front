@@ -190,6 +190,12 @@ const HOME_GUIDE_LINKS = [
       "Compare HiHired vs Grammarly on ATS resumes, cover letters, and job application auto-fill.",
   },
   {
+    to: "/guides/earnbetter-alternative-job-application-autofill",
+    title: "Best EarnBetter alternative for job application autofill",
+    description:
+      "Compare HiHired vs EarnBetter on Chrome job application auto-fill, resume tailoring, and cover letters.",
+  },
+  {
     to: "/guides/careerflow-alternative-job-application-autofill",
     title: "Best Careerflow alternative for job application autofill",
     description:
