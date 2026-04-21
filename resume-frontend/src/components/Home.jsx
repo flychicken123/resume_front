@@ -184,6 +184,12 @@ const HOME_GUIDE_LINKS = [
       "Compare HiHired vs CV Lite on ATS resumes, cover letters, and job application auto-fill.",
   },
   {
+    to: "/guides/resumefromspace-alternative-ai-resume-builder-cover-letter",
+    title: "Best ResumeFromSpace alternative for AI resume builder and cover letter",
+    description:
+      "Compare HiHired vs ResumeFromSpace on ATS resumes, cover letters, and job application auto-fill.",
+  },
+  {
     to: "/guides/aiapply-alternative-ai-resume-builder-cover-letter",
     title: "Best AIApply alternative for AI resume builder and cover letter",
     description:
