@@ -178,6 +178,12 @@ const HOME_GUIDE_LINKS = [
       "Compare HiHired vs Microsoft Word Copilot on ATS resumes, cover letters, and job application auto-fill.",
   },
   {
+    to: "/guides/myperfectcoverletter-alternative-ai-resume-builder-cover-letter",
+    title: "Best MyPerfectCoverLetter alternative for AI resume builder and cover letter",
+    description:
+      "Compare HiHired vs MyPerfectCoverLetter on ATS resumes, cover letters, and job application auto-fill.",
+  },
+  {
     to: "/guides/careerflow-alternative-job-application-autofill",
     title: "Best Careerflow alternative for job application autofill",
     description:
