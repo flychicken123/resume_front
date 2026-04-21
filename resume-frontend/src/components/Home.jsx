@@ -88,6 +88,12 @@ const HOME_GUIDE_LINKS = [
       "Compare HiHired vs BeamJobs on ATS resumes, cover letters, and job application auto-fill.",
   },
   {
+    to: "/guides/resufit-alternative-free-ai-resume-builder",
+    title: "Best ResuFit alternative for a free AI resume builder",
+    description:
+      "Compare HiHired vs ResuFit on ATS resumes, cover letters, and job application auto-fill.",
+  },
+  {
     to: "/guides/wobo-alternative-free-ai-resume-builder",
     title: "Best Wobo alternative for a free AI resume builder",
     description:
