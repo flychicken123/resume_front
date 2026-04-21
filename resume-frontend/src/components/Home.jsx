@@ -100,6 +100,12 @@ const HOME_GUIDE_LINKS = [
       "Compare HiHired vs ResuFit on ATS resumes, cover letters, and job application auto-fill.",
   },
   {
+    to: "/guides/resume-org-alternative-free-ai-resume-builder",
+    title: "Best Resume.org alternative for a free AI resume builder",
+    description:
+      "Compare HiHired vs Resume.org on ATS resumes, cover letters, and job application auto-fill.",
+  },
+  {
     to: "/guides/wobo-alternative-free-ai-resume-builder",
     title: "Best Wobo alternative for a free AI resume builder",
     description:
