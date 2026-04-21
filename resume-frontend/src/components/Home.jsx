@@ -136,6 +136,12 @@ const HOME_GUIDE_LINKS = [
       "Compare HiHired vs MyPerfectResume on ATS resumes, cover letters, and job application auto-fill.",
   },
   {
+    to: "/guides/beamjobs-alternative-ai-resume-builder-cover-letter",
+    title: "Best BeamJobs alternative for AI resume builder and cover letter",
+    description:
+      "Compare HiHired vs BeamJobs on ATS resumes, cover letters, and job application auto-fill.",
+  },
+  {
     to: "/guides/livecareer-alternative-free-ai-resume-builder",
     title: "Best LiveCareer alternative for a free AI resume builder",
     description:
