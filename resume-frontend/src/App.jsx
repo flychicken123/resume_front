@@ -6,7 +6,7 @@ import { ResumeProvider } from './context/ResumeContext';
 import { FeedbackProvider } from './context/FeedbackContext';
 import { ExperimentProvider } from './context/ExperimentContext';
 import Home from './components/Home';
-import { LoginPage, BuilderPage, AdminMembershipPage, AdminExitAnalyticsPage, AdminExperimentsPage, AdminJobsPage, TermsOfServicePage, PrivacyPolicyPage, MembershipPage, GuidesPage, GuideDetailPage, ContactPage, AdsRewardsPage, TemplatesPage, ClawPoolSupportPage } from './pages';
+import { LoginPage, BuilderPage, AdminMembershipPage, AdminExitAnalyticsPage, AdminExperimentsPage, AdminJobsPage, TermsOfServicePage, PrivacyPolicyPage, MembershipPage, GuidesPage, GuideDetailPage, ContactPage, AdsRewardsPage, TemplatesPage, ClawPoolSupportPage, NotFoundPage } from './pages';
 import PricingPage from './components/PricingPage';
 import SubscriptionSuccess from './components/SubscriptionSuccess';
 import SubscriptionCancel from './components/SubscriptionCancel';
@@ -83,6 +83,7 @@ function App() {
                 <Route path="/ads-rewards" element={<AdsRewardsPage />} />
                 <Route path="/clawpool-support" element={<ClawPoolSupportPage />} />
                 <Route path="/clawpool-support/" element={<ClawPoolSupportPage />} />
+                <Route path="*" element={<NotFoundPage />} />
               </Routes>
               <ChatWidgetGate />
             </FeedbackProvider>
