@@ -250,6 +250,12 @@ const HOME_GUIDE_LINKS = [
       "Compare HiHired vs SpeedyApply for Chrome job application auto-fill, resume tailoring, and cover letters.",
   },
   {
+    to: "/guides/teal-alternative-job-application-autofill",
+    title: "Best Teal alternative for job application autofill",
+    description:
+      "Compare HiHired vs Teal for Chrome job application auto-fill, resume tailoring, and cover letters.",
+  },
+  {
     to: "/guides/huntr-alternative-job-application-autofill",
     title: "Best Huntr alternative for job application autofill",
     description:
