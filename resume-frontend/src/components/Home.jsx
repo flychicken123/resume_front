@@ -238,6 +238,12 @@ const HOME_GUIDE_LINKS = [
       "Compare HiHired vs SpeedyApply for Chrome job application auto-fill, resume tailoring, and cover letters.",
   },
   {
+    to: "/guides/jobfillr-alternative-job-application-autofill",
+    title: "Best Jobfillr alternative for job application autofill",
+    description:
+      "Compare HiHired vs Jobfillr for Chrome job application auto-fill, resume tailoring, and cover letters.",
+  },
+  {
     to: "/guides/jobfill-ai-alternative-job-application-autofill",
     title: "Best JobFill.ai alternative for job application autofill",
     description:
