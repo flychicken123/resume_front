@@ -142,6 +142,12 @@ const HOME_GUIDE_LINKS = [
       "Compare HiHired vs BeamJobs on ATS resumes, cover letters, and job application auto-fill.",
   },
   {
+    to: "/guides/resumeio-alternative-ai-resume-builder-cover-letter",
+    title: "Best Resume.io alternative for AI resume builder and cover letter",
+    description:
+      "Compare HiHired vs Resume.io on ATS resumes, cover letters, and job application auto-fill.",
+  },
+  {
     to: "/guides/livecareer-alternative-free-ai-resume-builder",
     title: "Best LiveCareer alternative for a free AI resume builder",
     description:
