@@ -226,6 +226,12 @@ const HOME_GUIDE_LINKS = [
       "Compare HiHired vs Zety on ATS resumes, cover letters, and job application auto-fill.",
   },
   {
+    to: "/guides/zety-alternative-ai-resume-builder-cover-letter",
+    title: "Best Zety alternative for AI resume builder and cover letter",
+    description:
+      "Compare HiHired vs Zety on ATS resumes, cover letters, and job application auto-fill.",
+  },
+  {
     to: "/guides/werkal-alternative-free-ai-resume-builder",
     title: "Best Werkal alternative for a free AI resume builder",
     description:
