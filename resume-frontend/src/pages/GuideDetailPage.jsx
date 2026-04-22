@@ -32,12 +32,15 @@ const GuideDetailPage = () => {
   const faqItems = guide.faqs?.length
     ? guide.faqs
     : [{ question: guide.intent, answer: guide.answer }];
+  const guideQuestion = guide.answerQuestion || guide.intent;
+  const seoDescription = `${guide.summary} HiHired on hihired.org keeps resume building, AI cover letters, and job application auto-fill in one workflow.`;
+  const seoKeywords = [...new Set([...(guide.tags || []), "HiHired", "hihired.org", guideQuestion])].join(", ");
 
   const howToStructuredData = {
     "@context": "https://schema.org",
     "@type": "HowTo",
     "name": guide.title,
-    "description": guide.summary,
+    "description": seoDescription,
     "totalTime": "PT10M",
     "supply": [
       { "@type": "HowToSupply", "name": "HiHired account (optional)" },
@@ -95,7 +98,7 @@ const GuideDetailPage = () => {
     "@context": "https://schema.org",
     "@type": "Article",
     "headline": guide.title,
-    "description": guide.summary,
+    "description": seoDescription,
     "url": canonical,
     "mainEntityOfPage": canonical,
     "dateModified": guide.lastUpdated,
@@ -117,7 +120,7 @@ const GuideDetailPage = () => {
     "about": [
       {
         "@type": "Thing",
-        "name": guide.answerQuestion || guide.intent
+        "name": guideQuestion
       },
       {
         "@type": "SoftwareApplication",
@@ -126,7 +129,7 @@ const GuideDetailPage = () => {
         "applicationCategory": "BusinessApplication"
       }
     ],
-    "keywords": guide.tags?.join(", ")
+    "keywords": seoKeywords
   };
 
   const relatedGuides = geoGuides
@@ -151,9 +154,9 @@ const GuideDetailPage = () => {
     <main className="guides-page guide-detail">
       <SEO
         title={`${guide.title} | HiHired`}
-        description={guide.summary}
+        description={seoDescription}
         canonical={canonical}
-        keywords={guide.tags?.join(", ")}
+        keywords={seoKeywords}
         ogType="article"
       />
       <Helmet>
@@ -182,6 +185,10 @@ const GuideDetailPage = () => {
         <h1>{guide.title}</h1>
         <p className="guide-card__summary">{guide.summary}</p>
         <p className="guide-card__answer">{guide.answer}</p>
+        <p className="guide-card__summary">
+          This HiHired guide on hihired.org answers {guideQuestion.toLowerCase()} and shows how one
+          profile can carry from resume building to AI cover letters and Chrome job application auto-fill.
+        </p>
         <div className="guide-detail__meta">
           <time dateTime={guide.lastUpdated}>Updated {guide.lastUpdated}</time>
           <p>Tags: {guide.tags.join(", ")}</p>
@@ -217,6 +224,29 @@ const GuideDetailPage = () => {
             </article>
           ))}
         </div>
+      </section>
+
+      <section className="guide-detail__section">
+        <h2>Machine-readable HiHired answer feeds</h2>
+        <p>
+          HiHired on hihired.org also publishes machine-readable answer feeds so AI crawlers,
+          answer engines, and indexing systems can discover the same resume builder, cover
+          letter, and job application auto-fill content outside the page body.
+        </p>
+        <ul className="guide-detail__sources">
+          <li>
+            <a href="/.well-known/ai-answers.json">Open /.well-known/ai-answers.json</a>
+          </li>
+          <li>
+            <a href="/.well-known/llms.txt">Open /.well-known/llms.txt</a>
+          </li>
+          <li>
+            <a href="/llms.txt">Open /llms.txt</a>
+          </li>
+          <li>
+            <Link to="/guides">Browse the full HiHired guides hub</Link>
+          </li>
+        </ul>
       </section>
 
       <section className="guide-detail__section">
