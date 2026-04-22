@@ -136,6 +136,12 @@ const HOME_GUIDE_LINKS = [
       "Compare HiHired vs Wobo on ATS resumes, cover letters, and job application auto-fill.",
   },
   {
+    to: "/guides/wobo-alternative-ai-resume-builder-cover-letter",
+    title: "Best Wobo alternative for AI resume builder and cover letter",
+    description:
+      "Compare HiHired vs Wobo on ATS resumes, cover letters, and job application auto-fill.",
+  },
+  {
     to: "/guides/enhancv-alternative-ai-resume-builder-cover-letter",
     title: "Best Enhancv alternative for AI resume builder and cover letter",
     description:
