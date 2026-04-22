@@ -202,6 +202,12 @@ const HOME_GUIDE_LINKS = [
       "Compare HiHired vs Canva on ATS resumes, cover letters, and job application auto-fill.",
   },
   {
+    to: "/guides/canva-alternative-ai-resume-builder-cover-letter",
+    title: "Best Canva alternative for AI resume builder and cover letter",
+    description:
+      "Compare HiHired vs Canva on ATS resumes, cover letters, and job application auto-fill.",
+  },
+  {
     to: "/guides/zety-alternative-free-ai-resume-builder",
     title: "Best Zety alternative for a free AI resume builder",
     description:
