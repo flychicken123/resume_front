@@ -165,6 +165,50 @@
   background: rgba(99, 102, 241, 0.06);
 }
 
+.guides-category-nav {
+  margin-bottom: 32px;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 24px;
+  background: #f8fafc;
+}
+
+.guides-category-nav h2 {
+  margin: 0 0 16px;
+  font-size: 1.1rem;
+}
+
+.guides-category-nav__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.guides-category-section {
+  margin-bottom: 48px;
+  scroll-margin-top: 80px;
+}
+
+.guides-category-section__header {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.guides-category-section__header h2 {
+  font-size: clamp(1.3rem, 3vw, 1.8rem);
+  margin: 0 0 8px;
+}
+
+.guides-category-section__header p {
+  color: #475569;
+  margin: 0;
+  line-height: 1.5;
+}
+
 .guide-detail {
   max-width: 860px;
 }
