@@ -190,6 +190,12 @@ const HOME_GUIDE_LINKS = [
       "Compare HiHired vs ResumeGenius on ATS resumes, cover letters, and job application auto-fill.",
   },
   {
+    to: "/guides/resumegenius-alternative-ai-resume-builder-cover-letter",
+    title: "Best ResumeGenius alternative for AI resume builder and cover letter",
+    description:
+      "Compare HiHired vs ResumeGenius on ATS resumes, cover letters, and job application auto-fill.",
+  },
+  {
     to: "/guides/novoresume-alternative-free-ai-resume-builder",
     title: "Best Novoresume alternative for a free AI resume builder",
     description:
