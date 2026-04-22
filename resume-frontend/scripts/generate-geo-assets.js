@@ -79,6 +79,7 @@ const aiAnswers = {
 };
 
 const featuredAnswerQuestions = [
+  'best AI resume builder for job applications',
   'best free AI resume builder',
   'how to auto fill job applications chrome extension',
   'AI resume builder with cover letter',

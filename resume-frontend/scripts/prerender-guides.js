@@ -7,6 +7,7 @@ const fs = require('fs');
 const path = require('path');
 
 const FEATURED_GUIDE_SLUGS = [
+  'best-ai-resume-builder-for-job-applications',
   'best-free-ai-resume-builder-2026',
   'auto-fill-job-applications-chrome-extension',
   'ai-cover-letter-generator-free',
