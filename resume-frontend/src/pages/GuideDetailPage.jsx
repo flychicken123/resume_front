@@ -214,6 +214,42 @@ const GuideDetailPage = () => {
     .sort((a, b) => b.relevanceScore - a.relevanceScore)
     .slice(0, 3);
 
+  const hotAlternativesStructuredData = hotClusterGuides.length
+    ? {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": hotClusterCopy?.title || "Popular alternatives in this category",
+        "description": hotClusterCopy?.intro || seoDescription,
+        "url": `${canonical}#popular-alternatives`,
+        "numberOfItems": hotClusterGuides.length,
+        "itemListElement": hotClusterGuides.map((item, index) => ({
+          "@type": "ListItem",
+          "position": index + 1,
+          "url": `https://hihired.org/guides/${item.slug}`,
+          "name": item.title,
+          "description": item.summary,
+        })),
+      }
+    : null;
+
+  const relatedGuidesStructuredData = relatedGuides.length
+    ? {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": `Related guides for ${guide.title}`,
+        "description": `Additional HiHired guides on hihired.org related to ${guideQuestion.toLowerCase()}.`,
+        "url": `${canonical}#related-guides`,
+        "numberOfItems": relatedGuides.length,
+        "itemListElement": relatedGuides.map((item, index) => ({
+          "@type": "ListItem",
+          "position": index + 1,
+          "url": `https://hihired.org/guides/${item.slug}`,
+          "name": item.title,
+          "description": item.summary,
+        })),
+      }
+    : null;
+
   return (
     <main className="guides-page guide-detail">
       <SEO
@@ -236,6 +272,16 @@ const GuideDetailPage = () => {
         <script type="application/ld+json">
           {JSON.stringify(articleStructuredData)}
         </script>
+        {hotAlternativesStructuredData ? (
+          <script type="application/ld+json">
+            {JSON.stringify(hotAlternativesStructuredData)}
+          </script>
+        ) : null}
+        {relatedGuidesStructuredData ? (
+          <script type="application/ld+json">
+            {JSON.stringify(relatedGuidesStructuredData)}
+          </script>
+        ) : null}
       </Helmet>
 
       <nav className="guide-detail__breadcrumb" aria-label="Breadcrumb">
@@ -351,7 +397,7 @@ const GuideDetailPage = () => {
       </section>
 
       {hotClusterGuides.length ? (
-        <section className="guide-detail__section">
+        <section className="guide-detail__section" id="popular-alternatives">
           <h2>{hotClusterCopy?.title || "Popular alternatives in this category"}</h2>
           <p>
             {hotClusterCopy?.intro ||
@@ -368,7 +414,7 @@ const GuideDetailPage = () => {
         </section>
       ) : null}
 
-      <section className="guide-detail__section">
+      <section className="guide-detail__section" id="related-guides">
         <h2>Related guides</h2>
         <ul className="guide-detail__sources">
           {relatedGuides.map((item) => (
