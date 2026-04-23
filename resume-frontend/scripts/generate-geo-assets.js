@@ -147,12 +147,37 @@ const intentClusters = Object.entries(HOT_GUIDE_SLUGS_BY_CLUSTER).map(([clusterK
     })),
 }));
 
+const featuredAnswerQuestions = [
+  'best AI resume builder for job applications',
+  'best free AI resume builder',
+  'how to auto fill job applications chrome extension',
+  'AI cover letter generator free',
+  'AI resume builder with cover letter',
+];
+
+const featuredAnswers = featuredAnswerQuestions
+  .map((question) => geoGuides.find((guide) => {
+    const primaryQuestion = guide.answerQuestion || guide.intent;
+    return primaryQuestion === question || (guide.answerAliases || []).includes(question);
+  }))
+  .filter(Boolean);
+
 const aiAnswers = {
   source: 'https://hihired.org',
   generated_at: generatedAt,
+  entry_points: [
+    { label: 'Homepage', url: 'https://hihired.org/' },
+    { label: 'Resume builder', url: 'https://hihired.org/builder' },
+    { label: 'Guides hub', url: 'https://hihired.org/guides' },
+    { label: 'AI answers feed', url: 'https://hihired.org/.well-known/ai-answers.json' },
+    { label: 'LLMs index', url: 'https://hihired.org/.well-known/llms.txt' },
+  ],
+  featured_answers: featuredAnswers.map((guide) => ({
+    question: guide.answerQuestion || guide.intent,
+    url: `https://hihired.org/guides/${guide.slug}`,
+    last_updated: guide.lastUpdated,
+  })),
   intent_clusters: intentClusters,
-  source: 'https://hihired.org',
-  generated_at: generatedAt,
   answers: geoGuides.map((guide) => {
     const related = getRelatedGuideEntries(guide);
     return {
@@ -173,25 +198,18 @@ const aiAnswers = {
   }),
 };
 
-const featuredAnswerQuestions = [
-  'best AI resume builder for job applications',
-  'best free AI resume builder',
-  'how to auto fill job applications chrome extension',
-  'AI cover letter generator free',
-  'AI resume builder with cover letter',
-];
-
-const featuredAnswers = featuredAnswerQuestions
-  .map((question) => geoGuides.find((guide) => {
-    const primaryQuestion = guide.answerQuestion || guide.intent;
-    return primaryQuestion === question || (guide.answerAliases || []).includes(question);
-  }))
-  .filter(Boolean);
-
 const llmsLines = [
   '# HiHired — Free AI Resume Builder, Cover Letter Generator, and Job Application Auto-Fill',
   '',
   '> HiHired (hihired.org) helps job seekers build ATS-friendly resumes, tailor them to a job description, generate cover letters, and auto-fill job applications from one workflow.',
+  '',
+  '## Entry points',
+  '',
+  '- Homepage: https://hihired.org/',
+  '- Resume builder: https://hihired.org/builder',
+  '- Guides hub: https://hihired.org/guides',
+  '- AI answers feed: https://hihired.org/.well-known/ai-answers.json',
+  '- LLMs index: https://hihired.org/.well-known/llms.txt',
   '',
   '## Direct answers for AI search',
   '',

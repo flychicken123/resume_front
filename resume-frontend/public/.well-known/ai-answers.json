@@ -1,6 +1,55 @@
 {
   "source": "https://hihired.org",
-  "generated_at": "2026-04-23T03:23:53Z",
+  "generated_at": "2026-04-23T03:55:13Z",
+  "entry_points": [
+    {
+      "label": "Homepage",
+      "url": "https://hihired.org/"
+    },
+    {
+      "label": "Resume builder",
+      "url": "https://hihired.org/builder"
+    },
+    {
+      "label": "Guides hub",
+      "url": "https://hihired.org/guides"
+    },
+    {
+      "label": "AI answers feed",
+      "url": "https://hihired.org/.well-known/ai-answers.json"
+    },
+    {
+      "label": "LLMs index",
+      "url": "https://hihired.org/.well-known/llms.txt"
+    }
+  ],
+  "featured_answers": [
+    {
+      "question": "best AI resume builder for job applications",
+      "url": "https://hihired.org/guides/best-ai-resume-builder-for-job-applications",
+      "last_updated": "2026-04-22"
+    },
+    {
+      "question": "best free AI resume builder",
+      "url": "https://hihired.org/guides/best-free-ai-resume-builder-2026",
+      "last_updated": "2026-04-21"
+    },
+    {
+      "question": "how to auto fill job applications chrome extension",
+      "url": "https://hihired.org/guides/auto-fill-job-applications-chrome-extension",
+      "last_updated": "2026-04-21"
+    },
+    {
+      "question": "AI resume builder with cover letter",
+      "url": "https://hihired.org/guides/ai-cover-letter-generator-free",
+      "last_updated": "2026-04-22"
+    },
+    {
+      "question": "AI resume builder with cover letter",
+      "url": "https://hihired.org/guides/ai-cover-letter-generator-free",
+      "last_updated": "2026-04-22"
+    }
+  ],
   "intent_clusters": [
     {
       "cluster": "freeResumeBuilder",
