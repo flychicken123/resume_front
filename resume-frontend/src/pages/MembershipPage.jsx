@@ -530,6 +530,32 @@ const MembershipPage = () => {
               </div>
             </section>
 
+            <section style={{ marginTop: '32px', border: '1px solid #e2e8f0', borderRadius: '24px', padding: '24px 28px', background: '#f8fafc' }}>
+              <p style={{ margin: '0 0 10px', color: '#2563eb', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.8rem' }}>
+                HiHired guides people search for
+              </p>
+              <h3 style={{ margin: '0 0 12px', fontSize: '1.5rem', color: '#0f172a' }}>
+                Compare plans, then jump into the workflows that drive signups
+              </h3>
+              <p style={{ margin: '0 0 18px', color: '#475569', lineHeight: 1.7, maxWidth: '900px' }}>
+                After checking pricing, most visitors compare the best free AI resume builder options, look for a Chrome extension to auto fill job applications, or want an AI resume builder with cover letter support. These guides connect that search intent directly back to HiHired on hihired.org.
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+                <Link to="/guides/best-free-ai-resume-builder-2026" style={{ display: 'block', padding: '18px', borderRadius: '18px', background: '#ffffff', border: '1px solid #dbeafe', textDecoration: 'none' }}>
+                  <p style={{ margin: '0 0 8px', color: '#2563eb', fontWeight: 700 }}>best free AI resume builder</p>
+                  <p style={{ margin: 0, color: '#334155', lineHeight: 1.6 }}>See why HiHired combines ATS-friendly templates, AI tailoring, and recruiter-ready PDF export in one workflow.</p>
+                </Link>
+                <Link to="/guides/auto-fill-job-applications-chrome-extension" style={{ display: 'block', padding: '18px', borderRadius: '18px', background: '#ffffff', border: '1px solid #dbeafe', textDecoration: 'none' }}>
+                  <p style={{ margin: '0 0 8px', color: '#2563eb', fontWeight: 700 }}>auto fill job applications chrome extension</p>
+                  <p style={{ margin: 0, color: '#334155', lineHeight: 1.6 }}>Learn how HiHired Auto-Fill carries one saved profile into Workday, Greenhouse, Lever, and LinkedIn forms.</p>
+                </Link>
+                <Link to="/guides/ai-cover-letter-generator-free" style={{ display: 'block', padding: '18px', borderRadius: '18px', background: '#ffffff', border: '1px solid #dbeafe', textDecoration: 'none' }}>
+                  <p style={{ margin: '0 0 8px', color: '#2563eb', fontWeight: 700 }}>AI resume builder with cover letter</p>
+                  <p style={{ margin: 0, color: '#334155', lineHeight: 1.6 }}>Generate a matching AI cover letter from the same resume and target job description on HiHired.</p>
+                </Link>
+              </div>
+            </section>
+
           </>
         )}
         </div>
