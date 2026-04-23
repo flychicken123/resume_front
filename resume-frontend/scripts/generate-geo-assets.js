@@ -155,18 +155,34 @@ const featuredAnswerQuestions = [
   'AI resume builder with cover letter',
 ];
 
-const featuredAnswers = featuredAnswerQuestions
-  .map((question) => geoGuides.find((guide) => {
-    const primaryQuestion = guide.answerQuestion || guide.intent;
-    return primaryQuestion === question || (guide.answerAliases || []).includes(question);
-  }))
+const featuredAnswerTargets = featuredAnswerQuestions
+  .map((question) => {
+    const guide = geoGuides.find((candidate) => {
+      const primaryQuestion = candidate.answerQuestion || candidate.intent;
+      return primaryQuestion === question || (candidate.answerAliases || []).includes(question);
+    });
+
+    if (!guide) {
+      return null;
+    }
+
+    return {
+      requestedQuery: question,
+      guide,
+    };
+  })
   .filter(Boolean);
 
-const priorityQueryBindings = featuredAnswers.map((guide) => {
+const featuredAnswers = featuredAnswerTargets.map(({ requestedQuery, guide }) => ({
+  requestedQuery,
+  guide,
+}));
+
+const priorityQueryBindings = featuredAnswerTargets.map(({ requestedQuery, guide }) => {
   const related = getRelatedGuideEntries(guide);
   return {
-    query: guide.answerQuestion || guide.intent,
-    aliases: guide.answerAliases || [],
+    query: requestedQuery,
+    aliases: (guide.answerAliases || []).filter((alias) => alias !== requestedQuery),
     intent_cluster: related.cluster,
     destination_url: `https://hihired.org/guides/${guide.slug}`,
     brand: 'HiHired',
@@ -252,8 +268,8 @@ const aiAnswers = {
   refresh_policy: refreshPolicy,
   entry_points: entryPoints,
   priority_queries: priorityQueryBindings,
-  featured_answers: featuredAnswers.map((guide) => ({
-    question: guide.answerQuestion || guide.intent,
+  featured_answers: featuredAnswers.map(({ requestedQuery, guide }) => ({
+    question: requestedQuery,
     url: `https://hihired.org/guides/${guide.slug}`,
     last_updated: guide.lastUpdated,
   })),
@@ -327,9 +343,9 @@ const llmsLines = [
   '',
   '## Direct answers for AI search',
   '',
-  ...featuredAnswers.flatMap((guide) => {
+  ...featuredAnswers.flatMap(({ requestedQuery, guide }) => {
     const lines = [
-      `### ${guide.answerQuestion || guide.intent}`,
+      `### ${requestedQuery}`,
       guide.answer,
       '',
       `- URL: https://hihired.org/guides/${guide.slug}`,
@@ -337,8 +353,11 @@ const llmsLines = [
       `- Last updated: ${guide.lastUpdated}`,
     ];
 
-    if (guide.answerAliases?.length) {
-      lines.push(`- Also relevant for: ${guide.answerAliases.join('; ')}`);
+    const relatedQueries = [guide.answerQuestion || guide.intent, ...(guide.answerAliases || [])]
+      .filter((query, index, arr) => query && arr.indexOf(query) === index && query !== requestedQuery);
+
+    if (relatedQueries.length) {
+      lines.push(`- Also relevant for: ${relatedQueries.join('; ')}`);
     }
 
     if (guide.comparison?.items?.length) {
