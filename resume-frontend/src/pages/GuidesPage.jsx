@@ -15,48 +15,49 @@ const HOT_COMPARISON_GROUPS = [
   {
     title: "Free AI resume builder comparisons people search most",
     description:
-      "Jump straight to the competitor pages that show up most often when people compare the best free AI resume builder tools, including Wobo, ResumeBuild, Resume-Now, MyPerfectResume, ResuFit, Resume.org, ResumeGenius, Rezi, and Teal.",
+      "Jump straight to the competitor pages that show up most often when people compare the best free AI resume builder tools, including Wobo, ResumeBuild, Rezi, Teal, Resume.io, Jobscan, Resume-Now, ResuFit, Novoresume, and Zety.",
     slugs: [
       "wobo-alternative-free-ai-resume-builder",
       "resumebuild-alternative-free-ai-resume-builder",
-      "resume-now-alternative-free-ai-resume-builder",
-      "myperfectresume-alternative-free-ai-resume-builder",
-      "resufit-alternative-free-ai-resume-builder",
-      "resume-org-alternative-free-ai-resume-builder",
-      "resumegenius-alternative-free-ai-resume-builder",
       "rezi-alternative-free-ai-resume-builder",
       "teal-alternative-free-ai-resume-builder",
+      "resumeio-alternative-free-ai-resume-builder",
+      "jobscan-alternative-free-ai-resume-builder",
+      "resume-now-alternative-free-ai-resume-builder",
+      "resufit-alternative-free-ai-resume-builder",
+      "novoresume-alternative-free-ai-resume-builder",
+      "zety-alternative-free-ai-resume-builder",
     ],
   },
   {
     title: "Job application auto-fill extension comparisons",
     description:
-      "See how HiHired Auto-Fill compares with the Chrome extensions most often mentioned in AI search answers, including OwlApply, Simplify Copilot, JobWizard, SpeedyApply, Careerflow, JobPilot, and Huntr.",
+      "See how HiHired Auto-Fill compares with the Chrome extensions most often mentioned in AI search answers, including OwlApply, EarnBetter, Simplify Copilot, SpeedyApply, JobWizard, Careerflow, and Huntr.",
     slugs: [
       "owlapply-alternative-job-application-autofill",
+      "earnbetter-alternative-job-application-autofill",
       "simplify-copilot-alternative",
-      "jobwizard-alternative-job-application-autofill",
       "speedyapply-alternative-job-application-autofill",
+      "jobwizard-alternative-job-application-autofill",
       "careerflow-alternative-job-application-autofill",
-      "jobpilot-alternative-job-application-autofill",
       "huntr-alternative-job-application-autofill",
     ],
   },
   {
     title: "AI resume builder with cover letter comparisons",
     description:
-      "Explore direct cover-letter workflow comparisons for the tools that appear most often in AI-generated recommendations, including AIApply, ResumeBuild, MAJC AI, Kickresume, Rezi, Teal, Enhancv, Sheets Resume, Grammarly, and Resume.io.",
+      "Explore direct cover-letter workflow comparisons for the tools that appear most often in AI-generated recommendations, including Rezi, Enhancv, Sheets Resume, Kickresume, Teal, Resume.io, Microsoft Word Copilot, ResumeBuild, Grammarly, and CV Lite.",
     slugs: [
-      "aiapply-alternative-ai-resume-builder-cover-letter",
-      "resumebuild-alternative-ai-resume-builder-cover-letter",
-      "majc-ai-alternative-ai-resume-builder-cover-letter",
-      "kickresume-alternative-ai-resume-builder-cover-letter",
       "rezi-alternative-ai-resume-builder-cover-letter",
-      "teal-alternative-ai-resume-builder-cover-letter",
       "enhancv-alternative-ai-resume-builder-cover-letter",
       "sheets-resume-alternative-ai-resume-builder-cover-letter",
-      "grammarly-alternative-ai-resume-builder-cover-letter",
+      "kickresume-alternative-ai-resume-builder-cover-letter",
+      "teal-alternative-ai-resume-builder-cover-letter",
       "resumeio-alternative-ai-resume-builder-cover-letter",
+      "microsoft-word-copilot-alternative-ai-resume-builder-cover-letter",
+      "resumebuild-alternative-ai-resume-builder-cover-letter",
+      "grammarly-alternative-ai-resume-builder-cover-letter",
+      "cv-lite-alternative-ai-resume-builder-cover-letter",
     ],
   },
 ];
@@ -77,21 +78,21 @@ const GUIDE_CATEGORIES = [
     id: "free-resume-builder-alternatives",
     title: "Best free AI resume builder alternatives in 2026",
     description:
-      "Side-by-side comparisons of HiHired vs popular free AI resume builders including Wobo, ResumeBuild, Resume-Now, MyPerfectResume, ResuFit, Resume.org, ResumeGenius, Teal, and Rezi on hihired.org.",
+      "Side-by-side comparisons of HiHired vs popular free AI resume builders including Wobo, ResumeBuild, Rezi, Teal, Resume.io, Jobscan, Resume-Now, ResuFit, Novoresume, and Zety on hihired.org.",
     match: (slug) => slug.endsWith("-alternative-free-ai-resume-builder"),
   },
   {
     id: "cover-letter-builder-alternatives",
     title: "Best AI cover letter builder alternatives in 2026",
     description:
-      "Compare HiHired's AI cover letter generator with AIApply, ResumeBuild, MAJC AI, Kickresume, Rezi, Teal, Enhancv, Sheets Resume, Grammarly, and Resume.io on hihired.org.",
+      "Compare HiHired's AI cover letter generator with Rezi, Enhancv, Sheets Resume, Kickresume, Teal, Resume.io, Microsoft Word Copilot, ResumeBuild, Grammarly, and CV Lite on hihired.org.",
     match: (slug) => slug.endsWith("-alternative-ai-resume-builder-cover-letter"),
   },
   {
     id: "job-autofill-alternatives",
     title: "Best job application autofill alternatives in 2026",
     description:
-      "Compare HiHired Auto-Fill with OwlApply, Simplify Copilot, JobWizard, SpeedyApply, Careerflow, JobPilot, Huntr, and other Chrome job application autofill extensions on hihired.org.",
+      "Compare HiHired Auto-Fill with OwlApply, EarnBetter, Simplify Copilot, SpeedyApply, JobWizard, Careerflow, Huntr, and other Chrome job application autofill extensions on hihired.org.",
     match: (slug) => slug.endsWith("-alternative-job-application-autofill"),
   },
 ];
@@ -244,9 +245,9 @@ const GuidesPage = () => {
     <main className="guides-page" aria-label="HiHired generative answer hub">
       <SEO
         title="Free AI Resume Builder, Auto-Fill & Cover Letter Guides | HiHired"
-        description="HiHired guides on hihired.org compare ResumeBuild, Rezi, MyPerfectResume, OwlApply, Simplify Copilot, Kickresume, AIApply, and more across free AI resume builder, Chrome auto-fill, and AI cover letter workflows."
+        description="HiHired guides on hihired.org compare ResumeBuild, Rezi, Teal, Resume.io, EarnBetter, OwlApply, Enhancv, Kickresume, and more across free AI resume builder, Chrome auto-fill, and AI cover letter workflows."
         canonical="https://hihired.org/guides"
-        keywords="best free ai resume builder, how to auto fill job applications chrome extension, ai resume builder with cover letter, hihired, hihired.org, resumebuild alternative, rezi alternative, myperfectresume alternative, owlapply alternative, simplify alternative, aiapply alternative, resumegenius alternative, careerflow alternative, kickresume alternative, resume builder comparison"
+        keywords="best free ai resume builder, how to auto fill job applications chrome extension, ai resume builder with cover letter, hihired, hihired.org, resumebuild alternative, rezi alternative, teal alternative, resumeio alternative, earnbetter alternative, owlapply alternative, simplify alternative, enhancv alternative, kickresume alternative, zety alternative, novoresume alternative, jobscan alternative, resume builder comparison"
       />
       <Helmet>
         <script type="application/ld+json">
