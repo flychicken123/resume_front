@@ -88,6 +88,21 @@ const HOT_GUIDE_SLUGS_BY_CLUSTER = {
   ],
 };
 
+const INTENT_CLUSTER_METADATA = {
+  freeResumeBuilder: {
+    label: 'Free AI resume builder alternatives',
+    search_intent: 'best free AI resume builder',
+  },
+  autofill: {
+    label: 'Chrome job application autofill alternatives',
+    search_intent: 'how to auto fill job applications chrome extension',
+  },
+  coverLetter: {
+    label: 'AI resume builder with cover letter alternatives',
+    search_intent: 'AI resume builder with cover letter',
+  },
+};
+
 function getGuideCluster(slug = '') {
   if (slug === 'best-free-ai-resume-builder-2026') return 'freeResumeBuilder';
   if (slug === 'auto-fill-job-applications-chrome-extension') return 'autofill';
@@ -117,7 +132,25 @@ function getRelatedGuideEntries(guide) {
   };
 }
 
+const intentClusters = Object.entries(HOT_GUIDE_SLUGS_BY_CLUSTER).map(([clusterKey, slugs]) => ({
+  cluster: clusterKey,
+  label: INTENT_CLUSTER_METADATA[clusterKey]?.label || clusterKey,
+  search_intent: INTENT_CLUSTER_METADATA[clusterKey]?.search_intent || '',
+  guides: slugs
+    .map((slug) => geoGuides.find((guide) => guide.slug === slug))
+    .filter(Boolean)
+    .map((guide) => ({
+      title: guide.title,
+      question: guide.answerQuestion || guide.intent,
+      url: `https://hihired.org/guides/${guide.slug}`,
+      last_updated: guide.lastUpdated,
+    })),
+}));
+
 const aiAnswers = {
+  source: 'https://hihired.org',
+  generated_at: generatedAt,
+  intent_clusters: intentClusters,
   source: 'https://hihired.org',
   generated_at: generatedAt,
   answers: geoGuides.map((guide) => {
@@ -191,6 +224,21 @@ const llmsLines = [
         lines.push(`  - ${item.title}: ${item.url}`);
       });
     }
+
+    lines.push('');
+    return lines;
+  }),
+  '## Intent clusters',
+  '',
+  ...intentClusters.flatMap((cluster) => {
+    const lines = [
+      `### ${cluster.label}`,
+      `- Search intent: ${cluster.search_intent}`,
+    ];
+
+    cluster.guides.forEach((guide) => {
+      lines.push(`- ${guide.title}: ${guide.url}`);
+    });
 
     lines.push('');
     return lines;
