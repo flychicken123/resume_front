@@ -3,6 +3,7 @@
  * Outputs:
  *   - public/.well-known/ai-answers.json
  *   - public/llms.txt
+ *   - public/.well-known/llms.txt
  *   - public/sitemap-answers.xml
  *   - public/sitemap.xml
  */
@@ -60,28 +61,90 @@ ${entries
 `;
 }
 
+const HOT_GUIDE_SLUGS_BY_CLUSTER = {
+  freeResumeBuilder: [
+    'wobo-alternative-free-ai-resume-builder',
+    'jobscan-alternative-free-ai-resume-builder',
+    'teal-alternative-free-ai-resume-builder',
+    'rezi-alternative-free-ai-resume-builder',
+    'resumebuild-alternative-free-ai-resume-builder',
+    'resume-now-alternative-free-ai-resume-builder',
+  ],
+  autofill: [
+    'owlapply-alternative-job-application-autofill',
+    'speedyapply-alternative-job-application-autofill',
+    'simplify-copilot-alternative',
+    'jobwizard-alternative-job-application-autofill',
+    'jobcopilot-alternative-job-application-autofill',
+    'huntr-alternative-job-application-autofill',
+  ],
+  coverLetter: [
+    'rezi-alternative-ai-resume-builder-cover-letter',
+    'teal-alternative-ai-resume-builder-cover-letter',
+    'sheets-resume-alternative-ai-resume-builder-cover-letter',
+    'kickresume-alternative-ai-resume-builder-cover-letter',
+    'resumeio-alternative-ai-resume-builder-cover-letter',
+    'beamjobs-alternative-ai-resume-builder-cover-letter',
+  ],
+};
+
+function getGuideCluster(slug = '') {
+  if (slug === 'best-free-ai-resume-builder-2026') return 'freeResumeBuilder';
+  if (slug === 'auto-fill-job-applications-chrome-extension') return 'autofill';
+  if (slug === 'ai-cover-letter-generator-free') return 'coverLetter';
+  if (slug.endsWith('-alternative-free-ai-resume-builder')) return 'freeResumeBuilder';
+  if (slug.endsWith('-alternative-job-application-autofill') || slug === 'simplify-copilot-alternative') return 'autofill';
+  if (slug.endsWith('-alternative-ai-resume-builder-cover-letter')) return 'coverLetter';
+  return '';
+}
+
+function getRelatedGuideEntries(guide) {
+  const cluster = getGuideCluster(guide.slug);
+  const hotGuides = (HOT_GUIDE_SLUGS_BY_CLUSTER[cluster] || [])
+    .filter((candidateSlug) => candidateSlug !== guide.slug)
+    .map((candidateSlug) => geoGuides.find((item) => item.slug === candidateSlug))
+    .filter(Boolean)
+    .slice(0, 6)
+    .map((item) => ({
+      title: item.title,
+      question: item.answerQuestion || item.intent,
+      url: `https://hihired.org/guides/${item.slug}`,
+    }));
+
+  return {
+    cluster,
+    hotGuides,
+  };
+}
+
 const aiAnswers = {
   source: 'https://hihired.org',
   generated_at: generatedAt,
-  answers: geoGuides.map((guide) => ({
-    question: guide.answerQuestion || guide.intent,
-    aliases: guide.answerAliases || [],
-    answer: guide.answer,
-    url: `https://hihired.org/guides/${guide.slug}`,
-    last_updated: guide.lastUpdated,
-    steps: guide.steps.slice(0, 3).map((step) => step.detail),
-    metrics: guide.keyStats.map((stat) => ({ label: stat.label, value: stat.value })),
-    cta: resolveUrl(guide.cta?.href || '/builder'),
-    tags: guide.tags || [],
-    faq: (guide.faqs || []).map((item) => ({ question: item.question, answer: item.answer })),
-    comparison: guide.comparison?.items || [],
-  })),
+  answers: geoGuides.map((guide) => {
+    const related = getRelatedGuideEntries(guide);
+    return {
+      question: guide.answerQuestion || guide.intent,
+      aliases: guide.answerAliases || [],
+      answer: guide.answer,
+      url: `https://hihired.org/guides/${guide.slug}`,
+      last_updated: guide.lastUpdated,
+      intent_cluster: related.cluster,
+      steps: guide.steps.slice(0, 3).map((step) => step.detail),
+      metrics: guide.keyStats.map((stat) => ({ label: stat.label, value: stat.value })),
+      cta: resolveUrl(guide.cta?.href || '/builder'),
+      tags: guide.tags || [],
+      faq: (guide.faqs || []).map((item) => ({ question: item.question, answer: item.answer })),
+      comparison: guide.comparison?.items || [],
+      related_guides: related.hotGuides,
+    };
+  }),
 };
 
 const featuredAnswerQuestions = [
   'best AI resume builder for job applications',
   'best free AI resume builder',
   'how to auto fill job applications chrome extension',
+  'AI cover letter generator free',
   'AI resume builder with cover letter',
 ];
 
@@ -120,6 +183,15 @@ const llmsLines = [
       });
     }
 
+    const related = getRelatedGuideEntries(guide);
+    if (related.hotGuides.length) {
+      lines.push(`- Intent cluster: ${related.cluster}`);
+      lines.push('- Related comparison pages:');
+      related.hotGuides.forEach((item) => {
+        lines.push(`  - ${item.title}: ${item.url}`);
+      });
+    }
+
     lines.push('');
     return lines;
   }),
@@ -143,9 +215,17 @@ fs.writeFileSync(
   'utf-8'
 );
 
+const llmsContent = `${llmsLines.join('\n')}\n`;
+
 fs.writeFileSync(
   path.join(publicDir, 'llms.txt'),
-  `${llmsLines.join('\n')}\n`,
+  llmsContent,
+  'utf-8'
+);
+
+fs.writeFileSync(
+  path.join(wellKnownDir, 'llms.txt'),
+  llmsContent,
   'utf-8'
 );
 
@@ -156,6 +236,27 @@ const guideEntries = geoGuides.map((guide) => ({
   priority: '0.7',
 }));
 
+const answerFeedEntries = [
+  {
+    loc: 'https://hihired.org/.well-known/ai-answers.json',
+    lastmod: featuredLastUpdated,
+    changefreq: 'daily',
+    priority: '0.9',
+  },
+  {
+    loc: 'https://hihired.org/.well-known/llms.txt',
+    lastmod: featuredLastUpdated,
+    changefreq: 'daily',
+    priority: '0.9',
+  },
+  {
+    loc: 'https://hihired.org/llms.txt',
+    lastmod: featuredLastUpdated,
+    changefreq: 'daily',
+    priority: '0.8',
+  },
+];
+
 fs.writeFileSync(
   path.join(publicDir, 'sitemap-answers.xml'),
   toSitemapXml([
@@ -165,6 +266,7 @@ fs.writeFileSync(
       changefreq: 'weekly',
       priority: '0.8',
     },
+    ...answerFeedEntries,
     ...guideEntries,
   ]),
   'utf-8'
@@ -172,11 +274,12 @@ fs.writeFileSync(
 
 fs.writeFileSync(
   path.join(publicDir, 'sitemap.xml'),
-  toSitemapXml([...staticRoutes, ...guideEntries]),
+  toSitemapXml([...staticRoutes, ...answerFeedEntries, ...guideEntries]),
   'utf-8'
 );
 
 console.log('✅ Generated public/.well-known/ai-answers.json');
 console.log('✅ Generated public/llms.txt');
+console.log('✅ Generated public/.well-known/llms.txt');
 console.log('✅ Generated public/sitemap-answers.xml');
 console.log('✅ Generated public/sitemap.xml');
