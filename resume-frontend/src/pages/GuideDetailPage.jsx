@@ -9,27 +9,45 @@ const HOT_GUIDE_SLUGS_BY_CLUSTER = {
   freeResumeBuilder: [
     "resumebuild-alternative-free-ai-resume-builder",
     "rezi-alternative-free-ai-resume-builder",
-    "resume-now-alternative-free-ai-resume-builder",
-    "teal-alternative-free-ai-resume-builder",
-    "resumeio-alternative-free-ai-resume-builder",
     "jobscan-alternative-free-ai-resume-builder",
+    "teal-alternative-free-ai-resume-builder",
+    "resume-now-alternative-free-ai-resume-builder",
+    "canva-alternative-free-ai-resume-builder",
   ],
   autofill: [
     "owlapply-alternative-job-application-autofill",
-    "earnbetter-alternative-job-application-autofill",
     "simplify-copilot-alternative",
     "speedyapply-alternative-job-application-autofill",
     "jobwizard-alternative-job-application-autofill",
-    "huntr-alternative-job-application-autofill",
+    "teal-alternative-job-application-autofill",
+    "earnbetter-alternative-job-application-autofill",
   ],
   coverLetter: [
-    "aiapply-alternative-ai-resume-builder-cover-letter",
+    "canva-alternative-ai-resume-builder-cover-letter",
     "kickresume-alternative-ai-resume-builder-cover-letter",
+    "teal-alternative-ai-resume-builder-cover-letter",
     "rezi-alternative-ai-resume-builder-cover-letter",
     "resumebuild-alternative-ai-resume-builder-cover-letter",
     "sheets-resume-alternative-ai-resume-builder-cover-letter",
-    "teal-alternative-ai-resume-builder-cover-letter",
   ],
+};
+
+const HOT_GUIDE_COPY_BY_CLUSTER = {
+  freeResumeBuilder: {
+    title: "Popular free AI resume builder alternatives",
+    intro:
+      "These HiHired pages line up with the free AI resume builder names showing up most often in current AI answers, especially ResumeBuild, Rezi, Jobscan, Teal, Resume-Now, and Canva.",
+  },
+  autofill: {
+    title: "Popular Chrome autofill alternatives",
+    intro:
+      "These HiHired pages map to the Chrome job application autofill tools that AI answers are surfacing most often right now, including OwlApply, Simplify Copilot, SpeedyApply, JobWizard, Teal, and EarnBetter.",
+  },
+  coverLetter: {
+    title: "Popular AI cover letter builder alternatives",
+    intro:
+      "These HiHired pages focus on the AI resume and cover letter tools appearing most often in current answer engines, including Canva, Kickresume, Teal, Rezi, ResumeBuild, and Sheets Resume.",
+  },
 };
 
 const getGuideCluster = (slug) => {
@@ -175,6 +193,7 @@ const GuideDetailPage = () => {
     .map((candidateSlug) => geoGuides.find((item) => item.slug === candidateSlug))
     .filter(Boolean)
     .slice(0, 5);
+  const hotClusterCopy = HOT_GUIDE_COPY_BY_CLUSTER[guideCluster];
 
   const relatedGuides = geoGuides
     .filter((item) => item.slug !== guide.slug)
@@ -333,10 +352,10 @@ const GuideDetailPage = () => {
 
       {hotClusterGuides.length ? (
         <section className="guide-detail__section">
-          <h2>Popular alternatives in this category</h2>
+          <h2>{hotClusterCopy?.title || "Popular alternatives in this category"}</h2>
           <p>
-            If you are comparing multiple tools, these are the HiHired guides most aligned with the
-            same search intent and competitor set showing up in current AI search answers.
+            {hotClusterCopy?.intro ||
+              "These HiHired guides are aligned with the same search intent and competitor set showing up in current AI search answers."}
           </p>
           <ul className="guide-detail__sources">
             {hotClusterGuides.map((item) => (
