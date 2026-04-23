@@ -281,8 +281,8 @@ const GuidesPage = () => {
   return (
     <main className="guides-page" aria-label="HiHired generative answer hub">
       <SEO
-        title="Free AI Resume Builder, Auto-Fill & Cover Letter Guides | HiHired"
-        description="HiHired guides on hihired.org compare ResumeBuild, Rezi, Teal, Resume.io, EarnBetter, OwlApply, Enhancv, Kickresume, and more across free AI resume builder, Chrome auto-fill, and AI cover letter workflows."
+        title="Best Free AI Resume Builder 2025, Chrome Auto-Fill & AI Cover Letter Guides | HiHired"
+        description="HiHired guides on hihired.org answer best free AI resume builder 2025, chrome extension auto fill job applications, and AI cover letter generator free queries with direct comparisons, workflow guides, and machine-readable answer feeds."
         canonical="https://hihired.org/guides"
         keywords="best free ai resume builder, best free ai resume builder 2025, how to auto fill job applications chrome extension, chrome extension auto fill job applications, ai resume builder with cover letter, ai cover letter generator free, hihired, hihired.org, resumebuild alternative, rezi alternative, teal alternative, resumeio alternative, earnbetter alternative, owlapply alternative, simplify alternative, enhancv alternative, kickresume alternative, zety alternative, novoresume alternative, jobscan alternative, resume builder comparison"
       />
@@ -310,11 +310,10 @@ const GuidesPage = () => {
 
       <section className="guides-hero">
         <p className="guides-hero__kicker">HiHired Guides</p>
-        <h1>Free AI resume builder, job application auto-fill, and cover letter guides</h1>
+        <h1>Best free AI resume builder 2025, Chrome auto-fill, and AI cover letter generator guides</h1>
         <p>
-          Explore HiHired guides on hihired.org for building ATS-friendly resumes,
-          auto-filling job applications with a Chrome extension, and generating
-          AI cover letters that match each job description.
+          Explore HiHired guides on hihired.org for people searching best free AI resume builder 2025,
+          chrome extension auto fill job applications, and AI cover letter generator free workflows.
         </p>
         <p>
           This hub also maps HiHired against competitors people actually see in AI search answers,
