@@ -1,4 +1,5 @@
 import React from 'react';
+import { Helmet } from 'react-helmet';
 import SEO from '../components/SEO';
 
 const sectionStyle = {
@@ -28,6 +29,9 @@ const ClawPoolSupportPage = () => (
       keywords="ClawPool support, ClawPool help, subscription support, billing help, privacy, terms"
       canonical="https://clawpool.hihired.org/"
     />
+    <Helmet>
+      <meta name="robots" content="noindex, nofollow" />
+    </Helmet>
 
     <h1 style={{ fontSize: '2.75rem', fontWeight: 800, marginBottom: '1.5rem', color: '#0f172a' }}>
       ClawPool Support
