@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { CheckIcon } from '@heroicons/react/24/solid';
 
@@ -641,9 +641,9 @@ const PricingPage = () => {
     <div className="pricing-page">
 
       <SEO
-        title="Pricing Plans | HiHired AI Resume Builder"
-        description="Choose the perfect HiHired plan. Free tier available. Premium plans start at $1.99/month with AI cover letters."
-        keywords="resume builder pricing, HiHired plans, free resume builder, premium resume, AI resume cost, subscription plans"
+        title="AI Resume Builder Pricing, Cover Letter & Auto-Fill Plans | HiHired"
+        description="Compare HiHired pricing for the free AI resume builder, AI cover letter generator, and Chrome auto-fill workflow for job applications on hihired.org."
+        keywords="resume builder pricing, HiHired plans, free ai resume builder, AI cover letter generator, chrome auto fill job applications, premium resume, AI resume cost, subscription plans"
         canonical="https://hihired.org/pricing"
       />
 
@@ -657,11 +657,11 @@ const PricingPage = () => {
 
           <div className="pricing-header">
 
-            <h1 className="pricing-title">Choose Your Plan</h1>
+            <h1 className="pricing-title">Choose your HiHired plan for resume, cover letter, and auto-fill workflows</h1>
 
             <p className="pricing-subtitle">
 
-              Pick the resume limit that fits your workflow
+              Pick the plan that fits your workflow across the free AI resume builder, AI cover letter generation, and Chrome auto-fill for job applications.
 
             </p>
 
@@ -827,6 +827,31 @@ const PricingPage = () => {
               <p className="feature-description">Your data is encrypted and never shared</p>
 
             </div>
+
+          </div>
+
+        </div>
+
+        <div className="all-plans-section">
+
+          <h2 className="section-title">Popular HiHired guides before you choose a plan</h2>
+
+          <div className="features-grid">
+
+            <Link to="/guides/best-free-ai-resume-builder-2026" className="feature-card" style={{ textDecoration: 'none' }}>
+              <h3 className="feature-title">best free AI resume builder</h3>
+              <p className="feature-description">See how HiHired combines ATS-friendly resume building, job-specific tailoring, and recruiter-ready PDF export.</p>
+            </Link>
+
+            <Link to="/guides/auto-fill-job-applications-chrome-extension" className="feature-card" style={{ textDecoration: 'none' }}>
+              <h3 className="feature-title">chrome extension auto fill job applications</h3>
+              <p className="feature-description">Learn how HiHired Auto-Fill carries one saved profile into Workday, Greenhouse, Lever, and LinkedIn application flows.</p>
+            </Link>
+
+            <Link to="/guides/ai-cover-letter-generator-free" className="feature-card" style={{ textDecoration: 'none' }}>
+              <h3 className="feature-title">AI cover letter generator free</h3>
+              <p className="feature-description">Generate a matching AI cover letter from the same resume and target job description on hihired.org.</p>
+            </Link>
 
           </div>
 
