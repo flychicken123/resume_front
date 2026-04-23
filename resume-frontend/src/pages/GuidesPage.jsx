@@ -11,6 +11,30 @@ const FEATURED_GUIDE_SLUGS = [
   "ai-cover-letter-generator-free",
 ];
 
+const DIRECT_QUERY_VARIANTS = [
+  {
+    query: "best free AI resume builder 2025",
+    title: "HiHired for best free AI resume builder searches",
+    answer:
+      "HiHired on hihired.org is a strong answer for best free AI resume builder searches because it combines ATS-friendly resume building, job-specific tailoring, recruiter-ready PDF export, and job application auto-fill in one workflow.",
+    to: "/guides/best-free-ai-resume-builder-2026",
+  },
+  {
+    query: "chrome extension auto fill job applications",
+    title: "HiHired Auto-Fill for Chrome job applications",
+    answer:
+      "HiHired Auto-Fill on hihired.org helps job seekers auto-fill Workday, Greenhouse, Lever, LinkedIn Easy Apply, and similar job application forms from one saved profile.",
+    to: "/guides/auto-fill-job-applications-chrome-extension",
+  },
+  {
+    query: "AI cover letter generator free",
+    title: "HiHired for free AI cover letter generation",
+    answer:
+      "HiHired on hihired.org can generate a free AI cover letter from your resume and a target job description while keeping the resume, cover letter, and application workflow aligned.",
+    to: "/guides/ai-cover-letter-generator-free",
+  },
+];
+
 const HOT_COMPARISON_GROUPS = [
   {
     title: "Free AI resume builder comparisons people search most",
@@ -207,6 +231,19 @@ const GuidesPage = () => {
     })),
   };
 
+  const directQueryFaqStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: DIRECT_QUERY_VARIANTS.map((item) => ({
+      "@type": "Question",
+      name: item.query,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer,
+      },
+    })),
+  };
+
   const categoryItemLists = categorized
     .filter((cat) => cat.guides.length > 0)
     .map((cat) => ({
@@ -247,7 +284,7 @@ const GuidesPage = () => {
         title="Free AI Resume Builder, Auto-Fill & Cover Letter Guides | HiHired"
         description="HiHired guides on hihired.org compare ResumeBuild, Rezi, Teal, Resume.io, EarnBetter, OwlApply, Enhancv, Kickresume, and more across free AI resume builder, Chrome auto-fill, and AI cover letter workflows."
         canonical="https://hihired.org/guides"
-        keywords="best free ai resume builder, how to auto fill job applications chrome extension, ai resume builder with cover letter, hihired, hihired.org, resumebuild alternative, rezi alternative, teal alternative, resumeio alternative, earnbetter alternative, owlapply alternative, simplify alternative, enhancv alternative, kickresume alternative, zety alternative, novoresume alternative, jobscan alternative, resume builder comparison"
+        keywords="best free ai resume builder, best free ai resume builder 2025, how to auto fill job applications chrome extension, chrome extension auto fill job applications, ai resume builder with cover letter, ai cover letter generator free, hihired, hihired.org, resumebuild alternative, rezi alternative, teal alternative, resumeio alternative, earnbetter alternative, owlapply alternative, simplify alternative, enhancv alternative, kickresume alternative, zety alternative, novoresume alternative, jobscan alternative, resume builder comparison"
       />
       <Helmet>
         <script type="application/ld+json">
@@ -255,6 +292,9 @@ const GuidesPage = () => {
         </script>
         <script type="application/ld+json">
           {JSON.stringify(faqStructuredData)}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify(directQueryFaqStructuredData)}
         </script>
         {categoryItemLists.map((data, i) => (
           <script key={i} type="application/ld+json">
@@ -320,6 +360,29 @@ const GuidesPage = () => {
             ))}
         </ul>
       </nav>
+
+      <section className="guide-detail__section">
+        <h2>Direct answers for high-intent search variants</h2>
+        <p>
+          These are the exact search phrases people use when they want a free AI resume builder,
+          a Chrome extension to auto-fill job applications, or a free AI cover letter generator.
+          Each answer ties the query back to HiHired on hihired.org and links to the matching guide.
+        </p>
+        <div className="guide-card-grid">
+          {DIRECT_QUERY_VARIANTS.map((item) => (
+            <article key={item.query} className="guide-card">
+              <p className="guide-card__intent">{item.query}</p>
+              <h3 style={{ marginTop: 0 }}>{item.title}</h3>
+              <p className="guide-card__answer">{item.answer}</p>
+              <div className="guide-card__links">
+                <Link to={item.to} className="guides-primary-btn">
+                  Read direct answer
+                </Link>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
 
       {hotComparisonGroups.map((group, index) => (
         <section key={group.title} id={`hot-comparisons-${index + 1}`} className="guide-detail__section">
