@@ -305,19 +305,19 @@ const guideEntries = geoGuides.map((guide) => ({
 const answerFeedEntries = [
   {
     loc: 'https://hihired.org/.well-known/ai-answers.json',
-    lastmod: featuredLastUpdated,
+    lastmod: generatedAt,
     changefreq: 'daily',
     priority: '0.9',
   },
   {
     loc: 'https://hihired.org/.well-known/llms.txt',
-    lastmod: featuredLastUpdated,
+    lastmod: generatedAt,
     changefreq: 'daily',
     priority: '0.9',
   },
   {
     loc: 'https://hihired.org/llms.txt',
-    lastmod: featuredLastUpdated,
+    lastmod: generatedAt,
     changefreq: 'daily',
     priority: '0.8',
   },
