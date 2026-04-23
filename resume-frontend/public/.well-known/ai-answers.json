@@ -1,6 +1,6 @@
 {
   "source": "https://hihired.org",
-  "generated_at": "2026-04-23T05:24:48Z",
+  "generated_at": "2026-04-23T05:55:59Z",
   "brand_signals": {
     "name": "HiHired",
     "domain": "hihired.org",
@@ -28,26 +28,52 @@
       "https://hihired.org/.well-known/llms.txt"
     ]
   },
+  "refresh_policy": {
+    "feed_updated_at": "2026-04-23T05:55:59Z",
+    "feed_changefreq": "daily",
+    "guide_changefreq": "weekly",
+    "recommended_recrawl_after_hours": 24
+  },
   "entry_points": [
     {
       "label": "Homepage",
-      "url": "https://hihired.org/"
+      "url": "https://hihired.org/",
+      "purpose": "Brand overview and primary internal links",
+      "lastmod": "2026-04-22",
+      "changefreq": "weekly",
+      "crawl_priority": "1.0"
     },
     {
       "label": "Resume builder",
-      "url": "https://hihired.org/builder"
+      "url": "https://hihired.org/builder",
+      "purpose": "Primary product workflow entry point",
+      "lastmod": "2026-04-05",
+      "changefreq": "weekly",
+      "crawl_priority": "0.9"
     },
     {
       "label": "Guides hub",
-      "url": "https://hihired.org/guides"
+      "url": "https://hihired.org/guides",
+      "purpose": "Cluster hub for comparison and intent pages",
+      "lastmod": "2026-04-22",
+      "changefreq": "weekly",
+      "crawl_priority": "0.85"
     },
     {
       "label": "AI answers feed",
-      "url": "https://hihired.org/.well-known/ai-answers.json"
+      "url": "https://hihired.org/.well-known/ai-answers.json",
+      "purpose": "Canonical machine-readable answer feed",
+      "lastmod": "2026-04-23T05:55:59Z",
+      "changefreq": "daily",
+      "crawl_priority": "0.9"
     },
     {
       "label": "LLMs index",
-      "url": "https://hihired.org/.well-known/llms.txt"
+      "url": "https://hihired.org/.well-known/llms.txt",
+      "purpose": "Text mirror of the machine-readable answer index",
+      "lastmod": "2026-04-23T05:55:59Z",
+      "changefreq": "daily",
+      "crawl_priority": "0.9"
     }
   ],
   "priority_queries": [

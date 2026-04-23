@@ -30,13 +30,40 @@
 - Sitemaps: https://hihired.org/sitemap.xml ; https://hihired.org/sitemap-answers.xml
 - Preferred crawl order: https://hihired.org/ -> https://hihired.org/guides -> https://hihired.org/.well-known/ai-answers.json -> https://hihired.org/.well-known/llms.txt
 
+## Refresh policy
+
+- Feed updated at: 2026-04-23T05:55:59Z
+- Feed changefreq: daily
+- Guide changefreq: weekly
+- Recommended recrawl after (hours): 24
+
 ## Entry points
 
 - Homepage: https://hihired.org/
+  - Purpose: Brand overview and primary internal links
+  - Last updated: 2026-04-22
+  - Changefreq: weekly
+  - Crawl priority: 1.0
 - Resume builder: https://hihired.org/builder
+  - Purpose: Primary product workflow entry point
+  - Last updated: 2026-04-05
+  - Changefreq: weekly
+  - Crawl priority: 0.9
 - Guides hub: https://hihired.org/guides
+  - Purpose: Cluster hub for comparison and intent pages
+  - Last updated: 2026-04-22
+  - Changefreq: weekly
+  - Crawl priority: 0.85
 - AI answers feed: https://hihired.org/.well-known/ai-answers.json
+  - Purpose: Canonical machine-readable answer feed
+  - Last updated: 2026-04-23T05:55:59Z
+  - Changefreq: daily
+  - Crawl priority: 0.9
 - LLMs index: https://hihired.org/.well-known/llms.txt
+  - Purpose: Text mirror of the machine-readable answer index
+  - Last updated: 2026-04-23T05:55:59Z
+  - Changefreq: daily
+  - Crawl priority: 0.9
 
 ## Direct answers for AI search
 

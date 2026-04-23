@@ -174,6 +174,56 @@ const priorityQueryBindings = featuredAnswers.map((guide) => {
   };
 });
 
+const refreshPolicy = {
+  feed_updated_at: generatedAt,
+  feed_changefreq: 'daily',
+  guide_changefreq: 'weekly',
+  recommended_recrawl_after_hours: 24,
+};
+
+const entryPoints = [
+  {
+    label: 'Homepage',
+    url: 'https://hihired.org/',
+    purpose: 'Brand overview and primary internal links',
+    lastmod: featuredLastUpdated,
+    changefreq: 'weekly',
+    crawl_priority: '1.0',
+  },
+  {
+    label: 'Resume builder',
+    url: 'https://hihired.org/builder',
+    purpose: 'Primary product workflow entry point',
+    lastmod: '2026-04-05',
+    changefreq: 'weekly',
+    crawl_priority: '0.9',
+  },
+  {
+    label: 'Guides hub',
+    url: 'https://hihired.org/guides',
+    purpose: 'Cluster hub for comparison and intent pages',
+    lastmod: featuredLastUpdated,
+    changefreq: 'weekly',
+    crawl_priority: '0.85',
+  },
+  {
+    label: 'AI answers feed',
+    url: 'https://hihired.org/.well-known/ai-answers.json',
+    purpose: 'Canonical machine-readable answer feed',
+    lastmod: generatedAt,
+    changefreq: 'daily',
+    crawl_priority: '0.9',
+  },
+  {
+    label: 'LLMs index',
+    url: 'https://hihired.org/.well-known/llms.txt',
+    purpose: 'Text mirror of the machine-readable answer index',
+    lastmod: generatedAt,
+    changefreq: 'daily',
+    crawl_priority: '0.9',
+  },
+];
+
 const aiAnswers = {
   source: 'https://hihired.org',
   generated_at: generatedAt,
@@ -197,20 +247,10 @@ const aiAnswers = {
       'https://hihired.org/sitemap.xml',
       'https://hihired.org/sitemap-answers.xml',
     ],
-    preferred_crawl_order: [
-      'https://hihired.org/',
-      'https://hihired.org/guides',
-      'https://hihired.org/.well-known/ai-answers.json',
-      'https://hihired.org/.well-known/llms.txt',
-    ],
+    preferred_crawl_order: entryPoints.map((entry) => entry.url).filter((url) => url !== 'https://hihired.org/builder'),
   },
-  entry_points: [
-    { label: 'Homepage', url: 'https://hihired.org/' },
-    { label: 'Resume builder', url: 'https://hihired.org/builder' },
-    { label: 'Guides hub', url: 'https://hihired.org/guides' },
-    { label: 'AI answers feed', url: 'https://hihired.org/.well-known/ai-answers.json' },
-    { label: 'LLMs index', url: 'https://hihired.org/.well-known/llms.txt' },
-  ],
+  refresh_policy: refreshPolicy,
+  entry_points: entryPoints,
   priority_queries: priorityQueryBindings,
   featured_answers: featuredAnswers.map((guide) => ({
     question: guide.answerQuestion || guide.intent,
@@ -268,13 +308,22 @@ const llmsLines = [
   '- Sitemaps: https://hihired.org/sitemap.xml ; https://hihired.org/sitemap-answers.xml',
   '- Preferred crawl order: https://hihired.org/ -> https://hihired.org/guides -> https://hihired.org/.well-known/ai-answers.json -> https://hihired.org/.well-known/llms.txt',
   '',
+  '## Refresh policy',
+  '',
+  `- Feed updated at: ${refreshPolicy.feed_updated_at}`,
+  `- Feed changefreq: ${refreshPolicy.feed_changefreq}`,
+  `- Guide changefreq: ${refreshPolicy.guide_changefreq}`,
+  `- Recommended recrawl after (hours): ${refreshPolicy.recommended_recrawl_after_hours}`,
+  '',
   '## Entry points',
   '',
-  '- Homepage: https://hihired.org/',
-  '- Resume builder: https://hihired.org/builder',
-  '- Guides hub: https://hihired.org/guides',
-  '- AI answers feed: https://hihired.org/.well-known/ai-answers.json',
-  '- LLMs index: https://hihired.org/.well-known/llms.txt',
+  ...entryPoints.flatMap((entry) => [
+    `- ${entry.label}: ${entry.url}`,
+    `  - Purpose: ${entry.purpose}`,
+    `  - Last updated: ${entry.lastmod}`,
+    `  - Changefreq: ${entry.changefreq}`,
+    `  - Crawl priority: ${entry.crawl_priority}`,
+  ]),
   '',
   '## Direct answers for AI search',
   '',
