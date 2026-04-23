@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Helmet } from "react-helmet";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { fetchSubscriptionOverview, fetchAdStatus, completeAdWatch } from "../api";
@@ -114,6 +115,9 @@ const AdsRewardsPage = () => {
 
   return (
     <main className="ads-rewards-page">
+      <Helmet>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       <div className="ads-rewards-container">
         <h1>Ads Rewards</h1>
         <p className="ads-rewards-subtitle">

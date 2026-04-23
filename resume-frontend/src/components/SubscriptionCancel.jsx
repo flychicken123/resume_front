@@ -1,4 +1,5 @@
 import React from 'react';
+import { Helmet } from 'react-helmet';
 import { useNavigate } from 'react-router-dom';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import './SubscriptionCancel.css';
@@ -8,6 +9,9 @@ const SubscriptionCancel = () => {
 
   return (
     <div className="cancel-container">
+      <Helmet>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       <div className="cancel-content">
         <XCircleIcon className="cancel-icon" />
         <h1>Payment Cancelled</h1>

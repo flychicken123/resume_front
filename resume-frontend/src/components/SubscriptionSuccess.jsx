@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
 import { getAPIBaseURL } from '../api';
@@ -71,6 +72,9 @@ const SubscriptionSuccess = () => {
   if (loading) {
     return (
       <div className="success-container">
+        <Helmet>
+          <meta name="robots" content="noindex, nofollow" />
+        </Helmet>
         <div className="success-content">
           <div className="spinner"></div>
           <p>Verifying your payment...</p>
@@ -82,6 +86,9 @@ const SubscriptionSuccess = () => {
   if (error) {
     return (
       <div className="success-container">
+        <Helmet>
+          <meta name="robots" content="noindex, nofollow" />
+        </Helmet>
         <div className="success-content">
           <h2>Something went wrong</h2>
           <p>{error}</p>
@@ -95,6 +102,9 @@ const SubscriptionSuccess = () => {
 
   return (
     <div className="success-container">
+      <Helmet>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       <div className="success-content">
         <CheckCircleIcon className="success-icon" />
         <h1>Payment Successful!</h1>

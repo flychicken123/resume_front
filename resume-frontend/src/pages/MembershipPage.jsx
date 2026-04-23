@@ -9,6 +9,7 @@ import {
   fetchSubscriptionOverview,
 } from "../api";
 import { useAuth } from "../context/AuthContext";
+import { Helmet } from "react-helmet";
 import Navigation from "../components/Navigation";
 import SEO from "../components/SEO";
 import "./MembershipPage.css";
@@ -265,6 +266,9 @@ const MembershipPage = () => {
         keywords="HiHired account, membership management, subscription, billing, resume usage, plan upgrade"
         canonical="https://hihired.org/account"
       />
+      <Helmet>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       <Navigation />
       <div className="membership-page">
         <div className="membership-container">
