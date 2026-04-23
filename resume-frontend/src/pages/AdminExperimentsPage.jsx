@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet';
 import { Link, Navigate } from 'react-router-dom';
 import SEO from '../components/SEO';
 import { deleteExperiment, getExperimentMetrics, listExperiments, saveExperiment } from '../api';
@@ -210,6 +211,7 @@ const AdminExperimentsPage = () => {
         description="Plan, launch, and monitor A/B tests for both frontend flows and backend requests."
         canonical="https://hihired.org/admin/experiments"
       />
+      <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '28px 20px 48px', color: '#e2e8f0' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
           <div>

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { Helmet } from 'react-helmet';
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getAPIBaseURL } from '../api';
@@ -142,6 +143,7 @@ const AdminExitAnalyticsPage = () => {
         description="Bounce and exit analytics across your HiHired funnel."
         canonical="https://hihired.org/admin/analytics"
       />
+      <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '32px 20px 60px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
           <div>
