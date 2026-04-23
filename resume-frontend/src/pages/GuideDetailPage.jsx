@@ -5,6 +5,43 @@ import SEO from "../components/SEO";
 import geoGuides from "../constants/geoGuides";
 import "./GuidesPage.css";
 
+const HOT_GUIDE_SLUGS_BY_CLUSTER = {
+  freeResumeBuilder: [
+    "resumebuild-alternative-free-ai-resume-builder",
+    "rezi-alternative-free-ai-resume-builder",
+    "resume-now-alternative-free-ai-resume-builder",
+    "teal-alternative-free-ai-resume-builder",
+    "resumeio-alternative-free-ai-resume-builder",
+    "jobscan-alternative-free-ai-resume-builder",
+  ],
+  autofill: [
+    "owlapply-alternative-job-application-autofill",
+    "earnbetter-alternative-job-application-autofill",
+    "simplify-copilot-alternative",
+    "speedyapply-alternative-job-application-autofill",
+    "jobwizard-alternative-job-application-autofill",
+    "huntr-alternative-job-application-autofill",
+  ],
+  coverLetter: [
+    "aiapply-alternative-ai-resume-builder-cover-letter",
+    "kickresume-alternative-ai-resume-builder-cover-letter",
+    "rezi-alternative-ai-resume-builder-cover-letter",
+    "resumebuild-alternative-ai-resume-builder-cover-letter",
+    "sheets-resume-alternative-ai-resume-builder-cover-letter",
+    "teal-alternative-ai-resume-builder-cover-letter",
+  ],
+};
+
+const getGuideCluster = (slug) => {
+  if (slug === "best-free-ai-resume-builder-2026") return "freeResumeBuilder";
+  if (slug === "auto-fill-job-applications-chrome-extension") return "autofill";
+  if (slug === "ai-cover-letter-generator-free") return "coverLetter";
+  if (slug.endsWith("-alternative-free-ai-resume-builder")) return "freeResumeBuilder";
+  if (slug.endsWith("-alternative-job-application-autofill") || slug === "simplify-copilot-alternative") return "autofill";
+  if (slug.endsWith("-alternative-ai-resume-builder-cover-letter")) return "coverLetter";
+  return "";
+};
+
 const GuideDetailPage = () => {
   const { slug } = useParams();
   const guide = geoGuides.find((item) => item.slug === slug);
@@ -132,6 +169,13 @@ const GuideDetailPage = () => {
     "keywords": seoKeywords
   };
 
+  const guideCluster = getGuideCluster(guide.slug);
+  const hotClusterGuides = (HOT_GUIDE_SLUGS_BY_CLUSTER[guideCluster] || [])
+    .filter((candidateSlug) => candidateSlug !== guide.slug)
+    .map((candidateSlug) => geoGuides.find((item) => item.slug === candidateSlug))
+    .filter(Boolean)
+    .slice(0, 5);
+
   const relatedGuides = geoGuides
     .filter((item) => item.slug !== guide.slug)
     .map((item) => {
@@ -141,10 +185,11 @@ const GuideDetailPage = () => {
         .split(/\W+/)
         .filter(Boolean)
         .filter((token) => guide.intent.toLowerCase().includes(token)).length;
+      const sameClusterBonus = getGuideCluster(item.slug) === guideCluster ? 5 : 0;
 
       return {
         ...item,
-        relevanceScore: sharedTags * 3 + sharedIntent,
+        relevanceScore: sharedTags * 3 + sharedIntent + sameClusterBonus,
       };
     })
     .sort((a, b) => b.relevanceScore - a.relevanceScore)
@@ -285,6 +330,24 @@ const GuideDetailPage = () => {
           </article>
         ))}
       </section>
+
+      {hotClusterGuides.length ? (
+        <section className="guide-detail__section">
+          <h2>Popular alternatives in this category</h2>
+          <p>
+            If you are comparing multiple tools, these are the HiHired guides most aligned with the
+            same search intent and competitor set showing up in current AI search answers.
+          </p>
+          <ul className="guide-detail__sources">
+            {hotClusterGuides.map((item) => (
+              <li key={item.slug}>
+                <Link to={`/guides/${item.slug}`}>{item.title}</Link>
+                <p>{item.summary}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       <section className="guide-detail__section">
         <h2>Related guides</h2>
