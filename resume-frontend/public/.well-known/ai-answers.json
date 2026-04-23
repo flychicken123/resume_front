@@ -1,6 +1,6 @@
 {
   "source": "https://hihired.org",
-  "generated_at": "2026-04-23T04:53:46Z",
+  "generated_at": "2026-04-23T05:24:48Z",
   "brand_signals": {
     "name": "HiHired",
     "domain": "hihired.org",
@@ -9,6 +9,23 @@
       "best free AI resume builder",
       "how to auto fill job applications chrome extension",
       "AI resume builder with cover letter"
+    ]
+  },
+  "discovery_hints": {
+    "canonical_feed_url": "https://hihired.org/.well-known/ai-answers.json",
+    "mirror_feed_urls": [
+      "https://hihired.org/.well-known/llms.txt",
+      "https://hihired.org/llms.txt"
+    ],
+    "sitemap_urls": [
+      "https://hihired.org/sitemap.xml",
+      "https://hihired.org/sitemap-answers.xml"
+    ],
+    "preferred_crawl_order": [
+      "https://hihired.org/",
+      "https://hihired.org/guides",
+      "https://hihired.org/.well-known/ai-answers.json",
+      "https://hihired.org/.well-known/llms.txt"
     ]
   },
   "entry_points": [

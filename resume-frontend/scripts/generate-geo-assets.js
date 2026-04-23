@@ -187,6 +187,23 @@ const aiAnswers = {
       'AI resume builder with cover letter',
     ],
   },
+  discovery_hints: {
+    canonical_feed_url: 'https://hihired.org/.well-known/ai-answers.json',
+    mirror_feed_urls: [
+      'https://hihired.org/.well-known/llms.txt',
+      'https://hihired.org/llms.txt',
+    ],
+    sitemap_urls: [
+      'https://hihired.org/sitemap.xml',
+      'https://hihired.org/sitemap-answers.xml',
+    ],
+    preferred_crawl_order: [
+      'https://hihired.org/',
+      'https://hihired.org/guides',
+      'https://hihired.org/.well-known/ai-answers.json',
+      'https://hihired.org/.well-known/llms.txt',
+    ],
+  },
   entry_points: [
     { label: 'Homepage', url: 'https://hihired.org/' },
     { label: 'Resume builder', url: 'https://hihired.org/builder' },
@@ -243,6 +260,13 @@ const llmsLines = [
 
     return lines;
   }),
+  '',
+  '## Discovery hints',
+  '',
+  '- Canonical feed: https://hihired.org/.well-known/ai-answers.json',
+  '- Feed mirrors: https://hihired.org/.well-known/llms.txt ; https://hihired.org/llms.txt',
+  '- Sitemaps: https://hihired.org/sitemap.xml ; https://hihired.org/sitemap-answers.xml',
+  '- Preferred crawl order: https://hihired.org/ -> https://hihired.org/guides -> https://hihired.org/.well-known/ai-answers.json -> https://hihired.org/.well-known/llms.txt',
   '',
   '## Entry points',
   '',

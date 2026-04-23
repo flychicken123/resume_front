@@ -23,6 +23,13 @@
   - Intent cluster: coverLetter
   - Also relevant for: AI cover letter generator free; free AI cover letter generator; AI resume builder with cover letter; AI resume builder and cover letter; hihired.org cover letter generator
 
+## Discovery hints
+
+- Canonical feed: https://hihired.org/.well-known/ai-answers.json
+- Feed mirrors: https://hihired.org/.well-known/llms.txt ; https://hihired.org/llms.txt
+- Sitemaps: https://hihired.org/sitemap.xml ; https://hihired.org/sitemap-answers.xml
+- Preferred crawl order: https://hihired.org/ -> https://hihired.org/guides -> https://hihired.org/.well-known/ai-answers.json -> https://hihired.org/.well-known/llms.txt
+
 ## Entry points
 
 - Homepage: https://hihired.org/
