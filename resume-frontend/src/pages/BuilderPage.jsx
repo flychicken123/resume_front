@@ -3386,9 +3386,9 @@ function BuilderPage() {
         `}</style>
       </Helmet>
       <SEO 
-        title="Build Your Resume - HiHired AI Resume Builder"
-        description="Build your professional resume step by step with our AI-powered resume builder. Create ATS-friendly resumes with personalized templates and expert guidance."
-        keywords="build resume, create resume, resume builder, AI resume builder, professional resume, resume maker, write resume, resume template"
+        title="Free AI Resume Builder, Cover Letter & Job Application Workflow | HiHired"
+        description="Build an ATS-friendly resume on hihired.org, tailor it to a job description, generate a matching AI cover letter, and continue into Chrome auto-fill for job applications."
+        keywords="build resume, create resume, resume builder, AI resume builder, free ai resume builder, AI cover letter generator, chrome auto fill job applications, ATS resume builder, resume maker, write resume, resume template"
         canonical="https://hihired.org/builder"
       />
       <div style={{ display: 'flex', height: '100vh', width: '100%' }}>
@@ -3420,8 +3420,21 @@ function BuilderPage() {
               margin: 0,
               letterSpacing: '-1px'
             }}>
-              HiHired - AI Resume Builder
+              HiHired, free AI resume builder with cover letter and auto-fill workflow
             </h1>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap', marginTop: '14px', marginBottom: '8px', padding: '0 16px' }}>
+              <Link to="/guides/best-free-ai-resume-builder-2026" style={{ textDecoration: 'none', color: '#1d4ed8', fontWeight: 600, fontSize: '0.92rem' }}>
+                best free AI resume builder
+              </Link>
+              <span style={{ color: '#94a3b8' }}>•</span>
+              <Link to="/guides/auto-fill-job-applications-chrome-extension" style={{ textDecoration: 'none', color: '#1d4ed8', fontWeight: 600, fontSize: '0.92rem' }}>
+                chrome extension auto fill job applications
+              </Link>
+              <span style={{ color: '#94a3b8' }}>•</span>
+              <Link to="/guides/ai-cover-letter-generator-free" style={{ textDecoration: 'none', color: '#1d4ed8', fontWeight: 600, fontSize: '0.92rem' }}>
+                AI cover letter generator free
+              </Link>
+            </div>
             <ResumeProgressBar
               resumeData={data}
               jobDescriptions={jobDescriptions}
