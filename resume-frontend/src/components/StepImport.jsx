@@ -59,14 +59,20 @@ const StepImport = ({ onSkip }) => {
       }
     } catch (err) {
       console.error('Resume import failed', err);
-      setError(err?.message || 'Failed to parse resume. Please try a different file.');
+      const rawMessage = err?.message || 'Failed to parse resume. Please try a different file.';
+      const friendlyMessage = /unsupported file format:\s*\.doc\b/i.test(rawMessage)
+        ? '暂时不支持旧版 .doc 文件，请另存为 .docx、PDF 或 TXT 后再上传。'
+        : /could not extract text from this resume file/i.test(rawMessage)
+          ? '这个 PDF 里的文字暂时提取不出来，可能是扫描件、图片型 PDF、加密文件，或者编码比较特殊。你可以先换一个可复制文字的 PDF，或转成 .docx 再传。'
+          : rawMessage;
+      setError(friendlyMessage);
       setLastStep('resume_import_error');
       triggerFeedbackPrompt({
         scenario: 'resume_import',
         metadata: {
           result: 'error',
           source: 'file',
-          message: err?.message || 'parse_failed',
+          message: rawMessage || 'parse_failed',
         },
         force: true,
       });

@@ -202,9 +202,13 @@ const IntegratedBuilderStart = ({ onClose }) => {
       await handleResumeUpload(file);
     } catch (err) {
       console.error('Resume import failed:', err);
-      setError(
-        err.message || 'Something went wrong while importing the resume',
-      );
+      const rawMessage = err?.message || 'Something went wrong while importing the resume';
+      const friendlyMessage = /unsupported file format:\s*\.doc\b/i.test(rawMessage)
+        ? '暂时不支持旧版 .doc 文件，请改成 .docx、PDF 或 TXT 再上传。'
+        : /could not extract text from this resume file/i.test(rawMessage)
+          ? '这个 PDF 里的文字暂时提取不出来，可能是扫描件、图片型 PDF、加密文件，或者编码比较特殊。你可以先换一个可复制文字的 PDF，或转成 .docx 再传。'
+          : rawMessage;
+      setError(friendlyMessage);
     } finally {
       setPendingAction(null);
     }
