@@ -62,6 +62,7 @@ ${entries
 const HOT_GUIDE_SLUGS_BY_CLUSTER = {
   freeResumeBuilder: [
     'wobo-alternative-free-ai-resume-builder',
+    'enhancv-alternative-free-ai-resume-builder',
     'jobscan-alternative-free-ai-resume-builder',
     'teal-alternative-free-ai-resume-builder',
     'rezi-alternative-free-ai-resume-builder',
