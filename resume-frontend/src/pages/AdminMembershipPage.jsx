@@ -260,72 +260,18 @@ const AdminMembershipPage = () => {
     setJobError("");
     setJobMessage("");
     setSyncingAll(true);
-
-    const formatProgress = (status) => {
-      const r = status?.last_result || {};
-      const total = r.total_companies ?? 0;
-      const succeeded = r.succeeded ?? 0;
-      const failed = r.failed ?? 0;
-      const processed = succeeded + failed;
-      if (status?.running) {
-        if (total > 0) {
-          const pct = total > 0 ? Math.round((processed / total) * 100) : 0;
-          return `Syncing... ${processed} / ${total} companies (${pct}%) — ${succeeded} OK, ${failed} failed`;
-        }
-        return "Sync started, gathering company list...";
-      }
-      if (status?.last_error) {
-        return `Sync ended with error: ${status.last_error}. ${succeeded} OK, ${failed} failed.`;
-      }
-      const found = r.total_jobs_found ?? 0;
-      const created = r.total_jobs_created ?? 0;
-      const updated = r.total_jobs_updated ?? 0;
-      const closed = r.total_jobs_closed ?? 0;
-      return `Sync done. ${succeeded} OK, ${failed} failed. Jobs: ${found} found (${created} new, ${updated} updated, ${closed} closed).`;
-    };
-
-    const pollUntilDone = async () => {
-      // poll every 3s until status.running becomes false
-      while (true) {
-        let statusResp;
-        try {
-          statusResp = await fetch(`${API_BASE_URL}/api/admin/jobs/companies/sync-all/status`, {
-            headers: getAuthHeaders(),
-          });
-        } catch (err) {
-          setJobMessage(`Lost connection while polling: ${err.message}`);
-          return;
-        }
-        let status = {};
-        try { status = await statusResp.json(); } catch {}
-        setJobMessage(formatProgress(status));
-        if (!status?.running) {
-          // Final refresh of the company list once the run is over
-          await loadJobCompanies(jobPage);
-          return;
-        }
-        await new Promise((r) => setTimeout(r, 3000));
-      }
-    };
-
     try {
-      const response = await fetch(`${API_BASE_URL}/api/admin/jobs/companies/sync-all`, {
-        method: "POST",
-        headers: getAuthHeaders(),
-      });
+      const response = await fetch(`${API_BASE_URL}/api/admin/jobs/companies/sync-all`, { method: "POST", headers: getAuthHeaders() });
       let data = {};
       try { data = await response.json(); } catch { data = {}; }
-
-      if (response.status === 409) {
-        // Already running — pick up the existing run and poll it
-        setJobMessage("A sync is already running — tracking progress...");
-      } else if (!response.ok) {
-        throw new Error(data?.error || "Failed to start sync");
+      if (!response.ok) throw new Error(data?.error || "Failed to sync");
+      if (data.result && typeof data.result === "object") {
+        const s = data.result;
+        setJobMessage(`Ran ${s.ran ?? s.total_companies ?? 0} companies. ${s.succeeded ?? 0} OK, ${s.failed ?? 0} failed. Jobs: ${s.total_jobs_found ?? 0} found (${s.total_jobs_created ?? 0} new, ${s.total_jobs_updated ?? 0} updated, ${s.total_jobs_closed ?? 0} closed).`);
       } else {
-        setJobMessage(formatProgress(data?.status));
+        setJobMessage(data.message || "Sync completed.");
       }
-
-      await pollUntilDone();
+      await loadJobCompanies(jobPage);
     } catch (err) {
       setJobError(err.message || "Failed to sync");
     } finally {

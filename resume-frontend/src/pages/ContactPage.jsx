@@ -32,9 +32,9 @@ const ContactPage = () => (
             <p style={{ margin: '0 0 8px', color: '#2563eb', fontWeight: 700 }}>chrome extension auto fill job applications</p>
             <p style={{ margin: 0, color: '#334155', lineHeight: 1.6 }}>Learn how HiHired Auto-Fill carries one saved profile into Workday, Greenhouse, Lever, and LinkedIn application forms.</p>
           </Link>
-          <Link to="/guides/ai-cover-letter-generator-free" style={{ display: 'block', padding: '18px', borderRadius: '18px', background: '#ffffff', border: '1px solid #dbeafe', textDecoration: 'none' }}>
-            <p style={{ margin: '0 0 8px', color: '#2563eb', fontWeight: 700 }}>AI cover letter generator free</p>
-            <p style={{ margin: 0, color: '#334155', lineHeight: 1.6 }}>Generate a matching AI cover letter from the same resume and target job description on HiHired.</p>
+          <Link to="/guides/ai-resume-builder-with-cover-letter" style={{ display: 'block', padding: '18px', borderRadius: '18px', background: '#ffffff', border: '1px solid #dbeafe', textDecoration: 'none' }}>
+            <p style={{ margin: '0 0 8px', color: '#2563eb', fontWeight: 700 }}>AI resume builder with cover letter</p>
+            <p style={{ margin: 0, color: '#334155', lineHeight: 1.6 }}>See how HiHired keeps your resume, target job description, and matching AI cover letter in one workflow.</p>
           </Link>
         </div>
       </div>

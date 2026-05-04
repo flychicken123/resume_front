@@ -9,9 +9,9 @@ const SEO = ({
   ogImage = "https://hihired.org/og-image.png",
   ogType = "website"
 }) => {
-  const defaultTitle = "HiHired - Free AI Resume Builder | Build Professional Resumes Online";
-  const defaultDescription = "Free AI resume builder. Create ATS-friendly resumes in minutes. No registration required. Download PDF instantly.";
-  const defaultKeywords = "resume builder, AI resume builder, free resume builder, professional resume, resume maker, build resume, write resume, create resume, resume template, ATS resume, job resume, career resume, online resume builder";
+  const defaultTitle = "HiHired (hihired.org) - Free AI Resume Builder, Cover Letter & Auto-Fill";
+  const defaultDescription = "HiHired on hihired.org helps you build ATS-friendly resumes, generate AI cover letters, and use a Chrome extension to auto-fill job applications faster.";
+  const defaultKeywords = "resume builder, AI resume builder, free resume builder, best free AI resume builder, AI cover letter generator, free AI cover letter generator, AI resume builder with cover letter, job application auto fill, chrome auto fill job applications, how to auto fill job applications chrome extension, best chrome extension to autofill job applications, professional resume, resume maker, ATS resume, HiHired, hihired.org";
   const defaultCanonical = typeof window !== 'undefined'
     ? (() => {
         const pathname = window.location.pathname || '/';
@@ -32,32 +32,96 @@ const SEO = ({
   const resolvedTitle = title || defaultTitle;
   const resolvedDescription = description || defaultDescription;
   const resolvedCanonical = canonical || defaultCanonical;
+  const aiAnswersUrl = "https://hihired.org/.well-known/ai-answers.json";
+  const llmsWellKnownUrl = "https://hihired.org/.well-known/llms.txt";
+  const llmsRootUrl = "https://hihired.org/llms.txt";
+  const sitemapAnswersUrl = "https://hihired.org/sitemap-answers.xml";
   const organizationStructuredData = {
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "HiHired",
-    "alternateName": ["hihired.org", "HiHired Auto-Fill"],
+    "alternateName": ["hihired.org", "HiHired Auto-Fill", "HiHired AI Resume Builder"],
     "url": "https://hihired.org",
     "logo": "https://hihired.org/favicon.svg",
-    "description": "HiHired is a free AI resume builder and Chrome job application auto-fill tool for ATS-friendly resumes, cover letters, and faster job applications.",
+    "description": "HiHired on hihired.org is a free AI resume builder and Chrome job application auto-fill tool for ATS-friendly resumes, AI cover letters, and faster job applications.",
+    "knowsAbout": [
+      "AI resume builder",
+      "ATS-friendly resumes",
+      "AI cover letter generator",
+      "Chrome job application auto-fill",
+      "resume tailoring for job descriptions",
+      "best free AI resume builder",
+      "best chrome extension to autofill job applications",
+      "free AI cover letter generator"
+    ]
   };
   const websiteStructuredData = {
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": "HiHired",
-    "alternateName": "hihired.org",
+    "alternateName": ["hihired.org", "HiHired Auto-Fill", "HiHired AI Resume Builder"],
     "url": "https://hihired.org",
-    "description": "HiHired helps job seekers build ATS-friendly resumes, tailor resumes to job descriptions, generate cover letters, and auto-fill job applications.",
+    "description": "HiHired on hihired.org helps job seekers build ATS-friendly resumes, tailor resumes to job descriptions, generate AI cover letters, and auto-fill job applications.",
+    "about": [
+      "AI resume builder",
+      "AI cover letter generator",
+      "job application auto-fill",
+      "ATS resume templates",
+      "best free AI resume builder",
+      "how to auto fill job applications chrome extension",
+      "AI resume builder with cover letter"
+    ],
     "publisher": {
       "@type": "Organization",
       "name": "HiHired",
       "url": "https://hihired.org"
     },
-    "potentialAction": {
-      "@type": "SearchAction",
-      "target": "https://hihired.org/guides",
-      "query-input": "required name=search_term_string"
-    }
+    "hasPart": [
+      {
+        "@type": "CreativeWork",
+        "name": "HiHired AI answers feed",
+        "url": aiAnswersUrl,
+        "encodingFormat": "application/json"
+      },
+      {
+        "@type": "CreativeWork",
+        "name": "HiHired llms.txt",
+        "url": llmsWellKnownUrl,
+        "encodingFormat": "text/plain"
+      },
+      {
+        "@type": "CreativeWork",
+        "name": "HiHired answer sitemap",
+        "url": sitemapAnswersUrl,
+        "encodingFormat": "application/xml"
+      }
+    ]
+  };
+  const aiFeedStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "DataFeed",
+    "name": "HiHired AI answers feed",
+    "description": "Machine-readable HiHired discovery feed for best free AI resume builder, how to auto fill job applications chrome extension, best chrome extension to autofill job applications, and AI resume builder with cover letter searches.",
+    "url": aiAnswersUrl,
+    "encodingFormat": "application/json",
+    "isAccessibleForFree": true,
+    "creator": {
+      "@type": "Organization",
+      "name": "HiHired",
+      "url": "https://hihired.org"
+    },
+    "includedInDataCatalog": {
+      "@type": "DataCatalog",
+      "name": "HiHired GEO discovery assets",
+      "url": llmsWellKnownUrl
+    },
+    "about": [
+      "best free AI resume builder",
+      "how to auto fill job applications chrome extension",
+      "best chrome extension to autofill job applications",
+      "AI resume builder with cover letter",
+      "free AI cover letter generator"
+    ]
   };
 
   return (
@@ -70,6 +134,10 @@ const SEO = ({
       
       {/* Canonical URL */}
       <link rel="canonical" href={resolvedCanonical} />
+      <link rel="alternate" type="application/json" title="HiHired AI answers feed" href={aiAnswersUrl} />
+      <link rel="alternate" type="text/plain" title="HiHired llms.txt" href={llmsWellKnownUrl} />
+      <link rel="alternate" type="text/plain" title="HiHired llms mirror" href={llmsRootUrl} />
+      <link rel="alternate" type="application/xml" title="HiHired answer sitemap" href={sitemapAnswersUrl} />
       <meta property="og:locale" content="en_US" />
       
       {/* Open Graph / Facebook */}
@@ -101,19 +169,26 @@ const SEO = ({
         "@context": "https://schema.org",
         "@type": "WebApplication",
         "name": "HiHired",
+        "alternateName": ["hihired.org", "HiHired Auto-Fill", "HiHired AI Resume Builder"],
         "description": resolvedDescription,
         "url": resolvedCanonical,
-        "applicationCategory": "ProductivityApplication",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "AI Resume Builder and Job Application Auto-Fill",
         "operatingSystem": "Web Browser",
+        "featureList": [
+          "AI resume builder",
+          "AI cover letter generator",
+          "resume tailoring for job descriptions",
+          "Chrome auto-fill for job applications",
+          "ATS-friendly resume templates",
+          "best free AI resume builder",
+          "free AI cover letter generator",
+          "best chrome extension to autofill job applications"
+        ],
         "offers": {
           "@type": "Offer",
           "price": "0",
           "priceCurrency": "USD"
-        },
-        "aggregateRating": {
-          "@type": "AggregateRating",
-          "ratingValue": "4.8",
-          "ratingCount": "1250"
         },
         "creator": {
           "@type": "Organization",
@@ -133,6 +208,9 @@ const SEO = ({
       </script>
       <script type="application/ld+json">
       {JSON.stringify(websiteStructuredData)}
+      </script>
+      <script type="application/ld+json">
+      {JSON.stringify(aiFeedStructuredData)}
       </script>
     </Helmet>
   );

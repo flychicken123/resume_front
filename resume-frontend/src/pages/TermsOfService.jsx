@@ -5,9 +5,9 @@ import SEO from '../components/SEO';
 const TermsOfService = () => (
   <div style={{ padding: '60px 20px', maxWidth: '960px', margin: '0 auto' }}>
     <SEO
-      title="Terms of Service | HiHired"
-      description="HiHired Terms of Service. Understand our AI resume platform rules, user rights, and data usage policies."
-      keywords="terms of service, user agreement, HiHired terms, resume builder terms, service agreement, legal terms"
+      title="Terms of Service | HiHired Resume Builder & Auto-Fill Terms"
+      description="Review the HiHired terms for hihired.org, including rules for the AI resume builder, AI cover letter tools, and Chrome auto-fill job application workflow."
+      keywords="terms of service, HiHired terms, hihired.org terms, resume builder terms, auto-fill terms, AI cover letter terms, service agreement, legal terms"
       canonical="https://hihired.org/terms"
     />
     <h1 style={{ fontSize: '2.75rem', fontWeight: 800, marginBottom: '1.5rem', color: '#0f172a' }}>
@@ -101,6 +101,32 @@ const TermsOfService = () => (
       out of or in connection with your use of the Services. Our total liability for any claim shall not exceed
       the amount you paid us in the twelve (12) months preceding the claim.
     </p>
+
+    <section style={{ marginTop: '2rem', padding: '24px', borderRadius: '24px', border: '1px solid #dbeafe', background: '#f8fbff' }}>
+      <p style={{ margin: '0 0 10px', color: '#2563eb', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.8rem' }}>
+        Related HiHired resources
+      </p>
+      <h2 style={{ margin: '0 0 12px', fontSize: '1.8rem', color: '#0f172a' }}>
+        See the core HiHired workflows these terms cover
+      </h2>
+      <p style={{ margin: '0 0 18px', color: '#475569', lineHeight: 1.7 }}>
+        If you are reviewing legal terms before using HiHired, these pages explain the main product flows on hihired.org that these terms apply to.
+      </p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+        <Link to="/guides/best-free-ai-resume-builder-2026" style={{ display: 'block', padding: '18px', borderRadius: '18px', background: '#ffffff', border: '1px solid #dbeafe', textDecoration: 'none' }}>
+          <p style={{ margin: '0 0 8px', color: '#2563eb', fontWeight: 700 }}>free AI resume builder guide</p>
+          <p style={{ margin: 0, color: '#334155', lineHeight: 1.6 }}>Understand the ATS-focused resume builder workflow and where HiHired fits in the job search process.</p>
+        </Link>
+        <Link to="/guides/auto-fill-job-applications-chrome-extension" style={{ display: 'block', padding: '18px', borderRadius: '18px', background: '#ffffff', border: '1px solid #dbeafe', textDecoration: 'none' }}>
+          <p style={{ margin: '0 0 8px', color: '#2563eb', fontWeight: 700 }}>job application auto-fill guide</p>
+          <p style={{ margin: 0, color: '#334155', lineHeight: 1.6 }}>Review how the HiHired Chrome extension supports Workday, Greenhouse, Lever, LinkedIn, and other job forms.</p>
+        </Link>
+        <Link to="/guides/ai-resume-builder-with-cover-letter" style={{ display: 'block', padding: '18px', borderRadius: '18px', background: '#ffffff', border: '1px solid #dbeafe', textDecoration: 'none' }}>
+          <p style={{ margin: '0 0 8px', color: '#2563eb', fontWeight: 700 }}>AI resume builder with cover letter</p>
+          <p style={{ margin: 0, color: '#334155', lineHeight: 1.6 }}>See how HiHired turns one resume profile and job description into a matching AI cover letter workflow.</p>
+        </Link>
+      </div>
+    </section>
 
     <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginTop: '2rem', marginBottom: '0.75rem', color: '#111827' }}>
       9. Changes to These Terms

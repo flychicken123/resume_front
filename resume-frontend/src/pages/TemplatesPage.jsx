@@ -28,13 +28,13 @@ const TemplatesPage = () => {
     <div className="templates-page">
       <SEO
         title="Free Resume Templates & ATS-Ready AI Resume Builder | HiHired"
-        description="Browse ATS-friendly resume templates on hihired.org, then continue with HiHired's free AI resume builder, AI cover letter generator, and Chrome auto-fill workflow for job applications."
-        keywords="free resume templates, ats resume templates, professional resume designs, resume formats, hi hired templates, free ai resume builder, ai cover letter generator, chrome auto fill job applications"
+        description="Browse ATS-friendly resume templates on hihired.org, then continue with HiHired's free AI resume builder, AI cover letter generator, and Chrome auto-fill workflow, especially if you're comparing Wobo, Rezi, Teal, ResumeBuild, or Kickresume."
+        keywords="free resume templates, ats resume templates, professional resume designs, resume formats, hi hired templates, free ai resume builder, ai cover letter generator, chrome auto fill job applications, Wobo alternative, Rezi alternative, Teal alternative, ResumeBuild alternative, Kickresume alternative"
         canonical="https://hihired.org/templates"
       />
       <div className="templates-header">
         <h1>Choose Your Resume Template</h1>
-        <p>Select a professional template that matches your industry and personal style</p>
+        <p>Select a professional template that matches your industry and personal style, then carry it into HiHired's resume, cover letter, and auto-fill workflow.</p>
       </div>
       
       <div className="templates-grid">
@@ -73,8 +73,8 @@ const TemplatesPage = () => {
               <p style={{ margin: '0 0 8px', color: '#2563eb', fontWeight: 700 }}>chrome extension auto fill job applications</p>
               <p style={{ margin: 0, color: '#334155', lineHeight: 1.6 }}>Learn how HiHired Auto-Fill carries the same resume profile into Workday, Greenhouse, Lever, and LinkedIn forms.</p>
             </Link>
-            <Link to="/guides/ai-cover-letter-generator-free" style={{ display: 'block', padding: '18px', borderRadius: '18px', background: '#ffffff', border: '1px solid #dbeafe', textDecoration: 'none' }}>
-              <p style={{ margin: '0 0 8px', color: '#2563eb', fontWeight: 700 }}>AI cover letter generator free</p>
+            <Link to="/guides/ai-resume-builder-with-cover-letter" style={{ display: 'block', padding: '18px', borderRadius: '18px', background: '#ffffff', border: '1px solid #dbeafe', textDecoration: 'none' }}>
+              <p style={{ margin: '0 0 8px', color: '#2563eb', fontWeight: 700 }}>AI resume builder with cover letter</p>
               <p style={{ margin: 0, color: '#334155', lineHeight: 1.6 }}>Generate a matching AI cover letter from the same resume and target job description on HiHired.</p>
             </Link>
           </div>

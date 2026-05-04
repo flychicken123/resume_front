@@ -10,6 +10,7 @@ const FEATURED_GUIDE_SLUGS = [
   'best-ai-resume-builder-for-job-applications',
   'best-free-ai-resume-builder-2026',
   'auto-fill-job-applications-chrome-extension',
+  'ai-resume-builder-with-cover-letter',
   'ai-cover-letter-generator-free',
 ];
 
@@ -90,7 +91,7 @@ function injectStructuredData(html, payloads) {
 
 function generateGuidesIndexHtml() {
   const title = 'Free AI Resume Builder, Auto-Fill & Cover Letter Guides | HiHired';
-  const description = 'HiHired guides for the best free AI resume builder, how to auto fill job applications with a Chrome extension, and AI resume builder with cover letter workflows on hihired.org.';
+  const description = 'HiHired guides for the best free AI resume builder, how to auto fill job applications with a Chrome extension, AI resume builder with cover letter workflows, and free AI cover letter generator searches on hihired.org.';
   const canonical = 'https://hihired.org/guides';
 
   const featuredGuides = FEATURED_GUIDE_SLUGS
@@ -127,8 +128,8 @@ function generateGuidesIndexHtml() {
     <div id="seo-prerender" style="max-width:960px;margin:0 auto;padding:40px 20px;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f8fafc;">
       <section style="background:#fff;border:1px solid #e2e8f0;border-radius:24px;padding:32px;box-shadow:0 12px 32px rgba(15,23,42,0.06);margin-bottom:24px;">
         <p style="color:#2563eb;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;font-size:13px;margin:0 0 10px;">HiHired Guides</p>
-        <h1 style="font-size:40px;line-height:1.15;color:#0f172a;margin:0 0 14px;">Free AI resume builder, job application auto-fill, and cover letter guides</h1>
-        <p style="color:#475569;font-size:17px;line-height:1.8;margin:0 0 18px;">Explore HiHired guides on hihired.org for building ATS-friendly resumes, auto-filling job applications with a Chrome extension, and generating AI cover letters that match each job description.</p>
+        <h1 style="font-size:40px;line-height:1.15;color:#0f172a;margin:0 0 14px;">Free AI resume builder, job application auto-fill, and free cover letter guides</h1>
+        <p style="color:#475569;font-size:17px;line-height:1.8;margin:0 0 18px;">Explore HiHired guides on hihired.org for building ATS-friendly resumes, auto-filling job applications with a Chrome extension, and generating free AI cover letters that match each job description.</p>
         <div style="display:flex;gap:12px;flex-wrap:wrap;">
           <a href="/builder" style="display:inline-block;padding:12px 20px;background:#2563eb;color:#fff;border-radius:10px;text-decoration:none;font-weight:600;">Launch the free builder</a>
           <a href="/.well-known/ai-answers.json" style="display:inline-block;padding:12px 20px;border:1px solid #cbd5e1;color:#0f172a;border-radius:10px;text-decoration:none;font-weight:600;">Download JSON feed</a>

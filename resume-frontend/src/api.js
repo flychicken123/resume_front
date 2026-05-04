@@ -862,22 +862,10 @@ export async function parseResumeFile(file) {
     body: formData,
   });
 
-  let data = null;
-  try {
-    data = await res.json();
-  } catch (e) {
-    data = null;
-  }
-
+  const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(
-      data?.error ||
-      data?.message ||
-      data?.details ||
-      'Failed to parse resume'
-    );
+    throw new Error(data?.error || data?.details || `Failed to parse resume (${res.status})`);
   }
-
   return data;
 }
 

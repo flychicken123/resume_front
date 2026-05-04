@@ -177,7 +177,7 @@ const IntegratedBuilderStart = ({ onClose }) => {
       throw new Error('Failed to parse server response');
     }
     if (!resp.ok || !json) {
-      throw new Error(json?.error || `Parse failed (${resp.status})`);
+      throw new Error(json?.error || json?.details || `Parse failed (${resp.status})`);
     }
     if (!json.structured) {
       throw new Error('Could not extract usable data from resume');

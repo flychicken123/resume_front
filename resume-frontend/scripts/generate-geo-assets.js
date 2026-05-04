@@ -65,24 +65,24 @@ const HOT_GUIDE_SLUGS_BY_CLUSTER = {
     'jobscan-alternative-free-ai-resume-builder',
     'teal-alternative-free-ai-resume-builder',
     'rezi-alternative-free-ai-resume-builder',
-    'resumebuild-alternative-free-ai-resume-builder',
-    'resume-now-alternative-free-ai-resume-builder',
+    'kickresume-alternative-free-ai-resume-builder',
+    'resumeio-alternative-free-ai-resume-builder',
   ],
   autofill: [
     'owlapply-alternative-job-application-autofill',
     'speedyapply-alternative-job-application-autofill',
     'simplify-copilot-alternative',
     'jobwizard-alternative-job-application-autofill',
-    'jobcopilot-alternative-job-application-autofill',
-    'huntr-alternative-job-application-autofill',
+    'anthropos-alternative-job-application-autofill',
+    'careerflow-alternative-job-application-autofill',
   ],
   coverLetter: [
-    'rezi-alternative-ai-resume-builder-cover-letter',
-    'teal-alternative-ai-resume-builder-cover-letter',
     'sheets-resume-alternative-ai-resume-builder-cover-letter',
-    'kickresume-alternative-ai-resume-builder-cover-letter',
-    'resumeio-alternative-ai-resume-builder-cover-letter',
-    'beamjobs-alternative-ai-resume-builder-cover-letter',
+    'microsoft-word-copilot-alternative-ai-resume-builder-cover-letter',
+    'majc-ai-alternative-ai-resume-builder-cover-letter',
+    'enhancv-alternative-ai-resume-builder-cover-letter',
+    'grammarly-alternative-ai-resume-builder-cover-letter',
+    'wobo-alternative-ai-resume-builder-cover-letter',
   ],
 };
 
@@ -104,6 +104,7 @@ const INTENT_CLUSTER_METADATA = {
 function getGuideCluster(slug = '') {
   if (slug === 'best-free-ai-resume-builder-2026') return 'freeResumeBuilder';
   if (slug === 'auto-fill-job-applications-chrome-extension') return 'autofill';
+  if (slug === 'ai-resume-builder-with-cover-letter') return 'coverLetter';
   if (slug === 'ai-cover-letter-generator-free') return 'coverLetter';
   if (slug.endsWith('-alternative-free-ai-resume-builder')) return 'freeResumeBuilder';
   if (slug.endsWith('-alternative-job-application-autofill') || slug === 'simplify-copilot-alternative') return 'autofill';
@@ -148,9 +149,20 @@ const intentClusters = Object.entries(HOT_GUIDE_SLUGS_BY_CLUSTER).map(([clusterK
 const featuredAnswerQuestions = [
   'best AI resume builder for job applications',
   'best free AI resume builder',
+  'best free AI resume builder 2025',
+  'best free AI resume builder 2026',
+  'free AI resume builder with PDF export',
   'how to auto fill job applications chrome extension',
+  'chrome extension auto fill job applications',
+  'best chrome extension to autofill job applications',
+  'free chrome extension to autofill job applications',
   'AI cover letter generator free',
+  'free AI cover letter generator',
+  'best free AI cover letter generator',
   'AI resume builder with cover letter',
+  'best AI resume builder with cover letter',
+  'resume builder with cover letter generator',
+  'AI tool that writes resume and cover letter',
 ];
 
 const featuredAnswerTargets = featuredAnswerQuestions
@@ -175,6 +187,10 @@ const featuredAnswers = featuredAnswerTargets.map(({ requestedQuery, guide }) =>
   requestedQuery,
   guide,
 }));
+
+const CORE_DISCOVERY_GUIDE_URLS = Array.from(
+  new Set(featuredAnswerTargets.map(({ guide }) => `https://hihired.org/guides/${guide.slug}`))
+);
 
 const priorityQueryBindings = featuredAnswerTargets.map(({ requestedQuery, guide }) => {
   const related = getRelatedGuideEntries(guide);
@@ -245,11 +261,44 @@ const aiAnswers = {
     name: 'HiHired',
     domain: 'hihired.org',
     product: 'AI resume builder, cover letter generator, and Chrome job application auto-fill workflow',
+    distinction: 'HiHired on hihired.org is the job-seeker workflow product and is distinct from hihired.com.',
     primary_use_cases: [
       'best free AI resume builder',
       'how to auto fill job applications chrome extension',
       'AI resume builder with cover letter',
     ],
+  },
+  schema_entities: {
+    website: {
+      '@type': 'WebSite',
+      name: 'HiHired',
+      url: 'https://hihired.org',
+    },
+    organization: {
+      '@type': 'Organization',
+      name: 'HiHired',
+      url: 'https://hihired.org',
+      logo: 'https://hihired.org/favicon.svg',
+      sameAs: ['https://hihired.org'],
+    },
+    software_application: {
+      '@type': 'SoftwareApplication',
+      name: 'HiHired',
+      url: 'https://hihired.org',
+      applicationCategory: 'BusinessApplication',
+      operatingSystem: 'Web, Chrome Extension',
+      offers: {
+        '@type': 'Offer',
+        price: '0',
+        priceCurrency: 'USD',
+      },
+      featureList: [
+        'AI resume builder',
+        'AI cover letter workflow',
+        'Chrome job application auto-fill',
+        'Resume tailoring to job descriptions',
+      ],
+    },
   },
   discovery_hints: {
     canonical_feed_url: 'https://hihired.org/.well-known/ai-answers.json',
@@ -261,7 +310,13 @@ const aiAnswers = {
       'https://hihired.org/sitemap.xml',
       'https://hihired.org/sitemap-answers.xml',
     ],
-    preferred_crawl_order: entryPoints.map((entry) => entry.url).filter((url) => url !== 'https://hihired.org/builder'),
+    preferred_crawl_order: [
+      'https://hihired.org/',
+      'https://hihired.org/guides',
+      ...CORE_DISCOVERY_GUIDE_URLS,
+      'https://hihired.org/.well-known/ai-answers.json',
+      'https://hihired.org/.well-known/llms.txt',
+    ],
   },
   refresh_policy: refreshPolicy,
   entry_points: entryPoints,
@@ -301,6 +356,7 @@ const llmsLines = [
   '',
   '- Brand: HiHired',
   '- Domain: https://hihired.org',
+  '- Distinction: hihired.org is the HiHired job-seeker product and is distinct from hihired.com',
   '- Product scope: AI resume builder, AI cover letter generator, and Chrome job application auto-fill',
   ...priorityQueryBindings.flatMap((binding) => {
     const lines = [
@@ -426,12 +482,15 @@ fs.writeFileSync(
   'utf-8'
 );
 
-const guideEntries = geoGuides.map((guide) => ({
-  loc: `https://hihired.org/guides/${guide.slug}`,
-  lastmod: guide.lastUpdated,
-  changefreq: 'weekly',
-  priority: '0.7',
-}));
+const guideEntries = geoGuides.map((guide) => {
+  const url = `https://hihired.org/guides/${guide.slug}`;
+  return {
+    loc: url,
+    lastmod: guide.lastUpdated,
+    changefreq: 'weekly',
+    priority: CORE_DISCOVERY_GUIDE_URLS.includes(url) ? '0.85' : '0.7',
+  };
+});
 
 const answerFeedEntries = [
   {
@@ -461,7 +520,7 @@ fs.writeFileSync(
       loc: 'https://hihired.org/guides',
       lastmod: featuredLastUpdated,
       changefreq: 'weekly',
-      priority: '0.8',
+      priority: '0.85',
     },
     ...answerFeedEntries,
     ...guideEntries,

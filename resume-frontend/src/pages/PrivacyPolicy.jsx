@@ -5,9 +5,9 @@ import SEO from '../components/SEO';
 const PrivacyPolicy = () => (
   <div style={{ padding: '60px 20px', maxWidth: '960px', margin: '0 auto' }}>
     <SEO
-      title="Privacy Policy | HiHired"
-      description="Learn how HiHired protects your data. Our privacy policy covers data collection, usage, and your rights."
-      keywords="privacy policy, data protection, HiHired privacy, resume data security, GDPR, CCPA, user data rights"
+      title="Privacy Policy | HiHired Resume Builder & Auto-Fill Data Practices"
+      description="Learn how HiHired on hihired.org protects data used by the AI resume builder, AI cover letter tools, and Chrome auto-fill extension."
+      keywords="privacy policy, HiHired privacy, hihired.org privacy, resume data security, auto-fill extension privacy, AI resume builder privacy, GDPR, CCPA"
       canonical="https://hihired.org/privacy"
     />
     <h1 style={{ fontSize: '2.75rem', fontWeight: 800, marginBottom: '1.5rem', color: '#0f172a' }}>
@@ -131,6 +131,32 @@ const PrivacyPolicy = () => (
       data with third parties. All data is transmitted exclusively between your browser and hihired.org servers
       over HTTPS.
     </p>
+
+    <section style={{ marginTop: '2rem', padding: '24px', borderRadius: '24px', border: '1px solid #dbeafe', background: '#f8fbff' }}>
+      <p style={{ margin: '0 0 10px', color: '#2563eb', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.8rem' }}>
+        Related HiHired resources
+      </p>
+      <h2 style={{ margin: '0 0 12px', fontSize: '1.8rem', color: '#0f172a' }}>
+        Learn how HiHired handles resume building, cover letters, and auto-fill
+      </h2>
+      <p style={{ margin: '0 0 18px', color: '#475569', lineHeight: 1.7 }}>
+        If you are reviewing privacy before signing up, these pages explain the core HiHired workflows on hihired.org that this policy applies to.
+      </p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+        <Link to="/guides/best-free-ai-resume-builder-2026" style={{ display: 'block', padding: '18px', borderRadius: '18px', background: '#ffffff', border: '1px solid #dbeafe', textDecoration: 'none' }}>
+          <p style={{ margin: '0 0 8px', color: '#2563eb', fontWeight: 700 }}>free AI resume builder guide</p>
+          <p style={{ margin: 0, color: '#334155', lineHeight: 1.6 }}>See how HiHired stores and uses resume data inside its ATS-focused resume builder workflow.</p>
+        </Link>
+        <Link to="/guides/auto-fill-job-applications-chrome-extension" style={{ display: 'block', padding: '18px', borderRadius: '18px', background: '#ffffff', border: '1px solid #dbeafe', textDecoration: 'none' }}>
+          <p style={{ margin: '0 0 8px', color: '#2563eb', fontWeight: 700 }}>job application auto-fill guide</p>
+          <p style={{ margin: 0, color: '#334155', lineHeight: 1.6 }}>Review how the HiHired Chrome extension reads form fields and fills job applications from saved profile data.</p>
+        </Link>
+        <Link to="/guides/ai-resume-builder-with-cover-letter" style={{ display: 'block', padding: '18px', borderRadius: '18px', background: '#ffffff', border: '1px solid #dbeafe', textDecoration: 'none' }}>
+          <p style={{ margin: '0 0 8px', color: '#2563eb', fontWeight: 700 }}>AI resume builder with cover letter</p>
+          <p style={{ margin: 0, color: '#334155', lineHeight: 1.6 }}>Understand how HiHired reuses the same resume context and job details to produce a matching AI cover letter.</p>
+        </Link>
+      </div>
+    </section>
 
     <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginTop: '2rem', marginBottom: '0.75rem', color: '#111827' }}>
       10. Changes to this Policy

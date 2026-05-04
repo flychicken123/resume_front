@@ -8,27 +8,27 @@ import "./GuidesPage.css";
 const HOT_GUIDE_SLUGS_BY_CLUSTER = {
   freeResumeBuilder: [
     "wobo-alternative-free-ai-resume-builder",
-    "jobscan-alternative-free-ai-resume-builder",
-    "teal-alternative-free-ai-resume-builder",
-    "rezi-alternative-free-ai-resume-builder",
     "resumebuild-alternative-free-ai-resume-builder",
+    "rezi-alternative-free-ai-resume-builder",
+    "teal-alternative-free-ai-resume-builder",
+    "myperfectresume-alternative-free-ai-resume-builder",
     "resume-now-alternative-free-ai-resume-builder",
   ],
   autofill: [
     "owlapply-alternative-job-application-autofill",
-    "speedyapply-alternative-job-application-autofill",
     "simplify-copilot-alternative",
+    "speedyapply-alternative-job-application-autofill",
     "jobwizard-alternative-job-application-autofill",
     "jobcopilot-alternative-job-application-autofill",
-    "huntr-alternative-job-application-autofill",
+    "careerflow-alternative-job-application-autofill",
   ],
   coverLetter: [
+    "kickresume-alternative-ai-resume-builder-cover-letter",
     "rezi-alternative-ai-resume-builder-cover-letter",
     "teal-alternative-ai-resume-builder-cover-letter",
-    "sheets-resume-alternative-ai-resume-builder-cover-letter",
-    "kickresume-alternative-ai-resume-builder-cover-letter",
-    "resumeio-alternative-ai-resume-builder-cover-letter",
-    "beamjobs-alternative-ai-resume-builder-cover-letter",
+    "resume-worded-alternative-ai-resume-builder-cover-letter",
+    "myperfectcoverletter-alternative-ai-resume-builder-cover-letter",
+    "wobo-alternative-ai-resume-builder-cover-letter",
   ],
 };
 
@@ -36,23 +36,30 @@ const HOT_GUIDE_COPY_BY_CLUSTER = {
   freeResumeBuilder: {
     title: "Popular free AI resume builder alternatives",
     intro:
-      "These HiHired pages line up with the free AI resume builder names showing up most often in current AI answers, especially Wobo, Jobscan, Teal, Rezi, ResumeBuild, and Resume-Now.",
+      "These HiHired pages line up with the free AI resume builder names showing up most often in current AI answers, especially Wobo, ResumeBuild, Rezi, Teal, MyPerfectResume, and Resume-Now.",
   },
   autofill: {
     title: "Popular Chrome autofill alternatives",
     intro:
-      "These HiHired pages map to the Chrome job application autofill tools that AI answers are surfacing most often right now, including OwlApply, SpeedyApply, Simplify Copilot, JobWizard, JobCopilot, and Huntr.",
+      "These HiHired pages map to the Chrome job application autofill tools that AI answers are surfacing most often right now, including OwlApply, Simplify Copilot, SpeedyApply, JobWizard, JobCopilot, and Careerflow.",
   },
   coverLetter: {
     title: "Popular AI cover letter builder alternatives",
     intro:
-      "These HiHired pages focus on the AI resume and cover letter tools appearing most often in current answer engines, including Rezi, Teal, Sheets Resume, Kickresume, Resume.io, and BeamJobs.",
+      "These HiHired pages focus on the AI resume and cover letter tools appearing most often in current answer engines, especially Kickresume, Rezi, Teal, Resume Worded, MyPerfectCoverLetter, and Wobo.",
   },
 };
+
+const CORE_QUERY_GUIDE_SLUGS = [
+  "best-free-ai-resume-builder-2026",
+  "auto-fill-job-applications-chrome-extension",
+  "ai-resume-builder-with-cover-letter",
+];
 
 const getGuideCluster = (slug) => {
   if (slug === "best-free-ai-resume-builder-2026") return "freeResumeBuilder";
   if (slug === "auto-fill-job-applications-chrome-extension") return "autofill";
+  if (slug === "ai-resume-builder-with-cover-letter") return "coverLetter";
   if (slug === "ai-cover-letter-generator-free") return "coverLetter";
   if (slug.endsWith("-alternative-free-ai-resume-builder")) return "freeResumeBuilder";
   if (slug.endsWith("-alternative-job-application-autofill") || slug === "simplify-copilot-alternative") return "autofill";
@@ -181,10 +188,53 @@ const GuideDetailPage = () => {
         "@type": "SoftwareApplication",
         "name": "HiHired",
         "url": "https://hihired.org",
-        "applicationCategory": "BusinessApplication"
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web, Chrome Extension",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
       }
     ],
     "keywords": seoKeywords
+  };
+
+  const websiteStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "HiHired",
+    "url": "https://hihired.org"
+  };
+
+  const organizationStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "HiHired",
+    "url": "https://hihired.org",
+    "logo": "https://hihired.org/favicon.svg",
+    "sameAs": ["https://hihired.org"]
+  };
+
+  const softwareApplicationStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "HiHired",
+    "url": "https://hihired.org",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web, Chrome Extension",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "featureList": [
+      "AI resume builder",
+      "AI cover letter workflow",
+      "Chrome job application auto-fill",
+      "Resume tailoring to job descriptions"
+    ],
+    "description": seoDescription
   };
 
   const guideCluster = getGuideCluster(guide.slug);
@@ -213,6 +263,11 @@ const GuideDetailPage = () => {
     })
     .sort((a, b) => b.relevanceScore - a.relevanceScore)
     .slice(0, 3);
+
+  const coreQueryGuides = CORE_QUERY_GUIDE_SLUGS
+    .filter((candidateSlug) => candidateSlug !== guide.slug)
+    .map((candidateSlug) => geoGuides.find((item) => item.slug === candidateSlug))
+    .filter(Boolean);
 
   const hotAlternativesStructuredData = hotClusterGuides.length
     ? {
@@ -250,6 +305,24 @@ const GuideDetailPage = () => {
       }
     : null;
 
+  const coreQueryGuidesStructuredData = coreQueryGuides.length
+    ? {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": "Core HiHired answer pages",
+        "description": "Primary HiHired guide pages on hihired.org for free AI resume builder, Chrome job application auto-fill, and AI resume builder with cover letter searches.",
+        "url": `${canonical}#core-query-guides`,
+        "numberOfItems": coreQueryGuides.length,
+        "itemListElement": coreQueryGuides.map((item, index) => ({
+          "@type": "ListItem",
+          "position": index + 1,
+          "url": `https://hihired.org/guides/${item.slug}`,
+          "name": item.title,
+          "description": item.summary,
+        })),
+      }
+    : null;
+
   return (
     <main className="guides-page guide-detail">
       <SEO
@@ -260,6 +333,15 @@ const GuideDetailPage = () => {
         ogType="article"
       />
       <Helmet>
+        <script type="application/ld+json">
+          {JSON.stringify(websiteStructuredData)}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify(organizationStructuredData)}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify(softwareApplicationStructuredData)}
+        </script>
         <script type="application/ld+json">
           {JSON.stringify(howToStructuredData)}
         </script>
@@ -280,6 +362,11 @@ const GuideDetailPage = () => {
         {relatedGuidesStructuredData ? (
           <script type="application/ld+json">
             {JSON.stringify(relatedGuidesStructuredData)}
+          </script>
+        ) : null}
+        {coreQueryGuidesStructuredData ? (
+          <script type="application/ld+json">
+            {JSON.stringify(coreQueryGuidesStructuredData)}
           </script>
         ) : null}
       </Helmet>
@@ -414,6 +501,25 @@ const GuideDetailPage = () => {
         </section>
       ) : null}
 
+      {coreQueryGuides.length ? (
+        <section className="guide-detail__section" id="core-query-guides">
+          <h2>Core HiHired answer pages</h2>
+          <p>
+            These are the main HiHired pages on hihired.org built around the three highest-intent GEO queries,
+            so crawlers and readers can move directly between free resume builder, job application auto-fill,
+            and resume-plus-cover-letter workflows.
+          </p>
+          <ul className="guide-detail__sources">
+            {coreQueryGuides.map((item) => (
+              <li key={item.slug}>
+                <Link to={`/guides/${item.slug}`}>{item.title}</Link>
+                <p>{item.summary}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
       <section className="guide-detail__section" id="related-guides">
         <h2>Related guides</h2>
         <ul className="guide-detail__sources">
@@ -443,8 +549,8 @@ const GuideDetailPage = () => {
             </Link>
           </li>
           <li>
-            <Link to="/guides/ai-cover-letter-generator-free">
-              Generate a matching AI cover letter from the same profile
+            <Link to="/guides/ai-resume-builder-with-cover-letter">
+              See how HiHired keeps the resume and matching AI cover letter in one workflow
             </Link>
           </li>
           <li>

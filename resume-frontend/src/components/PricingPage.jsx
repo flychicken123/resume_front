@@ -642,8 +642,8 @@ const PricingPage = () => {
 
       <SEO
         title="AI Resume Builder Pricing, Cover Letter & Auto-Fill Plans | HiHired"
-        description="Compare HiHired pricing for the free AI resume builder, AI cover letter generator, and Chrome auto-fill workflow for job applications on hihired.org."
-        keywords="resume builder pricing, HiHired plans, free ai resume builder, AI cover letter generator, chrome auto fill job applications, premium resume, AI resume cost, subscription plans"
+        description="Compare HiHired pricing for the free AI resume builder, AI cover letter generator, and Chrome auto-fill workflow on hihired.org, especially if you're comparing Wobo, Rezi, Teal, OwlApply, Simplify Copilot, Sheets Resume, or Kickresume."
+        keywords="resume builder pricing, HiHired plans, free ai resume builder, AI cover letter generator, chrome auto fill job applications, premium resume, AI resume cost, subscription plans, Wobo alternative, Rezi alternative, Teal alternative, OwlApply alternative, Simplify Copilot alternative, Sheets Resume alternative, Kickresume alternative"
         canonical="https://hihired.org/pricing"
       />
 
@@ -661,7 +661,7 @@ const PricingPage = () => {
 
             <p className="pricing-subtitle">
 
-              Pick the plan that fits your workflow across the free AI resume builder, AI cover letter generation, and Chrome auto-fill for job applications.
+              Pick the plan that fits your workflow across the free AI resume builder, AI cover letter generation, and Chrome auto-fill for job applications, especially if you're comparing HiHired with tools like Wobo, Rezi, Teal, OwlApply, or Kickresume.
 
             </p>
 
@@ -848,8 +848,8 @@ const PricingPage = () => {
               <p className="feature-description">Learn how HiHired Auto-Fill carries one saved profile into Workday, Greenhouse, Lever, and LinkedIn application flows.</p>
             </Link>
 
-            <Link to="/guides/ai-cover-letter-generator-free" className="feature-card" style={{ textDecoration: 'none' }}>
-              <h3 className="feature-title">AI cover letter generator free</h3>
+            <Link to="/guides/ai-resume-builder-with-cover-letter" className="feature-card" style={{ textDecoration: 'none' }}>
+              <h3 className="feature-title">AI resume builder with cover letter</h3>
               <p className="feature-description">Generate a matching AI cover letter from the same resume and target job description on hihired.org.</p>
             </Link>
 

@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://hihired.org/</loc>
-    <lastmod>2026-04-22</lastmod>
+    <lastmod>2026-05-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
@@ -14,7 +14,7 @@
   </url>
   <url>
     <loc>https://hihired.org/guides</loc>
-    <lastmod>2026-04-22</lastmod>
+    <lastmod>2026-05-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -50,19 +50,19 @@
   </url>
   <url>
     <loc>https://hihired.org/.well-known/ai-answers.json</loc>
-    <lastmod>2026-04-23T14:25:19Z</lastmod>
+    <lastmod>2026-05-04T17:27:32Z</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://hihired.org/.well-known/llms.txt</loc>
-    <lastmod>2026-04-23T14:25:19Z</lastmod>
+    <lastmod>2026-05-04T17:27:32Z</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://hihired.org/llms.txt</loc>
-    <lastmod>2026-04-23T14:25:19Z</lastmod>
+    <lastmod>2026-05-04T17:27:32Z</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
@@ -92,33 +92,39 @@
   </url>
   <url>
     <loc>https://hihired.org/guides/auto-fill-job-applications-chrome-extension</loc>
-    <lastmod>2026-04-21</lastmod>
+    <lastmod>2026-05-03</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://hihired.org/guides/tailor-resume-to-job-description-ai</loc>
-    <lastmod>2026-04-03</lastmod>
+    <lastmod>2026-04-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://hihired.org/guides/best-free-ai-resume-builder-2026</loc>
-    <lastmod>2026-04-21</lastmod>
+    <lastmod>2026-05-03</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://hihired.org/guides/best-ai-resume-builder-for-job-applications</loc>
-    <lastmod>2026-04-22</lastmod>
+    <lastmod>2026-05-03</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://hihired.org/guides/ai-resume-builder-with-cover-letter</loc>
+    <lastmod>2026-05-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://hihired.org/guides/ai-cover-letter-generator-free</loc>
-    <lastmod>2026-04-22</lastmod>
+    <lastmod>2026-05-03</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://hihired.org/guides/simplify-copilot-alternative</loc>
@@ -181,6 +187,18 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://hihired.org/guides/flowcv-alternative-free-ai-resume-builder</loc>
+    <lastmod>2026-04-29</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hihired.org/guides/indeed-resume-builder-alternative-free-ai-resume-builder</loc>
+    <lastmod>2026-04-29</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://hihired.org/guides/resume-now-alternative-ai-resume-builder-cover-letter</loc>
     <lastmod>2026-04-21</lastmod>
     <changefreq>weekly</changefreq>
@@ -223,6 +241,18 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://hihired.org/guides/resumefast-alternative-free-ai-resume-builder</loc>
+    <lastmod>2026-05-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hihired.org/guides/abekus-alternative-free-ai-resume-builder</loc>
+    <lastmod>2026-05-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://hihired.org/guides/wobo-alternative-ai-resume-builder-cover-letter</loc>
     <lastmod>2026-04-21</lastmod>
     <changefreq>weekly</changefreq>
@@ -235,6 +265,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://hihired.org/guides/hiration-alternative-ai-resume-builder-cover-letter</loc>
+    <lastmod>2026-04-29</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://hihired.org/guides/jobscan-alternative-free-ai-resume-builder</loc>
     <lastmod>2026-04-20</lastmod>
     <changefreq>weekly</changefreq>
@@ -243,6 +279,12 @@
   <url>
     <loc>https://hihired.org/guides/myperfectresume-alternative-free-ai-resume-builder</loc>
     <lastmod>2026-04-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hihired.org/guides/sheets-resume-alternative-free-ai-resume-builder</loc>
+    <lastmod>2026-05-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -325,6 +367,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://hihired.org/guides/coverlettercopilot-alternative-ai-resume-builder-cover-letter</loc>
+    <lastmod>2026-04-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://hihired.org/guides/resumefromspace-alternative-ai-resume-builder-cover-letter</loc>
     <lastmod>2026-04-21</lastmod>
     <changefreq>weekly</changefreq>
@@ -373,8 +421,20 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://hihired.org/guides/jobcopilot-alternative-ai-resume-builder-cover-letter</loc>
+    <lastmod>2026-04-29</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://hihired.org/guides/coverletterai-alternative-ai-resume-builder-cover-letter</loc>
     <lastmod>2026-04-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hihired.org/guides/wonsultingai-alternative-ai-resume-builder-cover-letter</loc>
+    <lastmod>2026-04-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -403,6 +463,18 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://hihired.org/guides/resume-worded-alternative-ai-resume-builder-cover-letter</loc>
+    <lastmod>2026-04-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hihired.org/guides/resumenerd-alternative-ai-resume-builder-cover-letter</loc>
+    <lastmod>2026-05-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://hihired.org/guides/grammarly-alternative-ai-resume-builder-cover-letter</loc>
     <lastmod>2026-04-20</lastmod>
     <changefreq>weekly</changefreq>
@@ -421,6 +493,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://hihired.org/guides/anthropos-alternative-job-application-autofill</loc>
+    <lastmod>2026-04-29</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://hihired.org/guides/jobright-alternative-job-application-autofill</loc>
     <lastmod>2026-04-20</lastmod>
     <changefreq>weekly</changefreq>
@@ -433,8 +511,20 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://hihired.org/guides/magical-alternative-job-application-autofill</loc>
+    <lastmod>2026-04-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://hihired.org/guides/speedyapply-alternative-job-application-autofill</loc>
     <lastmod>2026-04-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hihired.org/guides/autoapplymax-alternative-job-application-autofill</loc>
+    <lastmod>2026-05-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -471,6 +561,12 @@
   <url>
     <loc>https://hihired.org/guides/jobpilot-alternative-job-application-autofill</loc>
     <lastmod>2026-04-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hihired.org/guides/simplefill-alternative-job-application-autofill</loc>
+    <lastmod>2026-05-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
