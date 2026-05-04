@@ -861,10 +861,24 @@ export async function parseResumeFile(file) {
     headers,
     body: formData,
   });
-  if (!res.ok) {
-    throw new Error('Failed to parse resume');
+
+  let data = null;
+  try {
+    data = await res.json();
+  } catch (e) {
+    data = null;
   }
-  return await res.json();
+
+  if (!res.ok) {
+    throw new Error(
+      data?.error ||
+      data?.message ||
+      data?.details ||
+      'Failed to parse resume'
+    );
+  }
+
+  return data;
 }
 
 export async function uploadResumeHistoryPdf(file) {
