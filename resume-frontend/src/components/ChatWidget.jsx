@@ -367,6 +367,9 @@ const createEmptyEducation = () => ({
 });
 
 const STORAGE_KEY = 'chatWidgetState';
+const CHAT_TOKEN_FLUSH_MS = 33;
+const getPersistableMessages = (items = []) =>
+  items.filter((message) => !message?.streaming).slice(-50);
 const DOWNLOAD_KEYWORDS = [
   'generate resume',
   'generate the resume',
@@ -485,6 +488,7 @@ const ChatWidgetInner = () => {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
   const [isLoading, setIsLoading] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
   const [resumeFlowState, setResumeFlowState] = useState(DEFAULT_RESUME_FLOW_STATE);
   const [awaitingJobMatchAnswer, setAwaitingJobMatchAnswer] = useState(false);
   const [showIntroTooltip, setShowIntroTooltip] = useState(true);
@@ -499,6 +503,12 @@ const ChatWidgetInner = () => {
   const prevUserRef = React.useRef(user);
   const staleReminderShownRef = React.useRef(false);
   const chatStorageLoadedRef = React.useRef(false);
+  const activeChatStreamRef = React.useRef({
+    id: 0,
+    controller: null,
+    flushTimer: null,
+    pendingText: '',
+  });
 
   // Load chat messages from localStorage on mount
   const CHAT_STORAGE_KEY = 'chatMessages';
@@ -524,7 +534,7 @@ const ChatWidgetInner = () => {
     if (!chatStorageLoadedRef.current) return;
     const email = user?.email;
     if (!email || messages.length === 0) return;
-    const capped = messages.slice(-50);
+    const capped = getPersistableMessages(messages);
     try {
       localStorage.setItem(`${CHAT_STORAGE_KEY}_${email}`, JSON.stringify(capped));
     } catch (e) {
@@ -599,9 +609,9 @@ const clampLauncherPosition = useCallback(
   // Auto-scroll to bottom when messages change
   React.useEffect(() => {
     if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      messagesEndRef.current.scrollIntoView({ behavior: isStreaming ? 'auto' : 'smooth' });
     }
-  }, [messages]);
+  }, [messages, isStreaming]);
 
   React.useEffect(() => {
     if (typeof window === 'undefined') {
@@ -662,8 +672,38 @@ const clampLauncherPosition = useCallback(
     });
   }, [clampLauncherPosition, isOpen, isLarge]);
 
+  const clearStreamFlushTimer = React.useCallback((streamState) => {
+    if (streamState?.flushTimer) {
+      clearTimeout(streamState.flushTimer);
+      streamState.flushTimer = null;
+    }
+  }, []);
+
+  const abortActiveChatStream = React.useCallback((options = {}) => {
+    const { updateState = true } = options;
+    const active = activeChatStreamRef.current;
+    clearStreamFlushTimer(active);
+    if (active.controller && !active.controller.signal.aborted) {
+      active.controller.abort();
+    }
+    activeChatStreamRef.current = {
+      id: active.id + 1,
+      controller: null,
+      flushTimer: null,
+      pendingText: '',
+    };
+    if (updateState) {
+      setIsStreaming(false);
+    }
+  }, [clearStreamFlushTimer]);
+
+  React.useEffect(() => () => {
+    abortActiveChatStream({ updateState: false });
+  }, [abortActiveChatStream]);
+
   const resetChatState = React.useCallback((options = {}) => {
     const { keepOpen = false } = options;
+    abortActiveChatStream();
     if (!keepOpen) {
       setIsOpen(false);
     }
@@ -679,7 +719,7 @@ const clampLauncherPosition = useCallback(
     } catch (err) {
       console.error('Failed to clear chat state:', err);
     }
-  }, []);
+  }, [abortActiveChatStream]);
 
   const appendBotMessage = (text, extras = {}) => {
     setMessages((prev) => [...prev, { sender: 'bot', text, ...extras }]);
@@ -736,7 +776,7 @@ const clampLauncherPosition = useCallback(
   React.useEffect(() => {
     try {
       const snapshot = {
-        messages: messages.slice(-50),
+        messages: getPersistableMessages(messages),
         isOpen,
         isLarge,
         resumeFlowState,
@@ -2730,12 +2770,60 @@ const buildSectionResponse = (sectionKey) => {
       text: msg.text,
     }));
 
+    abortActiveChatStream();
+    const controller = new AbortController();
+    const streamId = activeChatStreamRef.current.id + 1;
+    activeChatStreamRef.current = {
+      id: streamId,
+      controller,
+      flushTimer: null,
+      pendingText: '',
+    };
+
+    const isActiveStream = () => (
+      activeChatStreamRef.current.id === streamId &&
+      activeChatStreamRef.current.controller === controller
+    );
+
+    const replaceActiveBotMessage = (message) => {
+      if (!isActiveStream()) return;
+      setMessages((prev) => {
+        if (prev.length === 0) return prev;
+        const updated = [...prev];
+        updated[updated.length - 1] = message;
+        return updated;
+      });
+    };
+
+    const scheduleStreamTextFlush = (text) => {
+      if (!isActiveStream()) return;
+      const active = activeChatStreamRef.current;
+      active.pendingText = text;
+      if (active.flushTimer) return;
+      active.flushTimer = setTimeout(() => {
+        if (!isActiveStream()) return;
+        const current = activeChatStreamRef.current;
+        current.flushTimer = null;
+        const nextText = current.pendingText;
+        replaceActiveBotMessage({ sender: 'bot', text: nextText, streaming: true });
+      }, CHAT_TOKEN_FLUSH_MS);
+    };
+
+    const flushStreamTextNow = () => {
+      if (!isActiveStream()) return;
+      const active = activeChatStreamRef.current;
+      clearStreamFlushTimer(active);
+      if (active.pendingText) {
+        replaceActiveBotMessage({ sender: 'bot', text: active.pendingText, streaming: true });
+      }
+    };
+
     try {
       const pagePath = typeof window !== 'undefined' ? window.location.pathname : '';
       const userEmail = readStoredUserEmail();
 
       // Add empty bot message for streaming
-      setMessages((prev) => [...prev, { sender: 'bot', text: '' }]);
+      setMessages((prev) => [...prev, { sender: 'bot', text: '', streaming: true }]);
 
       const chatHeaders = { 'Content-Type': 'application/json' };
       const storedToken = localStorage.getItem('resumeToken');
@@ -2745,6 +2833,7 @@ const buildSectionResponse = (sectionKey) => {
       const response = await fetch(`${apiBaseUrl}/api/assistant/chat?stream=true`, {
         method: 'POST',
         headers: chatHeaders,
+        signal: controller.signal,
         body: JSON.stringify({
           message: trimmed,
           history: historyPayload,
@@ -2766,9 +2855,11 @@ const buildSectionResponse = (sectionKey) => {
         const decoder = new TextDecoder();
         let buffer = '';
         let streamedText = '';
+        let streamDone = false;
 
-        while (true) {
+        while (!streamDone) {
           const { done, value } = await reader.read();
+          if (!isActiveStream()) return;
           if (done) break;
           buffer += decoder.decode(value, { stream: true });
 
@@ -2779,31 +2870,34 @@ const buildSectionResponse = (sectionKey) => {
             if (!line.startsWith('data: ')) continue;
             try {
               const eventData = JSON.parse(line.slice(6));
+              if (!isActiveStream()) return;
+              if (eventData.ready) {
+                setIsStreaming(true);
+              }
+              if (eventData.status && !streamedText) {
+                setIsStreaming(true);
+                replaceActiveBotMessage({ sender: 'bot', text: eventData.status, streaming: true });
+              }
               if (eventData.error) {
-                setMessages((prev) => {
-                  const updated = [...prev];
-                  updated[updated.length - 1] = { sender: 'bot', text: eventData.message || FALLBACK_REPLY };
-                  return updated;
-                });
+                flushStreamTextNow();
+                replaceActiveBotMessage({ sender: 'bot', text: eventData.message || FALLBACK_REPLY });
+                streamDone = true;
                 break;
               }
               if (eventData.retry_reset) {
                 streamedText = '';
-                setMessages((prev) => {
-                  const updated = [...prev];
-                  updated[updated.length - 1] = { sender: 'bot', text: '' };
-                  return updated;
-                });
+                const active = activeChatStreamRef.current;
+                clearStreamFlushTimer(active);
+                active.pendingText = '';
+                replaceActiveBotMessage({ sender: 'bot', text: '', streaming: true });
               }
               if (eventData.token) {
+                setIsStreaming(true);
                 streamedText += eventData.token;
-                setMessages((prev) => {
-                  const updated = [...prev];
-                  updated[updated.length - 1] = { sender: 'bot', text: streamedText };
-                  return updated;
-                });
+                scheduleStreamTextFlush(streamedText);
               }
               if (eventData.done) {
+                flushStreamTextNow();
                 // Replace streamed text with final cleaned version
                 let reply = (eventData.reply || streamedText || '').trim() || FALLBACK_REPLY;
 
@@ -2837,15 +2931,13 @@ const buildSectionResponse = (sectionKey) => {
                   variant: 'suggestion',
                 }));
 
-                setMessages((prev) => {
-                  const updated = [...prev];
-                  updated[updated.length - 1] = {
-                    sender: 'bot',
-                    text: reply,
-                    buttons: suggestionButtons.length > 0 ? suggestionButtons : undefined,
-                  };
-                  return updated;
+                replaceActiveBotMessage({
+                  sender: 'bot',
+                  text: reply,
+                  buttons: suggestionButtons.length > 0 ? suggestionButtons : undefined,
                 });
+                streamDone = true;
+                break;
               }
             } catch (e) {
               // Skip unparseable SSE lines
@@ -2887,23 +2979,32 @@ const buildSectionResponse = (sectionKey) => {
           variant: 'suggestion',
         }));
 
-        setMessages((prev) => {
-          const updated = [...prev];
-          updated[updated.length - 1] = {
-            sender: 'bot',
-            text: reply,
-            buttons: jsonSuggestionButtons.length > 0 ? jsonSuggestionButtons : undefined,
-          };
-          return updated;
+        replaceActiveBotMessage({
+          sender: 'bot',
+          text: reply,
+          buttons: jsonSuggestionButtons.length > 0 ? jsonSuggestionButtons : undefined,
         });
       }
       setLastStep('chat_response_received');
     } catch (err) {
+      if (err?.name === 'AbortError' || !isActiveStream()) {
+        return;
+      }
       console.error('Chat assistant error:', err);
-      setMessages((prev) => [...prev, { sender: 'bot', text: FALLBACK_REPLY }]);
+      replaceActiveBotMessage({ sender: 'bot', text: FALLBACK_REPLY });
       setLastStep('chat_error_fallback');
     } finally {
-      setIsLoading(false);
+      if (isActiveStream()) {
+        clearStreamFlushTimer(activeChatStreamRef.current);
+        activeChatStreamRef.current = {
+          id: streamId,
+          controller: null,
+          flushTimer: null,
+          pendingText: '',
+        };
+        setIsStreaming(false);
+        setIsLoading(false);
+      }
     }
   };
 
@@ -3126,7 +3227,7 @@ const buildSectionResponse = (sectionKey) => {
                 </div>
               );
             })}
-            {isLoading && <div className="chat-message bot typing">HiHired assistant is typing...</div>}
+            {isLoading && !isStreaming && <div className="chat-message bot typing">HiHired assistant is typing...</div>}
             <div ref={messagesEndRef} />
           </div>
           <form className="chat-input" onSubmit={handleSubmit}>
