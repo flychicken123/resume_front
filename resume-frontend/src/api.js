@@ -284,6 +284,35 @@ export async function backfillKnowledgeEmbeddings() {
 }
 
 // AI assistant endpoints
+function normalizeAITextResponse(value) {
+  if (Array.isArray(value)) {
+    return value.map((item) => String(item || '').trim()).filter(Boolean).join('\n\n');
+  }
+  if (typeof value !== 'string') {
+    return '';
+  }
+
+  const trimmed = value.trim();
+  const unfenced = trimmed
+    .replace(/^```json\s*/i, '')
+    .replace(/^```\s*/i, '')
+    .replace(/\s*```$/i, '')
+    .trim();
+
+  if (unfenced.startsWith('[') && unfenced.endsWith(']')) {
+    try {
+      const parsed = JSON.parse(unfenced);
+      if (Array.isArray(parsed)) {
+        return parsed.map((item) => String(item || '').trim()).filter(Boolean).join('\n\n');
+      }
+    } catch {
+      // Fall through to plain text cleanup.
+    }
+  }
+
+  return trimmed;
+}
+
 export async function generateExperienceAI(experience, jobDescription = '', matchedSkills = [], missingSkills = []) {
   const payload = { 
     userExperience: experience,
@@ -311,7 +340,7 @@ export async function generateExperienceAI(experience, jobDescription = '', matc
   }
   const data = await res.json();
   const result = data && typeof data === "object" ? (data.data || data) : {};
-  return result.optimizedExperience || "";
+  return normalizeAITextResponse(result.optimizedExperience);
 }
 
 export async function generateEducationAI(education, existingEducation = null) {
@@ -503,7 +532,7 @@ export async function improveExperienceGrammarAI(experience) {
   }
   const data = await res.json();
   const payload = data && typeof data === "object" ? (data.data || data) : {};
-  return payload.improvedExperience || "";
+  return normalizeAITextResponse(payload.improvedExperience);
 }
 
 export async function optimizeProjectAI(projectData, jobDescription = '', existingProject = null, matchedSkills = [], missingSkills = []) {

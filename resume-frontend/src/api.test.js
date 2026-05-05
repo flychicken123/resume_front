@@ -7,6 +7,15 @@ import {
 } from './api';
 
 describe('API Functions', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    global.fetch = jest.fn();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('should export all required functions', () => {
     expect(typeof generateResume).toBe('function');
     expect(typeof generateExperienceAI).toBe('function');
@@ -33,5 +42,28 @@ describe('API Functions', () => {
 
   it('should have parseResumeFile function', () => {
     expect(parseResumeFile).toBeDefined();
+  });
+
+  it('normalizes JSON array text from experience optimization', async () => {
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        data: {
+          optimizedExperience: JSON.stringify([
+            'Architected and launched an AI resume platform',
+            'Developed evaluation workflows for recommendations',
+          ]),
+        },
+      }),
+    });
+
+    const result = await generateExperienceAI('built resume app', 'backend job');
+
+    expect(result).toBe(
+      'Architected and launched an AI resume platform\n\nDeveloped evaluation workflows for recommendations'
+    );
+    expect(result).not.toContain('[');
+    expect(result).not.toContain('"');
   });
 });
