@@ -310,6 +310,21 @@ function normalizeAITextResponse(value) {
     }
   }
 
+  if (unfenced.startsWith('"') && unfenced.endsWith('"')) {
+    try {
+      const parsed = JSON.parse(unfenced);
+      if (typeof parsed === 'string') {
+        return parsed.trim();
+      }
+    } catch {
+      // Fall through to plain text cleanup.
+    }
+  }
+
+  if (trimmed.includes('\\n') && !trimmed.includes('\n')) {
+    return trimmed.replace(/\\n/g, '\n').trim();
+  }
+
   return trimmed;
 }
 
