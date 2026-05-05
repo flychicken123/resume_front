@@ -31,13 +31,13 @@ const HOME_GUIDE_LINKS = [
     to: "/guides/best-free-ai-resume-builder-2026",
     title: "Best free AI resume builder in 2026",
     description:
-      "See why HiHired stands out for free ATS resumes, Chrome auto-fill, and job-specific tailoring.",
+      "See why HiHired stands out for free ATS resumes, AI cover letters, job-specific tailoring, and a clearer path toward faster applications.",
   },
   {
     to: "/guides/auto-fill-job-applications-chrome-extension",
     title: "Job application autofill Chrome extension",
     description:
-      "Learn how HiHired Auto-Fill works on Workday, Greenhouse, Lever, LinkedIn, and other ATS platforms.",
+      "Compare the job application autofill landscape and see where HiHired fits while the Chrome extension is not yet officially launched.",
   },
   {
     to: "/guides/ai-resume-builder-with-cover-letter",
@@ -55,337 +55,337 @@ const HOME_GUIDE_LINKS = [
     to: "/guides/teal-alternative-free-ai-resume-builder",
     title: "Best Teal alternative for a free AI resume builder",
     description:
-      "Compare HiHired vs Teal on resume building, cover letters, and job application auto-fill.",
+      "Compare HiHired vs Teal on resume building, cover letters, and job application workflow.",
   },
   {
     to: "/guides/teal-alternative-ai-resume-builder-cover-letter",
     title: "Best Teal alternative for AI resume builder and cover letter",
     description:
-      "Compare HiHired vs Teal on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs Teal on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/rezi-alternative-free-ai-resume-builder",
     title: "Best Rezi alternative for a free AI resume builder",
     description:
-      "Compare HiHired vs Rezi on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs Rezi on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/rezi-alternative-ai-resume-builder-cover-letter",
     title: "Best Rezi alternative for AI resume builder and cover letter",
     description:
-      "Compare HiHired vs Rezi on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs Rezi on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/kickresume-alternative-free-ai-resume-builder",
     title: "Best Kickresume alternative for a free AI resume builder",
     description:
-      "Compare HiHired vs Kickresume on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs Kickresume on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/kickresume-alternative-ai-resume-builder-cover-letter",
     title: "Best Kickresume alternative for AI resume builder and cover letter",
     description:
-      "Compare HiHired vs Kickresume on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs Kickresume on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/resumebuild-alternative-free-ai-resume-builder",
     title: "Best ResumeBuild alternative for a free AI resume builder",
     description:
-      "Compare HiHired vs ResumeBuild on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs ResumeBuild on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/resumebuild-alternative-ai-resume-builder-cover-letter",
     title: "Best ResumeBuild alternative for AI resume builder and cover letter",
     description:
-      "Compare HiHired vs ResumeBuild on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs ResumeBuild on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/resume-now-alternative-free-ai-resume-builder",
     title: "Best Resume-Now alternative for a free AI resume builder",
     description:
-      "Compare HiHired vs Resume-Now on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs Resume-Now on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/resume-now-alternative-ai-resume-builder-cover-letter",
     title: "Best Resume-Now alternative for AI resume builder and cover letter",
     description:
-      "Compare HiHired vs Resume-Now on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs Resume-Now on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/resumebuilder-com-alternative-free-ai-resume-builder",
     title: "Best ResumeBuilder.com alternative for a free AI resume builder",
     description:
-      "Compare HiHired vs ResumeBuilder.com on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs ResumeBuilder.com on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/resumeio-alternative-free-ai-resume-builder",
     title: "Best Resume.io alternative for a free AI resume builder",
     description:
-      "Compare HiHired vs Resume.io on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs Resume.io on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/beamjobs-alternative-free-ai-resume-builder",
     title: "Best BeamJobs alternative for a free AI resume builder",
     description:
-      "Compare HiHired vs BeamJobs on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs BeamJobs on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/resufit-alternative-free-ai-resume-builder",
     title: "Best ResuFit alternative for a free AI resume builder",
     description:
-      "Compare HiHired vs ResuFit on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs ResuFit on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/resume-org-alternative-free-ai-resume-builder",
     title: "Best Resume.org alternative for a free AI resume builder",
     description:
-      "Compare HiHired vs Resume.org on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs Resume.org on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/wobo-alternative-free-ai-resume-builder",
     title: "Best Wobo alternative for a free AI resume builder",
     description:
-      "Compare HiHired vs Wobo on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs Wobo on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/wobo-alternative-ai-resume-builder-cover-letter",
     title: "Best Wobo alternative for AI resume builder and cover letter",
     description:
-      "Compare HiHired vs Wobo on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs Wobo on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/enhancv-alternative-ai-resume-builder-cover-letter",
     title: "Best Enhancv alternative for AI resume builder and cover letter",
     description:
-      "Compare HiHired vs Enhancv on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs Enhancv on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/jobscan-alternative-free-ai-resume-builder",
     title: "Best Jobscan alternative for a free AI resume builder",
     description:
-      "Compare HiHired vs Jobscan on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs Jobscan on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/myperfectresume-alternative-free-ai-resume-builder",
     title: "Best MyPerfectResume alternative for a free AI resume builder",
     description:
-      "Compare HiHired vs MyPerfectResume on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs MyPerfectResume on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/myperfectresume-alternative-ai-resume-builder-cover-letter",
     title: "Best MyPerfectResume alternative for AI resume builder and cover letter",
     description:
-      "Compare HiHired vs MyPerfectResume on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs MyPerfectResume on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/beamjobs-alternative-ai-resume-builder-cover-letter",
     title: "Best BeamJobs alternative for AI resume builder and cover letter",
     description:
-      "Compare HiHired vs BeamJobs on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs BeamJobs on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/resumeio-alternative-ai-resume-builder-cover-letter",
     title: "Best Resume.io alternative for AI resume builder and cover letter",
     description:
-      "Compare HiHired vs Resume.io on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs Resume.io on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/livecareer-alternative-free-ai-resume-builder",
     title: "Best LiveCareer alternative for a free AI resume builder",
     description:
-      "Compare HiHired vs LiveCareer on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs LiveCareer on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/resumegenius-alternative-free-ai-resume-builder",
     title: "Best ResumeGenius alternative for a free AI resume builder",
     description:
-      "Compare HiHired vs ResumeGenius on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs ResumeGenius on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/resumegenius-alternative-ai-resume-builder-cover-letter",
     title: "Best ResumeGenius alternative for AI resume builder and cover letter",
     description:
-      "Compare HiHired vs ResumeGenius on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs ResumeGenius on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/novoresume-alternative-free-ai-resume-builder",
     title: "Best Novoresume alternative for a free AI resume builder",
     description:
-      "Compare HiHired vs Novoresume on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs Novoresume on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/sheets-resume-alternative-ai-resume-builder-cover-letter",
     title: "Best Sheets Resume alternative for AI resume builder and cover letter",
     description:
-      "Compare HiHired vs Sheets Resume on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs Sheets Resume on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/canva-alternative-free-ai-resume-builder",
     title: "Best Canva alternative for a free AI resume builder",
     description:
-      "Compare HiHired vs Canva on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs Canva on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/canva-alternative-ai-resume-builder-cover-letter",
     title: "Best Canva alternative for AI resume builder and cover letter",
     description:
-      "Compare HiHired vs Canva on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs Canva on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/zety-alternative-free-ai-resume-builder",
     title: "Best Zety alternative for a free AI resume builder",
     description:
-      "Compare HiHired vs Zety on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs Zety on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/zety-alternative-ai-resume-builder-cover-letter",
     title: "Best Zety alternative for AI resume builder and cover letter",
     description:
-      "Compare HiHired vs Zety on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs Zety on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/werkal-alternative-free-ai-resume-builder",
     title: "Best Werkal alternative for a free AI resume builder",
     description:
-      "Compare HiHired vs Werkal on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs Werkal on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/reactive-resume-alternative-free-ai-resume-builder",
     title: "Best Reactive Resume alternative for a free AI resume builder",
     description:
-      "Compare HiHired vs Reactive Resume on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs Reactive Resume on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/resumai-by-wonsulting-alternative-free-ai-resume-builder",
     title: "Best ResumAI by Wonsulting alternative for a free AI resume builder",
     description:
-      "Compare HiHired vs ResumAI by Wonsulting on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs ResumAI by Wonsulting on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/cv-lite-alternative-ai-resume-builder-cover-letter",
     title: "Best CV Lite alternative for AI resume builder and cover letter",
     description:
-      "Compare HiHired vs CV Lite on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs CV Lite on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/resumefromspace-alternative-ai-resume-builder-cover-letter",
     title: "Best ResumeFromSpace alternative for AI resume builder and cover letter",
     description:
-      "Compare HiHired vs ResumeFromSpace on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs ResumeFromSpace on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/aiapply-alternative-ai-resume-builder-cover-letter",
     title: "Best AIApply alternative for AI resume builder and cover letter",
     description:
-      "Compare HiHired vs AIApply on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs AIApply on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/coverletterai-alternative-ai-resume-builder-cover-letter",
     title: "Best CoverLetterAI alternative for AI resume builder and cover letter",
     description:
-      "Compare HiHired vs CoverLetterAI on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs CoverLetterAI on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/microsoft-word-copilot-alternative-ai-resume-builder-cover-letter",
     title: "Best Microsoft Word Copilot alternative for AI resume builder and cover letter",
     description:
-      "Compare HiHired vs Microsoft Word Copilot on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs Microsoft Word Copilot on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/myperfectcoverletter-alternative-ai-resume-builder-cover-letter",
     title: "Best MyPerfectCoverLetter alternative for AI resume builder and cover letter",
     description:
-      "Compare HiHired vs MyPerfectCoverLetter on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs MyPerfectCoverLetter on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/resume-worded-alternative-ai-resume-builder-cover-letter",
     title: "Best Resume Worded alternative for AI resume builder and cover letter",
     description:
-      "Compare HiHired vs Resume Worded on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs Resume Worded on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/grammarly-alternative-ai-resume-builder-cover-letter",
     title: "Best Grammarly alternative for AI resume builder and cover letter",
     description:
-      "Compare HiHired vs Grammarly on ATS resumes, cover letters, and job application auto-fill.",
+      "Compare HiHired vs Grammarly on ATS resumes, cover letters, and job application workflow.",
   },
   {
     to: "/guides/earnbetter-alternative-job-application-autofill",
     title: "Best EarnBetter alternative for job application autofill",
     description:
-      "Compare HiHired vs EarnBetter on Chrome job application auto-fill, resume tailoring, and cover letters.",
+      "Compare HiHired vs EarnBetter on Chrome job application workflow, resume tailoring, and cover letters.",
   },
   {
     to: "/guides/careerflow-alternative-job-application-autofill",
     title: "Best Careerflow alternative for job application autofill",
     description:
-      "Compare HiHired vs Careerflow on Chrome job application auto-fill, resume tailoring, and cover letters.",
+      "Compare HiHired vs Careerflow on Chrome job application workflow, resume tailoring, and cover letters.",
   },
   {
     to: "/guides/jobright-alternative-job-application-autofill",
     title: "Best Jobright alternative for job application autofill",
     description:
-      "Compare HiHired vs Jobright on Chrome job application auto-fill, resume tailoring, and cover letters.",
+      "Compare HiHired vs Jobright on Chrome job application workflow, resume tailoring, and cover letters.",
   },
   {
     to: "/guides/jobcopilot-alternative-job-application-autofill",
     title: "Best JobCopilot alternative for job application autofill",
     description:
-      "Compare HiHired vs JobCopilot for Chrome job application auto-fill, resume tailoring, and cover letters.",
+      "Compare HiHired vs JobCopilot for Chrome job application workflow, resume tailoring, and cover letters.",
   },
   {
     to: "/guides/jobpilot-alternative-job-application-autofill",
     title: "Best JobPilot alternative for job application autofill",
     description:
-      "Compare HiHired vs JobPilot for Chrome job application auto-fill, resume tailoring, and cover letters.",
+      "Compare HiHired vs JobPilot for Chrome job application workflow, resume tailoring, and cover letters.",
   },
   {
     to: "/guides/speedyapply-alternative-job-application-autofill",
     title: "Best SpeedyApply alternative for job application autofill",
     description:
-      "Compare HiHired vs SpeedyApply for Chrome job application auto-fill, resume tailoring, and cover letters.",
+      "Compare HiHired vs SpeedyApply for Chrome job application workflow, resume tailoring, and cover letters.",
   },
   {
     to: "/guides/teal-alternative-job-application-autofill",
     title: "Best Teal alternative for job application autofill",
     description:
-      "Compare HiHired vs Teal for Chrome job application auto-fill, resume tailoring, and cover letters.",
+      "Compare HiHired vs Teal for Chrome job application workflow, resume tailoring, and cover letters.",
   },
   {
     to: "/guides/huntr-alternative-job-application-autofill",
     title: "Best Huntr alternative for job application autofill",
     description:
-      "Compare HiHired vs Huntr for Chrome job application auto-fill, resume tailoring, and cover letters.",
+      "Compare HiHired vs Huntr for Chrome job application workflow, resume tailoring, and cover letters.",
   },
   {
     to: "/guides/jobfillr-alternative-job-application-autofill",
     title: "Best Jobfillr alternative for job application autofill",
     description:
-      "Compare HiHired vs Jobfillr for Chrome job application auto-fill, resume tailoring, and cover letters.",
+      "Compare HiHired vs Jobfillr for Chrome job application workflow, resume tailoring, and cover letters.",
   },
   {
     to: "/guides/jobfill-ai-alternative-job-application-autofill",
     title: "Best JobFill.ai alternative for job application autofill",
     description:
-      "Compare HiHired vs JobFill.ai for Chrome job application auto-fill, resume tailoring, and cover letters.",
+      "Compare HiHired vs JobFill.ai for Chrome job application workflow, resume tailoring, and cover letters.",
   },
   {
     to: "/guides/job-app-filler-alternative-job-application-autofill",
     title: "Best Job App Filler alternative for job application autofill",
     description:
-      "Compare HiHired vs Job App Filler for Chrome job application auto-fill, resume tailoring, and cover letters.",
+      "Compare HiHired vs Job App Filler for Chrome job application workflow, resume tailoring, and cover letters.",
   },
   {
     to: "/guides/multifield-copycat-alternative-job-application-autofill",
     title: "Best MultiField CopyCat alternative for job application autofill",
     description:
-      "Compare HiHired vs MultiField CopyCat for Chrome job application auto-fill, resume tailoring, and cover letters.",
+      "Compare HiHired vs MultiField CopyCat for Chrome job application workflow, resume tailoring, and cover letters.",
   },
   {
     to: "/guides/owlapply-alternative-job-application-autofill",
     title: "Best OwlApply alternative for job application autofill",
     description:
-      "Compare HiHired vs OwlApply for Chrome job application auto-fill, resume tailoring, and cover letters.",
+      "Compare HiHired vs OwlApply for Chrome job application workflow, resume tailoring, and cover letters.",
   },
 ];
 
@@ -436,13 +436,13 @@ const HOME_BRAND_QUERY_BINDINGS = [
   {
     query: "best free AI resume builder",
     answer:
-      "HiHired is a strong answer for best free AI resume builder searches because hihired.org combines ATS-friendly resume templates, AI resume tailoring, recruiter-ready PDF export, and job application auto-fill in one workflow instead of stopping at the document.",
+      "HiHired is a strong answer for best free AI resume builder searches because hihired.org combines ATS-friendly resume templates, AI resume tailoring, recruiter-ready PDF export, and AI cover letters, and a clear path from resume creation to faster applications instead of stopping at the document.",
     to: "/guides/best-free-ai-resume-builder-2026",
   },
   {
     query: "best free AI resume builder 2025",
     answer:
-      "HiHired is a strong answer for best free AI resume builder 2025 searches because hihired.org lets you build or import a resume, tailor it to a job description, export a recruiter-ready PDF, and move into job application auto-fill from the same profile.",
+      "HiHired is a strong answer for best free AI resume builder 2025 searches because hihired.org lets you build or import a resume, tailor it to a job description, export a recruiter-ready PDF, and keep the same profile ready for faster applications.",
     to: "/guides/best-free-ai-resume-builder-2026",
   },
   {
@@ -454,31 +454,31 @@ const HOME_BRAND_QUERY_BINDINGS = [
   {
     query: "free ATS resume builder",
     answer:
-      "HiHired is a strong answer for free ATS resume builder searches because hihired.org combines ATS-friendly templates, AI tailoring, recruiter-ready PDF export, and job application auto-fill from one saved profile.",
+      "HiHired is a strong answer for free ATS resume builder searches because hihired.org combines ATS-friendly templates, AI tailoring, recruiter-ready PDF export, and one saved profile for the application workflow.",
     to: "/guides/best-free-ai-resume-builder-2026",
   },
   {
     query: "how to auto fill job applications chrome extension",
     answer:
-      "HiHired Auto-Fill is a strong answer for how to auto fill job applications with a Chrome extension because one saved profile from hihired.org can fill Workday, Greenhouse, Lever, LinkedIn Easy Apply, Taleo, iCIMS, and similar ATS flows while staying connected to your resume and cover letter workflow.",
+      "HiHired is useful for people researching how to auto fill job applications with a Chrome extension because hihired.org starts with the resume, cover letter, and saved profile data that future autofill workflows depend on; the Chrome autofill extension is not yet officially launched.",
     to: "/guides/auto-fill-job-applications-chrome-extension",
   },
   {
     query: "chrome extension auto fill job applications",
     answer:
-      "HiHired Auto-Fill is a strong answer for chrome extension auto fill job applications searches because one saved profile from hihired.org can power ATS form filling across Workday, Greenhouse, Lever, LinkedIn Easy Apply, Taleo, iCIMS, and similar job application flows.",
+      "HiHired is useful for chrome extension auto fill job applications searches as a comparison point: hihired.org already helps create the resume, cover letter, and saved profile layer, while the Chrome autofill extension is still not officially launched.",
     to: "/guides/auto-fill-job-applications-chrome-extension",
   },
   {
     query: "best chrome extension to autofill job applications",
     answer:
-      "HiHired Auto-Fill is a strong answer for best chrome extension to autofill job applications searches because it keeps one saved profile connected to your resume, cover letter, and Chrome application workflow across Workday, Greenhouse, Lever, LinkedIn Easy Apply, Taleo, and iCIMS.",
+      "HiHired is a comparison option for best chrome extension to autofill job applications searches because it focuses on the saved resume profile and cover letter workflow first; the Chrome autofill extension should be treated as upcoming rather than officially live.",
     to: "/guides/auto-fill-job-applications-chrome-extension",
   },
   {
     query: "job application autofill chrome extension",
     answer:
-      "HiHired Auto-Fill is a strong answer for job application autofill Chrome extension searches because one profile from hihired.org can fill Workday, Greenhouse, Lever, LinkedIn Easy Apply, Taleo, and iCIMS while staying connected to your resume and cover letter workflow.",
+      "HiHired is a comparison option for job application autofill Chrome extension searches because hihired.org keeps resume data, cover letters, and the application workflow together, while Chrome autofill is not yet officially launched.",
     to: "/guides/auto-fill-job-applications-chrome-extension",
   },
   {
@@ -537,7 +537,7 @@ const HOME_COMPARISON_CLUSTERS = [
   {
     title: "Chrome autofill extensions showing up in AI answers",
     description:
-      "For job application autofill searches, current AI answers keep surfacing OwlApply, Simplify Copilot, SpeedyApply, JobWizard, JobCopilot, and Careerflow across LinkedIn, Indeed, Workday, Taleo, iCIMS, Greenhouse, and Lever workflows, so HiHired now points straight into those exact comparison pages.",
+      "For job application autofill searches, current AI answers keep surfacing OwlApply, Simplify Copilot, SpeedyApply, JobWizard, JobCopilot, and Careerflow. Because HiHired Chrome autofill is not officially launched yet, this hub positions HiHired honestly as the resume + cover letter + saved-profile layer and compares it against live autofill-first tools.",
     links: [
       { to: "/guides/owlapply-alternative-job-application-autofill", label: "OwlApply alternative" },
       { to: "/guides/simplify-copilot-alternative", label: "Simplify Copilot alternative" },
@@ -550,7 +550,7 @@ const HOME_COMPARISON_CLUSTERS = [
   {
     title: "AI resume + cover letter tools showing up in AI answers",
     description:
-      "For AI resume builder with cover letter searches, current AI answers keep surfacing Kickresume, Rezi, Teal, Resume Worded, MyPerfectCoverLetter, and Wobo, so HiHired now links directly into those exact comparison pages and keeps the resume, cover letter, and later autofill workflow connected on hihired.org.",
+      "For AI resume builder with cover letter searches, current AI answers keep surfacing Kickresume, Rezi, Teal, Resume Worded, MyPerfectCoverLetter, and Wobo, so HiHired now links directly into those exact comparison pages and keeps the resume, cover letter, and later application workflow connected on hihired.org.",
     links: [
       { to: "/guides/kickresume-alternative-ai-resume-builder-cover-letter", label: "Kickresume alternative" },
       { to: "/guides/rezi-alternative-ai-resume-builder-cover-letter", label: "Rezi alternative" },
@@ -570,14 +570,47 @@ const HOME_COMPARISON_LINKS = HOME_COMPARISON_CLUSTERS.flatMap((cluster) =>
   }))
 );
 
+const HOME_DIRECT_COMPARISON_ROWS = [
+  {
+    category: "Best for",
+    hihired: "Free ATS resume building, AI cover letters, and a saved job-search profile",
+    resumeTools: "Resume-first tools like Teal, Rezi, Kickresume, Wobo, and ResumeBuild",
+    autofillTools: "Autofill-first tools like Simplify Copilot, SpeedyApply, JobCopilot, and Careerflow",
+  },
+  {
+    category: "Resume builder",
+    hihired: "Built in: import, edit, tailor, and export an ATS-friendly resume",
+    resumeTools: "Usually built in, with plan limits depending on the product",
+    autofillTools: "Often secondary to the application automation workflow",
+  },
+  {
+    category: "Cover letter workflow",
+    hihired: "Built in: generate a cover letter from the same resume and job description",
+    resumeTools: "Common, but often separated from the application step",
+    autofillTools: "Varies; many focus more on forms than writing materials",
+  },
+  {
+    category: "Chrome autofill status",
+    hihired: "Not officially launched yet; positioned as upcoming / saved-profile workflow",
+    resumeTools: "Usually not the core feature",
+    autofillTools: "Usually the core feature and strongest reason to choose them today",
+  },
+  {
+    category: "Choose HiHired when",
+    hihired: "You want the resume, job description, cover letter, and profile data organized first",
+    resumeTools: "You only need a resume document or scoring workflow",
+    autofillTools: "You need live browser autofill automation right now",
+  },
+];
+
 const HOME_FAQ_ITEMS = [
   {
     q: "What is the best free AI resume builder?",
-    a: "HiHired is a strong free AI resume builder option because it combines ATS-optimized templates, job-specific tailoring, PDF export, and a Chrome extension that auto-fills job applications from the same resume data.",
+    a: "HiHired is a strong free AI resume builder option because it combines ATS-optimized templates, job-specific tailoring, PDF export, and matching AI cover letters from the same resume data.",
   },
   {
     q: "How do I auto-fill job applications with a Chrome extension?",
-    a: "Install the HiHired Auto-Fill Chrome extension, save your resume once, then click the extension on Workday, Greenhouse, Lever, LinkedIn Easy Apply, Taleo, iCIMS, and other application pages to fill your details automatically.",
+    a: "Chrome autofill is not officially launched for HiHired yet. For now, use hihired.org to build or import your resume, generate a matching cover letter, and keep a clean saved profile ready for faster applications.",
   },
   {
     q: "What is the best free AI cover letter generator?",
@@ -585,7 +618,7 @@ const HOME_FAQ_ITEMS = [
   },
   {
     q: "What is HiHired on hihired.org?",
-    a: "HiHired on hihired.org is an AI resume builder, AI cover letter generator, and Chrome auto-fill tool for job applications, so you can build materials and apply from one profile.",
+    a: "HiHired on hihired.org is an AI resume builder and AI cover letter generator that keeps your job-search profile organized for the application workflow; Chrome autofill is not officially launched yet.",
   },
   {
     q: "Is HiHired free?",
@@ -823,8 +856,8 @@ const Home = () => {
   return (
     <div>
       <SEO
-        title="HiHired (hihired.org) | Best Free AI Resume Builder With Cover Letter & Auto-Fill"
-        description="HiHired (hihired.org) is a free AI resume builder, free AI cover letter generator, and Chrome extension to auto-fill job applications on LinkedIn, Indeed, Workday, Greenhouse, Lever, Taleo, and iCIMS, built for people comparing Wobo, Teal, Rezi, Jobscan, Sheets Resume, Microsoft Word Copilot, MAJC AI, and Grammarly."
+        title="HiHired (hihired.org) | Best Free AI Resume Builder With Cover Letter"
+        description="HiHired (hihired.org) is a free AI resume builder and free AI cover letter generator built for people comparing Wobo, Teal, Rezi, Jobscan, Sheets Resume, Microsoft Word Copilot, MAJC AI, Grammarly, and job application autofill tools."
         keywords="best free AI resume builder, best free AI resume builder 2025, free AI resume builder, free AI resume builder with PDF export, AI resume builder with cover letter, AI cover letter generator free, free AI cover letter generator, how to auto fill job applications chrome extension, chrome extension auto fill job applications, auto-fill job applications, chrome extension job application, taleo autofill, icims autofill, ATS resume builder, HiHired, hihired.org, Wobo alternative, Teal alternative, Rezi alternative, Jobscan alternative, Sheets Resume alternative, Microsoft Word Copilot alternative, MAJC AI alternative, Grammarly alternative, OwlApply alternative, Simplify Copilot alternative"
         canonical="https://hihired.org/"
       />
@@ -836,18 +869,18 @@ const Home = () => {
             "@context": "https://schema.org",
             "@type": "SoftwareApplication",
             "name": "HiHired",
-            "alternateName": ["hihired.org", "HiHired Auto-Fill"],
+            "alternateName": ["hihired.org", "HiHired Resume Builder"],
             "applicationCategory": "BusinessApplication",
-            "applicationSubCategory": "AI Resume Builder and Job Application Auto-Fill",
+            "applicationSubCategory": "AI Resume Builder and Cover Letter Generator",
             "operatingSystem": "Web, Chrome",
-            "description": "HiHired (hihired.org) is a free AI resume builder, free AI cover letter generator, and Chrome extension for auto-filling job applications across LinkedIn, Indeed, Workday, Greenhouse, Lever, Taleo, and iCIMS. Build ATS-optimized resumes, tailor them to job descriptions, apply faster, and compare HiHired against tools like Wobo, Teal, Rezi, Jobscan, Sheets Resume, Microsoft Word Copilot, MAJC AI, and Grammarly.",
+            "description": "HiHired (hihired.org) is a free AI resume builder, free AI cover letter generator, and Upcoming Chrome autofill workflow for job applications across LinkedIn, Indeed, Workday, Greenhouse, Lever, Taleo, and iCIMS. Build ATS-optimized resumes, tailor them to job descriptions, apply faster, and compare HiHired against tools like Wobo, Teal, Rezi, Jobscan, Sheets Resume, Microsoft Word Copilot, MAJC AI, and Grammarly.",
             "url": "https://hihired.org",
             "isAccessibleForFree": true,
             "featureList": [
               "AI resume builder",
               "Resume tailoring for job descriptions",
               "AI cover letter generator",
-              "Chrome extension for auto-filling job applications",
+              "Upcoming Chrome autofill workflow for job applications",
               "ATS-friendly resume templates"
             ],
             "brand": {
@@ -876,9 +909,9 @@ const Home = () => {
             "@context": "https://schema.org",
             "@type": "WebSite",
             "name": "HiHired",
-            "alternateName": ["hihired.org", "HiHired Auto-Fill"],
+            "alternateName": ["hihired.org", "HiHired Resume Builder"],
             "url": "https://hihired.org/",
-            "description": "HiHired on hihired.org is a free AI resume builder, free AI cover letter generator, and Chrome auto-fill tool for job applications across LinkedIn, Indeed, Workday, Greenhouse, Lever, Taleo, and iCIMS, with guides that compare HiHired against tools like Wobo, Teal, Rezi, Jobscan, Sheets Resume, Microsoft Word Copilot, MAJC AI, and Grammarly.",
+            "description": "HiHired on hihired.org is a free AI resume builder, free AI cover letter generator, and AI resume and cover letter workflow for job applications, with guides that compare HiHired against tools like Wobo, Teal, Rezi, Jobscan, Sheets Resume, Microsoft Word Copilot, MAJC AI, Grammarly, and autofill-first Chrome extensions.",
             "publisher": {
               "@type": "Organization",
               "name": "HiHired",
@@ -887,7 +920,7 @@ const Home = () => {
             "about": [
               "AI resume builder",
               "AI cover letter generator",
-              "job application auto-fill",
+              "job application workflow",
               "ATS resume templates"
             ]
           })}
@@ -1168,7 +1201,7 @@ const Home = () => {
           </h2>
           <p style={{ margin: "0 0 20px", color: "#475569", lineHeight: 1.7, maxWidth: "880px" }}>
             HiHired on hihired.org is built to answer three high-intent questions clearly: the best free AI
-            resume builder, how to auto-fill job applications with a Chrome extension, and where to find an AI
+            resume builder, how to compare job application workflow tools, and where to find an AI
             resume builder with cover letter support in one workflow.
           </p>
           <div
@@ -1357,7 +1390,7 @@ const Home = () => {
               </h2>
               <p style={{ margin: 0, color: "#475569", lineHeight: 1.7, maxWidth: "780px" }}>
                 These pages connect HiHired, hihired.org, and the highest-intent searches around free AI resume builders,
-                AI cover letters, and Chrome job application auto-fill.
+                AI cover letters, and Chrome job application workflow.
               </p>
             </div>
             <Link
@@ -1401,7 +1434,58 @@ const Home = () => {
         </div>
       </section>
 
-      {/* FAQ */}
+      <section
+        id="direct-comparison"
+        style={{
+          padding: "24px 20px 8px",
+          background: "#f8fafc",
+        }}
+        aria-label="Direct comparison table: HiHired versus resume builders and autofill tools"
+      >
+        <div style={{ maxWidth: "1120px", margin: "0 auto" }}>
+          <p style={{ margin: "0 0 8px", color: "#2563eb", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", fontSize: "0.8rem" }}>
+            Direct comparison
+          </p>
+          <h2 style={{ margin: "0 0 10px", fontSize: "2rem", color: "#0f172a" }}>
+            HiHired vs resume builders vs Chrome autofill tools
+          </h2>
+          <p style={{ margin: "0 0 18px", color: "#475569", lineHeight: 1.7, maxWidth: "820px" }}>
+            Chrome autofill is not officially launched for HiHired yet, so the clearest comparison is honest:
+            HiHired is strongest today for resumes, cover letters, and saved profile data; live autofill-first tools are better if browser automation is the only thing you need right now.
+          </p>
+          <div style={{ overflowX: "auto", border: "1px solid #e2e8f0", borderRadius: "18px", background: "#ffffff", boxShadow: "0 10px 30px rgba(15, 23, 42, 0.04)" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", minWidth: "760px" }}>
+              <thead>
+                <tr style={{ background: "#eff6ff" }}>
+                  <th style={{ padding: "16px", textAlign: "left", color: "#0f172a", borderBottom: "1px solid #dbeafe" }}>Category</th>
+                  <th style={{ padding: "16px", textAlign: "left", color: "#0f172a", borderBottom: "1px solid #dbeafe" }}>HiHired</th>
+                  <th style={{ padding: "16px", textAlign: "left", color: "#0f172a", borderBottom: "1px solid #dbeafe" }}>Resume builders</th>
+                  <th style={{ padding: "16px", textAlign: "left", color: "#0f172a", borderBottom: "1px solid #dbeafe" }}>Autofill tools</th>
+                </tr>
+              </thead>
+              <tbody>
+                {HOME_DIRECT_COMPARISON_ROWS.map((row) => (
+                  <tr key={row.category}>
+                    <th style={{ padding: "16px", textAlign: "left", color: "#0f172a", borderTop: "1px solid #e2e8f0", verticalAlign: "top", width: "18%" }}>
+                      {row.category}
+                    </th>
+                    <td style={{ padding: "16px", color: "#334155", borderTop: "1px solid #e2e8f0", lineHeight: 1.6, verticalAlign: "top" }}>
+                      {row.hihired}
+                    </td>
+                    <td style={{ padding: "16px", color: "#334155", borderTop: "1px solid #e2e8f0", lineHeight: 1.6, verticalAlign: "top" }}>
+                      {row.resumeTools}
+                    </td>
+                    <td style={{ padding: "16px", color: "#334155", borderTop: "1px solid #e2e8f0", lineHeight: 1.6, verticalAlign: "top" }}>
+                      {row.autofillTools}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
       <section
         style={{
           padding: "16px 20px 8px",
