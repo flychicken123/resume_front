@@ -88,4 +88,24 @@ describe('API Functions', () => {
     expect(result).not.toContain('\\n');
     expect(result).not.toContain('"');
   });
+
+  it('normalizes loose quoted multiline text from experience optimization', async () => {
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        data: {
+          optimizedExperience:
+            '"Architected and launched an AI resume platform.\nDeveloped evaluation workflows."',
+        },
+      }),
+    });
+
+    const result = await generateExperienceAI('built resume app', 'backend job');
+
+    expect(result).toBe(
+      'Architected and launched an AI resume platform.\nDeveloped evaluation workflows.'
+    );
+    expect(result).not.toContain('"');
+  });
 });

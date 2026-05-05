@@ -284,6 +284,23 @@ export async function backfillKnowledgeEmbeddings() {
 }
 
 // AI assistant endpoints
+function decodeLooseQuotedText(value) {
+  if (typeof value !== 'string' || value.length < 2 || !value.startsWith('"') || !value.endsWith('"')) {
+    return value;
+  }
+
+  return value
+    .slice(1, -1)
+    .trim()
+    .replace(/\\r\\n/g, '\n')
+    .replace(/\\n/g, '\n')
+    .replace(/\\r/g, '\n')
+    .replace(/\\t/g, '\t')
+    .replace(/\\"/g, '"')
+    .replace(/\\\\/g, '\\')
+    .trim();
+}
+
 function normalizeAITextResponse(value) {
   if (Array.isArray(value)) {
     return value.map((item) => String(item || '').trim()).filter(Boolean).join('\n\n');
@@ -317,7 +334,7 @@ function normalizeAITextResponse(value) {
         return parsed.trim();
       }
     } catch {
-      // Fall through to plain text cleanup.
+      return decodeLooseQuotedText(unfenced);
     }
   }
 
