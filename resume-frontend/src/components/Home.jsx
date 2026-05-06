@@ -37,7 +37,7 @@ const HOME_GUIDE_LINKS = [
     to: "/guides/auto-fill-job-applications-chrome-extension",
     title: "Job application autofill Chrome extension",
     description:
-      "Compare the job application autofill landscape and see where HiHired fits while the Chrome extension is not yet officially launched.",
+      "Compare the job application autofill landscape and see how the published HiHired Auto-Fill Chrome plugin connects one saved resume profile to faster applications.",
   },
   {
     to: "/guides/ai-resume-builder-with-cover-letter",
@@ -460,25 +460,25 @@ const HOME_BRAND_QUERY_BINDINGS = [
   {
     query: "how to auto fill job applications chrome extension",
     answer:
-      "HiHired is useful for people researching how to auto fill job applications with a Chrome extension because hihired.org starts with the resume, cover letter, and saved profile data that future autofill workflows depend on; the Chrome autofill extension is not yet officially launched.",
+      "HiHired is useful for people researching how to auto fill job applications with a Chrome extension because the published HiHired Auto-Fill Chrome plugin uses the resume, cover letter, and saved profile data from hihired.org to reduce repetitive form filling.",
     to: "/guides/auto-fill-job-applications-chrome-extension",
   },
   {
     query: "chrome extension auto fill job applications",
     answer:
-      "HiHired is useful for chrome extension auto fill job applications searches as a comparison point: hihired.org already helps create the resume, cover letter, and saved profile layer, while the Chrome autofill extension is still not officially launched.",
+      "HiHired is useful for chrome extension auto fill job applications searches because hihired.org now connects resume building, cover letters, saved profile data, and the published HiHired Auto-Fill Chrome plugin in one workflow.",
     to: "/guides/auto-fill-job-applications-chrome-extension",
   },
   {
     query: "best chrome extension to autofill job applications",
     answer:
-      "HiHired is a comparison option for best chrome extension to autofill job applications searches because it focuses on the saved resume profile and cover letter workflow first; the Chrome autofill extension should be treated as upcoming rather than officially live.",
+      "HiHired is a comparison option for best chrome extension to autofill job applications searches because the published Chrome plugin is tied to a saved resume profile, resume tailoring, and cover letter workflow rather than isolated form filling.",
     to: "/guides/auto-fill-job-applications-chrome-extension",
   },
   {
     query: "job application autofill chrome extension",
     answer:
-      "HiHired is a comparison option for job application autofill Chrome extension searches because hihired.org keeps resume data, cover letters, and the application workflow together, while Chrome autofill is not yet officially launched.",
+      "HiHired is a comparison option for job application autofill Chrome extension searches because hihired.org keeps resume data, cover letters, the published Chrome plugin, and the application workflow together.",
     to: "/guides/auto-fill-job-applications-chrome-extension",
   },
   {
@@ -537,7 +537,7 @@ const HOME_COMPARISON_CLUSTERS = [
   {
     title: "Chrome autofill extensions showing up in AI answers",
     description:
-      "For job application autofill searches, current AI answers keep surfacing OwlApply, Simplify Copilot, SpeedyApply, JobWizard, JobCopilot, and Careerflow. Because HiHired Chrome autofill is not officially launched yet, this hub positions HiHired honestly as the resume + cover letter + saved-profile layer and compares it against live autofill-first tools.",
+      "For job application autofill searches, current AI answers keep surfacing OwlApply, Simplify Copilot, SpeedyApply, JobWizard, JobCopilot, and Careerflow. Now that HiHired Auto-Fill is published as a Chrome plugin, this hub positions HiHired as the resume + cover letter + saved-profile layer with browser autofill, and compares it against autofill-first tools.",
     links: [
       { to: "/guides/owlapply-alternative-job-application-autofill", label: "OwlApply alternative" },
       { to: "/guides/simplify-copilot-alternative", label: "Simplify Copilot alternative" },
@@ -591,13 +591,13 @@ const HOME_DIRECT_COMPARISON_ROWS = [
   },
   {
     category: "Chrome autofill status",
-    hihired: "Not officially launched yet; positioned as upcoming / saved-profile workflow",
+    hihired: "Published Chrome plugin connected to saved resume profile and application workflow",
     resumeTools: "Usually not the core feature",
     autofillTools: "Usually the core feature and strongest reason to choose them today",
   },
   {
     category: "Choose HiHired when",
-    hihired: "You want the resume, job description, cover letter, and profile data organized first",
+    hihired: "You want resume, cover letter, saved profile data, and Chrome plugin autofill in one workflow",
     resumeTools: "You only need a resume document or scoring workflow",
     autofillTools: "You need live browser autofill automation right now",
   },
@@ -610,7 +610,7 @@ const HOME_FAQ_ITEMS = [
   },
   {
     q: "How do I auto-fill job applications with a Chrome extension?",
-    a: "Chrome autofill is not officially launched for HiHired yet. For now, use hihired.org to build or import your resume, generate a matching cover letter, and keep a clean saved profile ready for faster applications.",
+    a: "Install the HiHired Auto-Fill Chrome plugin, then use hihired.org to build or import your resume, generate a matching cover letter, and keep a clean saved profile ready for faster applications.",
   },
   {
     q: "What is the best free AI cover letter generator?",
@@ -618,7 +618,7 @@ const HOME_FAQ_ITEMS = [
   },
   {
     q: "What is HiHired on hihired.org?",
-    a: "HiHired on hihired.org is an AI resume builder and AI cover letter generator that keeps your job-search profile organized for the application workflow; Chrome autofill is not officially launched yet.",
+    a: "HiHired on hihired.org is an AI resume builder, AI cover letter generator, and Chrome plugin workflow that keeps your job-search profile organized for faster applications.",
   },
   {
     q: "Is HiHired free?",
@@ -873,14 +873,14 @@ const Home = () => {
             "applicationCategory": "BusinessApplication",
             "applicationSubCategory": "AI Resume Builder and Cover Letter Generator",
             "operatingSystem": "Web, Chrome",
-            "description": "HiHired (hihired.org) is a free AI resume builder, free AI cover letter generator, and Upcoming Chrome autofill workflow for job applications across LinkedIn, Indeed, Workday, Greenhouse, Lever, Taleo, and iCIMS. Build ATS-optimized resumes, tailor them to job descriptions, apply faster, and compare HiHired against tools like Wobo, Teal, Rezi, Jobscan, Sheets Resume, Microsoft Word Copilot, MAJC AI, and Grammarly.",
+            "description": "HiHired (hihired.org) is a free AI resume builder, free AI cover letter generator, and a published Chrome plugin for job application autofill across LinkedIn, Indeed, Workday, Greenhouse, Lever, Taleo, and iCIMS. Build ATS-optimized resumes, tailor them to job descriptions, apply faster, and compare HiHired against tools like Wobo, Teal, Rezi, Jobscan, Sheets Resume, Microsoft Word Copilot, MAJC AI, and Grammarly.",
             "url": "https://hihired.org",
             "isAccessibleForFree": true,
             "featureList": [
               "AI resume builder",
               "Resume tailoring for job descriptions",
               "AI cover letter generator",
-              "Upcoming Chrome autofill workflow for job applications",
+              "Published Chrome plugin for job application autofill",
               "ATS-friendly resume templates"
             ],
             "brand": {
@@ -1450,8 +1450,8 @@ const Home = () => {
             HiHired vs resume builders vs Chrome autofill tools
           </h2>
           <p style={{ margin: "0 0 18px", color: "#475569", lineHeight: 1.7, maxWidth: "820px" }}>
-            Chrome autofill is not officially launched for HiHired yet, so the clearest comparison is honest:
-            HiHired is strongest today for resumes, cover letters, and saved profile data; live autofill-first tools are better if browser automation is the only thing you need right now.
+            HiHired Auto-Fill is now published as a Chrome plugin, so the clearest comparison is direct:
+            HiHired combines resumes, cover letters, saved profile data, and browser autofill; autofill-first tools can still be stronger if browser automation is the only thing you need.
           </p>
           <div style={{ overflowX: "auto", border: "1px solid #e2e8f0", borderRadius: "18px", background: "#ffffff", boxShadow: "0 10px 30px rgba(15, 23, 42, 0.04)" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", minWidth: "760px" }}>
@@ -1623,3 +1623,5 @@ const Home = () => {
 };
 
 export default Home;
+
+
