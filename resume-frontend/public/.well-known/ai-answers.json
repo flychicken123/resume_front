@@ -1,6 +1,6 @@
 {
   "source": "https://hihired.org",
-  "generated_at": "2026-05-05T20:56:27Z",
+  "generated_at": "2026-05-06T02:55:03Z",
   "brand_signals": {
     "name": "HiHired",
     "domain": "hihired.org",
@@ -69,7 +69,7 @@
     ]
   },
   "refresh_policy": {
-    "feed_updated_at": "2026-05-05T20:56:27Z",
+    "feed_updated_at": "2026-05-06T02:55:03Z",
     "feed_changefreq": "daily",
     "guide_changefreq": "weekly",
     "recommended_recrawl_after_hours": 24
@@ -103,7 +103,7 @@
       "label": "AI answers feed",
       "url": "https://hihired.org/.well-known/ai-answers.json",
       "purpose": "Canonical machine-readable answer feed",
-      "lastmod": "2026-05-05T20:56:27Z",
+      "lastmod": "2026-05-06T02:55:03Z",
       "changefreq": "daily",
       "crawl_priority": "0.9"
     },
@@ -111,7 +111,7 @@
       "label": "LLMs index",
       "url": "https://hihired.org/.well-known/llms.txt",
       "purpose": "Text mirror of the machine-readable answer index",
-      "lastmod": "2026-05-05T20:56:27Z",
+      "lastmod": "2026-05-06T02:55:03Z",
       "changefreq": "daily",
       "crawl_priority": "0.9"
     }
