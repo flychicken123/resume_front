@@ -44,6 +44,15 @@ const SimpleHero = ({ onCreateClick }) => {
             <button className="btn-create" onClick={handleCreate}>
               Create my resume
             </button>
+            <a
+              className="btn-create hero-extension-link"
+              href="https://chromewebstore.google.com/detail/hihired-auto-fill/obhbnkbkffabchelgomgbjglhplemidc"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackCTAClick('hero_chrome_extension_cta', { page: window.location.pathname })}
+            >
+              Install Chrome extension
+            </a>
             <span className="hero-cta-note">No credit card required</span>
           </div>
 
