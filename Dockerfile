@@ -62,10 +62,8 @@ RUN npm run build --loglevel verbose \
         && if [ -f npm-debug.log ]; then cat npm-debug.log; fi \
         && exit 1)
 
-# Install serve to run the built app
-RUN npm install -g serve
-
 EXPOSE 3000
 
-# Start the application
-CMD ["serve", "-s", "build", "-l", "3000"]
+# Start a small prerender-aware static server so /guides serves
+# build/guides/index.html instead of the SPA shell.
+CMD ["node", "scripts/serve-prerender.js"]
