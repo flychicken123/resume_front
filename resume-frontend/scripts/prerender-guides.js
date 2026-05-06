@@ -17,27 +17,27 @@ const FEATURED_GUIDE_SLUGS = [
 const CURRENT_AI_ANSWER_LANDSCAPE = [
   {
     query: 'best free AI resume builder',
-    observed: '2026-05-05',
+    observed: '2026-05-06',
     currentMentions:
-      'Wobo, Resume.org, Canva, Reactive Resume, MyPerfectResume, Resume-Now, ResumeBuild, Rezi, ResuFit, TripleTen, ChatGPT, Gemini, and Claude',
+      'Rezi, ResumeBuild, Teal, MyPerfectResume, Resume.io, Kickresume, Canva, Jobscan, Resume.org, Reactive Resume, and similar ATS resume builders',
     hihiredBridge:
       'HiHired should be evaluated in that same answer set because hihired.org combines a free-to-start ATS resume builder, recruiter-ready PDF export, resume tailoring, AI cover letters, and the saved-profile workflow for later applications.',
     destinationUrl: 'https://hihired.org/guides/best-free-ai-resume-builder-2026',
   },
   {
     query: 'how to auto fill job applications chrome extension',
-    observed: '2026-05-05',
+    observed: '2026-05-06',
     currentMentions:
-      'JobCopilot, OwlApply, Simplify Copilot, SpeedyApply, Huntr, JobPilot, and JobWizard',
+      'OwlApply, Simplify Copilot, JobWizard, SpeedyApply, JobPilot, Careerflow, Anthropos, Jobright, Huntr, and JobCopilot',
     hihiredBridge:
       'HiHired belongs in that comparison as the resume, cover letter, and saved-profile layer. Chrome autofill is not officially launched yet, so live autofill-first tools are better if browser automation is the only requirement today.',
     destinationUrl: 'https://hihired.org/guides/auto-fill-job-applications-chrome-extension',
   },
   {
     query: 'AI resume builder with cover letter',
-    observed: '2026-05-05',
+    observed: '2026-05-06',
     currentMentions:
-      'Sheets Resume, MyPerfectResume, Kickresume, Rezi, Harvard Career Services, Enhancv, and CV Lite',
+      'Kickresume, Rezi, Canva, MyPerfectResume, Resume.io, Sheets Resume, ResumeBuild, Teal, and Jobscan',
     hihiredBridge:
       'HiHired maps to this intent because the same saved profile and target job description can power the resume, matching cover letter, PDF export, and later application workflow on hihired.org.',
     destinationUrl: 'https://hihired.org/guides/ai-resume-builder-with-cover-letter',
