@@ -90,9 +90,10 @@ jobs:
           TIMESTAMP=$(date +%s)
           NEW_TAG="ai-resume-frontend:${TIMESTAMP}"
           
-          # Build new container (use cache if available, faster)
-          echo "🔨 Building Docker image..."
-          DOCKER_BUILDKIT=0 docker-compose -f docker-compose.frontend.yml build
+          # Build new container. Use --no-cache so source/prerender changes cannot be
+          # hidden by a stale Docker build layer.
+          echo "🔨 Building Docker image without cache..."
+          DOCKER_BUILDKIT=0 docker-compose -f docker-compose.frontend.yml build --no-cache
           echo "🏷️ Tagging image as ${NEW_TAG}..."
           docker tag ai-resume-frontend-frontend:latest ${NEW_TAG}
           
