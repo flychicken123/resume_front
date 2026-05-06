@@ -35,14 +35,27 @@
 /* CTA */
 .hero-primary-cta {
   display: flex;
-  align-items: center;
-  gap: 16px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
   margin-bottom: 40px;
 }
 
+.hero-cta-buttons {
+  display: flex;
+  align-items: stretch;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
 .btn-create {
-  padding: 16px 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  padding: 0 30px;
   font-size: 17px;
+  line-height: 1;
   font-weight: 700;
   background: #f97316;
   color: white;
@@ -51,6 +64,7 @@
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 4px 14px rgba(249, 115, 22, 0.3);
+  white-space: nowrap;
 }
 
 .btn-create:hover {
@@ -177,8 +191,11 @@
   }
 
   .hero-primary-cta {
-    flex-direction: column;
     align-items: center;
+  }
+
+  .hero-cta-buttons {
+    justify-content: center;
   }
 
   .hero-logos {
@@ -204,9 +221,14 @@
     margin-bottom: 24px;
   }
 
+  .hero-cta-buttons {
+    width: 100%;
+  }
+
   .btn-create {
     width: 100%;
-    padding: 16px 24px;
+    min-height: 54px;
+    padding: 0 24px;
     font-size: 16px;
   }
 

@@ -653,7 +653,7 @@ const Home = () => {
                 boxShadow: "0 10px 24px rgba(37, 99, 235, 0.24)",
               }}
             >
-              Install HiHired Auto-Fill
+              Install application autofill plugin
             </a>
           </div>
           <div

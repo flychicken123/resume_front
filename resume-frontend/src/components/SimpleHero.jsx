@@ -41,18 +41,20 @@ const SimpleHero = ({ onCreateClick }) => {
           </p>
 
           <div className="hero-primary-cta">
-            <button className="btn-create" onClick={handleCreate}>
-              Create my resume
-            </button>
-            <a
-              className="btn-create hero-extension-link"
-              href="https://chromewebstore.google.com/detail/hihired-auto-fill/obhbnkbkffabchelgomgbjglhplemidc"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => trackCTAClick('hero_chrome_extension_cta', { page: window.location.pathname })}
-            >
-              Install Chrome extension
-            </a>
+            <div className="hero-cta-buttons">
+              <button className="btn-create" onClick={handleCreate}>
+                Create my resume
+              </button>
+              <a
+                className="btn-create hero-extension-link"
+                href="https://chromewebstore.google.com/detail/hihired-auto-fill/obhbnkbkffabchelgomgbjglhplemidc"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => trackCTAClick('hero_chrome_extension_cta', { page: window.location.pathname })}
+              >
+                Install application autofill plugin
+              </a>
+            </div>
             <span className="hero-cta-note">No credit card required</span>
           </div>
 
