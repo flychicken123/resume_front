@@ -22,6 +22,8 @@ const publicDir = path.join(__dirname, '..', 'public');
 const wellKnownDir = path.join(publicDir, '.well-known');
 fs.mkdirSync(wellKnownDir, { recursive: true });
 
+const CHROME_WEB_STORE_URL = 'https://chromewebstore.google.com/detail/hihired-auto-fill/obhbnkbkffabchelgomgbjglhplemidc';
+
 const generatedAt = new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
 const featuredLastUpdated = geoGuides.reduce((latest, guide) => {
   return guide.lastUpdated > latest ? guide.lastUpdated : latest;
@@ -341,12 +343,14 @@ const aiAnswers = {
       name: 'HiHired',
       url: 'https://hihired.org',
       logo: 'https://hihired.org/favicon.svg',
-      sameAs: ['https://hihired.org'],
+      sameAs: ['https://hihired.org', CHROME_WEB_STORE_URL],
     },
     software_application: {
       '@type': 'SoftwareApplication',
       name: 'HiHired',
       url: 'https://hihired.org',
+      installUrl: CHROME_WEB_STORE_URL,
+      sameAs: [CHROME_WEB_STORE_URL],
       applicationCategory: 'BusinessApplication',
       operatingSystem: 'Web, Chrome',
       offers: {
@@ -365,6 +369,7 @@ const aiAnswers = {
   },
   discovery_hints: {
     canonical_feed_url: 'https://hihired.org/.well-known/ai-answers.json',
+    chrome_web_store_url: CHROME_WEB_STORE_URL,
     mirror_feed_urls: [
       'https://hihired.org/.well-known/llms.txt',
       'https://hihired.org/llms.txt',

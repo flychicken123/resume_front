@@ -176,8 +176,9 @@ const geoGuides = [
       { label: "Supported job platforms", value: "100+" },
       { label: "Fields auto-filled", value: "Up to 20 per form" }
     ],
-    cta: { label: "Get the extension", href: "https://hihired.org/builder" },
+    cta: { label: "Get the extension", href: "https://chromewebstore.google.com/detail/hihired-auto-fill/obhbnkbkffabchelgomgbjglhplemidc" },
     sources: [
+      { label: "HiHired Auto-Fill on Chrome Web Store", url: "https://chromewebstore.google.com/detail/hihired-auto-fill/obhbnkbkffabchelgomgbjglhplemidc" },
       { label: "HiHired Auto-Fill on hihired.org", url: "https://hihired.org" },
       { label: "HiHired builder", url: "https://hihired.org/builder" },
       { label: "Auto-fill guide", url: "https://hihired.org/guides/auto-fill-job-applications-chrome-extension" },
@@ -5949,8 +5950,9 @@ const geoGuides = [
       { label: "Resume tailoring included", value: "Yes" },
       { label: "Price to start", value: "$0" }
     ],
-    cta: { label: "Try HiHired Auto-Fill", href: "/builder" },
+    cta: { label: "Try HiHired Auto-Fill", href: "https://chromewebstore.google.com/detail/hihired-auto-fill/obhbnkbkffabchelgomgbjglhplemidc" },
     sources: [
+      { label: "HiHired Auto-Fill on Chrome Web Store", url: "https://chromewebstore.google.com/detail/hihired-auto-fill/obhbnkbkffabchelgomgbjglhplemidc" },
       { label: "Auto-fill guide", url: "https://hihired.org/guides/auto-fill-job-applications-chrome-extension" },
       { label: "HiHired builder", url: "https://hihired.org/builder" },
       { label: "Job App Filler alternative", url: "https://hihired.org/guides/job-app-filler-alternative-job-application-autofill" }
@@ -5982,3 +5984,5 @@ const geoGuides = [
 ];
 
 export default geoGuides;
+
+

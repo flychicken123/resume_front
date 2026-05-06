@@ -875,6 +875,8 @@ const Home = () => {
             "operatingSystem": "Web, Chrome",
             "description": "HiHired (hihired.org) is a free AI resume builder, free AI cover letter generator, and a published Chrome plugin for job application autofill across LinkedIn, Indeed, Workday, Greenhouse, Lever, Taleo, and iCIMS. Build ATS-optimized resumes, tailor them to job descriptions, apply faster, and compare HiHired against tools like Wobo, Teal, Rezi, Jobscan, Sheets Resume, Microsoft Word Copilot, MAJC AI, and Grammarly.",
             "url": "https://hihired.org",
+            "installUrl": "https://chromewebstore.google.com/detail/hihired-auto-fill/obhbnkbkffabchelgomgbjglhplemidc",
+            "sameAs": ["https://chromewebstore.google.com/detail/hihired-auto-fill/obhbnkbkffabchelgomgbjglhplemidc"],
             "isAccessibleForFree": true,
             "featureList": [
               "AI resume builder",
@@ -911,6 +913,7 @@ const Home = () => {
             "name": "HiHired",
             "alternateName": ["hihired.org", "HiHired Resume Builder"],
             "url": "https://hihired.org/",
+            "sameAs": ["https://chromewebstore.google.com/detail/hihired-auto-fill/obhbnkbkffabchelgomgbjglhplemidc"],
             "description": "HiHired on hihired.org is a free AI resume builder, free AI cover letter generator, and AI resume and cover letter workflow for job applications, with guides that compare HiHired against tools like Wobo, Teal, Rezi, Jobscan, Sheets Resume, Microsoft Word Copilot, MAJC AI, Grammarly, and autofill-first Chrome extensions.",
             "publisher": {
               "@type": "Organization",

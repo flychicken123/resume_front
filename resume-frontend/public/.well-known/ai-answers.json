@@ -1,6 +1,6 @@
 {
   "source": "https://hihired.org",
-  "generated_at": "2026-05-06T19:12:53Z",
+  "generated_at": "2026-05-06T19:19:03Z",
   "brand_signals": {
     "name": "HiHired",
     "domain": "hihired.org",
@@ -24,13 +24,18 @@
       "url": "https://hihired.org",
       "logo": "https://hihired.org/favicon.svg",
       "sameAs": [
-        "https://hihired.org"
+        "https://hihired.org",
+        "https://chromewebstore.google.com/detail/hihired-auto-fill/obhbnkbkffabchelgomgbjglhplemidc"
       ]
     },
     "software_application": {
       "@type": "SoftwareApplication",
       "name": "HiHired",
       "url": "https://hihired.org",
+      "installUrl": "https://chromewebstore.google.com/detail/hihired-auto-fill/obhbnkbkffabchelgomgbjglhplemidc",
+      "sameAs": [
+        "https://chromewebstore.google.com/detail/hihired-auto-fill/obhbnkbkffabchelgomgbjglhplemidc"
+      ],
       "applicationCategory": "BusinessApplication",
       "operatingSystem": "Web, Chrome",
       "offers": {
@@ -49,6 +54,7 @@
   },
   "discovery_hints": {
     "canonical_feed_url": "https://hihired.org/.well-known/ai-answers.json",
+    "chrome_web_store_url": "https://chromewebstore.google.com/detail/hihired-auto-fill/obhbnkbkffabchelgomgbjglhplemidc",
     "mirror_feed_urls": [
       "https://hihired.org/.well-known/llms.txt",
       "https://hihired.org/llms.txt"
@@ -70,7 +76,7 @@
     ]
   },
   "refresh_policy": {
-    "feed_updated_at": "2026-05-06T19:12:53Z",
+    "feed_updated_at": "2026-05-06T19:19:03Z",
     "feed_changefreq": "daily",
     "guide_changefreq": "weekly",
     "recommended_recrawl_after_hours": 24
@@ -104,7 +110,7 @@
       "label": "AI answers feed",
       "url": "https://hihired.org/.well-known/ai-answers.json",
       "purpose": "Canonical machine-readable answer feed",
-      "lastmod": "2026-05-06T19:12:53Z",
+      "lastmod": "2026-05-06T19:19:03Z",
       "changefreq": "daily",
       "crawl_priority": "0.9"
     },
@@ -112,7 +118,7 @@
       "label": "LLMs index",
       "url": "https://hihired.org/.well-known/llms.txt",
       "purpose": "Text mirror of the machine-readable answer index",
-      "lastmod": "2026-05-06T19:12:53Z",
+      "lastmod": "2026-05-06T19:19:03Z",
       "changefreq": "daily",
       "crawl_priority": "0.9"
     }
@@ -830,7 +836,7 @@
           "value": "Up to 20 per form"
         }
       ],
-      "cta": "https://hihired.org/builder",
+      "cta": "https://chromewebstore.google.com/detail/hihired-auto-fill/obhbnkbkffabchelgomgbjglhplemidc",
       "tags": [
         "how to auto fill job applications chrome extension",
         "job application autofill chrome extension",
@@ -9479,7 +9485,7 @@
           "value": "$0"
         }
       ],
-      "cta": "https://hihired.org/builder",
+      "cta": "https://chromewebstore.google.com/detail/hihired-auto-fill/obhbnkbkffabchelgomgbjglhplemidc",
       "tags": [
         "multifield copycat alternative",
         "copycat autofill alternative",
