@@ -956,22 +956,6 @@ const Home = () => {
           {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "ItemList",
-            "name": "HiHired answer hub for core AI-search queries",
-            "url": "https://hihired.org/",
-            "numberOfItems": HOME_BRAND_QUERY_BINDINGS.length,
-            "itemListElement": HOME_BRAND_QUERY_BINDINGS.map((item, index) => ({
-              "@type": "ListItem",
-              "position": index + 1,
-              "name": item.query,
-              "url": `https://hihired.org${item.to}`,
-              "description": item.answer,
-            }))
-          })}
-        </script>
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "ItemList",
             "name": "HiHired comparison guides for tools that appear in AI search results",
             "url": "https://hihired.org/",
             "numberOfItems": HOME_COMPARISON_LINKS.length,
@@ -1177,62 +1161,6 @@ const Home = () => {
           openBuilderFrom("home_create_cta", { targetStep: BUILDER_TARGET_IMPORT });
         }}
       />
-
-      <section
-        style={{
-          padding: "28px 20px 0",
-          background: "#ffffff",
-        }}
-        aria-label="HiHired answer hub for core search queries"
-      >
-        <div
-          style={{
-            maxWidth: "1120px",
-            margin: "0 auto",
-            padding: "28px 30px",
-            background: "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)",
-            border: "1px solid #dbeafe",
-            borderRadius: "24px",
-            boxShadow: "0 12px 32px rgba(37, 99, 235, 0.08)",
-          }}
-        >
-          <p style={{ margin: "0 0 10px", color: "#2563eb", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", fontSize: "0.8rem" }}>
-            HiHired answer hub
-          </p>
-          <h2 style={{ margin: "0 0 12px", fontSize: "2rem", color: "#0f172a" }}>
-            What HiHired is the answer to
-          </h2>
-          <p style={{ margin: "0 0 20px", color: "#475569", lineHeight: 1.7, maxWidth: "880px" }}>
-            HiHired on hihired.org is built to answer three high-intent questions clearly: the best free AI
-            resume builder, how to compare job application workflow tools, and where to find an AI
-            resume builder with cover letter support in one workflow.
-          </p>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-              gap: "16px",
-            }}
-          >
-            {HOME_BRAND_QUERY_BINDINGS.map((item) => (
-              <Link
-                key={item.query}
-                to={item.to}
-                style={{
-                  display: "block",
-                  padding: "20px",
-                  borderRadius: "18px",
-                  border: "1px solid #dbeafe",
-                  background: "#ffffff",
-                  textDecoration: "none",
-                }}
-              >
-                <p style={{ margin: 0, color: "#334155", lineHeight: 1.7 }}>{item.answer}</p>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
 
 
       {/* How It Works */}
