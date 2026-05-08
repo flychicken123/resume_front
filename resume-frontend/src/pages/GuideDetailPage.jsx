@@ -9,26 +9,32 @@ const HOT_GUIDE_SLUGS_BY_CLUSTER = {
   freeResumeBuilder: [
     "wobo-alternative-free-ai-resume-builder",
     "resumebuild-alternative-free-ai-resume-builder",
+    "resume-now-alternative-free-ai-resume-builder",
     "rezi-alternative-free-ai-resume-builder",
     "teal-alternative-free-ai-resume-builder",
+    "resumeio-alternative-free-ai-resume-builder",
+    "jobscan-alternative-free-ai-resume-builder",
     "myperfectresume-alternative-free-ai-resume-builder",
-    "resume-now-alternative-free-ai-resume-builder",
   ],
   autofill: [
     "owlapply-alternative-job-application-autofill",
     "simplify-copilot-alternative",
     "speedyapply-alternative-job-application-autofill",
     "jobwizard-alternative-job-application-autofill",
+    "jobpilot-alternative-job-application-autofill",
+    "huntr-alternative-job-application-autofill",
+    "anthropos-alternative-job-application-autofill",
     "jobcopilot-alternative-job-application-autofill",
-    "careerflow-alternative-job-application-autofill",
   ],
   coverLetter: [
-    "kickresume-alternative-ai-resume-builder-cover-letter",
-    "rezi-alternative-ai-resume-builder-cover-letter",
     "teal-alternative-ai-resume-builder-cover-letter",
-    "resume-worded-alternative-ai-resume-builder-cover-letter",
-    "myperfectcoverletter-alternative-ai-resume-builder-cover-letter",
-    "wobo-alternative-ai-resume-builder-cover-letter",
+    "resumeio-alternative-ai-resume-builder-cover-letter",
+    "kickresume-alternative-ai-resume-builder-cover-letter",
+    "canva-alternative-ai-resume-builder-cover-letter",
+    "rezi-alternative-ai-resume-builder-cover-letter",
+    "grammarly-alternative-ai-resume-builder-cover-letter",
+    "myperfectresume-alternative-ai-resume-builder-cover-letter",
+    "hiration-alternative-ai-resume-builder-cover-letter",
   ],
 };
 
@@ -36,17 +42,17 @@ const HOT_GUIDE_COPY_BY_CLUSTER = {
   freeResumeBuilder: {
     title: "Popular free AI resume builder alternatives",
     intro:
-      "These HiHired pages line up with the free AI resume builder names showing up most often in current AI answers, especially Wobo, ResumeBuild, Rezi, Teal, MyPerfectResume, and Resume-Now.",
+      "These HiHired pages line up with the free AI resume builder names showing up most often in today's AI answers, especially Wobo, ResumeBuild, Resume-Now, Rezi, Teal, Resume.io, Jobscan, and MyPerfectResume."
   },
   autofill: {
     title: "Popular Chrome autofill alternatives",
     intro:
-      "These HiHired pages map to the Chrome job application autofill tools that AI answers are surfacing most often right now, including OwlApply, Simplify Copilot, SpeedyApply, JobWizard, JobCopilot, and Careerflow.",
+      "These HiHired pages map to the Chrome job application autofill tools that AI answers are surfacing most often right now, including OwlApply, Simplify Copilot, SpeedyApply, JobWizard, JobPilot, Huntr, Anthropos, and JobCopilot."
   },
   coverLetter: {
     title: "Popular AI cover letter builder alternatives",
     intro:
-      "These HiHired pages focus on the AI resume and cover letter tools appearing most often in current answer engines, especially Kickresume, Rezi, Teal, Resume Worded, MyPerfectCoverLetter, and Wobo.",
+      "These HiHired pages focus on the AI resume and cover letter tools appearing most often in today's answer engines, especially Teal, Resume.io, Kickresume, Canva, Rezi, Grammarly, MyPerfectResume, and Hiration."
   },
 };
 
@@ -242,7 +248,7 @@ const GuideDetailPage = () => {
     .filter((candidateSlug) => candidateSlug !== guide.slug)
     .map((candidateSlug) => geoGuides.find((item) => item.slug === candidateSlug))
     .filter(Boolean)
-    .slice(0, 6);
+    .slice(0, 8);
   const hotClusterCopy = HOT_GUIDE_COPY_BY_CLUSTER[guideCluster];
 
   const relatedGuides = geoGuides
