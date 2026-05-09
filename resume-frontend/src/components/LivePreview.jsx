@@ -1593,7 +1593,7 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
   const getFormatStyles = (format, fontSize = 'medium') => {
     // Base scale factor for preview (2x for readability)
     const baseScaleFactor = 2;
-    
+
     // Font size multipliers (visible size increase)
     const fontSizeMultipliers = {
       'small': 1.0,
@@ -1601,18 +1601,18 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
       'large': 1.5,
       'extra-large': 1.8
     };
-    
+
     // Combined scale factor
     const scaleFactor = baseScaleFactor * (fontSizeMultipliers[fontSize] || fontSizeMultipliers['medium'])
-    
+
     switch (format) {
       case TEMPLATE_SLUGS.CLASSIC_PROFESSIONAL:
         // Classic Professional - exactly like StepFormat classic-professional
         return {
-          container: { 
-            fontFamily: 'Calibri, Arial, sans-serif', 
+          container: {
+            fontFamily: 'Calibri, Arial, sans-serif',
             // Normalize base body size across templates to keep preview consistent
-            fontSize: `${6 * scaleFactor}px`, 
+            fontSize: `${6 * scaleFactor}px`,
             lineHeight: '1.2',
             padding: '16px 16px 0 16px',
             background: 'white',
@@ -1620,42 +1620,42 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
             borderRadius: '4px',
             overflow: 'visible' // Changed from 'hidden' for full preview
           },
-          header: { 
-            textAlign: 'center', 
-            fontWeight: 'bold', 
-            fontSize: `${10 * scaleFactor}px`, 
-            marginBottom: `${3 * scaleFactor}px`, 
+          header: {
+            textAlign: 'center',
+            fontWeight: 'bold',
+            fontSize: `${10 * scaleFactor}px`,
+            marginBottom: `${3 * scaleFactor}px`,
             color: '#1f2937'
           },
-          contact: { 
-            textAlign: 'center', 
-            color: '#6b7280', 
-            fontSize: `${6 * scaleFactor}px`, 
+          contact: {
+            textAlign: 'center',
+            color: '#6b7280',
+            fontSize: `${6 * scaleFactor}px`,
             marginBottom: `${6 * scaleFactor}px`
           },
-          sectionTitle: { 
-            color: '#1f2937', 
-            fontWeight: 'bold', 
+          sectionTitle: {
+            color: '#1f2937',
+            fontWeight: 'bold',
             fontSize: `${8.4 * scaleFactor}px`,  // More prominent section headings
-            marginBottom: `${2.5 * scaleFactor}px`, 
-            borderBottom: '1px solid #000', 
-            paddingBottom: `${1.5 * scaleFactor}px`, 
+            marginBottom: `${2.5 * scaleFactor}px`,
+            borderBottom: '1px solid #000',
+            paddingBottom: `${1.5 * scaleFactor}px`,
             textAlign: 'left'
           },
-          company: { 
-            color: '#374151', 
-            fontWeight: 'bold', 
+          company: {
+            color: '#374151',
+            fontWeight: 'bold',
             fontSize: `${6 * scaleFactor}px`
           },
-          bullet: { 
-            color: '#374151', 
-            fontSize: `${6 * scaleFactor}px`, 
-            marginLeft: `${4 * scaleFactor}px`, 
+          bullet: {
+            color: '#374151',
+            fontSize: `${6 * scaleFactor}px`,
+            marginLeft: `${4 * scaleFactor}px`,
             marginBottom: `${2 * scaleFactor}px`
           },
-          summary: { 
-            color: '#374151', 
-            fontSize: `${6 * scaleFactor}px`, 
+          summary: {
+            color: '#374151',
+            fontSize: `${6 * scaleFactor}px`,
             marginBottom: `${4 * scaleFactor}px`
           },
           skills: {
@@ -2089,10 +2089,10 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
       case TEMPLATE_SLUGS.MODERN_CLEAN:
         // Contemporary Tech - exactly like StepFormat modern
         return {
-          container: { 
-            fontFamily: 'Segoe UI, sans-serif', 
+          container: {
+            fontFamily: 'Segoe UI, sans-serif',
             // Normalize body size to align with other templates
-            fontSize: `${6 * scaleFactor}px`, 
+            fontSize: `${6 * scaleFactor}px`,
             lineHeight: '1.15',
             padding: '16px 16px 0 16px',
             background: 'white',
@@ -2101,57 +2101,57 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
             overflow: 'visible'
           },
           headerContainer: {
-            borderBottom: '3px solid #3498db', 
-            paddingBottom: `${4 * scaleFactor}px`, 
+            borderBottom: '3px solid #3498db',
+            paddingBottom: `${4 * scaleFactor}px`,
             marginBottom: `${4 * scaleFactor}px`
           },
-          header: { 
-            fontWeight: '600', 
-            fontSize: `${10 * scaleFactor}px`, 
-            marginBottom: `${2 * scaleFactor}px`, 
+          header: {
+            fontWeight: '600',
+            fontSize: `${10 * scaleFactor}px`,
+            marginBottom: `${2 * scaleFactor}px`,
             color: '#2c3e50',
             textAlign: 'center'
           },
-          contact: { 
-            color: '#7f8c8d', 
+          contact: {
+            color: '#7f8c8d',
             fontSize: `${6 * scaleFactor}px`,
             textAlign: 'center'
           },
-          sectionTitle: { 
-            color: '#3498db', 
-            fontWeight: '600', 
+          sectionTitle: {
+            color: '#3498db',
+            fontWeight: '600',
             fontSize: `${8.6 * scaleFactor}px`,  // Larger section headings
-            marginBottom: `${2.5 * scaleFactor}px`, 
-            textTransform: 'uppercase', 
-            letterSpacing: '1px', 
-            borderBottom: '1px solid #000', 
-            paddingBottom: `${1.5 * scaleFactor}px`, 
+            marginBottom: `${2.5 * scaleFactor}px`,
+            textTransform: 'uppercase',
+            letterSpacing: '1px',
+            borderBottom: '1px solid #000',
+            paddingBottom: `${1.5 * scaleFactor}px`,
             textAlign: 'left'
           },
-          company: { 
-            color: '#2c3e50', 
-            fontWeight: '600', 
+          company: {
+            color: '#2c3e50',
+            fontWeight: '600',
             fontSize: `${6 * scaleFactor}px`
           },
-          bullet: { 
-            color: '#374151', 
-            fontSize: `${6 * scaleFactor}px`, 
-            marginLeft: `${3.5 * scaleFactor}px`, 
+          bullet: {
+            color: '#374151',
+            fontSize: `${6 * scaleFactor}px`,
+            marginLeft: `${3.5 * scaleFactor}px`,
             marginBottom: `${Math.max(2, 1.3 * scaleFactor)}px`
           },
-          summary: { 
-            color: '#374151', 
-            fontSize: `${6 * scaleFactor}px`, 
+          summary: {
+            color: '#374151',
+            fontSize: `${6 * scaleFactor}px`,
             marginBottom: `${3 * scaleFactor}px`
           },
-          skills: { 
-            color: '#374151', 
+          skills: {
+            color: '#374151',
             fontSize: `${6 * scaleFactor}px`,
             lineHeight: '1.35'
           },
           item: { marginTop: `${Math.max(2, 2.4 * scaleFactor)}px` }
         };
-      
+
              default:
          // Default to Classic Professional
          return getFormatStyles(DEFAULT_TEMPLATE_ID, fontSize);
@@ -3741,7 +3741,7 @@ const renderAttorneySummaryBlock = (summaryValue) => {
               <button
                 onClick={onSaveForPlugin}
                 disabled={savePluginStatus === 'saving'}
-                title="Save this resume as your plugin template so the HiHired Chrome extension can customize it for job applications"
+                title="Save this resume profile for the HiHired Chrome extension autofill"
                 style={{
                   backgroundColor: savePluginStatus === 'saved' ? '#059669'
                                   : savePluginStatus === 'error' ? '#dc2626'
@@ -3759,9 +3759,9 @@ const renderAttorneySummaryBlock = (summaryValue) => {
                 }}
               >
                 {savePluginStatus === 'saving' ? '⏳ Saving...'
-                : savePluginStatus === 'saved'  ? '✅ Saved for Plugin'
+                : savePluginStatus === 'saved'  ? '✅ Saved for Chrome Extension'
                 : savePluginStatus === 'error'  ? '❌ Save Failed'
-                : '🔌 Save for Plugin'}
+                : '🧩 Save for Chrome Extension'}
               </button>
             )}
           </div>
@@ -3839,4 +3839,4 @@ const renderAttorneySummaryBlock = (summaryValue) => {
     </div>
   );
 };
-export default LivePreview; 
+export default LivePreview;

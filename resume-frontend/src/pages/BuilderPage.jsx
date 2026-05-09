@@ -956,7 +956,7 @@ function BuilderPage() {
   }, [focusTemplateStep]);
   const { user, logout, loading } = useAuth();
   const { triggerFeedbackPrompt, scheduleFollowUp } = useFeedback();
-  const { data, updateData } = useResume();
+  const { data, updateData, saveToDatabaseNow } = useResume();
   const locationHook = useLocation();
   const jobPrefillHandledRef = useRef(false);
   const pendingJobIdRef = useRef(null);
@@ -1190,7 +1190,7 @@ function BuilderPage() {
     [latestRoleInfo]
   );
 
-  
+
   // Load job descriptions from localStorage on component mount
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -2075,7 +2075,7 @@ function BuilderPage() {
         if (exp && typeof exp.description === 'string' && exp.description.trim()) {
           try {
             const optimizedDescription = await generateExperienceAI(
-              exp.description, 
+              exp.description,
               jobDescriptionSource,
               match.matched_skills || [],
               match.missing_skills || []
@@ -2101,8 +2101,8 @@ function BuilderPage() {
         if (project && (project.description?.trim() || project.projectName)) {
           try {
             const optimizedProject = await optimizeProjectAI(
-              project, 
-              jobDescriptionSource, 
+              project,
+              jobDescriptionSource,
               null,
               match.matched_skills || [],
               match.missing_skills || []
@@ -2315,9 +2315,9 @@ function BuilderPage() {
   // Function to format date
   // API base URL function
 
-  // Save current resume HTML for the Chrome extension plugin (no PDF generated).
-  // The cloned DOM already carries all inline styles from the live preview.
-  // We only need the template font + clean PDF overrides — no CSS extraction.
+  // Save the current resume profile + rendered HTML for the Chrome extension.
+  // /api/user/load (used by the extension autofill) reads the structured profile,
+  // while /api/resume/save-html is used as the resume customization template.
   const handleSaveForPlugin = async () => {
     if (!user) {
       alert('Please log in first.');
@@ -2327,6 +2327,12 @@ function BuilderPage() {
     setSavePluginStatus('saving');
     let styleOverride = null;
     try {
+      // Persist structured resume fields first so the Chrome extension can load
+      // name/email/phone/experience via /api/user/load. Previously this button
+      // only saved HTML, which made it look successful while autofill still saw {}.
+      await saveToDatabaseNow();
+
+      // Then save rendered HTML for the extension's resume customization flow.
       // Temporarily remove page-height limits so all content is visible
       styleOverride = document.createElement('style');
       styleOverride.innerHTML = `
@@ -2390,11 +2396,14 @@ function BuilderPage() {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         body: formData,
       });
-      if (!resp.ok) throw new Error('Server error');
+      if (!resp.ok) {
+        const errorText = await resp.text().catch(() => '');
+        throw new Error(errorText || 'Server error');
+      }
 
       setSavePluginStatus('saved');
     } catch (e) {
-      console.error('Save for plugin failed:', e);
+      console.error('Save for Chrome extension failed:', e);
       if (styleOverride && styleOverride.parentNode) styleOverride.parentNode.removeChild(styleOverride);
       setSavePluginStatus('error');
     } finally {
@@ -2464,17 +2473,17 @@ function BuilderPage() {
         wrapper.style.opacity = "1";
       });
       const previewElement = document.querySelector('.live-preview-container');
-      
+
       if (previewElement) {
         // Clone the preview element (no inline style expansion to keep HTML small)
         const clonedElement = previewElement.cloneNode(true);
-        
 
-        
+
+
         // Remove the download button from the cloned element
         const downloadBtns = clonedElement.querySelectorAll('button');
         downloadBtns.forEach(btn => btn.remove());
-        
+
         // IMPORTANT: Remove the outer live-preview-container wrapper's extra spacing/padding
         // which might be causing phantom pages
         if (clonedElement.className === 'live-preview-container') {
@@ -2495,13 +2504,13 @@ function BuilderPage() {
             panel.remove();
           }
         });
-        
+
         // Remove the download button container specifically
         const downloadContainer = clonedElement.querySelector('div[style*="textAlign: center"]');
         if (downloadContainer && downloadContainer.innerHTML.includes('Download PDF')) {
           downloadContainer.remove();
         }
-        
+
         const overlaySelectors = [
           '.page-header',
           '.page-number',
@@ -2518,10 +2527,10 @@ function BuilderPage() {
         overlaySelectors.forEach((selector) => {
           clonedElement.querySelectorAll(selector).forEach((el) => el.remove());
         });
-        
+
         // Debug: Log structure to identify empty page cause
 
-        
+
         // Handle both single-page and multi-page content
         const singlePageContainer = clonedElement.querySelector('.single-page-container');
         const multiPageContainer = clonedElement.querySelector('.multi-page-container');
@@ -2659,7 +2668,7 @@ function BuilderPage() {
             }
           }
         });
-        
+
         // Remove any elements with excessive height that might push content to next page
         const containerDivs = clonedElement.querySelectorAll('[style*="height"]');
         containerDivs.forEach(div => {
@@ -2675,31 +2684,31 @@ function BuilderPage() {
             div.style.minHeight = 'auto';
           }
         });
-        
+
         // Collect essential CSS for PDF generation
         const stylesheets = Array.from(document.styleSheets);
         const cssRules = [];
-        
+
         stylesheets.forEach(sheet => {
           try {
             const rules = Array.from(sheet.cssRules);
             const relevantRules = rules.filter(rule => {
               if (rule.type === CSSRule.STYLE_RULE) {
                 const selector = rule.selectorText || '';
-                return selector.includes('.live-preview-container') || 
-                       selector.includes('.page-wrapper') || 
+                return selector.includes('.live-preview-container') ||
+                       selector.includes('.page-wrapper') ||
                        selector.includes('.single-page-container') ||
                        selector.includes('.page-content');
               }
               return false;
             });
-            
+
             cssRules.push(...relevantRules.map(rule => rule.cssText));
           } catch (e) {
             // Skip inaccessible stylesheets
           }
         });
-        
+
         const filteredCssText = cssRules.join('\n');
 
         // Remove screen-only visual effects that cause a visible edge in PDFs
@@ -2710,7 +2719,7 @@ function BuilderPage() {
 
         // CRITICAL FIX: Apply font size scaling to match preview
         const selectedFontSize = data.selectedFontSize || 'medium';
-        
+
         // Font size multipliers (must match LivePreview.jsx)
         const fontSizeMultipliers = {
           'small': 1.0,
@@ -2718,7 +2727,7 @@ function BuilderPage() {
           'large': 1.5,
           'extra-large': 1.8
         };
-        
+
         // Base scale factor for preview (2x) - same as LivePreview
         const baseScaleFactor = 2;
         const fontScale = baseScaleFactor * (fontSizeMultipliers[selectedFontSize] || 1.0);
@@ -2758,11 +2767,11 @@ function BuilderPage() {
 
         // PDF-specific overrides to ensure consistent rendering (keep minimal)
         const pdfOverrides = `
-          @page { 
-            size: Letter; 
+          @page {
+            size: Letter;
             margin: 0;
           }
-          
+
           /* Allow natural page breaks for long content */
           body {
             orphans: 2;
@@ -2770,7 +2779,7 @@ function BuilderPage() {
             page-break-inside: auto;
             height: auto !important;
           }
-          
+
           /* Ensure sections can break naturally if needed */
           .live-preview-container {
             padding: 0 !important;
@@ -2804,13 +2813,13 @@ function BuilderPage() {
           }
           /* IMPORTANT: Preserve font sizes from inline styles */
           /* Do not override fontSize that's already set inline */
-          div[style*="fontSize"], 
+          div[style*="fontSize"],
           div[style*="font-size"],
           span[style*="fontSize"],
           span[style*="font-size"] {
             /* Their inline font-size should be preserved, not overridden */
           }
-          
+
           /* Ensure page break elements work correctly with multiple CSS approaches */
           div[style*="page-break-before: always"], div[style*="break-before: page"] {
                 page-break-before: always !important;
@@ -2819,14 +2828,14 @@ function BuilderPage() {
                 margin-top: 0 !important;
             padding-top: 16px !important;
           }
-          
+
           /* Multi-page PDF container handling */
           .multi-page-pdf-container {
             width: 100%;
             margin: 0;
             padding: 0;
           }
-          
+
             /* Let the browser decide natural page breaks between logical pages.
                We still keep basic spacing, but avoid forcing an extra blank page
                when content slightly overflows a preview page. */
@@ -2870,20 +2879,20 @@ function BuilderPage() {
             max-height: none !important;
             height: auto !important;
           }
-          
-          html, body { 
-            background: #ffffff !important; 
-            margin: 0 !important; 
-            padding: 0 !important; 
+
+          html, body {
+            background: #ffffff !important;
+            margin: 0 !important;
+            padding: 0 !important;
             color: #000000 !important;
             width: 100% !important;
             max-width: none !important;
             min-width: 100% !important;
           }
-          
+
           /* Ensure all containers are visible and match preview layout */
-          .live-preview-container { 
-            background: #ffffff !important; 
+          .live-preview-container {
+            background: #ffffff !important;
             color: #000000 !important;
             display: block !important;
             visibility: visible !important;
@@ -2898,9 +2907,9 @@ function BuilderPage() {
             padding: 0 !important;
             margin: 0 !important;
           }
-          
-          .single-page-container { 
-            background: #ffffff !important; 
+
+          .single-page-container {
+            background: #ffffff !important;
             color: #000000 !important;
             display: block !important;
             visibility: visible !important;
@@ -2916,19 +2925,19 @@ function BuilderPage() {
             margin: 0 !important;
             box-sizing: border-box !important;
           }
-          
+
           /* Hide multi-page containers since we convert to single-page */
           .multi-page-container, .page-wrapper {
             display: none !important;
           }
-          
+
           /* Remove borders from containers only */
           .live-preview-container, .single-page-container {
             border: none !important;
             box-shadow: none !important;
             outline: none !important;
           }
-          
+
           /* Remove 3D transform effects for straight PDF boundaries */
           .single-page-container {
             transform: none !important;
@@ -2936,14 +2945,14 @@ function BuilderPage() {
             -moz-transform: none !important;
             -ms-transform: none !important;
           }
-          
+
           .single-page-container:hover {
             transform: none !important;
             -webkit-transform: none !important;
             -moz-transform: none !important;
             -ms-transform: none !important;
           }
-          
+
           /* Force all elements to use available width and prevent cutoff */
           * {
             word-wrap: break-word !important;
@@ -2954,12 +2963,12 @@ function BuilderPage() {
             height: auto !important;
             box-sizing: border-box !important;
           }
-          
+
           /* Only force black color on main containers, preserve template colors */
           body, .live-preview-container, .single-page-container {
             color: #000000 !important;
           }
-          
+
           /* Ensure all text containers have full width and proper text handling */
           /* BUT DO NOT override font sizes */
           div, p, span {
@@ -2981,9 +2990,9 @@ function BuilderPage() {
           .skills-inline {
             white-space: pre-wrap !important;
           }
-          
+
           /* Ensure experience and content sections don't get truncated */
-          div[style*="marginBottom: 6px"], 
+          div[style*="marginBottom: 6px"],
           div[style*="margin-bottom: 6px"],
           div[style*="lineHeight"],
           div[style*="line-height"] {
@@ -2995,7 +3004,7 @@ function BuilderPage() {
             word-wrap: break-word !important;
             white-space: normal !important;
           }
-          
+
           /* Add section title borders for separators */
           div[style*="fontSize: 11px"][style*="fontWeight: bold"][style*="textTransform: uppercase"],
           div[style*="font-size: 11px"][style*="font-weight: bold"][style*="text-transform: uppercase"] {
@@ -3004,22 +3013,22 @@ function BuilderPage() {
             margin-bottom: 8px !important;
             width: 100% !important;
           }
-          
+
           /* Hide buttons only */
           button {
             display: none !important;
           }
         `;
-        
 
- 
+
+
         console.log("Current selectedFormat:", selectedFormat);
         console.log("Current data.template:", data.template);
         console.log("Using font for template", selectedFormat, ":", templateFont);
         console.log("Template (selectedFormat):", selectedFormat);
         console.log("Font selected:", templateFont);
         console.log("All data keys:", Object.keys(data));
-        
+
         const htmlContent = `
 <!DOCTYPE html>
 <html>
@@ -3051,7 +3060,7 @@ function BuilderPage() {
     * {
       /* Reset any font-size !important that might override inline styles */
     }
-    
+
     /* Ensure font size scaling from selected size (${selectedFontSize}) is preserved */
     /* The preview scales fonts by ${fontScale}x which should be in inline styles */
   </style>
@@ -3072,27 +3081,27 @@ function BuilderPage() {
         const htmlBlob = new Blob([minHtmlContent], { type: 'text/html' });
         const formData = new FormData();
         formData.append('html', htmlBlob, 'resume.html');
-        
+
         // Add contact info to save in database
         formData.append('name', data.name || '');
         formData.append('email', data.email || '');
         formData.append('phone', data.phone || '');
         formData.append('resumeData', JSON.stringify(data));
         formData.append('format', data.selectedFormat || '');
-        
+
         // Force Chromium engine usage in backend
         formData.append('engine', 'chromium-strict');
 
         // Get token directly and only set Authorization header
         const token = localStorage.getItem('resumeToken');
         console.log('Token for PDF generation:', token); // Debug log
-        
+
         const headers = {};
         if (token) {
           headers['Authorization'] = `Bearer ${token}`;
         }
         console.log('Headers being sent:', headers); // Debug log
-        
+
         fetchInFlight = true;
         fetch(`${getAPIBaseURL()}/api/resume/generate-pdf-file`, {
           method: 'POST',
@@ -3385,7 +3394,7 @@ function BuilderPage() {
           .preview * { font-family: 'Segoe UI', 'Tahoma', sans-serif; }
         `}</style>
       </Helmet>
-      <SEO 
+      <SEO
         title="Free AI Resume Builder, Cover Letter & Job Application Workflow | HiHired"
         description="Build an ATS-friendly resume on hihired.org, customize it to a job description, generate a matching AI cover letter, and continue into Chrome auto-fill for job applications."
         keywords="build resume, create resume, resume builder, AI resume builder, free ai resume builder, AI cover letter generator, chrome auto fill job applications, ATS resume builder, resume maker, write resume, resume template"
@@ -4651,11 +4660,11 @@ function BuilderPage() {
             </button>
           </div>
         </div>
-        <div 
+        <div
           id="resume-preview-container"
-          style={{ 
-            flex: 1, 
-            overflow: 'visible', 
+          style={{
+            flex: 1,
+            overflow: 'visible',
             padding: '1rem',
             background: 'white',
             display: 'flex',
