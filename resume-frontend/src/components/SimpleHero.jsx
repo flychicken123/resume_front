@@ -33,7 +33,7 @@ const SimpleHero = ({ onCreateClick }) => {
       <div className="hero-container">
         <div className="hero-left">
           <h1 className="hero-headline">
-            Land more interviews with a resume tailored to each job
+            Land more interviews with a resume customized to each job
           </h1>
           <p className="hero-description">
             Stop juggling 10 tabs to job hunt. Build your resume, match with jobs,

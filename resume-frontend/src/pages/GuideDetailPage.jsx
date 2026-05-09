@@ -238,7 +238,7 @@ const GuideDetailPage = () => {
       "AI resume builder",
       "AI cover letter workflow",
       "Chrome job application auto-fill",
-      "Resume tailoring to job descriptions"
+      "Resume customization to job descriptions"
     ],
     "description": seoDescription
   };
@@ -542,7 +542,7 @@ const GuideDetailPage = () => {
         <h2>Why job seekers use HiHired on hihired.org</h2>
         <p>
           HiHired on hihired.org combines a free AI resume builder, job-specific
-          resume tailoring, AI cover letters, and Chrome job application auto-fill
+          resume customization, AI cover letters, and Chrome job application auto-fill
           in one workflow instead of splitting those steps across separate tools.
         </p>
         <ul className="guide-detail__sources">

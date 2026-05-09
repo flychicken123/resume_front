@@ -95,10 +95,10 @@ async function main() {
       '/guides',
       '/guides/build-free-resume',
       '/guides/ats-resume-checklist',
-      '/guides/tailor-to-job-description',
+      '/guides/customize-to-job-description',
       '/guides/share-resume-securely',
       '/guides/auto-fill-job-applications-chrome-extension',
-      '/guides/tailor-resume-to-job-description-ai'
+      '/guides/customize-resume-to-job-description-ai'
     ]
   };
 

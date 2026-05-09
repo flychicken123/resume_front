@@ -29,7 +29,7 @@ const HOME_VARIANT_SESSION_KEY = "homeVariantResolved";
 const HOME_FAQ_ITEMS = [
   {
     q: "What is the best free AI resume builder?",
-    a: "HiHired is a strong free AI resume builder option because it combines ATS-optimized templates, job-specific tailoring, PDF export, and matching AI cover letters from the same resume data.",
+    a: "HiHired is a strong free AI resume builder option because it combines ATS-optimized templates, job-specific customization, PDF export, and matching AI cover letters from the same resume data.",
   },
   {
     q: "How do I auto-fill job applications with a Chrome extension?",
@@ -37,7 +37,7 @@ const HOME_FAQ_ITEMS = [
   },
   {
     q: "What is the best free AI cover letter generator?",
-    a: "HiHired includes a free AI cover letter generator that uses your resume and the target job description to write a tailored letter in about a minute.",
+    a: "HiHired includes a free AI cover letter generator that uses your resume and the target job description to write a customized letter in about a minute.",
   },
   {
     q: "What is HiHired on hihired.org?",
@@ -280,8 +280,8 @@ const Home = () => {
     <div>
       <SEO
         title="HiHired | AI Resume Builder, Cover Letters, and Chrome Auto-Fill"
-        description="HiHired helps you build an ATS-friendly resume, generate tailored cover letters, save your job-search profile, and fill applications faster with the HiHired Auto-Fill Chrome extension."
-        keywords="HiHired, AI resume builder, AI cover letter generator, Chrome job application autofill, ATS resume builder, resume tailoring, job application autofill"
+        description="HiHired helps you build an ATS-friendly resume, generate customized cover letters, save your job-search profile, and fill applications faster with the HiHired Auto-Fill Chrome extension."
+        keywords="HiHired, AI resume builder, AI cover letter generator, Chrome job application autofill, ATS resume builder, resume customization, job application autofill"
         canonical="https://hihired.org/"
       />
 
@@ -303,7 +303,7 @@ const Home = () => {
             "isAccessibleForFree": true,
             "featureList": [
               "AI resume builder",
-              "Resume tailoring for job descriptions",
+              "Resume customization for job descriptions",
               "AI cover letter generator",
               "Published Chrome plugin for job application autofill",
               "ATS-friendly resume templates"
@@ -572,7 +572,7 @@ const Home = () => {
               <h3>Build your resume</h3>
               <p>
                 Import your existing PDF or start fresh. AI extracts your experience,
-                optimizes your bullet points, and tailors everything to your target role.
+                optimizes your bullet points, and customizes everything to your target role.
               </p>
             </div>
 
@@ -581,7 +581,7 @@ const Home = () => {
               <h3>Discover matching jobs</h3>
               <p>
                 AI scans 35,000+ active positions and ranks them by how well they fit
-                your skills, experience, and preferences. One-click to tailor your resume for any match.
+                your skills, experience, and preferences. One-click to customize your resume for any match.
               </p>
             </div>
 
@@ -669,7 +669,7 @@ const Home = () => {
               {[
                 ["One saved profile", "Reuse your resume data instead of typing the same details on every site."],
                 ["Application-field autofill", "Fill common fields like contact info, work history, education, and skills faster."],
-                ["Resume + cover letter workflow", "Create tailored documents first, then move into the application step with less copy-paste."],
+                ["Resume + cover letter workflow", "Create customized documents first, then move into the application step with less copy-paste."],
               ].map(([title, description]) => (
                 <div key={title} style={{ padding: "18px", borderRadius: "16px", background: "#eff6ff", border: "1px solid #bfdbfe" }}>
                   <h3 style={{ margin: "0 0 6px", color: "#0f172a", fontSize: "1rem" }}>{title}</h3>
@@ -752,7 +752,7 @@ const Home = () => {
               <div className="feature-title">Your job search copilot</div>
               <div className="feature-description">
                 Ask anything — interview tips, salary negotiation, resume feedback.
-                The AI knows your background and gives advice tailored to your goals, not generic tips.
+                The AI knows your background and gives advice customized to your goals, not generic tips.
               </div>
             </div>
           </div>

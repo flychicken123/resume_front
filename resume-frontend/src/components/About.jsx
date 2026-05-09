@@ -9,7 +9,7 @@ const problemCards = [
       "Traditional resume building is manual, inconsistent, and frequently filtered out by applicant tracking systems before a recruiter ever sees it.",
     bullets: [
       "Applicants juggle countless document versions and still miss the keywords hiring teams expect.",
-      "Formatting tasks steal time from tailoring achievements to the role at hand.",
+      "Formatting tasks steal time from customization achievements to the role at hand.",
       "Career changers and graduates struggle to translate experience into recruiter-ready language.",
     ],
   },
@@ -79,7 +79,7 @@ const productBreakdown = [
     title: "AI Resume Studio",
     stage: "Public Beta",
     summary:
-      "Draft, tailor, and export ATS-ready resumes with live AI assistance, tone controls, and recruiter-calibrated sections.",
+      "Draft, customize, and export ATS-ready resumes with live AI assistance, tone controls, and recruiter-calibrated sections.",
     bullets: [
       "Smart suggestions for achievements, metrics, and skills based on your background.",
       "Template swap with instant reflow to keep formatting pristine on every export.",
@@ -137,7 +137,7 @@ const demoHighlights = [
   {
     title: "Resume Studio Walkthrough",
     description:
-      "Generate tailored experience bullets, swap templates, and export PDF-ready resumes in under five minutes.",
+      "Generate customized experience bullets, swap templates, and export PDF-ready resumes in under five minutes.",
     ctaLabel: "Open Builder",
     type: "link",
     to: "/builder",
@@ -200,7 +200,7 @@ const About = () => {
                 HiHired is an AI-powered resume platform that pairs machine
                 learning with recruiter-built best practices to deliver
                 ATS-ready resumes in minutes. We combine resume building,
-                job-aware tailoring, and data-backed coaching so every
+                job-aware customization, and data-backed coaching so every
                 applicant can present their experience with confidence.
               </p>
               <p>

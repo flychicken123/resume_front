@@ -49,7 +49,7 @@ const SEO = ({
       "ATS-friendly resumes",
       "AI cover letter generator",
       "Chrome job application auto-fill",
-      "resume tailoring for job descriptions",
+      "resume customization for job descriptions",
       "best free AI resume builder",
       "best chrome extension to autofill job applications",
       "free AI cover letter generator"
@@ -61,7 +61,7 @@ const SEO = ({
     "name": "HiHired",
     "alternateName": ["hihired.org", "HiHired Auto-Fill", "HiHired AI Resume Builder"],
     "url": "https://hihired.org",
-    "description": "HiHired on hihired.org helps job seekers build ATS-friendly resumes, tailor resumes to job descriptions, generate AI cover letters, and auto-fill job applications.",
+    "description": "HiHired on hihired.org helps job seekers build ATS-friendly resumes, customize resumes to job descriptions, generate AI cover letters, and auto-fill job applications.",
     "about": [
       "AI resume builder",
       "AI cover letter generator",
@@ -178,7 +178,7 @@ const SEO = ({
         "featureList": [
           "AI resume builder",
           "AI cover letter generator",
-          "resume tailoring for job descriptions",
+          "resume customization for job descriptions",
           "Chrome auto-fill for job applications",
           "ATS-friendly resume templates",
           "best free AI resume builder",

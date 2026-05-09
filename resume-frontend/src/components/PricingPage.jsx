@@ -840,7 +840,7 @@ const PricingPage = () => {
 
             <Link to="/guides/best-free-ai-resume-builder-2026" className="feature-card" style={{ textDecoration: 'none' }}>
               <h3 className="feature-title">best free AI resume builder</h3>
-              <p className="feature-description">See how HiHired combines ATS-friendly resume building, job-specific tailoring, and recruiter-ready PDF export.</p>
+              <p className="feature-description">See how HiHired combines ATS-friendly resume building, job-specific customization, and recruiter-ready PDF export.</p>
             </Link>
 
             <Link to="/guides/auto-fill-job-applications-chrome-extension" className="feature-card" style={{ textDecoration: 'none' }}>

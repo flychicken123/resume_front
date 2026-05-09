@@ -3741,7 +3741,7 @@ const renderAttorneySummaryBlock = (summaryValue) => {
               <button
                 onClick={onSaveForPlugin}
                 disabled={savePluginStatus === 'saving'}
-                title="Save this resume as your plugin template so the HiHired Chrome extension can tailor it for job applications"
+                title="Save this resume as your plugin template so the HiHired Chrome extension can customize it for job applications"
                 style={{
                   backgroundColor: savePluginStatus === 'saved' ? '#059669'
                                   : savePluginStatus === 'error' ? '#dc2626'

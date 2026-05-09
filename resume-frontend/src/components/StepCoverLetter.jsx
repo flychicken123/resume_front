@@ -154,7 +154,7 @@ const StepCoverLetter = ({ onGeneratePremiumFeature }) => {
             For job-customized letters, first fill the{" "}
             <strong>Job Description (Optional)</strong> section in the builder. We’ll use your
             latest generated resume as the core context and, when available, the job description
-            content to tailor the letter.
+            content to customize the letter.
           </p>
 
           {error && <div className="error-message">{error}</div>}

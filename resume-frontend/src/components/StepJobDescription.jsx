@@ -173,7 +173,7 @@ const StepJobDescription = ({ jobDescriptions, onJobDescriptionsChange }) => {
       <div style={{ marginBottom: '1.5rem' }}>
         <h2 style={{ margin: 0, color: '#1f2937', fontSize: '1.75rem' }}>Job Description</h2>
         <p style={{ color: '#6b7280', marginTop: '0.5rem', lineHeight: 1.6 }}>
-          Add one or more job descriptions so our AI can tailor your resume and cover letter to the exact roles you care about.
+          Add one or more job descriptions so our AI can customize your resume and cover letter to the exact roles you care about.
         </p>
       </div>
 
@@ -304,7 +304,7 @@ const StepJobDescription = ({ jobDescriptions, onJobDescriptionsChange }) => {
               id={`job-description-textarea-${entry.id}`}
               value={entry.text}
               onChange={(e) => handleTextChange(entry.id, e.target.value)}
-              placeholder="Paste the job description here to enable AI tailoring across your resume and cover letters."
+              placeholder="Paste the job description here to enable AI customization across your resume and cover letters."
               rows={10}
               style={{
                 width: '100%',
@@ -381,7 +381,7 @@ const StepJobDescription = ({ jobDescriptions, onJobDescriptionsChange }) => {
           lineHeight: 1.5,
         }}
       >
-        📌 Add multiple job descriptions to tailor your resume to different roles in one go. We’ll use every entry when generating content and suggestions.
+        📌 Add multiple job descriptions to customize your resume to different roles in one go. We’ll use every entry when generating content and suggestions.
       </div>
     </div>
   );

@@ -56,7 +56,7 @@ function App() {
             <FeedbackProvider>
               <SEO
                 title="Free AI Resume Builder — Create Professional Resumes | HiHired"
-                description="Build a professional, ATS-friendly resume in minutes with our free AI resume builder. No signup required. Choose templates, tailor to job descriptions, and download as PDF."
+                description="Build a professional, ATS-friendly resume in minutes with our free AI resume builder. No signup required. Choose templates, customize to job descriptions, and download as PDF."
                 ogImage="https://hihired.org/og-image.png"
               />
               <Analytics />

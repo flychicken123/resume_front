@@ -31,7 +31,7 @@ import { useLocation } from "react-router-dom";
 const INITIAL_MESSAGES = [
   {
     sender: 'bot',
-    text: "Hey! I'm your HiHired assistant. Job searching can be tough, but you don't have to do it alone. I can help you craft a standout resume, find job matches tailored to your skills, and keep your applications on track.",
+    text: "Hey! I'm your HiHired assistant. Job searching can be tough, but you don't have to do it alone. I can help you craft a standout resume, find job matches customized to your skills, and keep your applications on track.",
   },
   {
     sender: 'bot',

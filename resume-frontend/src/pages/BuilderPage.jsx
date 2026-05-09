@@ -816,9 +816,9 @@ function BuilderPage() {
   const geocoderLastQueryRef = useRef('');
   const [isResumeGenerating, setIsResumeGenerating] = useState(false);
   const [navigateToJobMatchesPending, setNavigateToJobMatchesPending] = useState(false);
-  const [tailorActiveJobId, setTailorActiveJobId] = useState(null);
-  const [tailorNotice, setTailorNotice] = useState(null);
-  const [tailorError, setTailorError] = useState(null);
+  const [customizeActiveJobId, setCustomizeActiveJobId] = useState(null);
+  const [customizeNotice, setCustomizeNotice] = useState(null);
+  const [customizeError, setCustomizeError] = useState(null);
   const [trackedJobIds, setTrackedJobIds] = useState(new Set());
   const [trackingInProgress, setTrackingInProgress] = useState(null);
   const [hoveredMatchKey, setHoveredMatchKey] = useState(null);
@@ -1512,7 +1512,7 @@ function BuilderPage() {
         );
       } else if (jobTitle) {
         reasons.push(
-          `Hiring managers are prioritizing the ${jobTitle} seat right now, so your tailored resume lands while the opportunity is hot.`
+          `Hiring managers are prioritizing the ${jobTitle} seat right now, so your customized resume lands while the opportunity is hot.`
         );
       }
 
@@ -2030,43 +2030,43 @@ function BuilderPage() {
         job_location: match.job_location || '',
       });
       setTrackedJobIds((prev) => new Set(prev).add(key));
-      setTailorNotice('Application added to tracker!');
+      setCustomizeNotice('Application added to tracker!');
     } catch (err) {
       if (err.message && err.message.includes('already exists')) {
         setTrackedJobIds((prev) => new Set(prev).add(key));
-        setTailorNotice('Already tracking this application.');
+        setCustomizeNotice('Already tracking this application.');
       } else {
-        setTailorError(err.message || 'Failed to track application.');
+        setCustomizeError(err.message || 'Failed to track application.');
       }
     } finally {
       setTrackingInProgress(null);
     }
   }, [user, trackedJobIds]);
 
-  const handleAutoTailorResume = useCallback(async (match) => {
+  const handleAutoCustomizeResume = useCallback(async (match) => {
     if (!match) {
-      setTailorError('Unable to run One-Click AI Resume: job details are missing.');
+      setCustomizeError('Unable to run One-Click AI Resume: job details are missing.');
       return;
     }
     if (!user) {
-      setTailorError('Please sign in to use One-Click AI Resume.');
+      setCustomizeError('Please sign in to use One-Click AI Resume.');
       return;
     }
     if (!data) {
-      setTailorError('Resume data has not loaded yet. Please try again in a moment.');
+      setCustomizeError('Resume data has not loaded yet. Please try again in a moment.');
       return;
     }
 
     const jobDescriptionSource = ((match.job_description || '').trim()) || trimmedJobDescription;
     if (!jobDescriptionSource) {
-      setTailorError('This job does not include a description yet. Add a job description to use One-Click AI Resume.');
+      setCustomizeError('This job does not include a description yet. Add a job description to use One-Click AI Resume.');
       return;
     }
 
     const jobKey = getMatchKey(match);
-    setTailorActiveJobId(jobKey);
-    setTailorError(null);
-    setTailorNotice(null);
+    setCustomizeActiveJobId(jobKey);
+    setCustomizeError(null);
+    setCustomizeNotice(null);
 
     try {
       const experiences = Array.isArray(data.experiences) ? data.experiences : [];
@@ -2177,12 +2177,12 @@ function BuilderPage() {
         summary: updatedSummary || data.summary,
       });
 
-      setTailorNotice(`One-Click AI Resume generated for ${match.job_title || 'this job'}. Review and tweak before downloading.`);
+      setCustomizeNotice(`One-Click AI Resume generated for ${match.job_title || 'this job'}. Review and tweak before downloading.`);
     } catch (err) {
       console.error('Failed to run One-Click AI Resume', err);
-      setTailorError(err.message || 'Failed to run One-Click AI Resume.');
+      setCustomizeError(err.message || 'Failed to run One-Click AI Resume.');
     } finally {
-      setTailorActiveJobId(null);
+      setCustomizeActiveJobId(null);
     }
   }, [data, combinedJobDescription, updateData, user]);
   useEffect(() => {
@@ -3387,7 +3387,7 @@ function BuilderPage() {
       </Helmet>
       <SEO 
         title="Free AI Resume Builder, Cover Letter & Job Application Workflow | HiHired"
-        description="Build an ATS-friendly resume on hihired.org, tailor it to a job description, generate a matching AI cover letter, and continue into Chrome auto-fill for job applications."
+        description="Build an ATS-friendly resume on hihired.org, customize it to a job description, generate a matching AI cover letter, and continue into Chrome auto-fill for job applications."
         keywords="build resume, create resume, resume builder, AI resume builder, free ai resume builder, AI cover letter generator, chrome auto fill job applications, ATS resume builder, resume maker, write resume, resume template"
         canonical="https://hihired.org/builder"
       />
@@ -3927,15 +3927,15 @@ function BuilderPage() {
                     <div style={{ color: '#b91c1c', fontSize: '0.9rem' }}>{jobMatchesError}</div>
                   )}
 
-                  {tailorError && (
+                  {customizeError && (
                     <div style={{ background: '#fee2e2', border: '1px solid #fca5a5', color: '#b91c1c', padding: '0.75rem 1rem', borderRadius: '8px', marginBottom: '0.75rem' }}>
-                      {tailorError}
+                      {customizeError}
                     </div>
                   )}
 
-                  {tailorNotice && (
+                  {customizeNotice && (
                     <div style={{ background: '#ecfdf5', border: '1px solid #34d399', color: '#065f46', padding: '0.75rem 1rem', borderRadius: '8px', marginBottom: '0.75rem' }}>
-                      {tailorNotice}
+                      {customizeNotice}
                     </div>
                   )}
 
@@ -4098,20 +4098,20 @@ function BuilderPage() {
                         )}
                         <button
                           type="button"
-                          onClick={() => handleAutoTailorResume(topMatch)}
-                          disabled={tailorActiveJobId === topMatchKey || !topMatchHasDescription}
+                          onClick={() => handleAutoCustomizeResume(topMatch)}
+                          disabled={customizeActiveJobId === topMatchKey || !topMatchHasDescription}
                           style={{
                             padding: '0.45rem 0.9rem',
                             borderRadius: '999px',
                             border: '1px solid #0ea5e9',
-                            background: tailorActiveJobId === topMatchKey ? '#bae6fd' : '#e0f2fe',
+                            background: customizeActiveJobId === topMatchKey ? '#bae6fd' : '#e0f2fe',
                             color: '#0369a1',
                             fontWeight: 600,
-                            cursor: tailorActiveJobId === topMatchKey || !topMatchHasDescription ? 'not-allowed' : 'pointer',
+                            cursor: customizeActiveJobId === topMatchKey || !topMatchHasDescription ? 'not-allowed' : 'pointer',
                             fontSize: '0.85rem',
                           }}
                         >
-                          {tailorActiveJobId === topMatchKey ? 'Generating…' : 'One-Click AI Resume'}
+                          {customizeActiveJobId === topMatchKey ? 'Generating…' : 'One-Click AI Resume'}
                         </button>
                         <button
                           type="button"
@@ -4182,7 +4182,7 @@ function BuilderPage() {
                     <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: '0.75rem' }}>
                       {paginatedMatches.map((match, index) => {
                         const matchKey = getMatchKey(match) || `match-${index}`;
-                        const canTailorMatch = Boolean(((match.job_description || '').trim()) || trimmedJobDescription);
+                        const canCustomizeMatch = Boolean(((match.job_description || '').trim()) || trimmedJobDescription);
                         // Top 5 highlight: on page 0, indices 0-3 are positions 2-5 (topMatch is position 1)
                         const isTopFive = jobMatchesPage === 0 && index < 4;
                         return (
@@ -4322,20 +4322,20 @@ function BuilderPage() {
                                 )}
                                 <button
                                   type="button"
-                                  onClick={() => handleAutoTailorResume(match)}
-                                  disabled={tailorActiveJobId === matchKey || !canTailorMatch}
+                                  onClick={() => handleAutoCustomizeResume(match)}
+                                  disabled={customizeActiveJobId === matchKey || !canCustomizeMatch}
                                   style={{
                                     padding: '0.35rem 0.8rem',
                                     borderRadius: '999px',
                                     border: '1px solid #0ea5e9',
-                                    background: tailorActiveJobId === matchKey ? '#bae6fd' : '#e0f2fe',
+                                    background: customizeActiveJobId === matchKey ? '#bae6fd' : '#e0f2fe',
                                     color: '#0369a1',
                                     fontWeight: 600,
-                                    cursor: tailorActiveJobId === matchKey || !canTailorMatch ? 'not-allowed' : 'pointer',
+                                    cursor: customizeActiveJobId === matchKey || !canCustomizeMatch ? 'not-allowed' : 'pointer',
                                     fontSize: '0.8rem',
                                   }}
                                 >
-                                  {tailorActiveJobId === matchKey ? 'Generating…' : 'One-Click AI Resume'}
+                                  {customizeActiveJobId === matchKey ? 'Generating…' : 'One-Click AI Resume'}
                                 </button>
                                 <button
                                   type="button"
@@ -4394,7 +4394,7 @@ function BuilderPage() {
                                 </div>
                               )}
                             </div>
-                            {!canTailorMatch && (
+                            {!canCustomizeMatch && (
                               <span style={{ color: '#f97316', fontSize: '0.75rem' }}>Add a job description to enable One-Click AI Resume.</span>
                             )}
                           </li>

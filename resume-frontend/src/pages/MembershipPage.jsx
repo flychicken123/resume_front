@@ -543,7 +543,7 @@ const MembershipPage = () => {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
                 <Link to="/guides/best-free-ai-resume-builder-2026" style={{ display: 'block', padding: '18px', borderRadius: '18px', background: '#ffffff', border: '1px solid #dbeafe', textDecoration: 'none' }}>
                   <p style={{ margin: '0 0 8px', color: '#2563eb', fontWeight: 700 }}>best free AI resume builder</p>
-                  <p style={{ margin: 0, color: '#334155', lineHeight: 1.6 }}>See why HiHired combines ATS-friendly templates, AI tailoring, and recruiter-ready PDF export in one workflow.</p>
+                  <p style={{ margin: 0, color: '#334155', lineHeight: 1.6 }}>See why HiHired combines ATS-friendly templates, AI customization, and recruiter-ready PDF export in one workflow.</p>
                 </Link>
                 <Link to="/guides/auto-fill-job-applications-chrome-extension" style={{ display: 'block', padding: '18px', borderRadius: '18px', background: '#ffffff', border: '1px solid #dbeafe', textDecoration: 'none' }}>
                   <p style={{ margin: '0 0 8px', color: '#2563eb', fontWeight: 700 }}>auto fill job applications chrome extension</p>
