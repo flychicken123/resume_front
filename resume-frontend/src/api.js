@@ -601,7 +601,7 @@ export async function optimizeProjectAI(projectData, jobDescription = '', existi
 
   const responseData = raw && typeof raw === 'object' ? raw.data || raw : {};
   // Fall back to original text if backend returns nothing
-  return responseData.optimizedProject || projectData || '';
+  return normalizeAITextResponse(responseData.optimizedProject) || projectData || '';
 }
 
 export async function improveProjectGrammarAI(projectData) {
@@ -621,7 +621,7 @@ export async function improveProjectGrammarAI(projectData) {
   }
 
   const payload = raw && typeof raw === 'object' ? raw.data || raw : {};
-  return payload.improvedProject || projectData || '';
+  return normalizeAITextResponse(payload.improvedProject) || projectData || '';
 }
 
 export async function improveSummaryGrammarAI(summary) {
