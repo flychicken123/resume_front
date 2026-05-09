@@ -560,52 +560,6 @@ const Home = () => {
       />
 
 
-      {/* How It Works */}
-      <section className="how-it-works" id="how-it-works">
-        <div className="how-it-works-content">
-          <h2>How it works</h2>
-          <p className="how-it-works-subtitle">From resume to offer — one platform</p>
-
-          <div className="steps-grid">
-            <div className="step-card">
-              <div className="step-number">1</div>
-              <h3>Build your resume</h3>
-              <p>
-                Import your existing PDF or start fresh. AI extracts your experience,
-                optimizes your bullet points, and customizes everything to your target role.
-              </p>
-            </div>
-
-            <div className="step-card">
-              <div className="step-number">2</div>
-              <h3>Discover matching jobs</h3>
-              <p>
-                AI scans 35,000+ active positions and ranks them by how well they fit
-                your skills, experience, and preferences. One-click to customize your resume for any match.
-              </p>
-            </div>
-
-            <div className="step-card">
-              <div className="step-number">3</div>
-              <h3>Apply and track</h3>
-              <p>
-                Download your ATS-optimized PDF, track every application on a Kanban board,
-                and get AI-powered follow-up reminders so nothing falls through the cracks.
-              </p>
-            </div>
-          </div>
-
-          <div className="how-it-works-cta">
-            <button
-              className="home-btn primary"
-              onClick={() => openBuilderFrom("home_howitworks_cta", { targetStep: BUILDER_TARGET_IMPORT })}
-            >
-              Try it free
-            </button>
-          </div>
-        </div>
-      </section>
-
       <section
         id="chrome-extension"
         style={{
@@ -687,6 +641,52 @@ const Home = () => {
               Watch HiHired generate a resume from a real Toast job description, open the Chrome extension,
               click Fill Application, and complete the form without submitting it.
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="how-it-works" id="how-it-works">
+        <div className="how-it-works-content">
+          <h2>How it works</h2>
+          <p className="how-it-works-subtitle">From resume to offer — one platform</p>
+
+          <div className="steps-grid">
+            <div className="step-card">
+              <div className="step-number">1</div>
+              <h3>Build your resume</h3>
+              <p>
+                Import your existing PDF or start fresh. AI extracts your experience,
+                optimizes your bullet points, and customizes everything to your target role.
+              </p>
+            </div>
+
+            <div className="step-card">
+              <div className="step-number">2</div>
+              <h3>Discover matching jobs</h3>
+              <p>
+                AI scans 35,000+ active positions and ranks them by how well they fit
+                your skills, experience, and preferences. One-click to customize your resume for any match.
+              </p>
+            </div>
+
+            <div className="step-card">
+              <div className="step-number">3</div>
+              <h3>Apply and track</h3>
+              <p>
+                Download your ATS-optimized PDF, track every application on a Kanban board,
+                and get AI-powered follow-up reminders so nothing falls through the cracks.
+              </p>
+            </div>
+          </div>
+
+          <div className="how-it-works-cta">
+            <button
+              className="home-btn primary"
+              onClick={() => openBuilderFrom("home_howitworks_cta", { targetStep: BUILDER_TARGET_IMPORT })}
+            >
+              Try it free
+            </button>
           </div>
         </div>
       </section>
