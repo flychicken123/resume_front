@@ -658,25 +658,35 @@ const Home = () => {
           </div>
           <div
             style={{
-              background: "#ffffff",
-              border: "1px solid #dbeafe",
+              background: "#0f172a",
+              border: "1px solid #1e3a8a",
               borderRadius: "24px",
-              padding: "28px",
-              boxShadow: "0 18px 45px rgba(37, 99, 235, 0.12)",
+              padding: "14px",
+              boxShadow: "0 18px 45px rgba(37, 99, 235, 0.18)",
             }}
           >
-            <div style={{ display: "grid", gap: "16px" }}>
-              {[
-                ["One saved profile", "Reuse your resume data instead of typing the same details on every site."],
-                ["Application-field autofill", "Fill common fields like contact info, work history, education, and skills faster."],
-                ["Resume + cover letter workflow", "Create customized documents first, then move into the application step with less copy-paste."],
-              ].map(([title, description]) => (
-                <div key={title} style={{ padding: "18px", borderRadius: "16px", background: "#eff6ff", border: "1px solid #bfdbfe" }}>
-                  <h3 style={{ margin: "0 0 6px", color: "#0f172a", fontSize: "1rem" }}>{title}</h3>
-                  <p style={{ margin: 0, color: "#475569", lineHeight: 1.6 }}>{description}</p>
-                </div>
-              ))}
-            </div>
+            <video
+              controls
+              playsInline
+              preload="metadata"
+              poster="/og-image.png"
+              style={{
+                width: "100%",
+                display: "block",
+                borderRadius: "18px",
+                background: "#020617",
+                aspectRatio: "9 / 16",
+                objectFit: "cover",
+              }}
+              aria-label="HiHired Chrome extension demo filling a Toast job application"
+            >
+              <source src="/videos/hihired-toast-autofill-demo.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+            <p style={{ margin: "12px 4px 2px", color: "#cbd5e1", lineHeight: 1.6, fontSize: "0.95rem" }}>
+              Watch HiHired generate a resume from a real Toast job description, open the Chrome extension,
+              click Fill Application, and complete the form without submitting it.
+            </p>
           </div>
         </div>
       </section>

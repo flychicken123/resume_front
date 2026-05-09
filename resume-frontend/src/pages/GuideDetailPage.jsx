@@ -406,6 +406,47 @@ const GuideDetailPage = () => {
         </div>
       </header>
 
+      {guide.slug === "auto-fill-job-applications-chrome-extension" ? (
+        <section className="guide-detail__section" id="demo-video">
+          <h2>Watch HiHired Auto-Fill on a real job application</h2>
+          <p>
+            This demo shows the Toast job page and the real HiHired Chrome extension popup on screen:
+            generate a resume from the job description, attach it, click Fill Application, and review the
+            completed form before submitting.
+          </p>
+          <div
+            style={{
+              maxWidth: "560px",
+              margin: "20px auto 0",
+              padding: "12px",
+              borderRadius: "24px",
+              background: "#0f172a",
+              border: "1px solid #1e3a8a",
+              boxShadow: "0 18px 45px rgba(37, 99, 235, 0.16)",
+            }}
+          >
+            <video
+              controls
+              playsInline
+              preload="metadata"
+              poster="/og-image.png"
+              style={{
+                width: "100%",
+                display: "block",
+                borderRadius: "18px",
+                background: "#020617",
+                aspectRatio: "9 / 16",
+                objectFit: "cover",
+              }}
+              aria-label="HiHired Chrome extension demo filling a Toast job application"
+            >
+              <source src="/videos/hihired-toast-autofill-demo.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        </section>
+      ) : null}
+
       <section className="guide-detail__section">
         <h2>Step-by-step instructions</h2>
         <ol className="guide-detail__steps">
