@@ -65,7 +65,6 @@ const StepSkills = () => {
         alert('AI could not extract any skills yet. Try adding more experience, projects, or education.');
       }
     } catch (error) {
-      // eslint-disable-next-line no-console
       console.error('Failed to auto-generate skills:', error);
       alert('Failed to auto-generate skills from AI. Please try again.');
     } finally {
@@ -95,7 +94,6 @@ const StepSkills = () => {
         alert('AI could not categorize your skills yet. Try refining your skills list.');
       }
     } catch (error) {
-      // eslint-disable-next-line no-console
       console.error('Failed to categorize skills:', error);
       alert('Failed to categorize skills with AI. Please try again.');
     } finally {

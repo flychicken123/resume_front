@@ -95,7 +95,7 @@ function BenchmarkTab({ benchmarkSummary, setBenchmarkSummary, benchmarkHistory,
     };
     load();
     return () => { if (benchmarkPollRef.current) clearInterval(benchmarkPollRef.current); };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleRun = async (type) => {
     setLoading(true);

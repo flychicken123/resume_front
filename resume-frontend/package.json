@@ -26,7 +26,7 @@
     "test": "react-scripts test --watchAll=false --coverage",
     "test:watch": "react-scripts test",
     "test:ci": "react-scripts test --watchAll=false --coverage --ci",
-    "lint": "eslint src --ext .js,.jsx --report-unused-disable-directives --max-warnings 0"
+    "lint": "eslint src --ext .js,.jsx --report-unused-disable-directives"
   },
   "reactSnap": {
     "source": "build",

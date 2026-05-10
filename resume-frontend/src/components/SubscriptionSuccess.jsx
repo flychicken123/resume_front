@@ -22,7 +22,7 @@ const SubscriptionSuccess = () => {
         'transaction_id': sessionId || ''
       });
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const confirmSession = async () => {

@@ -186,7 +186,6 @@ export const ExperimentProvider = ({ children }) => {
       );
     } catch (error) {
       // Experiment tracking is best-effort only; never break the UI.
-      // eslint-disable-next-line no-console
       console.warn('[Experiment] Failed to record event', {
         experimentKey: key,
         eventName,

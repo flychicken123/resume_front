@@ -1657,7 +1657,7 @@ function BuilderPage() {
     };
     const timer = setTimeout(fetchFiltered, 500);
     return () => { clearTimeout(timer); controller.abort(); };
-  }, [jobDislikeKeywords, isUSPreferredLocation, remoteOnlyFilter]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [jobDislikeKeywords, isUSPreferredLocation, remoteOnlyFilter]);
 
   // Dismiss filter stays client-side (optimistic with undo toast)
   const visibleJobMatches = useMemo(() => {

@@ -527,7 +527,7 @@ const ChatWidgetInner = () => {
       // Corrupted data — ignore
     }
     chatStorageLoadedRef.current = true;
-  }, [user?.email]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [user?.email]);
 
   // Auto-persist messages to localStorage whenever they change
   useEffect(() => {

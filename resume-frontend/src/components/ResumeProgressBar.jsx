@@ -72,7 +72,7 @@ const ResumeProgressBar = ({ resumeData, jobDescriptions, onSectionClick }) => {
   // Fetch encouragement on mount and whenever completion changes
   useEffect(() => {
     fetchProgress();
-  }, [cacheKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [cacheKey]);
 
   const handleMouseEnter = () => {
     hoverTimerRef.current = setTimeout(() => {
