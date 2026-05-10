@@ -44,6 +44,14 @@ describe('API Functions', () => {
     expect(generateSummaryAI).toBeDefined();
   });
 
+  it('should have optimizeProjectAI function', () => {
+    expect(optimizeProjectAI).toBeDefined();
+  });
+
+  it('should have improveProjectGrammarAI function', () => {
+    expect(improveProjectGrammarAI).toBeDefined();
+  });
+
   it('should have parseResumeFile function', () => {
     expect(parseResumeFile).toBeDefined();
   });
