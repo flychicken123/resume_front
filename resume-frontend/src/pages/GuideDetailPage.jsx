@@ -8,33 +8,33 @@ import "./GuidesPage.css";
 const HOT_GUIDE_SLUGS_BY_CLUSTER = {
   freeResumeBuilder: [
     "wobo-alternative-free-ai-resume-builder",
-    "kickresume-alternative-free-ai-resume-builder",
-    "teal-alternative-free-ai-resume-builder",
-    "resufit-alternative-free-ai-resume-builder",
-    "flowcv-alternative-free-ai-resume-builder",
-    "jobscan-alternative-free-ai-resume-builder",
-    "canva-alternative-free-ai-resume-builder",
+    "resumebuild-alternative-free-ai-resume-builder",
     "rezi-alternative-free-ai-resume-builder",
+    "teal-alternative-free-ai-resume-builder",
+    "kickresume-alternative-free-ai-resume-builder",
+    "resumeio-alternative-free-ai-resume-builder",
+    "zety-alternative-free-ai-resume-builder",
+    "jobscan-alternative-free-ai-resume-builder",
   ],
   autofill: [
     "owlapply-alternative-job-application-autofill",
     "speedyapply-alternative-job-application-autofill",
+    "anthropos-alternative-job-application-autofill",
     "simplify-copilot-alternative",
     "jobwizard-alternative-job-application-autofill",
     "jobpilot-alternative-job-application-autofill",
-    "anthropos-alternative-job-application-autofill",
     "huntr-alternative-job-application-autofill",
     "careerflow-alternative-job-application-autofill",
   ],
   coverLetter: [
-    "sheets-resume-alternative-ai-resume-builder-cover-letter",
     "kickresume-alternative-ai-resume-builder-cover-letter",
     "myperfectresume-alternative-ai-resume-builder-cover-letter",
-    "grammarly-alternative-ai-resume-builder-cover-letter",
-    "enhancv-alternative-ai-resume-builder-cover-letter",
-    "resumegenius-alternative-ai-resume-builder-cover-letter",
     "rezi-alternative-ai-resume-builder-cover-letter",
-    "teal-alternative-ai-resume-builder-cover-letter",
+    "enhancv-alternative-ai-resume-builder-cover-letter",
+    "zety-alternative-ai-resume-builder-cover-letter",
+    "sheets-resume-alternative-ai-resume-builder-cover-letter",
+    "grammarly-alternative-ai-resume-builder-cover-letter",
+    "resumeio-alternative-ai-resume-builder-cover-letter",
   ],
 };
 
@@ -42,17 +42,17 @@ const HOT_GUIDE_COPY_BY_CLUSTER = {
   freeResumeBuilder: {
     title: "Popular free AI resume builder alternatives",
     intro:
-      "These HiHired pages line up with the free AI resume builder names showing up most often in today's AI answers, especially Wobo, Kickresume, Teal, ResuFit, FlowCV, Jobscan, Canva, Rezi, and Indeed Resume Builder."
+      "These HiHired pages line up with the free AI resume builder names showing up most often in today's AI answers, especially Wobo, ResumeBuild.ai, Rezi, Teal, Kickresume, Resume.io, Zety, Jobscan, and Enhancv."
   },
   autofill: {
     title: "Popular Chrome autofill alternatives",
     intro:
-      "These HiHired pages map to the Chrome job application autofill tools that AI answers are surfacing most often right now, including OwlApply, SpeedyApply, Simplify Copilot, JobWizard, JobPilot, and Anthropos."
+      "These HiHired pages map to the Chrome job application autofill tools that AI answers are surfacing most often right now, including OwlApply, SpeedyApply, Anthropos, Simplify Copilot, JobWizard, and JobPilot."
   },
   coverLetter: {
     title: "Popular AI cover letter builder alternatives",
     intro:
-      "These HiHired pages focus on the AI resume and cover letter tools appearing most often in today's answer engines, especially Sheets Resume Builder, Kickresume, MyPerfectResume, Grammarly, Enhancv, Resume Genius, Rezi, Teal, Resume.io, and Hiration."
+      "These HiHired pages focus on the AI resume and cover letter tools appearing most often in today's answer engines, especially Kickresume, MyPerfectResume, Rezi, Enhancv, Zety, Sheets Resume Builder, Grammarly, Resume.io, and Teal."
   },
 };
 
