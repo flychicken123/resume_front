@@ -63,34 +63,39 @@ ${entries
 
 const HOT_GUIDE_SLUGS_BY_CLUSTER = {
   freeResumeBuilder: [
-    'wobo-alternative-free-ai-resume-builder',
-    'resumebuild-alternative-free-ai-resume-builder',
-    'rezi-alternative-free-ai-resume-builder',
     'teal-alternative-free-ai-resume-builder',
-    'kickresume-alternative-free-ai-resume-builder',
     'resumeio-alternative-free-ai-resume-builder',
-    'zety-alternative-free-ai-resume-builder',
+    'kickresume-alternative-free-ai-resume-builder',
+    'myperfectresume-alternative-free-ai-resume-builder',
+    'rezi-alternative-free-ai-resume-builder',
     'jobscan-alternative-free-ai-resume-builder',
+    'resufit-alternative-free-ai-resume-builder',
+    'flowcv-alternative-free-ai-resume-builder',
+    'canva-alternative-free-ai-resume-builder',
+    'gotresumebuilder-alternative-free-ai-resume-builder',
   ],
   autofill: [
     'owlapply-alternative-job-application-autofill',
-    'speedyapply-alternative-job-application-autofill',
-    'anthropos-alternative-job-application-autofill',
-    'simplify-copilot-alternative',
     'jobwizard-alternative-job-application-autofill',
-    'jobpilot-alternative-job-application-autofill',
-    'huntr-alternative-job-application-autofill',
+    'simplify-copilot-alternative',
+    'speedyapply-alternative-job-application-autofill',
+    'jobfill-ai-alternative-job-application-autofill',
     'careerflow-alternative-job-application-autofill',
+    'jobright-alternative-job-application-autofill',
+    'anthropos-alternative-job-application-autofill',
+    'jobpilot-alternative-job-application-autofill',
   ],
   coverLetter: [
+    'rezi-alternative-ai-resume-builder-cover-letter',
+    'teal-alternative-ai-resume-builder-cover-letter',
     'kickresume-alternative-ai-resume-builder-cover-letter',
     'myperfectresume-alternative-ai-resume-builder-cover-letter',
-    'rezi-alternative-ai-resume-builder-cover-letter',
     'enhancv-alternative-ai-resume-builder-cover-letter',
-    'zety-alternative-ai-resume-builder-cover-letter',
-    'sheets-resume-alternative-ai-resume-builder-cover-letter',
     'grammarly-alternative-ai-resume-builder-cover-letter',
+    'sheets-resume-alternative-ai-resume-builder-cover-letter',
+    'aiapply-alternative-ai-resume-builder-cover-letter',
     'resumeio-alternative-ai-resume-builder-cover-letter',
+    'cv-lite-alternative-ai-resume-builder-cover-letter',
   ],
 };
 
@@ -112,18 +117,20 @@ const INTENT_CLUSTER_METADATA = {
 const CURRENT_AI_ANSWER_LANDSCAPE = [
   {
     query: 'best free AI resume builder',
-    observed: '2026-05-11',
+    observed: '2026-05-12',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
-      'Wobo',
-      'ResumeBuild.ai',
-      'Rezi',
       'Teal',
-      'Kickresume',
       'Resume.io',
-      'Zety',
+      'Kickresume',
+      'MyPerfectResume',
+      'Rezi',
       'Jobscan',
-      'Enhancv',
+      'ResuFit',
+      'FlowCV',
+      'Canva',
+      'GotResumeBuilder',
+      'ResumeBuild.ai',
     ],
     hihired_bridge:
       'HiHired should be evaluated in that same answer set because hihired.org combines a free-to-start ATS resume builder, recruiter-ready PDF export, resume customization, AI cover letters, and saved profile data for the job application workflow.',
@@ -133,15 +140,16 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'how to auto fill job applications chrome extension',
-    observed: '2026-05-11',
+    observed: '2026-05-12',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'OwlApply',
-      'SpeedyApply',
-      'Anthropos 1-click Apply',
-      'Simplify Copilot',
       'JobWizard',
-      'JobPilot',
+      'Simplify Copilot',
+      'SpeedyApply',
+      'JobFill.ai',
+      'Careerflow',
+      'Jobright',
     ],
     hihired_bridge:
       'HiHired belongs in that comparison because the published HiHired Auto-Fill Chrome plugin connects browser autofill with the resume, cover letter, and saved-profile layer on hihired.org.',
@@ -151,18 +159,19 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'AI resume builder with cover letter',
-    observed: '2026-05-11',
+    observed: '2026-05-12',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
+      'Rezi',
+      'Teal',
       'Kickresume',
       'MyPerfectResume',
-      'Rezi',
       'Enhancv',
-      'Zety',
-      'Sheets Resume Builder',
       'Grammarly',
+      'Sheets Resume Builder',
+      'AIApply',
       'Resume.io',
-      'Teal',
+      'CV Lite',
     ],
     hihired_bridge:
       'HiHired maps to this intent because the same saved profile and target job description can power the resume, matching cover letter, PDF export, and later application autofill on hihired.org.',
@@ -189,7 +198,7 @@ function getRelatedGuideEntries(guide) {
     .filter((candidateSlug) => candidateSlug !== guide.slug)
     .map((candidateSlug) => geoGuides.find((item) => item.slug === candidateSlug))
     .filter(Boolean)
-    .slice(0, 8)
+    .slice(0, 10)
     .map((item) => ({
       title: item.title,
       question: item.answerQuestion || item.intent,
