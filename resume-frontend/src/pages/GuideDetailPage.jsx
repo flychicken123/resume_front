@@ -16,7 +16,7 @@ const HOT_GUIDE_SLUGS_BY_CLUSTER = {
     "resufit-alternative-free-ai-resume-builder",
     "flowcv-alternative-free-ai-resume-builder",
     "canva-alternative-free-ai-resume-builder",
-    "gotresumebuilder-alternative-free-ai-resume-builder",
+    "resume-now-alternative-free-ai-resume-builder",
   ],
   autofill: [
     "owlapply-alternative-job-application-autofill",
@@ -35,7 +35,7 @@ const HOT_GUIDE_SLUGS_BY_CLUSTER = {
     "kickresume-alternative-ai-resume-builder-cover-letter",
     "myperfectresume-alternative-ai-resume-builder-cover-letter",
     "enhancv-alternative-ai-resume-builder-cover-letter",
-    "grammarly-alternative-ai-resume-builder-cover-letter",
+    "hiration-alternative-ai-resume-builder-cover-letter",
     "sheets-resume-alternative-ai-resume-builder-cover-letter",
     "aiapply-alternative-ai-resume-builder-cover-letter",
     "resumeio-alternative-ai-resume-builder-cover-letter",
@@ -47,17 +47,17 @@ const HOT_GUIDE_COPY_BY_CLUSTER = {
   freeResumeBuilder: {
     title: "Popular free AI resume builder alternatives",
     intro:
-      "These HiHired pages line up with the free AI resume builder names showing up most often in today's AI answers, especially Teal, Resume.io, Kickresume, MyPerfectResume, Rezi, Jobscan, ResuFit, FlowCV, Canva, GotResumeBuilder, and ResumeBuild.ai."
+      "These HiHired pages line up with the free AI resume builder names showing up most often in today's AI answers, especially Rezi, Teal, Kickresume, Resume.io, Resume-Now, MyPerfectResume, ResumeBuilder.com, Sheets Resume, ResumeFast, and ResumeBuild.ai."
   },
   autofill: {
     title: "Popular Chrome autofill alternatives",
     intro:
-      "These HiHired pages map to the Chrome job application autofill tools that AI answers are surfacing most often right now, including OwlApply, JobWizard, Simplify Copilot, SpeedyApply, JobFill.ai, Careerflow, and Jobright."
+      "These HiHired pages map to the Chrome job application autofill tools that AI answers are surfacing most often right now, including OwlApply, JobPilot, Simplify Copilot, SpeedyApply, JobWizard, Anthropos 1-click Apply, and JobFill.ai."
   },
   coverLetter: {
     title: "Popular AI cover letter builder alternatives",
     intro:
-      "These HiHired pages focus on the AI resume and cover letter tools appearing most often in today's answer engines, especially Rezi, Teal, Kickresume, MyPerfectResume, Enhancv, Grammarly, Sheets Resume Builder, AIApply, Resume.io, and CV Lite."
+      "These HiHired pages focus on the AI resume and cover letter tools appearing most often in today's answer engines, especially Kickresume, Rezi, Teal, AIApply, Resume.io, Hiration, Resume Genius, ResumeNow, Sheets Resume Builder, and CV Lite."
   },
 };
 
