@@ -551,6 +551,43 @@ const Home = () => {
         </div>
       )}
 
+      <section
+        aria-label="Chrome extension launch announcement"
+        style={{
+          margin: "0 auto",
+          padding: "12px 20px",
+          background: "linear-gradient(90deg, #eff6ff 0%, #f8fafc 55%, #ecfeff 100%)",
+          borderBottom: "1px solid #dbeafe",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: "1120px",
+            margin: "0 auto",
+            display: "flex",
+            gap: "12px",
+            alignItems: "center",
+            justifyContent: "center",
+            flexWrap: "wrap",
+            textAlign: "center",
+            color: "#0f172a",
+            fontSize: "0.95rem",
+          }}
+        >
+          <strong style={{ color: "#1d4ed8" }}>New:</strong>
+          <span>HiHired Auto-Fill is live on the Chrome Web Store — turn your resume profile into faster job applications.</span>
+          <a
+            href="https://chromewebstore.google.com/detail/hihired-auto-fill/obhbnkbkffabchelgomgbjglhplemidc"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => trackCTAClick("home_launch_bar_chrome_install", { page: window.location.pathname })}
+            style={{ color: "#1d4ed8", fontWeight: 700, textDecoration: "none" }}
+          >
+            Install free →
+          </a>
+        </div>
+      </section>
+
       {/* Hero */}
       <SimpleHero
         onCreateClick={() => {
