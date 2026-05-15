@@ -2434,6 +2434,10 @@ function BuilderPage() {
       trackDownloadClicked(selectedFormat || 'default', { page: window.location.pathname });
       setDownloadNotice(null);
 
+      // Persist the structured profile before generating/exporting so the Chrome
+      // extension can immediately reuse the website-created resume via /api/user/load.
+      await saveToDatabaseNow();
+
       // Track resume generation
       trackResumeGeneration(selectedFormat || 'default');
       setIsResumeGenerating(true);

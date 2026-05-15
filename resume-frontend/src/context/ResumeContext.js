@@ -218,7 +218,8 @@ export const ResumeProvider = ({ children }) => {
     });
   };
 
-  // Save data to localStorage whenever it changes (but not to database)
+  // Save data to localStorage whenever it changes. Explicit saves below also persist to database
+  // so the Chrome extension can load the same resume profile via /api/user/load.
   useEffect(() => {
     const currentUserId = user ? user.email : null;
 
@@ -239,20 +240,32 @@ export const ResumeProvider = ({ children }) => {
       initialUserEmailRef.current = currentUserId;
     }
     saveToStorage(data, currentUserId);
-    // Note: Database saving is now only done when user clicks "Download Resume"
   }, [data, user]);
+
+  const getCurrentUserEmail = () => {
+    if (user) {
+      if (typeof user === 'string') return user;
+      if (user.email) return user.email;
+    }
+    return getStoredUserEmail();
+  };
+
+  const saveResumeDataToDatabase = async (resumeData = data) => {
+    const userEmail = getCurrentUserEmail();
+    if (!userEmail) return false;
+    try {
+      await saveToDatabase(resumeData, userEmail);
+      console.log('Successfully saved resume data to database for user:', userEmail);
+      return true;
+    } catch (error) {
+      console.error('Failed to save to database:', error);
+      throw error;
+    }
+  };
 
   // Function to save current data to database
   const saveToDatabaseNow = async () => {
-    if (user && user.email) {
-      try {
-        await saveToDatabase(data, user.email);
-        console.log('Successfully saved resume data to database for user:', user.email);
-      } catch (error) {
-        console.error('Failed to save to database:', error);
-        throw error;
-      }
-    }
+    return saveResumeDataToDatabase(data);
   };
 
   // Function to clear all stored data
@@ -292,99 +305,120 @@ export const ResumeProvider = ({ children }) => {
     }
   };
 
-  // Map imported structured resume JSON into our state shape
-  const applyImportedData = (structured) => {
+  const mapStructuredResumeData = (structured) => {
+    // Start with a clean slate - only keep format and font size settings
+    const mapped = {
+      name: "",
+      email: "",
+      phone: "",
+      experiences: [],
+      education: [],
+      projects: [],
+      skills: "",
+      skillsCategorized: "",
+      summary: "",
+      selectedFormat: normalizeTemplateId(data.selectedFormat || DEFAULT_TEMPLATE_ID),
+      selectedFontSize: data.selectedFontSize || "medium"
+    };
+
+    if (structured.name) mapped.name = structured.name;
+    if (structured.email) mapped.email = structured.email;
+    if (structured.phone) mapped.phone = structured.phone;
+    if (structured.summary) mapped.summary = structured.summary;
+    if (structured.skillsCategorized) mapped.skillsCategorized = structured.skillsCategorized;
+    if (Array.isArray(structured.skills)) {
+      mapped.skills = structured.skills.join(', ');
+    } else if (typeof structured.skills === 'string') {
+      mapped.skills = structured.skills;
+    }
+
+    const sourceExperiences = Array.isArray(structured.experience)
+      ? structured.experience
+      : Array.isArray(structured.experiences)
+        ? structured.experiences
+        : [];
+
+    if (sourceExperiences.length > 0) {
+      mapped.experiences = sourceExperiences.map((e) => {
+        const location = e.location || '';
+        const [city = '', state = ''] = String(location).split(',').map((part) => part.trim());
+        const endDate = e.endDate || e.end_date || '';
+        return {
+          jobTitle: e.jobTitle || e.job_title || e.role || e.title || e.position || '',
+          company: e.company || '',
+          city: e.city || city || '',
+          state: e.state || state || '',
+          startDate: e.startDate || e.start_date || '',
+          endDate,
+          currentlyWorking: Boolean(e.currentlyWorking || e.currently_working || e.current || String(endDate).toLowerCase() === 'present'),
+          description: Array.isArray(e.bullets) ? e.bullets.join('\n') : (e.description || ''),
+        };
+      });
+    }
+
+    if (Array.isArray(structured.education) && structured.education.length > 0) {
+      mapped.education = structured.education.map((ed) => ({
+        degree: ed.degree || '',
+        school: ed.school || ed.institution || ed.university || '',
+        field: ed.field || ed.fieldOfStudy || ed.major || '',
+        startMonth: '',
+        startYear: String(ed.startDate || ed.start_date || '').replace(/[^0-9-]/g, ''),
+        graduationMonth: '',
+        graduationYear: String(ed.endDate || ed.end_date || ed.graduationYear || ed.year || '').replace(/[^0-9-]/g, ''),
+        gpa: ed.gpa || '',
+        honors: ed.honors || '',
+        location: ed.location || ''
+      }));
+    } else {
+      mapped.education = [{
+        degree: '',
+        school: '',
+        field: '',
+        startMonth: '',
+        startYear: '',
+        graduationMonth: '',
+        graduationYear: '',
+        gpa: '',
+        honors: '',
+        location: ''
+      }];
+    }
+
+    mapped.projects = Array.isArray(structured.projects)
+      ? structured.projects.map((proj) => ({
+          projectName: proj.projectName || proj.name || '',
+          description: Array.isArray(proj.bullets) ? proj.bullets.join('\n') : (proj.description || ''),
+          technologies: Array.isArray(proj.technologies) ? proj.technologies.join(', ') : (proj.technologies || ''),
+          projectUrl: proj.projectUrl || proj.url || ''
+        }))
+      : [];
+
+    return normalizeResumeData(mapped);
+  };
+
+  // Map imported structured resume JSON into our state shape and immediately save it
+  // for plugin/autofill reuse when the user is logged in.
+  const applyImportedData = async (structured) => {
     try {
       console.log('applyImportedData called with:', structured);
       if (!structured || typeof structured !== 'object') {
         console.log('Invalid structured data, returning early');
-        return;
-      }
-      // Start with a clean slate - only keep format and font size settings
-      const mapped = {
-        name: "",
-        email: "",
-        phone: "",
-        experiences: [],
-        education: [],
-        projects: [],
-        skills: "",
-        summary: "",
-        selectedFormat: normalizeTemplateId(data.selectedFormat || DEFAULT_TEMPLATE_ID),
-        selectedFontSize: data.selectedFontSize || "medium"
-      };
-      console.log('Starting with clean data, preserving format settings');
-
-      // Now apply the imported data
-      if (structured.name) mapped.name = structured.name;
-      if (structured.email) mapped.email = structured.email;
-      if (structured.phone) mapped.phone = structured.phone;
-      if (structured.summary) mapped.summary = structured.summary;
-      if (Array.isArray(structured.skills)) {
-        mapped.skills = structured.skills.join(', ');
+        return null;
       }
 
-      // Only add experiences if they exist in the imported data
-      if (Array.isArray(structured.experience) && structured.experience.length > 0) {
-        mapped.experiences = structured.experience.map((e) => {
-          return {
-            jobTitle: e.role || '',
-            company: e.company || '',
-            city: (e.location || '').split(',')[0] || '',
-            state: (e.location || '').split(',')[1]?.trim() || '',
-            startDate: e.startDate || '',
-            endDate: e.endDate || '',
-            currentlyWorking: (e.endDate || '').toLowerCase() === 'present',
-            description: Array.isArray(e.bullets) ? e.bullets.join('\n') : (e.description || ''),
-          };
-        });
-      }
-
-      // Only add education if it exists in the imported data
-      if (Array.isArray(structured.education) && structured.education.length > 0) {
-        mapped.education = structured.education.map((ed) => ({
-          degree: ed.degree || '',
-          school: ed.school || '',
-          field: ed.field || '',
-          startMonth: '',
-          startYear: (ed.startDate || '').replace(/[^0-9-]/g, ''),
-          graduationMonth: '',
-          graduationYear: (ed.endDate || '').replace(/[^0-9-]/g, ''),
-          gpa: '',
-          honors: '',
-          location: ''
-        }));
-      } else {
-        // If no education in import, add one empty education entry (common requirement)
-        mapped.education = [{
-          degree: '',
-          school: '',
-          field: '',
-          startMonth: '',
-          startYear: '',
-          graduationMonth: '',
-          graduationYear: '',
-          gpa: '',
-          honors: '',
-          location: ''
-        }];
-      }
-
-      // Add standalone projects from the imported data
-      mapped.projects = Array.isArray(structured.projects)
-        ? structured.projects.map((proj) => ({
-            projectName: proj.projectName || '',
-            description: Array.isArray(proj.bullets) ? proj.bullets.join('\n') : (proj.description || ''),
-            technologies: Array.isArray(proj.technologies) ? proj.technologies.join(', ') : (proj.technologies || ''),
-            projectUrl: proj.projectUrl || ''
-          }))
-        : [];
-
+      const mapped = mapStructuredResumeData(structured);
       console.log('Mapped data:', mapped);
-      setData(normalizeResumeData(mapped));
-      console.log('Data set successfully - old data cleared, new data applied');
+      setData(mapped);
+      const currentUserId = getCurrentUserEmail();
+      if (currentUserId) {
+        saveToStorage(mapped, currentUserId);
+        await saveResumeDataToDatabase(mapped);
+      }
+      console.log('Data set successfully - imported resume saved for website and plugin use');
+      return mapped;
     } catch (e) {
       console.error('Failed to apply imported data:', e);
+      throw e;
     }
   };
 

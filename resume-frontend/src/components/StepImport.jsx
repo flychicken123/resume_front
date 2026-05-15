@@ -41,7 +41,7 @@ const StepImport = ({ onSkip }) => {
         if (Array.isArray(parsed.structured.conversions) && parsed.structured.conversions.length > 0) {
           setConversions(parsed.structured.conversions);
         }
-        applyImportedData(parsed.structured);
+        await applyImportedData(parsed.structured);
       }
       setLastStep('resume_import_success');
       triggerFeedbackPrompt({

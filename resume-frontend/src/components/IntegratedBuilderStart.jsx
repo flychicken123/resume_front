@@ -182,7 +182,7 @@ const IntegratedBuilderStart = ({ onClose }) => {
     if (!json.structured) {
       throw new Error('Could not extract usable data from resume');
     }
-    applyImportedData(json.structured);
+    await applyImportedData(json.structured);
     setTimeout(() => {
       onClose();
       navigate('/builder');
