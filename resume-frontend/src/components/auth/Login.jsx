@@ -46,7 +46,6 @@ const Login = ({ onLogin, onClose, contextMessage }) => {
       
       // Decode the Google token to get user information
       const decodedToken = decodeJwt(googleToken);
-      console.log('Decoded Google token:', decodedToken);
       
       const getApiUrl = () => {
         if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
@@ -75,10 +74,8 @@ const Login = ({ onLogin, onClose, contextMessage }) => {
       console.log('Google login response status:', response.status);
       
       const result = await response.json();
-      console.log('Google login backend response:', result);
-      
+
       if (result.success) {
-        console.log('Google login successful, token:', result.token);
         const userPayload = result.user || {
           email,
           name: decodedToken?.name || email,
@@ -156,7 +153,6 @@ const Login = ({ onLogin, onClose, contextMessage }) => {
       }
 
       console.log('Making request to:', `${API_BASE_URL}${endpoint}`);
-      console.log('Request body:', payload);
 
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: 'POST',
@@ -170,11 +166,8 @@ const Login = ({ onLogin, onClose, contextMessage }) => {
       console.log('Response headers:', response.headers);
 
       const result = await response.json();
-      console.log('Backend response:', result);
-      
+
       if (result.success) {
-        console.log('Login successful, token:', result.token);
-        
         // Track login method
         trackUserLogin(mode === 'signup' ? 'email_registration' : 'email_login');
         
@@ -360,7 +353,6 @@ const Login = ({ onLogin, onClose, contextMessage }) => {
         <div style={{ width: '100%' }}>
           <GoogleLogin
             onSuccess={credentialResponse => {
-              console.log('Google login success:', credentialResponse);
               const info = decodeJwt(credentialResponse.credential);
               if (info && info.email) {
                 handleGoogleLogin(credentialResponse.credential, info.email);

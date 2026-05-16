@@ -3098,13 +3098,11 @@ function BuilderPage() {
 
         // Get token directly and only set Authorization header
         const token = localStorage.getItem('resumeToken');
-        console.log('Token for PDF generation:', token); // Debug log
 
         const headers = {};
         if (token) {
           headers['Authorization'] = `Bearer ${token}`;
         }
-        console.log('Headers being sent:', headers); // Debug log
 
         fetchInFlight = true;
         fetch(`${getAPIBaseURL()}/api/resume/generate-pdf-file`, {

@@ -14,11 +14,9 @@ export const useResumeHistory = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const authHeaders = getAuthHeaders();
-      console.log('Auth headers:', authHeaders); // Debug log
-      console.log('Token from localStorage:', localStorage.getItem('resumeToken')); // Debug log
-      
+
       // Check if we have a valid token
       if (!authHeaders.Authorization || authHeaders.Authorization === 'Bearer undefined') {
         console.log('No valid token found, user will be auto-logged out');
@@ -119,7 +117,6 @@ export const useResumeHistory = () => {
       }
     }).then(data => {
       if (data && data.downloadUrl) {
-        console.log('Opening download URL:', data.downloadUrl);
         // Open the S3 presigned URL directly in a new tab
         window.open(data.downloadUrl, '_blank');
       } else {

@@ -48,8 +48,6 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const savedUser = localStorage.getItem('resumeUser');
     const savedToken = localStorage.getItem('resumeToken');
-    console.log('AuthContext useEffect - savedUser:', savedUser);
-    console.log('AuthContext useEffect - savedToken:', savedToken);
 
     let parsedUser = null;
     if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
@@ -63,17 +61,13 @@ export const AuthProvider = ({ children }) => {
     const normalizedUser = normalizeUser(parsedUser);
 
     if (normalizedUser && savedToken && savedToken !== 'undefined' && savedToken !== 'null') {
-      console.log('AuthContext useEffect - setting user and token from localStorage');
       setUser(normalizedUser);
       setToken(savedToken);
-    } else {
-      console.log('AuthContext useEffect - no valid saved user/token found, but not auto-logging out');
     }
     setLoading(false);
   }, []);
 
   const login = (userData, authToken) => {
-    console.log('AuthContext login called with:', { userData, authToken });
     const normalized = normalizeUser(userData);
     setUser(normalized);
     setToken(authToken);
@@ -85,7 +79,6 @@ export const AuthProvider = ({ children }) => {
     }
 
     localStorage.setItem('resumeToken', authToken);
-    console.log('AuthContext login completed, token saved to localStorage');
   };
 
   const logout = (redirect = true) => {
@@ -103,20 +96,15 @@ export const AuthProvider = ({ children }) => {
   };
 
   const getAuthHeaders = () => {
-    console.log('AuthContext getAuthHeaders - token state:', token);
-    console.log('AuthContext getAuthHeaders - localStorage token:', localStorage.getItem('resumeToken'));
-    
     const baseHeaders = {
       'Content-Type': 'application/json',
       'X-Experiment-User': ensureExperimentUserId(),
     };
 
     if (!token || token === 'undefined' || token === 'null') {
-      console.log('AuthContext getAuthHeaders - no valid token, returning basic headers');
       return baseHeaders;
     }
-    
-    console.log('AuthContext getAuthHeaders - returning headers with token');
+
     return {
       ...baseHeaders,
       'Authorization': `Bearer ${token}`
