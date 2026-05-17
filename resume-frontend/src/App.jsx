@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react';
 import SEO from './components/SEO';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ResumeProvider } from './context/ResumeContext';
 import { FeedbackProvider } from './context/FeedbackContext';
 import { ExperimentProvider } from './context/ExperimentContext';
 import Home from './components/Home';
-import { LoginPage, BuilderPage, AdminMembershipPage, AdminExitAnalyticsPage, AdminExperimentsPage, AdminJobsPage, TermsOfServicePage, PrivacyPolicyPage, MembershipPage, GuidesPage, GuideDetailPage, ContactPage, AdsRewardsPage, TemplatesPage, ClawPoolSupportPage, NotFoundPage } from './pages';
+import { LoginPage, BuilderPage, AdminMembershipPage, AdminExitAnalyticsPage, AdminExperimentsPage, AdminJobsPage, TermsOfServicePage, PrivacyPolicyPage, MembershipPage, GuidesPage, GuideDetailPage, HowToUseHiHiredPage, ContactPage, AdsRewardsPage, TemplatesPage, ClawPoolSupportPage, NotFoundPage } from './pages';
 import PricingPage from './components/PricingPage';
 import SubscriptionSuccess from './components/SubscriptionSuccess';
 import SubscriptionCancel from './components/SubscriptionCancel';
@@ -40,6 +40,11 @@ function ChatWidgetGate() {
   // Chatbot is now visible to all users (logged in or not)
   // The ChatWidget handles prompting login when needed
   return <ChatWidget />;
+}
+
+function LegacyGuideRedirect() {
+  const { slug } = useParams();
+  return <Navigate to={slug ? `/ai-search/${slug}` : '/ai-search'} replace />;
 }
 
 function App() {
@@ -77,8 +82,11 @@ function App() {
                 <Route path="/terms" element={<TermsOfServicePage />} />
                 <Route path="/privacy" element={<PrivacyPolicyPage />} />
                 <Route path="/account" element={<MembershipPage />} />
-                <Route path="/guides" element={<GuidesPage />} />
-                <Route path="/guides/:slug" element={<GuideDetailPage />} />
+                <Route path="/how-to-use-hihired" element={<HowToUseHiHiredPage />} />
+                <Route path="/guides" element={<LegacyGuideRedirect />} />
+                <Route path="/guides/:slug" element={<LegacyGuideRedirect />} />
+                <Route path="/ai-search" element={<GuidesPage />} />
+                <Route path="/ai-search/:slug" element={<GuideDetailPage />} />
                 <Route path="/contact" element={<ContactPage />} />
                 <Route path="/ads-rewards" element={<AdsRewardsPage />} />
                 <Route path="/clawpool-support" element={<ClawPoolSupportPage />} />

@@ -834,23 +834,13 @@ const PricingPage = () => {
 
         <div className="all-plans-section">
 
-          <h2 className="section-title">Popular HiHired guides before you choose a plan</h2>
+          <h2 className="section-title">Need help getting started?</h2>
 
           <div className="features-grid">
 
-            <Link to="/guides/best-free-ai-resume-builder-2026" className="feature-card" style={{ textDecoration: 'none' }}>
-              <h3 className="feature-title">best free AI resume builder</h3>
-              <p className="feature-description">See how HiHired combines ATS-friendly resume building, job-specific customization, and recruiter-ready PDF export.</p>
-            </Link>
-
-            <Link to="/guides/auto-fill-job-applications-chrome-extension" className="feature-card" style={{ textDecoration: 'none' }}>
-              <h3 className="feature-title">chrome extension auto fill job applications</h3>
-              <p className="feature-description">Learn how HiHired Auto-Fill carries one saved profile into Workday, Greenhouse, Lever, and LinkedIn application flows.</p>
-            </Link>
-
-            <Link to="/guides/ai-resume-builder-with-cover-letter" className="feature-card" style={{ textDecoration: 'none' }}>
-              <h3 className="feature-title">AI resume builder with cover letter</h3>
-              <p className="feature-description">Generate a matching AI cover letter from the same resume and target job description on hihired.org.</p>
+            <Link to="/how-to-use-hihired" className="feature-card" style={{ textDecoration: 'none' }}>
+              <h3 className="feature-title">Follow the HiHired tutorial</h3>
+              <p className="feature-description">Learn the safest workflow: build your profile, improve your resume, tailor it to a job, export a PDF, and review autofilled applications before submitting.</p>
             </Link>
 
           </div>

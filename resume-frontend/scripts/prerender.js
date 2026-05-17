@@ -92,13 +92,13 @@ async function main() {
       '/terms',
       '/contact',
       '/login',
-      '/guides',
-      '/guides/build-free-resume',
-      '/guides/ats-resume-checklist',
-      '/guides/customize-to-job-description',
-      '/guides/share-resume-securely',
-      '/guides/auto-fill-job-applications-chrome-extension',
-      '/guides/customize-resume-to-job-description-ai'
+      '/ai-search',
+      '/ai-search/build-free-resume',
+      '/ai-search/ats-resume-checklist',
+      '/ai-search/customize-to-job-description',
+      '/ai-search/share-resume-securely',
+      '/ai-search/auto-fill-job-applications-chrome-extension',
+      '/ai-search/customize-resume-to-job-description-ai'
     ]
   };
 

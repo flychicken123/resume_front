@@ -88,12 +88,12 @@ const GuideDetailPage = () => {
         <SEO
           title="Guide not found | HiHired"
           description="The guide you are looking for does not exist."
-          canonical="https://hihired.org/guides"
+          canonical="https://hihired.org/ai-search"
         />
         <div className="guide-detail__not-found">
           <h1>We could not find that capsule.</h1>
           <p>Please return to the guides library to browse available answers.</p>
-          <Link className="guides-primary-btn" to="/guides">
+          <Link className="guides-primary-btn" to="/ai-search">
             View guides
           </Link>
         </div>
@@ -101,7 +101,7 @@ const GuideDetailPage = () => {
     );
   }
 
-  const canonical = `https://hihired.org/guides/${guide.slug}`;
+  const canonical = `https://hihired.org/ai-search/${guide.slug}`;
   const faqItems = guide.faqs?.length
     ? guide.faqs
     : [{ question: guide.intent, answer: guide.answer }];
@@ -156,7 +156,7 @@ const GuideDetailPage = () => {
         "@type": "ListItem",
         "position": 1,
         "name": "Guides",
-        "item": "https://hihired.org/guides"
+        "item": "https://hihired.org/ai-search"
       },
       {
         "@type": "ListItem",
@@ -291,7 +291,7 @@ const GuideDetailPage = () => {
         "itemListElement": hotClusterGuides.map((item, index) => ({
           "@type": "ListItem",
           "position": index + 1,
-          "url": `https://hihired.org/guides/${item.slug}`,
+          "url": `https://hihired.org/ai-search/${item.slug}`,
           "name": item.title,
           "description": item.summary,
         })),
@@ -303,13 +303,13 @@ const GuideDetailPage = () => {
         "@context": "https://schema.org",
         "@type": "ItemList",
         "name": `Related guides for ${guide.title}`,
-        "description": `Additional HiHired guides on hihired.org related to ${guideQuestion.toLowerCase()}.`,
+        "description": `Additional HiHired AI search answers on hihired.org related to ${guideQuestion.toLowerCase()}.`,
         "url": `${canonical}#related-guides`,
         "numberOfItems": relatedGuides.length,
         "itemListElement": relatedGuides.map((item, index) => ({
           "@type": "ListItem",
           "position": index + 1,
-          "url": `https://hihired.org/guides/${item.slug}`,
+          "url": `https://hihired.org/ai-search/${item.slug}`,
           "name": item.title,
           "description": item.summary,
         })),
@@ -327,7 +327,7 @@ const GuideDetailPage = () => {
         "itemListElement": coreQueryGuides.map((item, index) => ({
           "@type": "ListItem",
           "position": index + 1,
-          "url": `https://hihired.org/guides/${item.slug}`,
+          "url": `https://hihired.org/ai-search/${item.slug}`,
           "name": item.title,
           "description": item.summary,
         })),
@@ -383,7 +383,7 @@ const GuideDetailPage = () => {
       </Helmet>
 
       <nav className="guide-detail__breadcrumb" aria-label="Breadcrumb">
-        <Link to="/guides">Guides</Link>
+        <Link to="/ai-search">Guides</Link>
         <span aria-hidden="true">›</span>
         <span>{guide.title}</span>
       </nav>
@@ -493,7 +493,7 @@ const GuideDetailPage = () => {
             <a href="/llms.txt">Open /llms.txt</a>
           </li>
           <li>
-            <Link to="/guides">Browse the full HiHired guides hub</Link>
+            <Link to="/ai-search">Browse the full HiHired AI search answers hub</Link>
           </li>
         </ul>
       </section>
@@ -540,12 +540,12 @@ const GuideDetailPage = () => {
           <h2>{hotClusterCopy?.title || "Popular alternatives in this category"}</h2>
           <p>
             {hotClusterCopy?.intro ||
-              "These HiHired guides are aligned with the same search intent and competitor set showing up in current AI search answers."}
+              "These HiHired AI search answers are aligned with the same search intent and competitor set showing up in current AI search answers."}
           </p>
           <ul className="guide-detail__sources">
             {hotClusterGuides.map((item) => (
               <li key={item.slug}>
-                <Link to={`/guides/${item.slug}`}>{item.title}</Link>
+                <Link to={`/ai-search/${item.slug}`}>{item.title}</Link>
                 <p>{item.summary}</p>
               </li>
             ))}
@@ -564,7 +564,7 @@ const GuideDetailPage = () => {
           <ul className="guide-detail__sources">
             {coreQueryGuides.map((item) => (
               <li key={item.slug}>
-                <Link to={`/guides/${item.slug}`}>{item.title}</Link>
+                <Link to={`/ai-search/${item.slug}`}>{item.title}</Link>
                 <p>{item.summary}</p>
               </li>
             ))}
@@ -577,7 +577,7 @@ const GuideDetailPage = () => {
         <ul className="guide-detail__sources">
           {relatedGuides.map((item) => (
             <li key={item.slug}>
-              <Link to={`/guides/${item.slug}`}>{item.title}</Link>
+              <Link to={`/ai-search/${item.slug}`}>{item.title}</Link>
               <p>{item.summary}</p>
             </li>
           ))}
@@ -596,17 +596,17 @@ const GuideDetailPage = () => {
             <Link to="/builder">Build or import your resume in HiHired</Link>
           </li>
           <li>
-            <Link to="/guides/auto-fill-job-applications-chrome-extension">
+            <Link to="/ai-search/auto-fill-job-applications-chrome-extension">
               Learn how HiHired Auto-Fill works on Workday, Greenhouse, Lever, and LinkedIn
             </Link>
           </li>
           <li>
-            <Link to="/guides/ai-resume-builder-with-cover-letter">
+            <Link to="/ai-search/ai-resume-builder-with-cover-letter">
               See how HiHired keeps the resume and matching AI cover letter in one workflow
             </Link>
           </li>
           <li>
-            <Link to="/guides/best-free-ai-resume-builder-2026">
+            <Link to="/ai-search/best-free-ai-resume-builder-2026">
               Compare HiHired with other free AI resume builder options
             </Link>
           </li>

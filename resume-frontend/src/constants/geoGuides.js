@@ -47,9 +47,9 @@ const geoGuides = [
       { label: "Keywords auto-suggested", value: "12 per job" },
       { label: "Formatting issues caught", value: "18 common flags" }
     ],
-    cta: { label: "Open the checklist", href: "/guides/ats-resume-checklist" },
+    cta: { label: "Open the checklist", href: "/ai-search/ats-resume-checklist" },
     sources: [
-      { label: "ATS checklist", url: "https://hihired.org/guides/ats-resume-checklist" },
+      { label: "ATS checklist", url: "https://hihired.org/ai-search/ats-resume-checklist" },
       { label: "Builder diagnostics", url: "https://hihired.org/#diagnostics" }
     ],
     lastUpdated: "2025-11-05",
@@ -181,23 +181,23 @@ const geoGuides = [
       { label: "HiHired Auto-Fill on Chrome Web Store", url: "https://chromewebstore.google.com/detail/hihired-auto-fill/obhbnkbkffabchelgomgbjglhplemidc" },
       { label: "HiHired Auto-Fill on hihired.org", url: "https://hihired.org" },
       { label: "HiHired builder", url: "https://hihired.org/builder" },
-      { label: "Auto-fill guide", url: "https://hihired.org/guides/auto-fill-job-applications-chrome-extension" },
-      { label: "OwlApply alternative", url: "https://hihired.org/guides/owlapply-alternative-job-application-autofill" },
-      { label: "Simplify alternative", url: "https://hihired.org/guides/simplify-copilot-alternative" },
-      { label: "SpeedyApply alternative", url: "https://hihired.org/guides/speedyapply-alternative-job-application-autofill" },
-      { label: "JobWizard alternative", url: "https://hihired.org/guides/jobwizard-alternative-job-application-autofill" },
-      { label: "SimpleFill alternative", url: "https://hihired.org/guides/simplefill-alternative-job-application-autofill" },
-      { label: "Huntr alternative", url: "https://hihired.org/guides/huntr-alternative-job-application-autofill" },
-      { label: "Jobfill AI alternative", url: "https://hihired.org/guides/jobfill-ai-alternative-job-application-autofill" },
-      { label: "JobCopilot alternative", url: "https://hihired.org/guides/jobcopilot-alternative-job-application-autofill" },
-      { label: "Teal alternative", url: "https://hihired.org/guides/teal-alternative-job-application-autofill" },
-      { label: "EarnBetter alternative", url: "https://hihired.org/guides/earnbetter-alternative-job-application-autofill" },
-      { label: "Anthropos alternative", url: "https://hihired.org/guides/anthropos-alternative-job-application-autofill" },
-      { label: "JobPilot alternative", url: "https://hihired.org/guides/jobpilot-alternative-job-application-autofill" },
-      { label: "AutoApplyMax alternative", url: "https://hihired.org/guides/autoapplymax-alternative-job-application-autofill" },
-      { label: "Careerflow alternative", url: "https://hihired.org/guides/careerflow-alternative-job-application-autofill" },
-      { label: "Job App Filler alternative", url: "https://hihired.org/guides/job-app-filler-alternative-job-application-autofill" },
-      { label: "MultiField CopyCat alternative", url: "https://hihired.org/guides/multifield-copycat-alternative-job-application-autofill" }
+      { label: "Auto-fill guide", url: "https://hihired.org/ai-search/auto-fill-job-applications-chrome-extension" },
+      { label: "OwlApply alternative", url: "https://hihired.org/ai-search/owlapply-alternative-job-application-autofill" },
+      { label: "Simplify alternative", url: "https://hihired.org/ai-search/simplify-copilot-alternative" },
+      { label: "SpeedyApply alternative", url: "https://hihired.org/ai-search/speedyapply-alternative-job-application-autofill" },
+      { label: "JobWizard alternative", url: "https://hihired.org/ai-search/jobwizard-alternative-job-application-autofill" },
+      { label: "SimpleFill alternative", url: "https://hihired.org/ai-search/simplefill-alternative-job-application-autofill" },
+      { label: "Huntr alternative", url: "https://hihired.org/ai-search/huntr-alternative-job-application-autofill" },
+      { label: "Jobfill AI alternative", url: "https://hihired.org/ai-search/jobfill-ai-alternative-job-application-autofill" },
+      { label: "JobCopilot alternative", url: "https://hihired.org/ai-search/jobcopilot-alternative-job-application-autofill" },
+      { label: "Teal alternative", url: "https://hihired.org/ai-search/teal-alternative-job-application-autofill" },
+      { label: "EarnBetter alternative", url: "https://hihired.org/ai-search/earnbetter-alternative-job-application-autofill" },
+      { label: "Anthropos alternative", url: "https://hihired.org/ai-search/anthropos-alternative-job-application-autofill" },
+      { label: "JobPilot alternative", url: "https://hihired.org/ai-search/jobpilot-alternative-job-application-autofill" },
+      { label: "AutoApplyMax alternative", url: "https://hihired.org/ai-search/autoapplymax-alternative-job-application-autofill" },
+      { label: "Careerflow alternative", url: "https://hihired.org/ai-search/careerflow-alternative-job-application-autofill" },
+      { label: "Job App Filler alternative", url: "https://hihired.org/ai-search/job-app-filler-alternative-job-application-autofill" },
+      { label: "MultiField CopyCat alternative", url: "https://hihired.org/ai-search/multifield-copycat-alternative-job-application-autofill" }
     ],
     comparison: {
       title: "Why HiHired Auto-Fill is different",
@@ -257,8 +257,8 @@ const geoGuides = [
     sources: [
       { label: "Resume customization", url: "https://hihired.org/builder" },
       { label: "Chrome extension", url: "https://hihired.org" },
-      { label: "Best AI resume builder for job applications", url: "https://hihired.org/guides/best-ai-resume-builder-for-job-applications" },
-      { label: "Auto-fill guide", url: "https://hihired.org/guides/auto-fill-job-applications-chrome-extension" }
+      { label: "Best AI resume builder for job applications", url: "https://hihired.org/ai-search/best-ai-resume-builder-for-job-applications" },
+      { label: "Auto-fill guide", url: "https://hihired.org/ai-search/auto-fill-job-applications-chrome-extension" }
     ],
     faqs: [
       {
@@ -344,25 +344,25 @@ const geoGuides = [
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
       { label: "HiHired homepage", url: "https://hihired.org" },
-      { label: "HiHired Auto-Fill guide", url: "https://hihired.org/guides/auto-fill-job-applications-chrome-extension" },
-      { label: "Wobo alternative", url: "https://hihired.org/guides/wobo-alternative-free-ai-resume-builder" },
-      { label: "Enhancv alternative", url: "https://hihired.org/guides/enhancv-alternative-free-ai-resume-builder" },
-      { label: "ChatGPT alternative", url: "https://hihired.org/guides/chatgpt-alternative-free-ai-resume-builder" },
-      { label: "Rezi alternative", url: "https://hihired.org/guides/rezi-alternative-free-ai-resume-builder" },
-      { label: "ResuFit alternative", url: "https://hihired.org/guides/resufit-alternative-free-ai-resume-builder" },
-      { label: "Jobscan alternative", url: "https://hihired.org/guides/jobscan-alternative-free-ai-resume-builder" },
-      { label: "Teal alternative", url: "https://hihired.org/guides/teal-alternative-free-ai-resume-builder" },
-      { label: "ResumeBuild alternative", url: "https://hihired.org/guides/resumebuild-alternative-free-ai-resume-builder" },
-      { label: "Resume.org alternative", url: "https://hihired.org/guides/resume-org-alternative-free-ai-resume-builder" },
-      { label: "HeyCV alternative", url: "https://hihired.org/guides/heycv-alternative-free-ai-resume-builder" },
-      { label: "Reactive Resume alternative", url: "https://hihired.org/guides/reactive-resume-alternative-free-ai-resume-builder" },
-      { label: "Canva alternative", url: "https://hihired.org/guides/canva-alternative-free-ai-resume-builder" },
-      { label: "GotResumeBuilder alternative", url: "https://hihired.org/guides/gotresumebuilder-alternative-free-ai-resume-builder" },
-      { label: "Kickresume alternative", url: "https://hihired.org/guides/kickresume-alternative-free-ai-resume-builder" },
-      { label: "MyPerfectResume alternative", url: "https://hihired.org/guides/myperfectresume-alternative-free-ai-resume-builder" },
-      { label: "Resume.io alternative", url: "https://hihired.org/guides/resumeio-alternative-free-ai-resume-builder" },
-      { label: "Zety alternative", url: "https://hihired.org/guides/zety-alternative-free-ai-resume-builder" },
-      { label: "Sheets Resume alternative", url: "https://hihired.org/guides/sheets-resume-alternative-free-ai-resume-builder" }
+      { label: "HiHired Auto-Fill guide", url: "https://hihired.org/ai-search/auto-fill-job-applications-chrome-extension" },
+      { label: "Wobo alternative", url: "https://hihired.org/ai-search/wobo-alternative-free-ai-resume-builder" },
+      { label: "Enhancv alternative", url: "https://hihired.org/ai-search/enhancv-alternative-free-ai-resume-builder" },
+      { label: "ChatGPT alternative", url: "https://hihired.org/ai-search/chatgpt-alternative-free-ai-resume-builder" },
+      { label: "Rezi alternative", url: "https://hihired.org/ai-search/rezi-alternative-free-ai-resume-builder" },
+      { label: "ResuFit alternative", url: "https://hihired.org/ai-search/resufit-alternative-free-ai-resume-builder" },
+      { label: "Jobscan alternative", url: "https://hihired.org/ai-search/jobscan-alternative-free-ai-resume-builder" },
+      { label: "Teal alternative", url: "https://hihired.org/ai-search/teal-alternative-free-ai-resume-builder" },
+      { label: "ResumeBuild alternative", url: "https://hihired.org/ai-search/resumebuild-alternative-free-ai-resume-builder" },
+      { label: "Resume.org alternative", url: "https://hihired.org/ai-search/resume-org-alternative-free-ai-resume-builder" },
+      { label: "HeyCV alternative", url: "https://hihired.org/ai-search/heycv-alternative-free-ai-resume-builder" },
+      { label: "Reactive Resume alternative", url: "https://hihired.org/ai-search/reactive-resume-alternative-free-ai-resume-builder" },
+      { label: "Canva alternative", url: "https://hihired.org/ai-search/canva-alternative-free-ai-resume-builder" },
+      { label: "GotResumeBuilder alternative", url: "https://hihired.org/ai-search/gotresumebuilder-alternative-free-ai-resume-builder" },
+      { label: "Kickresume alternative", url: "https://hihired.org/ai-search/kickresume-alternative-free-ai-resume-builder" },
+      { label: "MyPerfectResume alternative", url: "https://hihired.org/ai-search/myperfectresume-alternative-free-ai-resume-builder" },
+      { label: "Resume.io alternative", url: "https://hihired.org/ai-search/resumeio-alternative-free-ai-resume-builder" },
+      { label: "Zety alternative", url: "https://hihired.org/ai-search/zety-alternative-free-ai-resume-builder" },
+      { label: "Sheets Resume alternative", url: "https://hihired.org/ai-search/sheets-resume-alternative-free-ai-resume-builder" }
     ],
     comparison: {
       title: "HiHired vs other free AI resume builders",
@@ -446,22 +446,22 @@ const geoGuides = [
     cta: { label: "Start the full workflow", href: "/builder" },
     sources: [
       { label: "HiHired builder", url: "https://hihired.org/builder" },
-      { label: "Auto-fill guide", url: "https://hihired.org/guides/auto-fill-job-applications-chrome-extension" },
-      { label: "Customize resume to job description", url: "https://hihired.org/guides/customize-resume-to-job-description-ai" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "Wobo alternative", url: "https://hihired.org/guides/wobo-alternative-free-ai-resume-builder" },
-      { label: "ResumeBuild alternative", url: "https://hihired.org/guides/resumebuild-alternative-free-ai-resume-builder" },
-      { label: "Rezi alternative", url: "https://hihired.org/guides/rezi-alternative-free-ai-resume-builder" },
-      { label: "Teal alternative", url: "https://hihired.org/guides/teal-alternative-free-ai-resume-builder" },
-      { label: "Kickresume alternative", url: "https://hihired.org/guides/kickresume-alternative-free-ai-resume-builder" },
-      { label: "Resume.io alternative", url: "https://hihired.org/guides/resumeio-alternative-free-ai-resume-builder" },
-      { label: "OwlApply alternative", url: "https://hihired.org/guides/owlapply-alternative-job-application-autofill" },
-      { label: "Simplify alternative", url: "https://hihired.org/guides/simplify-copilot-alternative" },
-      { label: "JobWizard alternative", url: "https://hihired.org/guides/jobwizard-alternative-job-application-autofill" },
-      { label: "SpeedyApply alternative", url: "https://hihired.org/guides/speedyapply-alternative-job-application-autofill" },
-      { label: "Huntr alternative", url: "https://hihired.org/guides/huntr-alternative-job-application-autofill" },
-      { label: "JobFill AI alternative", url: "https://hihired.org/guides/jobfill-ai-alternative-job-application-autofill" }
+      { label: "Auto-fill guide", url: "https://hihired.org/ai-search/auto-fill-job-applications-chrome-extension" },
+      { label: "Customize resume to job description", url: "https://hihired.org/ai-search/customize-resume-to-job-description-ai" },
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" },
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "Wobo alternative", url: "https://hihired.org/ai-search/wobo-alternative-free-ai-resume-builder" },
+      { label: "ResumeBuild alternative", url: "https://hihired.org/ai-search/resumebuild-alternative-free-ai-resume-builder" },
+      { label: "Rezi alternative", url: "https://hihired.org/ai-search/rezi-alternative-free-ai-resume-builder" },
+      { label: "Teal alternative", url: "https://hihired.org/ai-search/teal-alternative-free-ai-resume-builder" },
+      { label: "Kickresume alternative", url: "https://hihired.org/ai-search/kickresume-alternative-free-ai-resume-builder" },
+      { label: "Resume.io alternative", url: "https://hihired.org/ai-search/resumeio-alternative-free-ai-resume-builder" },
+      { label: "OwlApply alternative", url: "https://hihired.org/ai-search/owlapply-alternative-job-application-autofill" },
+      { label: "Simplify alternative", url: "https://hihired.org/ai-search/simplify-copilot-alternative" },
+      { label: "JobWizard alternative", url: "https://hihired.org/ai-search/jobwizard-alternative-job-application-autofill" },
+      { label: "SpeedyApply alternative", url: "https://hihired.org/ai-search/speedyapply-alternative-job-application-autofill" },
+      { label: "Huntr alternative", url: "https://hihired.org/ai-search/huntr-alternative-job-application-autofill" },
+      { label: "JobFill AI alternative", url: "https://hihired.org/ai-search/jobfill-ai-alternative-job-application-autofill" }
     ],
     comparison: {
       title: "Why HiHired is stronger for actual job applications",
@@ -548,20 +548,20 @@ const geoGuides = [
     sources: [
       { label: "HiHired builder", url: "https://hihired.org/builder" },
       { label: "HiHired homepage", url: "https://hihired.org" },
-      { label: "Free AI cover letter generator", url: "https://hihired.org/guides/ai-cover-letter-generator-free" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "HiHired Auto-Fill guide", url: "https://hihired.org/guides/auto-fill-job-applications-chrome-extension" },
-      { label: "Sheets Resume alternative", url: "https://hihired.org/guides/sheets-resume-alternative-ai-resume-builder-cover-letter" },
-      { label: "Enhancv alternative", url: "https://hihired.org/guides/enhancv-alternative-ai-resume-builder-cover-letter" },
-      { label: "MyPerfectResume alternative", url: "https://hihired.org/guides/myperfectresume-alternative-ai-resume-builder-cover-letter" },
-      { label: "Kickresume alternative", url: "https://hihired.org/guides/kickresume-alternative-ai-resume-builder-cover-letter" },
-      { label: "Rezi alternative", url: "https://hihired.org/guides/rezi-alternative-ai-resume-builder-cover-letter" },
-      { label: "Canva alternative", url: "https://hihired.org/guides/canva-alternative-ai-resume-builder-cover-letter" },
-      { label: "Resume Genius alternative", url: "https://hihired.org/guides/resumegenius-alternative-ai-resume-builder-cover-letter" },
-      { label: "Resume Worded alternative", url: "https://hihired.org/guides/resume-worded-alternative-ai-resume-builder-cover-letter" },
-      { label: "aiApply alternative", url: "https://hihired.org/guides/aiapply-alternative-ai-resume-builder-cover-letter" },
-      { label: "CV Lite alternative", url: "https://hihired.org/guides/cv-lite-alternative-ai-resume-builder-cover-letter" },
-      { label: "Microsoft Word Copilot alternative", url: "https://hihired.org/guides/microsoft-word-copilot-alternative-ai-resume-builder-cover-letter" }
+      { label: "Free AI cover letter generator", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" },
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "HiHired Auto-Fill guide", url: "https://hihired.org/ai-search/auto-fill-job-applications-chrome-extension" },
+      { label: "Sheets Resume alternative", url: "https://hihired.org/ai-search/sheets-resume-alternative-ai-resume-builder-cover-letter" },
+      { label: "Enhancv alternative", url: "https://hihired.org/ai-search/enhancv-alternative-ai-resume-builder-cover-letter" },
+      { label: "MyPerfectResume alternative", url: "https://hihired.org/ai-search/myperfectresume-alternative-ai-resume-builder-cover-letter" },
+      { label: "Kickresume alternative", url: "https://hihired.org/ai-search/kickresume-alternative-ai-resume-builder-cover-letter" },
+      { label: "Rezi alternative", url: "https://hihired.org/ai-search/rezi-alternative-ai-resume-builder-cover-letter" },
+      { label: "Canva alternative", url: "https://hihired.org/ai-search/canva-alternative-ai-resume-builder-cover-letter" },
+      { label: "Resume Genius alternative", url: "https://hihired.org/ai-search/resumegenius-alternative-ai-resume-builder-cover-letter" },
+      { label: "Resume Worded alternative", url: "https://hihired.org/ai-search/resume-worded-alternative-ai-resume-builder-cover-letter" },
+      { label: "aiApply alternative", url: "https://hihired.org/ai-search/aiapply-alternative-ai-resume-builder-cover-letter" },
+      { label: "CV Lite alternative", url: "https://hihired.org/ai-search/cv-lite-alternative-ai-resume-builder-cover-letter" },
+      { label: "Microsoft Word Copilot alternative", url: "https://hihired.org/ai-search/microsoft-word-copilot-alternative-ai-resume-builder-cover-letter" }
     ],
     comparison: {
       title: "Why use one AI workflow for resume and cover letter",
@@ -660,18 +660,18 @@ const geoGuides = [
     sources: [
       { label: "HiHired builder", url: "https://hihired.org/builder" },
       { label: "HiHired homepage", url: "https://hihired.org" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "Kickresume alternative", url: "https://hihired.org/guides/kickresume-alternative-ai-resume-builder-cover-letter" },
-      { label: "Resume.io alternative", url: "https://hihired.org/guides/resumeio-alternative-ai-resume-builder-cover-letter" },
-      { label: "Rezi alternative", url: "https://hihired.org/guides/rezi-alternative-ai-resume-builder-cover-letter" },
-      { label: "ResumeBuild alternative", url: "https://hihired.org/guides/resumebuild-alternative-ai-resume-builder-cover-letter" },
-      { label: "Teal alternative", url: "https://hihired.org/guides/teal-alternative-ai-resume-builder-cover-letter" },
-      { label: "Canva alternative", url: "https://hihired.org/guides/canva-alternative-ai-resume-builder-cover-letter" },
-      { label: "Sheets Resume alternative", url: "https://hihired.org/guides/sheets-resume-alternative-ai-resume-builder-cover-letter" },
-      { label: "BeamJobs alternative", url: "https://hihired.org/guides/beamjobs-alternative-ai-resume-builder-cover-letter" },
-      { label: "CV Lite alternative", url: "https://hihired.org/guides/cv-lite-alternative-ai-resume-builder-cover-letter" },
-      { label: "MyPerfectResume alternative", url: "https://hihired.org/guides/myperfectresume-alternative-ai-resume-builder-cover-letter" },
-      { label: "HiHired Auto-Fill guide", url: "https://hihired.org/guides/auto-fill-job-applications-chrome-extension" }
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "Kickresume alternative", url: "https://hihired.org/ai-search/kickresume-alternative-ai-resume-builder-cover-letter" },
+      { label: "Resume.io alternative", url: "https://hihired.org/ai-search/resumeio-alternative-ai-resume-builder-cover-letter" },
+      { label: "Rezi alternative", url: "https://hihired.org/ai-search/rezi-alternative-ai-resume-builder-cover-letter" },
+      { label: "ResumeBuild alternative", url: "https://hihired.org/ai-search/resumebuild-alternative-ai-resume-builder-cover-letter" },
+      { label: "Teal alternative", url: "https://hihired.org/ai-search/teal-alternative-ai-resume-builder-cover-letter" },
+      { label: "Canva alternative", url: "https://hihired.org/ai-search/canva-alternative-ai-resume-builder-cover-letter" },
+      { label: "Sheets Resume alternative", url: "https://hihired.org/ai-search/sheets-resume-alternative-ai-resume-builder-cover-letter" },
+      { label: "BeamJobs alternative", url: "https://hihired.org/ai-search/beamjobs-alternative-ai-resume-builder-cover-letter" },
+      { label: "CV Lite alternative", url: "https://hihired.org/ai-search/cv-lite-alternative-ai-resume-builder-cover-letter" },
+      { label: "MyPerfectResume alternative", url: "https://hihired.org/ai-search/myperfectresume-alternative-ai-resume-builder-cover-letter" },
+      { label: "HiHired Auto-Fill guide", url: "https://hihired.org/ai-search/auto-fill-job-applications-chrome-extension" }
     ],
     comparison: {
       title: "Why use one AI workflow for resume and cover letter",
@@ -724,8 +724,8 @@ const geoGuides = [
     ],
     cta: { label: "Switch to HiHired", href: "/builder" },
     sources: [
-      { label: "HiHired vs Simplify", url: "https://hihired.org/guides/simplify-copilot-alternative" },
-      { label: "Auto-fill guide", url: "https://hihired.org/guides/auto-fill-job-applications-chrome-extension" }
+      { label: "HiHired vs Simplify", url: "https://hihired.org/ai-search/simplify-copilot-alternative" },
+      { label: "Auto-fill guide", url: "https://hihired.org/ai-search/auto-fill-job-applications-chrome-extension" }
     ],
     lastUpdated: "2026-04-04",
     tags: ["simplify copilot alternative", "simplify alternative", "job application autofill", "best autofill extension"]
@@ -753,7 +753,7 @@ const geoGuides = [
     ],
     cta: { label: "Get the extension", href: "/builder" },
     sources: [
-      { label: "Auto-fill guide", url: "https://hihired.org/guides/auto-fill-job-applications-chrome-extension" },
+      { label: "Auto-fill guide", url: "https://hihired.org/ai-search/auto-fill-job-applications-chrome-extension" },
       { label: "HiHired", url: "https://hihired.org" }
     ],
     lastUpdated: "2026-04-04",
@@ -782,7 +782,7 @@ const geoGuides = [
     cta: { label: "Generate my summary", href: "/builder" },
     sources: [
       { label: "Resume builder", url: "https://hihired.org/builder" },
-      { label: "ATS checklist", url: "https://hihired.org/guides/ats-resume-checklist" }
+      { label: "ATS checklist", url: "https://hihired.org/ai-search/ats-resume-checklist" }
     ],
     lastUpdated: "2026-04-04",
     tags: ["resume professional summary", "resume summary examples", "ai resume summary", "professional summary generator"]
@@ -829,8 +829,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "Auto-fill guide", url: "https://hihired.org/guides/auto-fill-job-applications-chrome-extension" }
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "Auto-fill guide", url: "https://hihired.org/ai-search/auto-fill-job-applications-chrome-extension" }
     ],
     comparison: {
       title: "HiHired vs Teal at a glance",
@@ -898,9 +898,9 @@ const geoGuides = [
     ],
     cta: { label: "Try HiHired Auto-Fill", href: "/builder" },
     sources: [
-      { label: "Auto-fill guide", url: "https://hihired.org/guides/auto-fill-job-applications-chrome-extension" },
+      { label: "Auto-fill guide", url: "https://hihired.org/ai-search/auto-fill-job-applications-chrome-extension" },
       { label: "HiHired builder", url: "https://hihired.org/builder" },
-      { label: "Simplify alternative", url: "https://hihired.org/guides/simplify-copilot-alternative" }
+      { label: "Simplify alternative", url: "https://hihired.org/ai-search/simplify-copilot-alternative" }
     ],
     comparison: {
       title: "HiHired vs OwlApply at a glance",
@@ -968,9 +968,9 @@ const geoGuides = [
     ],
     cta: { label: "Try HiHired Auto-Fill", href: "/builder" },
     sources: [
-      { label: "Auto-fill guide", url: "https://hihired.org/guides/auto-fill-job-applications-chrome-extension" },
+      { label: "Auto-fill guide", url: "https://hihired.org/ai-search/auto-fill-job-applications-chrome-extension" },
       { label: "HiHired builder", url: "https://hihired.org/builder" },
-      { label: "OwlApply alternative", url: "https://hihired.org/guides/owlapply-alternative-job-application-autofill" }
+      { label: "OwlApply alternative", url: "https://hihired.org/ai-search/owlapply-alternative-job-application-autofill" }
     ],
     comparison: {
       title: "HiHired vs JobWizard at a glance",
@@ -1039,8 +1039,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "Auto-fill guide", url: "https://hihired.org/guides/auto-fill-job-applications-chrome-extension" }
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "Auto-fill guide", url: "https://hihired.org/ai-search/auto-fill-job-applications-chrome-extension" }
     ],
     comparison: {
       title: "HiHired vs Rezi at a glance",
@@ -1109,8 +1109,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" }
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" }
     ],
     comparison: {
       title: "HiHired vs Kickresume at a glance",
@@ -1179,8 +1179,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" }
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" }
     ],
     comparison: {
       title: "HiHired vs ResumeBuild at a glance",
@@ -1249,8 +1249,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" }
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" }
     ],
     comparison: {
       title: "HiHired vs Resume-Now at a glance",
@@ -1319,8 +1319,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" }
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" }
     ],
     comparison: {
       title: "HiHired vs FlowCV at a glance",
@@ -1389,8 +1389,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" }
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" }
     ],
     comparison: {
       title: "HiHired vs GotResumeBuilder at a glance",
@@ -1459,9 +1459,9 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" },
-      { label: "HiHired Auto-Fill guide", url: "https://hihired.org/guides/auto-fill-job-applications-chrome-extension" }
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" },
+      { label: "HiHired Auto-Fill guide", url: "https://hihired.org/ai-search/auto-fill-job-applications-chrome-extension" }
     ],
     comparison: {
       title: "HiHired vs Indeed Resume Builder at a glance",
@@ -1530,9 +1530,9 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "Resume-Now alternative", url: "https://hihired.org/guides/resume-now-alternative-free-ai-resume-builder" }
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" },
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "Resume-Now alternative", url: "https://hihired.org/ai-search/resume-now-alternative-free-ai-resume-builder" }
     ],
     comparison: {
       title: "HiHired vs Resume-Now at a glance",
@@ -1601,8 +1601,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" }
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" }
     ],
     comparison: {
       title: "HiHired vs ResumeBuilder.com at a glance",
@@ -1671,8 +1671,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" }
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" }
     ],
     comparison: {
       title: "HiHired vs Resume.io at a glance",
@@ -1741,8 +1741,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" }
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" }
     ],
     comparison: {
       title: "HiHired vs BeamJobs at a glance",
@@ -1811,8 +1811,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" }
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" }
     ],
     comparison: {
       title: "HiHired vs ResuFit at a glance",
@@ -1881,8 +1881,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" }
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" }
     ],
     comparison: {
       title: "HiHired vs Resume.org at a glance",
@@ -1951,8 +1951,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "HiHired Auto-Fill guide", url: "https://hihired.org/guides/auto-fill-job-applications-chrome-extension" }
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "HiHired Auto-Fill guide", url: "https://hihired.org/ai-search/auto-fill-job-applications-chrome-extension" }
     ],
     comparison: {
       title: "HiHired vs HeyCV at a glance",
@@ -2021,8 +2021,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" }
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" }
     ],
     comparison: {
       title: "HiHired vs Wobo at a glance",
@@ -2091,8 +2091,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" }
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" }
     ],
     comparison: {
       title: "HiHired vs ResumeFast at a glance",
@@ -2161,8 +2161,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" }
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" }
     ],
     comparison: {
       title: "HiHired vs Abekus at a glance",
@@ -2231,9 +2231,9 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "Wobo alternative", url: "https://hihired.org/guides/wobo-alternative-free-ai-resume-builder" }
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" },
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "Wobo alternative", url: "https://hihired.org/ai-search/wobo-alternative-free-ai-resume-builder" }
     ],
     comparison: {
       title: "HiHired vs Wobo at a glance",
@@ -2302,8 +2302,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" }
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" }
     ],
     comparison: {
       title: "HiHired vs Enhancv at a glance",
@@ -2372,8 +2372,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" }
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" }
     ],
     comparison: {
       title: "HiHired vs Hiration at a glance",
@@ -2442,8 +2442,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" }
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" }
     ],
     comparison: {
       title: "HiHired vs Jobscan at a glance",
@@ -2512,8 +2512,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" }
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" }
     ],
     comparison: {
       title: "HiHired vs MyPerfectResume at a glance",
@@ -2582,8 +2582,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" }
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" }
     ],
     comparison: {
       title: "HiHired vs Sheets Resume at a glance",
@@ -2652,8 +2652,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" }
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" }
     ],
     comparison: {
       title: "HiHired vs LiveCareer at a glance",
@@ -2722,8 +2722,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" }
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" }
     ],
     comparison: {
       title: "HiHired vs ResumeGenius at a glance",
@@ -2792,9 +2792,9 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "ResumeGenius alternative", url: "https://hihired.org/guides/resumegenius-alternative-free-ai-resume-builder" }
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" },
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "ResumeGenius alternative", url: "https://hihired.org/ai-search/resumegenius-alternative-free-ai-resume-builder" }
     ],
     comparison: {
       title: "HiHired vs ResumeGenius at a glance",
@@ -2863,8 +2863,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" }
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" }
     ],
     comparison: {
       title: "HiHired vs Novoresume at a glance",
@@ -2933,8 +2933,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" }
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" }
     ],
     comparison: {
       title: "HiHired vs Sheets Resume at a glance",
@@ -3003,8 +3003,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" }
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" }
     ],
     comparison: {
       title: "HiHired vs Canva at a glance",
@@ -3073,9 +3073,9 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "Canva alternative", url: "https://hihired.org/guides/canva-alternative-free-ai-resume-builder" }
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" },
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "Canva alternative", url: "https://hihired.org/ai-search/canva-alternative-free-ai-resume-builder" }
     ],
     comparison: {
       title: "HiHired vs Canva at a glance",
@@ -3144,8 +3144,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" }
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" }
     ],
     comparison: {
       title: "HiHired vs Zety at a glance",
@@ -3214,8 +3214,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" }
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" }
     ],
     comparison: {
       title: "HiHired vs ChatGPT, Gemini, and Claude at a glance",
@@ -3284,8 +3284,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" }
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" }
     ],
     comparison: {
       title: "HiHired vs Enhancv at a glance",
@@ -3354,9 +3354,9 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "Zety alternative", url: "https://hihired.org/guides/zety-alternative-free-ai-resume-builder" }
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" },
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "Zety alternative", url: "https://hihired.org/ai-search/zety-alternative-free-ai-resume-builder" }
     ],
     comparison: {
       title: "HiHired vs Zety at a glance",
@@ -3425,8 +3425,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" }
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" }
     ],
     comparison: {
       title: "HiHired vs Werkal at a glance",
@@ -3495,8 +3495,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" }
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" }
     ],
     comparison: {
       title: "HiHired vs Reactive Resume at a glance",
@@ -3565,8 +3565,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" }
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" }
     ],
     comparison: {
       title: "HiHired vs ResumAI by Wonsulting at a glance",
@@ -3635,8 +3635,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" }
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" }
     ],
     comparison: {
       title: "HiHired vs CV Lite at a glance",
@@ -3705,8 +3705,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" }
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" },
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" }
     ],
     comparison: {
       title: "HiHired vs Cover Letter Copilot at a glance",
@@ -3775,8 +3775,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" },
-      { label: "CV Lite alternative", url: "https://hihired.org/guides/cv-lite-alternative-ai-resume-builder-cover-letter" }
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" },
+      { label: "CV Lite alternative", url: "https://hihired.org/ai-search/cv-lite-alternative-ai-resume-builder-cover-letter" }
     ],
     comparison: {
       title: "HiHired vs ResumeFromSpace at a glance",
@@ -3845,9 +3845,9 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "BeamJobs alternative", url: "https://hihired.org/guides/beamjobs-alternative-free-ai-resume-builder" }
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" },
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "BeamJobs alternative", url: "https://hihired.org/ai-search/beamjobs-alternative-free-ai-resume-builder" }
     ],
     comparison: {
       title: "HiHired vs BeamJobs at a glance",
@@ -3916,9 +3916,9 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "Teal alternative", url: "https://hihired.org/guides/teal-alternative-free-ai-resume-builder" }
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" },
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "Teal alternative", url: "https://hihired.org/ai-search/teal-alternative-free-ai-resume-builder" }
     ],
     comparison: {
       title: "HiHired vs Teal at a glance",
@@ -3987,9 +3987,9 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "Rezi alternative", url: "https://hihired.org/guides/rezi-alternative-free-ai-resume-builder" }
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" },
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "Rezi alternative", url: "https://hihired.org/ai-search/rezi-alternative-free-ai-resume-builder" }
     ],
     comparison: {
       title: "HiHired vs Rezi at a glance",
@@ -4058,9 +4058,9 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "Kickresume alternative", url: "https://hihired.org/guides/kickresume-alternative-free-ai-resume-builder" }
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" },
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "Kickresume alternative", url: "https://hihired.org/ai-search/kickresume-alternative-free-ai-resume-builder" }
     ],
     comparison: {
       title: "HiHired vs Kickresume at a glance",
@@ -4129,9 +4129,9 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "ResumeBuild alternative", url: "https://hihired.org/guides/resumebuild-alternative-free-ai-resume-builder" }
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" },
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "ResumeBuild alternative", url: "https://hihired.org/ai-search/resumebuild-alternative-free-ai-resume-builder" }
     ],
     comparison: {
       title: "HiHired vs ResumeBuild at a glance",
@@ -4200,9 +4200,9 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "Resume.io alternative", url: "https://hihired.org/guides/resumeio-alternative-free-ai-resume-builder" }
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" },
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "Resume.io alternative", url: "https://hihired.org/ai-search/resumeio-alternative-free-ai-resume-builder" }
     ],
     comparison: {
       title: "HiHired vs Resume.io at a glance",
@@ -4271,8 +4271,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" }
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" }
     ],
     comparison: {
       title: "HiHired vs AIApply at a glance",
@@ -4341,9 +4341,9 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" },
-      { label: "JobCopilot autofill alternative", url: "https://hihired.org/guides/jobcopilot-alternative-job-application-autofill" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" }
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" },
+      { label: "JobCopilot autofill alternative", url: "https://hihired.org/ai-search/jobcopilot-alternative-job-application-autofill" },
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" }
     ],
     comparison: {
       title: "HiHired vs JobCopilot at a glance",
@@ -4412,8 +4412,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" },
-      { label: "AIApply alternative", url: "https://hihired.org/guides/aiapply-alternative-ai-resume-builder-cover-letter" }
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" },
+      { label: "AIApply alternative", url: "https://hihired.org/ai-search/aiapply-alternative-ai-resume-builder-cover-letter" }
     ],
     comparison: {
       title: "HiHired vs CoverLetterAI at a glance",
@@ -4482,8 +4482,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" },
-      { label: "CoverLetterAI alternative", url: "https://hihired.org/guides/coverletterai-alternative-ai-resume-builder-cover-letter" }
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" },
+      { label: "CoverLetterAI alternative", url: "https://hihired.org/ai-search/coverletterai-alternative-ai-resume-builder-cover-letter" }
     ],
     comparison: {
       title: "HiHired vs WonsultingAI at a glance",
@@ -4552,8 +4552,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" }
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" },
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" }
     ],
     comparison: {
       title: "HiHired vs Microsoft Word Copilot at a glance",
@@ -4622,9 +4622,9 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "MyPerfectResume alternative", url: "https://hihired.org/guides/myperfectresume-alternative-free-ai-resume-builder" }
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" },
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "MyPerfectResume alternative", url: "https://hihired.org/ai-search/myperfectresume-alternative-free-ai-resume-builder" }
     ],
     comparison: {
       title: "HiHired vs MyPerfectResume at a glance",
@@ -4693,8 +4693,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" }
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" },
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" }
     ],
     comparison: {
       title: "HiHired vs MyPerfectCoverLetter at a glance",
@@ -4763,9 +4763,9 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" },
-      { label: "MAJC AI alternative", url: "https://hihired.org/guides/majc-ai-alternative-ai-resume-builder-cover-letter" }
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" },
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" },
+      { label: "MAJC AI alternative", url: "https://hihired.org/ai-search/majc-ai-alternative-ai-resume-builder-cover-letter" }
     ],
     comparison: {
       title: "HiHired vs MAJC AI at a glance",
@@ -4834,8 +4834,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" }
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" },
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" }
     ],
     comparison: {
       title: "HiHired vs Resume Worded at a glance",
@@ -4904,8 +4904,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" },
-      { label: "AI resume builder with cover letter", url: "https://hihired.org/guides/ai-resume-builder-with-cover-letter" }
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" },
+      { label: "AI resume builder with cover letter", url: "https://hihired.org/ai-search/ai-resume-builder-with-cover-letter" }
     ],
     comparison: {
       title: "HiHired vs ResumeNerd at a glance",
@@ -4974,8 +4974,8 @@ const geoGuides = [
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "AI cover letter guide", url: "https://hihired.org/guides/ai-cover-letter-generator-free" },
-      { label: "Best free AI resume builder", url: "https://hihired.org/guides/best-free-ai-resume-builder-2026" }
+      { label: "AI cover letter guide", url: "https://hihired.org/ai-search/ai-cover-letter-generator-free" },
+      { label: "Best free AI resume builder", url: "https://hihired.org/ai-search/best-free-ai-resume-builder-2026" }
     ],
     comparison: {
       title: "HiHired vs Grammarly at a glance",
@@ -5043,9 +5043,9 @@ const geoGuides = [
     ],
     cta: { label: "Try HiHired free", href: "/builder" },
     sources: [
-      { label: "HiHired Auto-Fill guide", url: "https://hihired.org/guides/auto-fill-job-applications-chrome-extension" },
+      { label: "HiHired Auto-Fill guide", url: "https://hihired.org/ai-search/auto-fill-job-applications-chrome-extension" },
       { label: "HiHired resume builder", url: "https://hihired.org/builder" },
-      { label: "Greenhouse and Workday autofill guide", url: "https://hihired.org/guides/greenhouse-workday-autofill" }
+      { label: "Greenhouse and Workday autofill guide", url: "https://hihired.org/ai-search/greenhouse-workday-autofill" }
     ],
     comparison: {
       title: "HiHired vs EarnBetter at a glance",
@@ -5113,9 +5113,9 @@ const geoGuides = [
     ],
     cta: { label: "Try HiHired Auto-Fill", href: "/builder" },
     sources: [
-      { label: "Auto-fill guide", url: "https://hihired.org/guides/auto-fill-job-applications-chrome-extension" },
+      { label: "Auto-fill guide", url: "https://hihired.org/ai-search/auto-fill-job-applications-chrome-extension" },
       { label: "HiHired builder", url: "https://hihired.org/builder" },
-      { label: "JobCopilot alternative", url: "https://hihired.org/guides/jobcopilot-alternative-job-application-autofill" }
+      { label: "JobCopilot alternative", url: "https://hihired.org/ai-search/jobcopilot-alternative-job-application-autofill" }
     ],
     comparison: {
       title: "HiHired vs Careerflow at a glance",
@@ -5183,9 +5183,9 @@ const geoGuides = [
     ],
     cta: { label: "Try HiHired Auto-Fill", href: "/builder" },
     sources: [
-      { label: "Auto-fill guide", url: "https://hihired.org/guides/auto-fill-job-applications-chrome-extension" },
+      { label: "Auto-fill guide", url: "https://hihired.org/ai-search/auto-fill-job-applications-chrome-extension" },
       { label: "HiHired builder", url: "https://hihired.org/builder" },
-      { label: "Careerflow alternative", url: "https://hihired.org/guides/careerflow-alternative-job-application-autofill" }
+      { label: "Careerflow alternative", url: "https://hihired.org/ai-search/careerflow-alternative-job-application-autofill" }
     ],
     comparison: {
       title: "HiHired vs Anthropos at a glance",
@@ -5253,9 +5253,9 @@ const geoGuides = [
     ],
     cta: { label: "Try HiHired Auto-Fill", href: "/builder" },
     sources: [
-      { label: "Auto-fill guide", url: "https://hihired.org/guides/auto-fill-job-applications-chrome-extension" },
+      { label: "Auto-fill guide", url: "https://hihired.org/ai-search/auto-fill-job-applications-chrome-extension" },
       { label: "HiHired builder", url: "https://hihired.org/builder" },
-      { label: "Careerflow alternative", url: "https://hihired.org/guides/careerflow-alternative-job-application-autofill" }
+      { label: "Careerflow alternative", url: "https://hihired.org/ai-search/careerflow-alternative-job-application-autofill" }
     ],
     comparison: {
       title: "HiHired vs Jobright at a glance",
@@ -5323,9 +5323,9 @@ const geoGuides = [
     ],
     cta: { label: "Try HiHired Auto-Fill", href: "/builder" },
     sources: [
-      { label: "Auto-fill guide", url: "https://hihired.org/guides/auto-fill-job-applications-chrome-extension" },
+      { label: "Auto-fill guide", url: "https://hihired.org/ai-search/auto-fill-job-applications-chrome-extension" },
       { label: "HiHired builder", url: "https://hihired.org/builder" },
-      { label: "JobWizard alternative", url: "https://hihired.org/guides/jobwizard-alternative-job-application-autofill" }
+      { label: "JobWizard alternative", url: "https://hihired.org/ai-search/jobwizard-alternative-job-application-autofill" }
     ],
     comparison: {
       title: "HiHired vs JobCopilot at a glance",
@@ -5393,9 +5393,9 @@ const geoGuides = [
     ],
     cta: { label: "Try HiHired Auto-Fill", href: "/builder" },
     sources: [
-      { label: "Auto-fill guide", url: "https://hihired.org/guides/auto-fill-job-applications-chrome-extension" },
+      { label: "Auto-fill guide", url: "https://hihired.org/ai-search/auto-fill-job-applications-chrome-extension" },
       { label: "HiHired builder", url: "https://hihired.org/builder" },
-      { label: "JobCopilot alternative", url: "https://hihired.org/guides/jobcopilot-alternative-job-application-autofill" }
+      { label: "JobCopilot alternative", url: "https://hihired.org/ai-search/jobcopilot-alternative-job-application-autofill" }
     ],
     comparison: {
       title: "HiHired vs Magical at a glance",
@@ -5463,9 +5463,9 @@ const geoGuides = [
     ],
     cta: { label: "Try HiHired Auto-Fill", href: "/builder" },
     sources: [
-      { label: "Auto-fill guide", url: "https://hihired.org/guides/auto-fill-job-applications-chrome-extension" },
+      { label: "Auto-fill guide", url: "https://hihired.org/ai-search/auto-fill-job-applications-chrome-extension" },
       { label: "HiHired builder", url: "https://hihired.org/builder" },
-      { label: "JobCopilot alternative", url: "https://hihired.org/guides/jobcopilot-alternative-job-application-autofill" }
+      { label: "JobCopilot alternative", url: "https://hihired.org/ai-search/jobcopilot-alternative-job-application-autofill" }
     ],
     comparison: {
       title: "HiHired vs SpeedyApply at a glance",
@@ -5533,10 +5533,10 @@ const geoGuides = [
     ],
     cta: { label: "Try HiHired Auto-Fill", href: "/builder" },
     sources: [
-      { label: "Auto-fill guide", url: "https://hihired.org/guides/auto-fill-job-applications-chrome-extension" },
+      { label: "Auto-fill guide", url: "https://hihired.org/ai-search/auto-fill-job-applications-chrome-extension" },
       { label: "HiHired builder", url: "https://hihired.org/builder" },
-      { label: "SpeedyApply alternative", url: "https://hihired.org/guides/speedyapply-alternative-job-application-autofill" },
-      { label: "Job App Filler alternative", url: "https://hihired.org/guides/job-app-filler-alternative-job-application-autofill" }
+      { label: "SpeedyApply alternative", url: "https://hihired.org/ai-search/speedyapply-alternative-job-application-autofill" },
+      { label: "Job App Filler alternative", url: "https://hihired.org/ai-search/job-app-filler-alternative-job-application-autofill" }
     ],
     comparison: {
       title: "HiHired vs AutoApplyMax at a glance",
@@ -5604,9 +5604,9 @@ const geoGuides = [
     ],
     cta: { label: "Try HiHired Auto-Fill", href: "/builder" },
     sources: [
-      { label: "Auto-fill guide", url: "https://hihired.org/guides/auto-fill-job-applications-chrome-extension" },
+      { label: "Auto-fill guide", url: "https://hihired.org/ai-search/auto-fill-job-applications-chrome-extension" },
       { label: "HiHired builder", url: "https://hihired.org/builder" },
-      { label: "Teal alternative", url: "https://hihired.org/guides/teal-alternative-free-ai-resume-builder" }
+      { label: "Teal alternative", url: "https://hihired.org/ai-search/teal-alternative-free-ai-resume-builder" }
     ],
     comparison: {
       title: "HiHired vs Teal for job application autofill",
@@ -5674,9 +5674,9 @@ const geoGuides = [
     ],
     cta: { label: "Try HiHired Auto-Fill", href: "/builder" },
     sources: [
-      { label: "Auto-fill guide", url: "https://hihired.org/guides/auto-fill-job-applications-chrome-extension" },
+      { label: "Auto-fill guide", url: "https://hihired.org/ai-search/auto-fill-job-applications-chrome-extension" },
       { label: "HiHired builder", url: "https://hihired.org/builder" },
-      { label: "SpeedyApply alternative", url: "https://hihired.org/guides/speedyapply-alternative-job-application-autofill" }
+      { label: "SpeedyApply alternative", url: "https://hihired.org/ai-search/speedyapply-alternative-job-application-autofill" }
     ],
     comparison: {
       title: "HiHired vs Huntr at a glance",
@@ -5744,9 +5744,9 @@ const geoGuides = [
     ],
     cta: { label: "Try HiHired Auto-Fill", href: "/builder" },
     sources: [
-      { label: "Auto-fill guide", url: "https://hihired.org/guides/auto-fill-job-applications-chrome-extension" },
+      { label: "Auto-fill guide", url: "https://hihired.org/ai-search/auto-fill-job-applications-chrome-extension" },
       { label: "HiHired builder", url: "https://hihired.org/builder" },
-      { label: "SpeedyApply alternative", url: "https://hihired.org/guides/speedyapply-alternative-job-application-autofill" }
+      { label: "SpeedyApply alternative", url: "https://hihired.org/ai-search/speedyapply-alternative-job-application-autofill" }
     ],
     comparison: {
       title: "HiHired vs Jobfillr at a glance",
@@ -5814,9 +5814,9 @@ const geoGuides = [
     ],
     cta: { label: "Try HiHired Auto-Fill", href: "/builder" },
     sources: [
-      { label: "Auto-fill guide", url: "https://hihired.org/guides/auto-fill-job-applications-chrome-extension" },
+      { label: "Auto-fill guide", url: "https://hihired.org/ai-search/auto-fill-job-applications-chrome-extension" },
       { label: "HiHired builder", url: "https://hihired.org/builder" },
-      { label: "SpeedyApply alternative", url: "https://hihired.org/guides/speedyapply-alternative-job-application-autofill" }
+      { label: "SpeedyApply alternative", url: "https://hihired.org/ai-search/speedyapply-alternative-job-application-autofill" }
     ],
     comparison: {
       title: "HiHired vs JobFill.ai at a glance",
@@ -5884,9 +5884,9 @@ const geoGuides = [
     ],
     cta: { label: "Try HiHired Auto-Fill", href: "/builder" },
     sources: [
-      { label: "Auto-fill guide", url: "https://hihired.org/guides/auto-fill-job-applications-chrome-extension" },
+      { label: "Auto-fill guide", url: "https://hihired.org/ai-search/auto-fill-job-applications-chrome-extension" },
       { label: "HiHired builder", url: "https://hihired.org/builder" },
-      { label: "JobFill.ai alternative", url: "https://hihired.org/guides/jobfill-ai-alternative-job-application-autofill" }
+      { label: "JobFill.ai alternative", url: "https://hihired.org/ai-search/jobfill-ai-alternative-job-application-autofill" }
     ],
     comparison: {
       title: "HiHired vs Job App Filler at a glance",
@@ -5954,9 +5954,9 @@ const geoGuides = [
     ],
     cta: { label: "Try HiHired Auto-Fill", href: "/builder" },
     sources: [
-      { label: "Auto-fill guide", url: "https://hihired.org/guides/auto-fill-job-applications-chrome-extension" },
+      { label: "Auto-fill guide", url: "https://hihired.org/ai-search/auto-fill-job-applications-chrome-extension" },
       { label: "HiHired builder", url: "https://hihired.org/builder" },
-      { label: "JobCopilot alternative", url: "https://hihired.org/guides/jobcopilot-alternative-job-application-autofill" }
+      { label: "JobCopilot alternative", url: "https://hihired.org/ai-search/jobcopilot-alternative-job-application-autofill" }
     ],
     comparison: {
       title: "HiHired vs JobPilot at a glance",
@@ -6024,9 +6024,9 @@ const geoGuides = [
     ],
     cta: { label: "Try HiHired Auto-Fill", href: "/builder" },
     sources: [
-      { label: "Auto-fill guide", url: "https://hihired.org/guides/auto-fill-job-applications-chrome-extension" },
+      { label: "Auto-fill guide", url: "https://hihired.org/ai-search/auto-fill-job-applications-chrome-extension" },
       { label: "HiHired builder", url: "https://hihired.org/builder" },
-      { label: "Job App Filler alternative", url: "https://hihired.org/guides/job-app-filler-alternative-job-application-autofill" }
+      { label: "Job App Filler alternative", url: "https://hihired.org/ai-search/job-app-filler-alternative-job-application-autofill" }
     ],
     comparison: {
       title: "HiHired vs SimpleFill at a glance",
@@ -6095,9 +6095,9 @@ const geoGuides = [
     cta: { label: "Try HiHired Auto-Fill", href: "https://chromewebstore.google.com/detail/hihired-auto-fill/obhbnkbkffabchelgomgbjglhplemidc" },
     sources: [
       { label: "HiHired Auto-Fill on Chrome Web Store", url: "https://chromewebstore.google.com/detail/hihired-auto-fill/obhbnkbkffabchelgomgbjglhplemidc" },
-      { label: "Auto-fill guide", url: "https://hihired.org/guides/auto-fill-job-applications-chrome-extension" },
+      { label: "Auto-fill guide", url: "https://hihired.org/ai-search/auto-fill-job-applications-chrome-extension" },
       { label: "HiHired builder", url: "https://hihired.org/builder" },
-      { label: "Job App Filler alternative", url: "https://hihired.org/guides/job-app-filler-alternative-job-application-autofill" }
+      { label: "Job App Filler alternative", url: "https://hihired.org/ai-search/job-app-filler-alternative-job-application-autofill" }
     ],
     comparison: {
       title: "HiHired vs MultiField CopyCat at a glance",

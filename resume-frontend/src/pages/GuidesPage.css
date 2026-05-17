@@ -302,6 +302,132 @@
   align-items: center;
 }
 
+.how-to-guide .guide-detail__hero p {
+  color: #334155;
+  line-height: 1.65;
+  font-size: 1.05rem;
+}
+
+.how-to-feature-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  background: linear-gradient(135deg, #eef2ff 0%, #f8fafc 55%, #ecfeff 100%);
+}
+
+.how-to-feature-card p {
+  color: #334155;
+  line-height: 1.6;
+}
+
+.how-to-overview p {
+  color: #334155;
+  line-height: 1.6;
+}
+
+.how-to-flow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin: 18px 0;
+}
+
+.how-to-flow span {
+  border: 1px solid #c7d2fe;
+  background: #fff;
+  border-radius: 999px;
+  padding: 10px 14px;
+  color: #3730a3;
+  font-weight: 700;
+  text-align: center;
+}
+
+.how-to-steps {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.how-to-step-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 18px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  border-radius: 18px;
+  padding: 20px;
+}
+
+.how-to-step-card__number {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: #6366f1;
+  font-weight: 800;
+}
+
+.how-to-step-card h3,
+.how-to-mini-card h3 {
+  margin-top: 0;
+}
+
+.how-to-step-card p,
+.how-to-mini-card p {
+  color: #334155;
+  line-height: 1.55;
+}
+
+.how-to-step-card__action {
+  font-weight: 700;
+  color: #0f172a !important;
+}
+
+.how-to-checklist {
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.how-to-checklist li {
+  position: relative;
+  border: 1px solid #dbeafe;
+  background: #fff;
+  border-radius: 14px;
+  padding: 14px 16px 14px 44px;
+  color: #0f172a;
+  line-height: 1.45;
+}
+
+.how-to-checklist li::before {
+  content: "✓";
+  position: absolute;
+  left: 16px;
+  top: 14px;
+  color: #16a34a;
+  font-weight: 900;
+}
+
+.how-to-callout {
+  background: #0f172a;
+  color: #fff;
+}
+
+.how-to-callout p {
+  color: #dbeafe;
+  line-height: 1.6;
+}
+
 @media (max-width: 640px) {
   .guides-page {
     padding-top: 48px;
@@ -309,5 +435,14 @@
 
   .guide-card {
     padding: 20px;
+  }
+
+  .how-to-feature-card {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .how-to-step-card {
+    grid-template-columns: 1fr;
   }
 }

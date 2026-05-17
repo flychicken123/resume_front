@@ -3,7 +3,7 @@
  * Static production server for HiHired.
  *
  * Unlike `serve -s build`, this preserves prerendered nested HTML files such as
- * /guides/index.html and /guides/<slug>/index.html for no-JS SEO/GEO crawlers,
+ * /ai-search/index.html and /ai-search/<slug>/index.html for no-JS SEO/GEO crawlers,
  * while still falling back to the React SPA shell for app routes.
  */
 const fs = require('fs');
@@ -75,7 +75,7 @@ function resolveRequest(pathname) {
     return directPath;
   }
 
-  // Serve prerendered route HTML first, e.g. /guides and /guides/<slug>.
+  // Serve prerendered route HTML first, e.g. /ai-search and /ai-search/<slug>.
   if (directPath) {
     const prerenderedIndex = path.join(directPath, 'index.html');
     if (fs.existsSync(prerenderedIndex) && fs.statSync(prerenderedIndex).isFile()) {

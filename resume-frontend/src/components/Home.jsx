@@ -409,8 +409,8 @@ const Home = () => {
           >
             Features
           </a>
-          <Link to="/guides" className="home-nav-link">
-            Guides
+          <Link to="/how-to-use-hihired" className="home-nav-link">
+            How to use
           </Link>
           <Link to="/contact" className="home-nav-link">
             Contact
@@ -521,8 +521,8 @@ const Home = () => {
             <a href="#features" className="mobile-nav-link" onClick={(e) => { e.preventDefault(); document.getElementById("features")?.scrollIntoView({ behavior: "smooth" }); setShowMobileMenu(false); }}>
               Features
             </a>
-            <Link to="/guides" className="mobile-nav-link" onClick={() => setShowMobileMenu(false)}>
-              Guides
+            <Link to="/how-to-use-hihired" className="mobile-nav-link" onClick={() => setShowMobileMenu(false)}>
+              How to use
             </Link>
             {user && (
               <button
@@ -596,91 +596,6 @@ const Home = () => {
         }}
       />
 
-
-      <section
-        id="chrome-extension"
-        style={{
-          padding: "56px 20px",
-          background: "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)",
-        }}
-        aria-label="HiHired Auto-Fill Chrome extension"
-      >
-        <div
-          style={{
-            maxWidth: "1120px",
-            margin: "0 auto",
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-            gap: "28px",
-            alignItems: "center",
-          }}
-        >
-          <div>
-            <p style={{ margin: "0 0 10px", color: "#2563eb", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", fontSize: "0.8rem" }}>
-              Chrome extension
-            </p>
-            <h2 style={{ margin: "0 0 14px", fontSize: "2.25rem", color: "#0f172a", lineHeight: 1.15 }}>
-              Fill job applications from your saved HiHired profile
-            </h2>
-            <p style={{ margin: "0 0 22px", color: "#475569", lineHeight: 1.75, fontSize: "1.05rem" }}>
-              HiHired Auto-Fill is published on the Chrome Web Store. Build or import your resume once,
-              keep your profile organized, then use the extension to fill common application fields faster.
-            </p>
-            <a
-              href="https://chromewebstore.google.com/detail/hihired-auto-fill/obhbnkbkffabchelgomgbjglhplemidc"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => trackCTAClick("home_chrome_extension_section_cta", { page: window.location.pathname })}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "14px 22px",
-                borderRadius: "12px",
-                background: "#2563eb",
-                color: "#ffffff",
-                fontWeight: 700,
-                textDecoration: "none",
-                boxShadow: "0 10px 24px rgba(37, 99, 235, 0.24)",
-              }}
-            >
-              Install application autofill plugin
-            </a>
-          </div>
-          <div
-            style={{
-              background: "#0f172a",
-              border: "1px solid #1e3a8a",
-              borderRadius: "24px",
-              padding: "14px",
-              boxShadow: "0 18px 45px rgba(37, 99, 235, 0.18)",
-            }}
-          >
-            <video
-              controls
-              playsInline
-              preload="metadata"
-              poster="/og-image.png"
-              style={{
-                width: "100%",
-                display: "block",
-                borderRadius: "18px",
-                background: "#020617",
-                aspectRatio: "9 / 16",
-                objectFit: "cover",
-              }}
-              aria-label="HiHired Chrome extension demo filling a Toast job application"
-            >
-              <source src="/videos/hihired-toast-autofill-demo.mp4" type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
-            <p style={{ margin: "12px 4px 2px", color: "#cbd5e1", lineHeight: 1.6, fontSize: "0.95rem" }}>
-              Watch HiHired generate a resume from a real Toast job description, open the Chrome extension,
-              click Fill Application, and complete the form without submitting it.
-            </p>
-          </div>
-        </div>
-      </section>
 
       {/* How It Works */}
       <section className="how-it-works" id="how-it-works">
@@ -870,7 +785,7 @@ const Home = () => {
         <div style={{ maxWidth: '960px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
           <span>&copy; {new Date().getFullYear()} HiHired. All rights reserved.</span>
           <nav className="footer-menu">
-            <Link to="/guides">Guides</Link>
+            <Link to="/how-to-use-hihired">How to use</Link>
             <Link to="/contact">Contact</Link>
             <Link to="/terms">Terms of Service</Link>
             <Link to="/privacy">Privacy Policy</Link>

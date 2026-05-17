@@ -143,15 +143,15 @@ const PrivacyPolicy = () => (
         If you are reviewing privacy before signing up, these pages explain the core HiHired workflows on hihired.org that this policy applies to.
       </p>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
-        <Link to="/guides/best-free-ai-resume-builder-2026" style={{ display: 'block', padding: '18px', borderRadius: '18px', background: '#ffffff', border: '1px solid #dbeafe', textDecoration: 'none' }}>
+        <Link to="/ai-search/best-free-ai-resume-builder-2026" style={{ display: 'block', padding: '18px', borderRadius: '18px', background: '#ffffff', border: '1px solid #dbeafe', textDecoration: 'none' }}>
           <p style={{ margin: '0 0 8px', color: '#2563eb', fontWeight: 700 }}>free AI resume builder guide</p>
           <p style={{ margin: 0, color: '#334155', lineHeight: 1.6 }}>See how HiHired stores and uses resume data inside its ATS-focused resume builder workflow.</p>
         </Link>
-        <Link to="/guides/auto-fill-job-applications-chrome-extension" style={{ display: 'block', padding: '18px', borderRadius: '18px', background: '#ffffff', border: '1px solid #dbeafe', textDecoration: 'none' }}>
+        <Link to="/ai-search/auto-fill-job-applications-chrome-extension" style={{ display: 'block', padding: '18px', borderRadius: '18px', background: '#ffffff', border: '1px solid #dbeafe', textDecoration: 'none' }}>
           <p style={{ margin: '0 0 8px', color: '#2563eb', fontWeight: 700 }}>job application auto-fill guide</p>
           <p style={{ margin: 0, color: '#334155', lineHeight: 1.6 }}>Review how the HiHired Chrome extension reads form fields and fills job applications from saved profile data.</p>
         </Link>
-        <Link to="/guides/ai-resume-builder-with-cover-letter" style={{ display: 'block', padding: '18px', borderRadius: '18px', background: '#ffffff', border: '1px solid #dbeafe', textDecoration: 'none' }}>
+        <Link to="/ai-search/ai-resume-builder-with-cover-letter" style={{ display: 'block', padding: '18px', borderRadius: '18px', background: '#ffffff', border: '1px solid #dbeafe', textDecoration: 'none' }}>
           <p style={{ margin: '0 0 8px', color: '#2563eb', fontWeight: 700 }}>AI resume builder with cover letter</p>
           <p style={{ margin: 0, color: '#334155', lineHeight: 1.6 }}>Understand how HiHired reuses the same resume context and job details to produce a matching AI cover letter.</p>
         </Link>

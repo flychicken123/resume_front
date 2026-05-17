@@ -778,6 +778,52 @@ const CHAT_STAGE_TO_STEP = {
   tracking: STEP_IDS.TRACKING,
 };
 
+const BUILDER_ONBOARDING_KEY = 'hihiredBuilderOnboardingDismissed';
+const BUILDER_ONBOARDING_STEPS = [
+  {
+    stepId: STEP_IDS.IMPORT,
+    label: 'Import',
+    title: 'Start with your resume',
+    text: 'Upload your existing resume, or choose “start from scratch.” This gives HiHired your base profile before you edit anything.',
+    actionLabel: 'Go to import',
+  },
+  {
+    stepId: STEP_IDS.FORMAT,
+    label: 'Template',
+    title: 'Pick a clean template',
+    text: 'Choose a recruiter-friendly layout first. The preview on the right will update while you build.',
+    actionLabel: 'Choose template',
+  },
+  {
+    stepId: STEP_IDS.PERSONAL,
+    label: 'Basics',
+    title: 'Check your basic info',
+    text: 'Confirm your name, email, phone, LinkedIn, location, and portfolio links. These are the fields recruiters scan first.',
+    actionLabel: 'Check basics',
+  },
+  {
+    stepId: STEP_IDS.EXPERIENCE,
+    label: 'Experience',
+    title: 'Fill your work experience',
+    text: 'Add roles, impact, and measurable bullets. Use the AI rewrite buttons when a bullet feels too vague.',
+    actionLabel: 'Edit experience',
+  },
+  {
+    stepId: STEP_IDS.JOB_DESCRIPTION,
+    label: 'Target job',
+    title: 'Paste a target job description',
+    text: 'If you are applying to a specific role, paste the job description so HiHired can tailor your resume and cover letter.',
+    actionLabel: 'Add job description',
+  },
+  {
+    stepId: STEP_IDS.SUMMARY,
+    label: 'AI polish',
+    title: 'Generate your summary',
+    text: 'Use AI to draft a focused professional summary, then review the preview before downloading your PDF.',
+    actionLabel: 'Generate summary',
+  },
+];
+
 const getInitialStep = () => {
   if (typeof window === 'undefined') {
     return STEP_IDS.IMPORT;
@@ -828,6 +874,14 @@ function BuilderPage() {
   const [dismissReasonJobId, setDismissReasonJobId] = useState(null);
   const [dismissToast, setDismissToast] = useState(null);
   const [remoteOnlyFilter, setRemoteOnlyFilter] = useState(false);
+  const [showBuilderOnboarding, setShowBuilderOnboarding] = useState(() => {
+    if (typeof window === 'undefined') {
+      return false;
+    }
+    return window.localStorage.getItem(BUILDER_ONBOARDING_KEY) !== 'true';
+  });
+  const [builderOnboardingIndex, setBuilderOnboardingIndex] = useState(0);
+  const currentBuilderOnboardingStep = BUILDER_ONBOARDING_STEPS[builderOnboardingIndex] || BUILDER_ONBOARDING_STEPS[0];
   const dismissTimersRef = useRef(new Map());
   const JOBS_PER_PAGE = 25;
   const scrollBuilderIntoView = useCallback(() => {
@@ -2242,6 +2296,37 @@ function BuilderPage() {
     scrollBuilderIntoView();
   };
 
+  const dismissBuilderOnboarding = () => {
+    setShowBuilderOnboarding(false);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(BUILDER_ONBOARDING_KEY, 'true');
+    }
+  };
+
+  const jumpFromOnboarding = (targetStep) => {
+    handleStepChange(targetStep);
+    if (targetStep !== STEP_IDS.IMPORT) {
+      setUserRequestedImport(false);
+    }
+  };
+
+  const goToBuilderOnboardingStep = (index) => {
+    const safeIndex = Math.max(0, Math.min(index, BUILDER_ONBOARDING_STEPS.length - 1));
+    const nextGuideStep = BUILDER_ONBOARDING_STEPS[safeIndex];
+    setBuilderOnboardingIndex(safeIndex);
+    if (nextGuideStep) {
+      jumpFromOnboarding(nextGuideStep.stepId);
+    }
+  };
+
+  const goToNextBuilderOnboardingStep = () => {
+    if (builderOnboardingIndex >= BUILDER_ONBOARDING_STEPS.length - 1) {
+      dismissBuilderOnboarding();
+      return;
+    }
+    goToBuilderOnboardingStep(builderOnboardingIndex + 1);
+  };
+
   useEffect(() => {
     if (typeof window === 'undefined') {
       return undefined;
@@ -3433,24 +3518,56 @@ function BuilderPage() {
             }}>
               HiHired, free AI resume builder with cover letter and auto-fill workflow
             </h1>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap', marginTop: '14px', marginBottom: '8px', padding: '0 16px' }}>
-              <Link to="/guides/best-free-ai-resume-builder-2026" style={{ textDecoration: 'none', color: '#1d4ed8', fontWeight: 600, fontSize: '0.92rem' }}>
-                best free AI resume builder
-              </Link>
-              <span style={{ color: '#94a3b8' }}>•</span>
-              <Link to="/guides/auto-fill-job-applications-chrome-extension" style={{ textDecoration: 'none', color: '#1d4ed8', fontWeight: 600, fontSize: '0.92rem' }}>
-                chrome extension auto fill job applications
-              </Link>
-              <span style={{ color: '#94a3b8' }}>•</span>
-              <Link to="/guides/ai-cover-letter-generator-free" style={{ textDecoration: 'none', color: '#1d4ed8', fontWeight: 600, fontSize: '0.92rem' }}>
-                AI cover letter generator free
-              </Link>
+            <div className="builder-getting-started-note">
+              New here? Follow the steps from left to right — import or create your resume first, then tailor it to a job and export your PDF.
             </div>
             <ResumeProgressBar
               resumeData={data}
               jobDescriptions={jobDescriptions}
               onSectionClick={handleStepChange}
             />
+            {showBuilderOnboarding && currentBuilderOnboardingStep && (
+              <section className="builder-onboarding" aria-label="First-time builder walkthrough">
+                <div className="builder-onboarding__header">
+                  <div>
+                    <p className="builder-onboarding__kicker">Guided setup</p>
+                    <h2>{currentBuilderOnboardingStep.title}</h2>
+                    <p>{currentBuilderOnboardingStep.text}</p>
+                  </div>
+                  <button type="button" className="builder-onboarding__close" onClick={dismissBuilderOnboarding}>
+                    Skip tour
+                  </button>
+                </div>
+                <div className="builder-onboarding__progress" aria-label="Builder tour progress">
+                  {BUILDER_ONBOARDING_STEPS.map((item, index) => (
+                    <button
+                      key={item.label}
+                      type="button"
+                      className={`builder-onboarding__dot ${index === builderOnboardingIndex ? 'is-active' : ''} ${index < builderOnboardingIndex ? 'is-complete' : ''}`}
+                      onClick={() => goToBuilderOnboardingStep(index)}
+                      aria-label={`Go to tour step ${index + 1}: ${item.label}`}
+                    >
+                      <span>{index + 1}</span>
+                      <small>{item.label}</small>
+                    </button>
+                  ))}
+                </div>
+                <div className="builder-onboarding__actions">
+                  <button type="button" onClick={() => jumpFromOnboarding(currentBuilderOnboardingStep.stepId)}>
+                    {currentBuilderOnboardingStep.actionLabel}
+                  </button>
+                  {builderOnboardingIndex > 0 && (
+                    <button type="button" className="builder-onboarding__secondary" onClick={() => goToBuilderOnboardingStep(builderOnboardingIndex - 1)}>
+                      Back
+                    </button>
+                  )}
+                  <button type="button" className="builder-onboarding__secondary" onClick={goToNextBuilderOnboardingStep}>
+                    {builderOnboardingIndex >= BUILDER_ONBOARDING_STEPS.length - 1 ? 'Finish tour' : 'Next step'}
+                  </button>
+                  <Link to="/how-to-use-hihired">Open full tutorial</Link>
+                </div>
+              </section>
+            )}
             {user && (
               <div style={{ position: 'absolute', right: '20px', top: '80px' }}>
                 <SubscriptionStatus
