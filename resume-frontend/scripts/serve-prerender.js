@@ -66,6 +66,17 @@ function safeJoin(root, requestPath) {
   return filePath.startsWith(root) ? filePath : null;
 }
 
+function legacyGuideRedirect(pathname) {
+  const cleanPath = pathname === '/' ? '/' : pathname.replace(/\/$/, '');
+  if (cleanPath === '/guides') {
+    return '/ai-search';
+  }
+  if (cleanPath.startsWith('/guides/')) {
+    return `/ai-search/${cleanPath.slice('/guides/'.length)}`;
+  }
+  return null;
+}
+
 function resolveRequest(pathname) {
   const cleanPath = pathname === '/' ? '/' : pathname.replace(/\/$/, '');
   const directPath = safeJoin(buildDir, cleanPath);
@@ -95,6 +106,16 @@ const server = http.createServer((req, res) => {
   }
 
   const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+  const redirectTarget = legacyGuideRedirect(url.pathname);
+  if (redirectTarget) {
+    res.writeHead(301, {
+      Location: redirectTarget,
+      'Cache-Control': 'public, max-age=3600',
+    });
+    res.end();
+    return;
+  }
+
   const filePath = resolveRequest(url.pathname);
   sendFile(res, filePath);
 });
