@@ -43,7 +43,7 @@ const SimpleHero = ({ onCreateClick }) => {
           <div className="hero-primary-cta">
             <div className="hero-cta-buttons">
               <button className="btn-create" onClick={handleCreate}>
-                Create my resume
+                Build Resume
               </button>
               <a
                 className="btn-create hero-extension-link"
