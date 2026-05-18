@@ -3433,7 +3433,7 @@ function BuilderPage() {
               margin: 0,
               letterSpacing: '-1px'
             }}>
-              HiHired, free AI resume builder with cover letter and auto-fill workflow
+              Resume Builder
             </h1>
             <ResumeProgressBar
               resumeData={data}
