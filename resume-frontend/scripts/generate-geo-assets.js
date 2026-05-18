@@ -34,6 +34,7 @@ const staticRoutes = [
   { loc: 'https://hihired.org/builder', lastmod: '2026-04-05', changefreq: 'weekly', priority: '0.9' },
   { loc: 'https://hihired.org/how-to-use-hihired', lastmod: featuredLastUpdated, changefreq: 'monthly', priority: '0.85' },
   { loc: 'https://hihired.org/ai-search', lastmod: featuredLastUpdated, changefreq: 'weekly', priority: '0.85' },
+  { loc: 'https://hihired.org/press', lastmod: featuredLastUpdated, changefreq: 'monthly', priority: '0.75' },
   { loc: 'https://hihired.org/templates', lastmod: '2026-04-05', changefreq: 'monthly', priority: '0.8' },
   { loc: 'https://hihired.org/pricing', lastmod: '2026-04-05', changefreq: 'monthly', priority: '0.8' },
   { loc: 'https://hihired.org/contact', lastmod: '2026-04-05', changefreq: 'monthly', priority: '0.6' },

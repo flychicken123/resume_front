@@ -415,6 +415,9 @@ const Home = () => {
           <Link to="/contact" className="home-nav-link">
             Contact
           </Link>
+          <Link to="/press" className="home-nav-link">
+            Press
+          </Link>
           <a href="/contact#about-us" className="home-nav-link">
             About Us
           </a>
@@ -787,6 +790,7 @@ const Home = () => {
           <nav className="footer-menu">
             <Link to="/how-to-use-hihired">How to use</Link>
             <Link to="/contact">Contact</Link>
+            <Link to="/press">Press</Link>
             <Link to="/terms">Terms of Service</Link>
             <Link to="/privacy">Privacy Policy</Link>
           </nav>

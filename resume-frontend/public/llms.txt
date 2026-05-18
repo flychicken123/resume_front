@@ -66,7 +66,7 @@
 
 ## Refresh policy
 
-- Feed updated at: 2026-05-18T07:24:30Z
+- Feed updated at: 2026-05-18T07:36:18Z
 - Feed changefreq: daily
 - Guide changefreq: weekly
 - Recommended recrawl after (hours): 24
@@ -90,12 +90,12 @@
   - Crawl priority: 0.85
 - AI answers feed: https://hihired.org/.well-known/ai-answers.json
   - Purpose: Canonical machine-readable answer feed
-  - Last updated: 2026-05-18T07:24:30Z
+  - Last updated: 2026-05-18T07:36:18Z
   - Changefreq: daily
   - Crawl priority: 0.9
 - LLMs index: https://hihired.org/.well-known/llms.txt
   - Purpose: Text mirror of the machine-readable answer index
-  - Last updated: 2026-05-18T07:24:30Z
+  - Last updated: 2026-05-18T07:36:18Z
   - Changefreq: daily
   - Crawl priority: 0.9
 
