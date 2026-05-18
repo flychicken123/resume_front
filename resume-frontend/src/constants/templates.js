@@ -3,6 +3,10 @@ export const TEMPLATE_SLUGS = {
   MODERN_CLEAN: 'modern-clean',
   EXECUTIVE_SERIF: 'executive-serif',
   ATTORNEY_TEMPLATE: 'attorney-template',
+  HARVARD_ATS: 'harvard-ats',
+  TECH_MINIMAL: 'tech-minimal',
+  CREATIVE_PORTFOLIO: 'creative-portfolio',
+  ACADEMIC_CV: 'academic-cv',
 };
 
 export const DEFAULT_TEMPLATE_ID = TEMPLATE_SLUGS.CLASSIC_PROFESSIONAL;
@@ -43,6 +47,30 @@ export const TEMPLATE_OPTIONS = [
     id: TEMPLATE_SLUGS.ATTORNEY_TEMPLATE,
     name: 'Attorney Professional',
     description: 'Polished legal layout showcasing case results, bar admissions, and courtroom expertise',
+    image: '/templates/executive.png',
+  },
+  {
+    id: TEMPLATE_SLUGS.HARVARD_ATS,
+    name: 'Harvard ATS',
+    description: 'Dense single-column format for finance, consulting, law, and early-career roles',
+    image: '/templates/classic.png',
+  },
+  {
+    id: TEMPLATE_SLUGS.TECH_MINIMAL,
+    name: 'Tech Minimal',
+    description: 'Clean engineering layout that emphasizes technical skills, projects, and measurable impact',
+    image: '/templates/modern.png',
+  },
+  {
+    id: TEMPLATE_SLUGS.CREATIVE_PORTFOLIO,
+    name: 'Creative Portfolio',
+    description: 'Subtle portfolio-style design for marketing, design, product, and content roles',
+    image: '/templates/modern.png',
+  },
+  {
+    id: TEMPLATE_SLUGS.ACADEMIC_CV,
+    name: 'Academic CV',
+    description: 'Serif research-focused layout for education, research, grants, and academic applications',
     image: '/templates/executive.png',
   },
 ];

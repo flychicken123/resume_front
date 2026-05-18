@@ -935,3 +935,186 @@ body > div > div[style*='flex-direction:column'] {
 
 
 
+
+/* Harvard ATS template preview styles */
+.preview.harvard-ats {
+  background: #ffffff;
+  padding: 0.38in 0.55in 0.3in 0.55in !important;
+  border: none;
+  border-radius: 0;
+  font-family: 'Times New Roman', Times, serif;
+  color: #111827;
+  line-height: 1.08;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.preview.harvard-ats .name {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: calc(var(--font-size-header) * 1.08) !important;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
+  color: #111827;
+  text-align: center;
+  margin-bottom: 3pt;
+}
+
+.preview.harvard-ats .contact-info {
+  color: #111827;
+  font-size: calc(var(--font-size-details) * 0.92) !important;
+  margin-bottom: 6pt;
+  text-align: center;
+}
+
+.preview.harvard-ats .section-header {
+  color: #111827;
+  font-size: calc(var(--font-size-section) * 0.88) !important;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4pt;
+  border-bottom: 1px solid #111827;
+  margin-top: 8pt;
+  margin-bottom: 4pt;
+  padding-bottom: 1pt;
+}
+
+.preview.harvard-ats .institution-header {
+  color: #111827;
+  font-weight: 700;
+  font-size: calc(var(--font-size-content) * 0.95) !important;
+}
+
+.preview.harvard-ats p,
+.preview.harvard-ats .education-details,
+.preview.harvard-ats li {
+  color: #111827;
+  line-height: 1.12;
+}
+
+/* Tech Minimal template preview styles */
+.preview.tech-minimal {
+  background: #ffffff;
+  padding: 0.42in 0.52in 0.28in 0.52in !important;
+  border-left: 7pt solid #10b981;
+  border-radius: 0;
+  font-family: Inter, 'Segoe UI', Arial, sans-serif;
+  color: #0f172a;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.preview.tech-minimal .name {
+  color: #064e3b;
+  text-align: left;
+  text-transform: none;
+  font-weight: 800;
+  letter-spacing: -0.4pt;
+}
+
+.preview.tech-minimal .contact-info {
+  text-align: left;
+  color: #475569;
+  border-bottom: 1px solid #a7f3d0;
+  padding-bottom: 6pt;
+}
+
+.preview.tech-minimal .section-header {
+  color: #047857;
+  border-bottom: 1px solid #d1fae5;
+  letter-spacing: 1.3pt;
+}
+
+.preview.tech-minimal .institution-header {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.preview.tech-minimal .education-details,
+.preview.tech-minimal p,
+.preview.tech-minimal li {
+  color: #334155;
+}
+
+/* Creative Portfolio template preview styles */
+.preview.creative-portfolio {
+  background: linear-gradient(90deg, #f5f3ff 0, #f5f3ff 0.26in, #ffffff 0.26in, #ffffff 100%);
+  padding: 0.42in 0.5in 0.28in 0.62in !important;
+  border-radius: 0;
+  font-family: 'Aptos', 'Segoe UI', Arial, sans-serif;
+  color: #1e1b4b;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.preview.creative-portfolio .name {
+  color: #5b21b6;
+  text-align: left;
+  text-transform: none;
+  font-weight: 800;
+  letter-spacing: -0.3pt;
+}
+
+.preview.creative-portfolio .contact-info {
+  text-align: left;
+  color: #6d28d9;
+  margin-bottom: 8pt;
+}
+
+.preview.creative-portfolio .section-header {
+  color: #7c3aed;
+  border-bottom: 2px solid #ddd6fe;
+  letter-spacing: 1.2pt;
+}
+
+.preview.creative-portfolio .institution-header {
+  color: #312e81;
+  font-weight: 700;
+}
+
+.preview.creative-portfolio .education-details,
+.preview.creative-portfolio p,
+.preview.creative-portfolio li {
+  color: #3f3f46;
+}
+
+/* Academic CV template preview styles */
+.preview.academic-cv {
+  background: #fffdf8;
+  padding: 0.45in 0.58in 0.3in 0.58in !important;
+  border-top: 5pt solid #9a3412;
+  border-radius: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  color: #292524;
+  line-height: 1.18;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.preview.academic-cv .name {
+  color: #7c2d12;
+  text-align: left;
+  text-transform: none;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.preview.academic-cv .contact-info {
+  text-align: left;
+  color: #57534e;
+  border-bottom: 1px solid #d6d3d1;
+  padding-bottom: 6pt;
+}
+
+.preview.academic-cv .section-header {
+  color: #7c2d12;
+  border-bottom: 1px solid #d6d3d1;
+  letter-spacing: 0.8pt;
+}
+
+.preview.academic-cv .institution-header {
+  color: #292524;
+  font-weight: 700;
+}
+
+.preview.academic-cv .education-details,
+.preview.academic-cv p,
+.preview.academic-cv li {
+  color: #44403c;
+}

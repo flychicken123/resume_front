@@ -37,6 +37,30 @@ const TemplateGallery = ({ onSelectTemplate, showAuthModal }) => {
       color: '#0f172a',
       popular: false,
     },
+    [TEMPLATE_SLUGS.HARVARD_ATS]: {
+      category: 'ats',
+      features: ['Single Column', 'Bullet Dense', 'Recruiter Friendly'],
+      color: '#111827',
+      popular: true,
+    },
+    [TEMPLATE_SLUGS.TECH_MINIMAL]: {
+      category: 'tech',
+      features: ['Skills First', 'Project Ready', 'Clean Engineering Layout'],
+      color: '#059669',
+      popular: false,
+    },
+    [TEMPLATE_SLUGS.CREATIVE_PORTFOLIO]: {
+      category: 'creative',
+      features: ['Portfolio Links', 'Subtle Color', 'Brand Forward'],
+      color: '#7c3aed',
+      popular: false,
+    },
+    [TEMPLATE_SLUGS.ACADEMIC_CV]: {
+      category: 'academic',
+      features: ['Research Focus', 'Publications Ready', 'Serif Typography'],
+      color: '#7c2d12',
+      popular: false,
+    },
   };
 
   const templates = TEMPLATE_OPTIONS.map((template) => {
@@ -59,6 +83,10 @@ const TemplateGallery = ({ onSelectTemplate, showAuthModal }) => {
     { id: 'professional', name: 'Professional', icon: '💼' },
     { id: 'modern', name: 'Modern', icon: '⚡' },
     { id: 'executive', name: 'Executive', icon: '🏛️' },
+    { id: 'ats', name: 'ATS / Harvard', icon: '📄' },
+    { id: 'tech', name: 'Tech', icon: '💻' },
+    { id: 'creative', name: 'Creative', icon: '✨' },
+    { id: 'academic', name: 'Academic', icon: '🎓' },
   ];
 
   const filteredTemplates = selectedCategory === 'all' 

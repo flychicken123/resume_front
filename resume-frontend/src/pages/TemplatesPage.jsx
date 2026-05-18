@@ -4,6 +4,7 @@ import { useResume } from '../context/ResumeContext';
 import { TEMPLATE_OPTIONS } from '../constants/templates';
 import { trackReferrer, trackBuilderStart } from '../components/Analytics';
 import SEO from '../components/SEO';
+import TemplateThumbnail from '../components/TemplateThumbnail';
 
 const TemplatesPage = () => {
   const navigate = useNavigate();
@@ -41,7 +42,7 @@ const TemplatesPage = () => {
         {templates.map((template) => (
           <div key={template.id} className="template-card" onClick={() => handleTemplateSelect(template.id)}>
             <div className="template-image">
-              <img src={template.image} alt={template.name} />
+              <TemplateThumbnail templateId={template.id} width={220} />
             </div>
             <div className="template-info">
               <h3>{template.name}</h3>

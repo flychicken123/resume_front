@@ -270,11 +270,197 @@ const buildAttorneyData = () => ({
     'Litigation Strategy, Trial Advocacy, Regulatory Investigations, Appellate Briefing, Client Counseling, Legal Research & Writing',
 });
 
+const buildHarvardData = () => ({
+  name: 'Harvard ATS Template · Maya Chen',
+  email: 'maya.chen@email.com',
+  phone: '(617) 555-0191',
+  summary: 'Harvard ATS template sample — strategy analyst with rigorous problem solving, stakeholder communication, and measurable execution across consulting-style business initiatives.',
+  selectedFormat: TEMPLATE_SLUGS.HARVARD_ATS,
+  selectedFontSize: 'medium',
+  experiences: [
+    {
+      jobTitle: 'Business Analyst',
+      company: 'Northstar Strategy Group',
+      city: 'Boston',
+      state: 'MA',
+      startDate: '2022-07-01',
+      currentlyWorking: true,
+      description: [
+        'Built market-sizing model informing $22M expansion decision across three regions.',
+        'Synthesized 40+ stakeholder interviews into operating recommendations adopted by leadership.',
+        'Created KPI dashboard reducing monthly reporting cycle from 5 days to 2 days.',
+      ].map((line) => `• ${line}`).join('\n'),
+    },
+    {
+      jobTitle: 'Research Fellow',
+      company: 'Harvard Innovation Lab',
+      city: 'Cambridge',
+      state: 'MA',
+      startDate: '2020-09-01',
+      endDate: '2022-05-01',
+      description: [
+        'Analyzed commercialization paths for 18 early-stage ventures across healthcare and climate.',
+        'Presented investment memo to faculty committee and secured pilot funding for 3 teams.',
+      ].map((line) => `• ${line}`).join('\n'),
+    },
+  ],
+  education: [
+    {
+      degree: 'A.B.',
+      field: 'Economics, Secondary in Computer Science',
+      school: 'Harvard University',
+      city: 'Cambridge',
+      state: 'MA',
+      graduationYear: '2022',
+      honors: 'Magna Cum Laude',
+    },
+  ],
+  skills: 'Financial Modeling, Market Research, SQL, Excel, Tableau, Client Communication, Competitive Analysis',
+});
+
+const buildTechMinimalData = () => ({
+  name: 'Tech Minimal Template · Jordan Kim',
+  email: 'jordan.kim@devmail.com',
+  phone: '(650) 555-0188',
+  summary: 'Tech Minimal template sample — full-stack engineer shipping reliable AI products with strong ownership across React, Go, distributed systems, and cloud infrastructure.',
+  selectedFormat: TEMPLATE_SLUGS.TECH_MINIMAL,
+  selectedFontSize: 'medium',
+  experiences: [
+    {
+      jobTitle: 'Senior Software Engineer',
+      company: 'SignalForge AI',
+      city: 'Palo Alto',
+      state: 'CA',
+      startDate: '2021-04-01',
+      currentlyWorking: true,
+      description: [
+        'Designed event-driven ingestion service processing 35M records/day with 99.97% uptime.',
+        'Cut API latency 41% by refactoring GraphQL resolvers and adding targeted Redis caching.',
+        'Led migration from monolith deployment to containerized services on GKE.',
+      ].map((line) => `• ${line}`).join('\n'),
+    },
+  ],
+  projects: [
+    {
+      projectName: 'LLM Observability Console',
+      technologies: 'Go • React • PostgreSQL • Kubernetes • OpenTelemetry',
+      description: [
+        'Built trace explorer that helped on-call engineers debug model routing issues in minutes.',
+        'Added cost attribution views adopted by finance and platform engineering.',
+      ].map((line) => `• ${line}`).join('\n'),
+    },
+  ],
+  education: [
+    {
+      degree: 'B.S.',
+      field: 'Computer Science',
+      school: 'University of Illinois Urbana-Champaign',
+      city: 'Urbana',
+      state: 'IL',
+      graduationYear: '2020',
+    },
+  ],
+  skills: 'Go, TypeScript, React, PostgreSQL, Kubernetes, AWS, Redis, GraphQL, CI/CD, System Design',
+});
+
+const buildCreativePortfolioData = () => ({
+  name: 'Creative Portfolio Template · Riley Stone',
+  email: 'riley@portfolio.studio',
+  phone: '(323) 555-0176',
+  summary: 'Creative Portfolio template sample — brand and growth marketer turning customer insight into campaigns, launch narratives, and content systems that convert.',
+  selectedFormat: TEMPLATE_SLUGS.CREATIVE_PORTFOLIO,
+  selectedFontSize: 'medium',
+  experiences: [
+    {
+      jobTitle: 'Growth Marketing Manager',
+      company: 'Brightline Studio',
+      city: 'Los Angeles',
+      state: 'CA',
+      startDate: '2020-06-01',
+      currentlyWorking: true,
+      description: [
+        'Launched creator campaign that generated 18K qualified leads and 31% lower CAC.',
+        'Built editorial calendar across newsletter, social, and landing pages reaching 420K monthly readers.',
+        'Partnered with design to refresh conversion pages and lift trial starts by 27%.',
+      ].map((line) => `• ${line}`).join('\n'),
+    },
+  ],
+  projects: [
+    {
+      projectName: 'Portfolio: rileystone.com',
+      technologies: 'Brand Strategy • Copywriting • Webflow • Analytics',
+      description: [
+        'Case studies include product launches, lifecycle campaigns, and paid social experiments.',
+      ].map((line) => `• ${line}`).join('\n'),
+    },
+  ],
+  education: [
+    {
+      degree: 'B.A.',
+      field: 'Communication Design',
+      school: 'Parsons School of Design',
+      city: 'New York',
+      state: 'NY',
+      graduationYear: '2018',
+    },
+  ],
+  skills: 'Brand Strategy, Campaign Planning, Copywriting, Lifecycle Marketing, Webflow, Figma, GA4, Paid Social',
+});
+
+const buildAcademicData = () => ({
+  name: 'Academic CV Template · Dr. Elena Alvarez',
+  email: 'e.alvarez@research.edu',
+  phone: '(734) 555-0137',
+  summary: 'Academic CV template sample — computational social scientist studying labor markets, AI adoption, and organizational change through mixed-methods research.',
+  selectedFormat: TEMPLATE_SLUGS.ACADEMIC_CV,
+  selectedFontSize: 'medium',
+  experiences: [
+    {
+      jobTitle: 'Assistant Professor, Sociology',
+      company: 'Midwestern Research University',
+      city: 'Ann Arbor',
+      state: 'MI',
+      startDate: '2021-08-01',
+      currentlyWorking: true,
+      description: [
+        'Published 9 peer-reviewed articles on technology adoption, job quality, and workforce mobility.',
+        'Secured $640K NSF grant to study AI-enabled hiring systems across 120 employers.',
+        'Taught undergraduate statistics and graduate research design with average rating of 4.8/5.',
+      ].map((line) => `• ${line}`).join('\n'),
+    },
+  ],
+  projects: [
+    {
+      projectName: 'Selected Publications',
+      technologies: 'American Journal of Sociology • Work and Occupations • CHI',
+      description: [
+        '“Algorithmic Screening and Labor Market Signaling,” AJS, 2025.',
+        '“Automation Narratives in Mid-Sized Firms,” Work and Occupations, 2024.',
+      ].map((line) => `• ${line}`).join('\n'),
+    },
+  ],
+  education: [
+    {
+      degree: 'Ph.D.',
+      field: 'Sociology',
+      school: 'University of Michigan',
+      city: 'Ann Arbor',
+      state: 'MI',
+      graduationYear: '2021',
+    },
+  ],
+  skills: 'Research Design, Causal Inference, R, Python, Survey Methods, Grant Writing, Teaching, Mixed Methods',
+});
+
 const SAMPLE_DATA_FACTORIES = {
   [TEMPLATE_SLUGS.CLASSIC_PROFESSIONAL]: buildClassicData,
   [TEMPLATE_SLUGS.MODERN_CLEAN]: buildModernData,
   [TEMPLATE_SLUGS.EXECUTIVE_SERIF]: buildExecutiveData,
   [TEMPLATE_SLUGS.ATTORNEY_TEMPLATE]: buildAttorneyData,
+  [TEMPLATE_SLUGS.HARVARD_ATS]: buildHarvardData,
+  [TEMPLATE_SLUGS.TECH_MINIMAL]: buildTechMinimalData,
+  [TEMPLATE_SLUGS.CREATIVE_PORTFOLIO]: buildCreativePortfolioData,
+  [TEMPLATE_SLUGS.ACADEMIC_CV]: buildAcademicData,
 };
 
 const TemplateThumbnail = ({ templateId, width = 220 }) => {
