@@ -2184,30 +2184,6 @@ const applyFormatAdjustment = (value, sectionKey = type) => {
           skills: { color: '#334155', fontSize: `${6 * scaleFactor}px`, lineHeight: '1.35' },
           item: { marginTop: `${2.4 * scaleFactor}px` }
         };
-      case TEMPLATE_SLUGS.CREATIVE_PORTFOLIO:
-        return {
-          container: { fontFamily: 'Aptos, Segoe UI, Arial, sans-serif', fontSize: `${6 * scaleFactor}px`, lineHeight: '1.2', padding: '16px 16px 0 20px', background: 'linear-gradient(90deg, #f5f3ff 0, #f5f3ff 12px, #ffffff 12px, #ffffff 100%)', border: '1px solid #ddd6fe', borderRadius: '4px', overflow: 'visible' },
-          header: { textAlign: 'left', fontWeight: 800, fontSize: `${10 * scaleFactor}px`, marginBottom: `${3 * scaleFactor}px`, color: '#5b21b6' },
-          contact: { textAlign: 'left', color: '#6d28d9', fontSize: `${6 * scaleFactor}px`, marginBottom: `${6 * scaleFactor}px` },
-          sectionTitle: { color: '#7c3aed', fontWeight: 700, fontSize: `${8.2 * scaleFactor}px`, marginBottom: `${2.5 * scaleFactor}px`, textTransform: 'uppercase', letterSpacing: '1px', borderBottom: '2px solid #ddd6fe', paddingBottom: `${1.5 * scaleFactor}px`, textAlign: 'left' },
-          company: { color: '#312e81', fontWeight: 700, fontSize: `${6 * scaleFactor}px` },
-          bullet: { color: '#3f3f46', fontSize: `${6 * scaleFactor}px`, marginLeft: `${3.5 * scaleFactor}px`, marginBottom: `${1.5 * scaleFactor}px` },
-          summary: { color: '#3f3f46', fontSize: `${6 * scaleFactor}px`, marginBottom: `${3 * scaleFactor}px` },
-          skills: { color: '#3f3f46', fontSize: `${6 * scaleFactor}px`, lineHeight: '1.35' },
-          item: { marginTop: `${2.4 * scaleFactor}px` }
-        };
-      case TEMPLATE_SLUGS.ACADEMIC_CV:
-        return {
-          container: { fontFamily: 'Georgia, Times New Roman, serif', fontSize: `${6 * scaleFactor}px`, lineHeight: '1.22', padding: '18px 18px 0 18px', background: '#fffdf8', border: '1px solid #d6d3d1', borderTop: '6px solid #9a3412', borderRadius: '4px', overflow: 'visible' },
-          header: { textAlign: 'left', fontWeight: 700, fontSize: `${10 * scaleFactor}px`, marginBottom: `${3 * scaleFactor}px`, color: '#7c2d12' },
-          contact: { textAlign: 'left', color: '#57534e', fontSize: `${6 * scaleFactor}px`, marginBottom: `${6 * scaleFactor}px`, borderBottom: '1px solid #d6d3d1', paddingBottom: `${4 * scaleFactor}px` },
-          sectionTitle: { color: '#7c2d12', fontWeight: 700, fontSize: `${8.2 * scaleFactor}px`, marginBottom: `${2.5 * scaleFactor}px`, textTransform: 'uppercase', letterSpacing: '0.8px', borderBottom: '1px solid #d6d3d1', paddingBottom: `${1.5 * scaleFactor}px`, textAlign: 'left' },
-          company: { color: '#292524', fontWeight: 700, fontSize: `${6 * scaleFactor}px` },
-          bullet: { color: '#44403c', fontSize: `${6 * scaleFactor}px`, marginLeft: `${3.5 * scaleFactor}px`, marginBottom: `${1.5 * scaleFactor}px` },
-          summary: { color: '#44403c', fontSize: `${6 * scaleFactor}px`, marginBottom: `${3 * scaleFactor}px` },
-          skills: { color: '#44403c', fontSize: `${6 * scaleFactor}px`, lineHeight: '1.35' },
-          item: { marginTop: `${2.4 * scaleFactor}px` }
-        };
 
              default:
          // Default to Classic Professional

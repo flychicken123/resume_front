@@ -171,10 +171,6 @@ const isAttorneyTemplate = normalizedFormat === TEMPLATE_SLUGS.ATTORNEY_TEMPLATE
         return 'preview harvard-ats';
       case TEMPLATE_SLUGS.TECH_MINIMAL:
         return 'preview tech-minimal';
-      case TEMPLATE_SLUGS.CREATIVE_PORTFOLIO:
-        return 'preview creative-portfolio';
-      case TEMPLATE_SLUGS.ACADEMIC_CV:
-        return 'preview academic-cv';
       default:
         return 'preview'; // classic-professional template
     }

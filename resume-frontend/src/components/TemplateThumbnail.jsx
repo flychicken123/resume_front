@@ -363,94 +363,6 @@ const buildTechMinimalData = () => ({
   skills: 'Go, TypeScript, React, PostgreSQL, Kubernetes, AWS, Redis, GraphQL, CI/CD, System Design',
 });
 
-const buildCreativePortfolioData = () => ({
-  name: 'Creative Portfolio Template · Riley Stone',
-  email: 'riley@portfolio.studio',
-  phone: '(323) 555-0176',
-  summary: 'Creative Portfolio template sample — brand and growth marketer turning customer insight into campaigns, launch narratives, and content systems that convert.',
-  selectedFormat: TEMPLATE_SLUGS.CREATIVE_PORTFOLIO,
-  selectedFontSize: 'medium',
-  experiences: [
-    {
-      jobTitle: 'Growth Marketing Manager',
-      company: 'Brightline Studio',
-      city: 'Los Angeles',
-      state: 'CA',
-      startDate: '2020-06-01',
-      currentlyWorking: true,
-      description: [
-        'Launched creator campaign that generated 18K qualified leads and 31% lower CAC.',
-        'Built editorial calendar across newsletter, social, and landing pages reaching 420K monthly readers.',
-        'Partnered with design to refresh conversion pages and lift trial starts by 27%.',
-      ].map((line) => `• ${line}`).join('\n'),
-    },
-  ],
-  projects: [
-    {
-      projectName: 'Portfolio: rileystone.com',
-      technologies: 'Brand Strategy • Copywriting • Webflow • Analytics',
-      description: [
-        'Case studies include product launches, lifecycle campaigns, and paid social experiments.',
-      ].map((line) => `• ${line}`).join('\n'),
-    },
-  ],
-  education: [
-    {
-      degree: 'B.A.',
-      field: 'Communication Design',
-      school: 'Parsons School of Design',
-      city: 'New York',
-      state: 'NY',
-      graduationYear: '2018',
-    },
-  ],
-  skills: 'Brand Strategy, Campaign Planning, Copywriting, Lifecycle Marketing, Webflow, Figma, GA4, Paid Social',
-});
-
-const buildAcademicData = () => ({
-  name: 'Academic CV Template · Dr. Elena Alvarez',
-  email: 'e.alvarez@research.edu',
-  phone: '(734) 555-0137',
-  summary: 'Academic CV template sample — computational social scientist studying labor markets, AI adoption, and organizational change through mixed-methods research.',
-  selectedFormat: TEMPLATE_SLUGS.ACADEMIC_CV,
-  selectedFontSize: 'medium',
-  experiences: [
-    {
-      jobTitle: 'Assistant Professor, Sociology',
-      company: 'Midwestern Research University',
-      city: 'Ann Arbor',
-      state: 'MI',
-      startDate: '2021-08-01',
-      currentlyWorking: true,
-      description: [
-        'Published 9 peer-reviewed articles on technology adoption, job quality, and workforce mobility.',
-        'Secured $640K NSF grant to study AI-enabled hiring systems across 120 employers.',
-        'Taught undergraduate statistics and graduate research design with average rating of 4.8/5.',
-      ].map((line) => `• ${line}`).join('\n'),
-    },
-  ],
-  projects: [
-    {
-      projectName: 'Selected Publications',
-      technologies: 'American Journal of Sociology • Work and Occupations • CHI',
-      description: [
-        '“Algorithmic Screening and Labor Market Signaling,” AJS, 2025.',
-        '“Automation Narratives in Mid-Sized Firms,” Work and Occupations, 2024.',
-      ].map((line) => `• ${line}`).join('\n'),
-    },
-  ],
-  education: [
-    {
-      degree: 'Ph.D.',
-      field: 'Sociology',
-      school: 'University of Michigan',
-      city: 'Ann Arbor',
-      state: 'MI',
-      graduationYear: '2021',
-    },
-  ],
-  skills: 'Research Design, Causal Inference, R, Python, Survey Methods, Grant Writing, Teaching, Mixed Methods',
-});
 
 const SAMPLE_DATA_FACTORIES = {
   [TEMPLATE_SLUGS.CLASSIC_PROFESSIONAL]: buildClassicData,
@@ -459,8 +371,6 @@ const SAMPLE_DATA_FACTORIES = {
   [TEMPLATE_SLUGS.ATTORNEY_TEMPLATE]: buildAttorneyData,
   [TEMPLATE_SLUGS.HARVARD_ATS]: buildHarvardData,
   [TEMPLATE_SLUGS.TECH_MINIMAL]: buildTechMinimalData,
-  [TEMPLATE_SLUGS.CREATIVE_PORTFOLIO]: buildCreativePortfolioData,
-  [TEMPLATE_SLUGS.ACADEMIC_CV]: buildAcademicData,
 };
 
 const TemplateThumbnail = ({ templateId, width = 220 }) => {

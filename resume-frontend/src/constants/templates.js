@@ -5,8 +5,6 @@ export const TEMPLATE_SLUGS = {
   ATTORNEY_TEMPLATE: 'attorney-template',
   HARVARD_ATS: 'harvard-ats',
   TECH_MINIMAL: 'tech-minimal',
-  CREATIVE_PORTFOLIO: 'creative-portfolio',
-  ACADEMIC_CV: 'academic-cv',
 };
 
 export const DEFAULT_TEMPLATE_ID = TEMPLATE_SLUGS.CLASSIC_PROFESSIONAL;
@@ -60,18 +58,6 @@ export const TEMPLATE_OPTIONS = [
     name: 'Tech Minimal',
     description: 'Clean engineering layout that emphasizes technical skills, projects, and measurable impact',
     image: '/templates/modern.png',
-  },
-  {
-    id: TEMPLATE_SLUGS.CREATIVE_PORTFOLIO,
-    name: 'Creative Portfolio',
-    description: 'Subtle portfolio-style design for marketing, design, product, and content roles',
-    image: '/templates/modern.png',
-  },
-  {
-    id: TEMPLATE_SLUGS.ACADEMIC_CV,
-    name: 'Academic CV',
-    description: 'Serif research-focused layout for education, research, grants, and academic applications',
-    image: '/templates/executive.png',
   },
 ];
 

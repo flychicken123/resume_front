@@ -49,18 +49,6 @@ const TemplateGallery = ({ onSelectTemplate, showAuthModal }) => {
       color: '#059669',
       popular: false,
     },
-    [TEMPLATE_SLUGS.CREATIVE_PORTFOLIO]: {
-      category: 'creative',
-      features: ['Portfolio Links', 'Subtle Color', 'Brand Forward'],
-      color: '#7c3aed',
-      popular: false,
-    },
-    [TEMPLATE_SLUGS.ACADEMIC_CV]: {
-      category: 'academic',
-      features: ['Research Focus', 'Publications Ready', 'Serif Typography'],
-      color: '#7c2d12',
-      popular: false,
-    },
   };
 
   const templates = TEMPLATE_OPTIONS.map((template) => {
@@ -85,8 +73,6 @@ const TemplateGallery = ({ onSelectTemplate, showAuthModal }) => {
     { id: 'executive', name: 'Executive', icon: '🏛️' },
     { id: 'ats', name: 'ATS / Harvard', icon: '📄' },
     { id: 'tech', name: 'Tech', icon: '💻' },
-    { id: 'creative', name: 'Creative', icon: '✨' },
-    { id: 'academic', name: 'Academic', icon: '🎓' },
   ];
 
   const filteredTemplates = selectedCategory === 'all' 
