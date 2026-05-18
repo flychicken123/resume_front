@@ -31,12 +31,6 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://hihired.org/templates</loc>
-    <lastmod>2026-04-05</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://hihired.org/pricing</loc>
     <lastmod>2026-04-05</lastmod>
     <changefreq>monthly</changefreq>
