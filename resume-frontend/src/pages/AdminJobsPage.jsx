@@ -436,6 +436,13 @@ const modalContent = {
   boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
 };
 
+const formatBackfillErrorTime = (value) => {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString();
+};
+
 const tabBtn = (active) => ({
   padding: "0.6rem 1.2rem", borderRadius: "8px 8px 0 0", border: "1px solid #e5e7eb",
   borderBottom: active ? "2px solid #2563eb" : "1px solid #e5e7eb",
@@ -612,7 +619,10 @@ export default function AdminJobsPage() {
   const [backfillStatus, setBackfillStatus] = useState(null);
   const [backfillSinceDays, setBackfillSinceDays] = useState(30);
   const [backfillStarting, setBackfillStarting] = useState(false);
+  const [showBackfillErrors, setShowBackfillErrors] = useState(false);
   const backfillPollRef = useRef(null);
+  const backfillErrorLogs = Array.isArray(backfillStatus?.error_logs) ? backfillStatus.error_logs : [];
+  const hasBackfillErrors = (backfillStatus?.errors || 0) > 0 || backfillErrorLogs.length > 0;
 
   // --- Benchmark state ---
   const [benchmarkSummary, setBenchmarkSummary] = useState([]);
@@ -940,6 +950,20 @@ export default function AdminJobsPage() {
                 >
                   Stop
                 </button>
+                <button
+                  style={{
+                    ...btnSmall,
+                    background: showBackfillErrors ? "#334155" : "#ffffff",
+                    color: showBackfillErrors ? "#ffffff" : "#334155",
+                    borderColor: "#94a3b8",
+                    opacity: hasBackfillErrors ? 1 : 0.5,
+                  }}
+                  disabled={!hasBackfillErrors}
+                  aria-pressed={showBackfillErrors}
+                  onClick={() => setShowBackfillErrors((current) => !current)}
+                >
+                  {showBackfillErrors ? "Hide Errors" : "Show Errors"}
+                </button>
                 {backfillStatus && (
                   <span style={{ fontSize: "0.8rem", color: "#475569" }}>
                     {backfillStatus.running
@@ -950,6 +974,38 @@ export default function AdminJobsPage() {
                   </span>
                 )}
               </div>
+              {showBackfillErrors && (
+                <div style={{ marginTop: "0.75rem", paddingTop: "0.75rem", borderTop: "1px solid #bbf7d0" }}>
+                  {backfillErrorLogs.length > 0 ? (
+                    <div style={{ display: "grid", gap: "6px", maxHeight: "220px", overflow: "auto" }}>
+                      {backfillErrorLogs.map((log, index) => (
+                        <div
+                          key={`${log.job_id || "run"}-${log.at || index}-${index}`}
+                          style={{
+                            padding: "0.55rem 0.65rem",
+                            border: "1px solid #fecaca",
+                            borderRadius: "6px",
+                            background: "#fff7f7",
+                            color: "#7f1d1d",
+                          }}
+                        >
+                          <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", marginBottom: "3px", fontSize: "0.72rem", color: "#991b1b" }}>
+                            <span>{log.job_id ? `Job ${log.job_id}` : "Backfill"}</span>
+                            <span>{formatBackfillErrorTime(log.at)}</span>
+                          </div>
+                          <div style={{ fontSize: "0.78rem", lineHeight: 1.4, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+                            {log.message || "Unknown error"}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: "0.8rem", color: "#7f1d1d" }}>
+                      No error logs captured for this run.
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Filters */}
