@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://hihired.org/</loc>
-    <lastmod>2026-05-19</lastmod>
+    <lastmod>2026-05-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
@@ -14,19 +14,19 @@
   </url>
   <url>
     <loc>https://hihired.org/how-to-use-hihired</loc>
-    <lastmod>2026-05-19</lastmod>
+    <lastmod>2026-05-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://hihired.org/ai-search</loc>
-    <lastmod>2026-05-19</lastmod>
+    <lastmod>2026-05-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://hihired.org/press</loc>
-    <lastmod>2026-05-19</lastmod>
+    <lastmod>2026-05-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.75</priority>
   </url>
@@ -56,19 +56,19 @@
   </url>
   <url>
     <loc>https://hihired.org/.well-known/ai-answers.json</loc>
-    <lastmod>2026-05-19T18:52:53Z</lastmod>
+    <lastmod>2026-05-20T07:25:29Z</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://hihired.org/.well-known/llms.txt</loc>
-    <lastmod>2026-05-19T18:52:53Z</lastmod>
+    <lastmod>2026-05-20T07:25:29Z</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://hihired.org/llms.txt</loc>
-    <lastmod>2026-05-19T18:52:53Z</lastmod>
+    <lastmod>2026-05-20T07:25:29Z</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
@@ -98,7 +98,7 @@
   </url>
   <url>
     <loc>https://hihired.org/ai-search/auto-fill-job-applications-chrome-extension</loc>
-    <lastmod>2026-05-19</lastmod>
+    <lastmod>2026-05-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -110,7 +110,7 @@
   </url>
   <url>
     <loc>https://hihired.org/ai-search/best-free-ai-resume-builder-2026</loc>
-    <lastmod>2026-05-19</lastmod>
+    <lastmod>2026-05-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -122,7 +122,7 @@
   </url>
   <url>
     <loc>https://hihired.org/ai-search/ai-resume-builder-with-cover-letter</loc>
-    <lastmod>2026-05-19</lastmod>
+    <lastmod>2026-05-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>

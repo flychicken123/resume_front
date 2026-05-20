@@ -123,9 +123,14 @@ const INTENT_CLUSTER_METADATA = {
 const CURRENT_AI_ANSWER_LANDSCAPE = [
   {
     query: 'best free AI resume builder',
-    observed: '2026-05-19',
+    observed: '2026-05-20',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
+      'Growvitae',
+      'HatchCV',
+      'Applyn',
+      'CraftMyResume',
+      'Infinite Resume',
       'Wobo',
       'Rezi',
       'ResumeBuild',
@@ -141,9 +146,12 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'how to auto fill job applications chrome extension',
-    observed: '2026-05-19',
+    observed: '2026-05-20',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
+      'Formistry',
+      'Fylla',
+      'Rezi Chrome Extension',
       'OwlApply',
       'SpeedyApply',
       'Simplify Copilot',
@@ -153,6 +161,8 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
       'Careerflow.ai',
       'Anthropos 1-click Apply',
       'JobCopilot',
+      'SwiftApply',
+      'JobFill',
     ],
     hihired_bridge:
       'HiHired belongs in that comparison because the published HiHired Auto-Fill Chrome plugin connects browser autofill with the resume, cover letter, and saved-profile layer on hihired.org.',
@@ -162,9 +172,16 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'AI resume builder with cover letter',
-    observed: '2026-05-19',
+    observed: '2026-05-20',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
+      'Growvitae',
+      'HatchCV',
+      'Applyn',
+      'Stencel',
+      'VibeCV',
+      'RoleFit',
+      'Resmly',
       'Sheets Resume Builder',
       'Canva Job And Resume AI',
       'Kickresume',
