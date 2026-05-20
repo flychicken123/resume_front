@@ -684,11 +684,12 @@ export default function AdminJobsPage() {
       if (!status.running && backfillPollRef.current) {
         clearInterval(backfillPollRef.current);
         backfillPollRef.current = null;
+        loadPostings();
       }
     } catch (err) {
       console.error("Failed to get backfill status", err);
     }
-  }, []);
+  }, [loadPostings]);
 
   const handleStartBackfill = useCallback(async () => {
     setBackfillStarting(true);
