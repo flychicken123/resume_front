@@ -317,6 +317,35 @@ function generateGuideHtml(guide) {
     `
     : '';
 
+  const autofillDemoHtml = guide.slug === 'auto-fill-job-applications-chrome-extension'
+    ? `
+      <section id="demo-video" style="background:#fff;border:1px solid #e2e8f0;border-radius:24px;padding:28px;margin-top:20px;">
+        <h2 style="margin:0 0 16px;font-size:28px;color:#0f172a;">Watch the HiHired Chrome extension fill a real job application</h2>
+        <p style="margin:0 0 18px;color:#475569;line-height:1.8;">HiHired Auto-Fill is a Chrome extension. This video shows the real Chrome plugin popup on a Toast job application: generate a resume from the job description, attach it, click Fill Application, and review the completed form before submitting.</p>
+        <div style="max-width:560px;margin:20px auto 0;padding:12px;border:1px solid #1e3a8a;border-radius:24px;background:#0f172a;box-shadow:0 18px 45px rgba(37,99,235,0.16);">
+          <video controls playsinline preload="metadata" poster="/og-image.png" aria-label="HiHired Chrome extension demo filling a Toast job application" style="display:block;width:100%;aspect-ratio:9 / 16;border-radius:18px;background:#020617;object-fit:cover;">
+            <source src="/videos/hihired-toast-autofill-demo.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </section>
+
+      <section id="install-chrome-extension" style="background:#fff;border:1px solid #e2e8f0;border-radius:24px;padding:28px;margin-top:20px;">
+        <h2 style="margin:0 0 16px;font-size:28px;color:#0f172a;">How to install the HiHired Auto-Fill Chrome extension</h2>
+        <ol style="padding-left:20px;margin:0;">
+          <li style="margin-bottom:14px;"><strong>Open the Chrome Web Store listing.</strong> Go to the HiHired Auto-Fill Chrome extension page and click Add to Chrome.</li>
+          <li style="margin-bottom:14px;"><strong>Confirm the Chrome plugin install.</strong> Click Add extension when Chrome asks for confirmation, then pin HiHired Auto-Fill from the Extensions menu so it stays visible.</li>
+          <li style="margin-bottom:14px;"><strong>Sign in on hihired.org.</strong> Build or import your resume profile at hihired.org/builder so the Chrome extension has your contact info, work history, education, skills, and common answers.</li>
+          <li style="margin-bottom:14px;"><strong>Use it on a job application.</strong> Open a Workday, Greenhouse, Lever, LinkedIn Easy Apply, Indeed, Taleo, iCIMS, or other supported application and click Fill Application in the HiHired Chrome extension popup.</li>
+        </ol>
+        <div style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap;">
+          <a href="https://chromewebstore.google.com/detail/hihired-auto-fill/obhbnkbkffabchelgomgbjglhplemidc" style="display:inline-block;padding:12px 20px;background:#2563eb;color:#fff;border-radius:10px;text-decoration:none;font-weight:600;">Install the Chrome extension</a>
+          <a href="/builder" style="display:inline-block;padding:12px 20px;border:1px solid #cbd5e1;color:#0f172a;border-radius:10px;text-decoration:none;font-weight:600;">Create your HiHired profile</a>
+        </div>
+      </section>
+    `
+    : '';
+
   const relatedGuidesHtml = relatedGuides.length
     ? `
       <section style="background:#fff;border:1px solid #e2e8f0;border-radius:24px;padding:28px;margin-top:20px;">
@@ -353,6 +382,8 @@ function generateGuideHtml(guide) {
           <a href="/.well-known/ai-answers.json" style="display:inline-block;padding:12px 20px;border:1px solid #cbd5e1;color:#0f172a;border-radius:10px;text-decoration:none;font-weight:600;">Download JSON capsule</a>
         </div>
       </section>
+
+      ${autofillDemoHtml}
 
       <section style="background:#fff;border:1px solid #e2e8f0;border-radius:24px;padding:28px;margin-top:20px;">
         <h2 style="margin:0 0 16px;font-size:28px;color:#0f172a;">Step-by-step instructions</h2>
@@ -448,9 +479,30 @@ function generateGuideHtml(guide) {
     })),
   };
 
+  const videoStructuredData = guide.slug === 'auto-fill-job-applications-chrome-extension'
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'VideoObject',
+        name: 'HiHired Auto-Fill Chrome extension demo',
+        description: 'A product demo showing the HiHired Auto-Fill Chrome extension filling a real job application from a saved HiHired profile.',
+        thumbnailUrl: 'https://hihired.org/og-image.png',
+        uploadDate: guide.lastUpdated,
+        contentUrl: 'https://hihired.org/videos/hihired-toast-autofill-demo.mp4',
+        embedUrl: `${canonical}#demo-video`,
+        publisher: {
+          '@type': 'Organization',
+          name: 'HiHired',
+          url: 'https://hihired.org',
+        },
+      }
+    : null;
+
   let html = templateHtml;
   html = replaceMeta(html, title, description, canonical, 'article');
-  html = injectStructuredData(html, [organizationStructuredData, websiteStructuredData, articleStructuredData, howToStructuredData, faqStructuredData]);
+  html = injectStructuredData(
+    html,
+    [organizationStructuredData, websiteStructuredData, articleStructuredData, howToStructuredData, faqStructuredData, videoStructuredData].filter(Boolean)
+  );
   html = html.replace('<div id="root"></div>', `<div id="root">${bodyHtml}</div>`);
   return html;
 }

@@ -108,6 +108,7 @@ const GuideDetailPage = () => {
   const guideQuestion = guide.answerQuestion || guide.intent;
   const seoDescription = `${guide.summary} HiHired on hihired.org keeps resume building, AI cover letters, and job application auto-fill in one workflow.`;
   const seoKeywords = [...new Set([...(guide.tags || []), "HiHired", "hihired.org", guideQuestion])].join(", ");
+  const isAutofillGuide = guide.slug === "auto-fill-job-applications-chrome-extension";
 
   const howToStructuredData = {
     "@context": "https://schema.org",
@@ -248,6 +249,24 @@ const GuideDetailPage = () => {
     "description": seoDescription
   };
 
+  const videoStructuredData = isAutofillGuide
+    ? {
+        "@context": "https://schema.org",
+        "@type": "VideoObject",
+        "name": "HiHired Auto-Fill Chrome extension demo",
+        "description": "A product demo showing the HiHired Auto-Fill Chrome extension filling a real job application from a saved HiHired profile.",
+        "thumbnailUrl": "https://hihired.org/og-image.png",
+        "uploadDate": guide.lastUpdated,
+        "contentUrl": "https://hihired.org/videos/hihired-toast-autofill-demo.mp4",
+        "embedUrl": `${canonical}#demo-video`,
+        "publisher": {
+          "@type": "Organization",
+          "name": "HiHired",
+          "url": "https://hihired.org"
+        }
+      }
+    : null;
+
   const guideCluster = getGuideCluster(guide.slug);
   const hotClusterGuides = (HOT_GUIDE_SLUGS_BY_CLUSTER[guideCluster] || [])
     .filter((candidateSlug) => candidateSlug !== guide.slug)
@@ -365,6 +384,11 @@ const GuideDetailPage = () => {
         <script type="application/ld+json">
           {JSON.stringify(articleStructuredData)}
         </script>
+        {videoStructuredData ? (
+          <script type="application/ld+json">
+            {JSON.stringify(videoStructuredData)}
+          </script>
+        ) : null}
         {hotAlternativesStructuredData ? (
           <script type="application/ld+json">
             {JSON.stringify(hotAlternativesStructuredData)}
@@ -411,43 +435,65 @@ const GuideDetailPage = () => {
         </div>
       </header>
 
-      {guide.slug === "auto-fill-job-applications-chrome-extension" ? (
-        <section className="guide-detail__section" id="demo-video">
-          <h2>Watch HiHired Auto-Fill on a real job application</h2>
+      {isAutofillGuide ? (
+        <section className="guide-detail__section guide-detail__video-section" id="demo-video">
+          <h2>Watch the HiHired Chrome extension fill a real job application</h2>
           <p>
-            This demo shows the Toast job page and the real HiHired Chrome extension popup on screen:
-            generate a resume from the job description, attach it, click Fill Application, and review the
-            completed form before submitting.
+            HiHired Auto-Fill is a Chrome extension. This video shows the real Chrome plugin popup on
+            a Toast job application: generate a resume from the job description, attach it, click Fill
+            Application, and review the completed form before submitting.
           </p>
-          <div
-            style={{
-              maxWidth: "560px",
-              margin: "20px auto 0",
-              padding: "12px",
-              borderRadius: "24px",
-              background: "#0f172a",
-              border: "1px solid #1e3a8a",
-              boxShadow: "0 18px 45px rgba(37, 99, 235, 0.16)",
-            }}
-          >
+          <div className="guide-detail__video-frame">
             <video
               controls
               playsInline
               preload="metadata"
               poster="/og-image.png"
-              style={{
-                width: "100%",
-                display: "block",
-                borderRadius: "18px",
-                background: "#020617",
-                aspectRatio: "9 / 16",
-                objectFit: "cover",
-              }}
               aria-label="HiHired Chrome extension demo filling a Toast job application"
             >
               <source src="/videos/hihired-toast-autofill-demo.mp4" type="video/mp4" />
               Your browser does not support the video tag.
             </video>
+          </div>
+        </section>
+      ) : null}
+
+      {isAutofillGuide ? (
+        <section className="guide-detail__section" id="install-chrome-extension">
+          <h2>How to install the HiHired Auto-Fill Chrome extension</h2>
+          <ol className="guide-detail__steps">
+            <li>
+              <strong>Open the Chrome Web Store listing.</strong>{" "}
+              Go to the HiHired Auto-Fill Chrome extension page and click Add to Chrome.
+            </li>
+            <li>
+              <strong>Confirm the Chrome plugin install.</strong>{" "}
+              Click Add extension when Chrome asks for confirmation, then pin HiHired Auto-Fill from the
+              Extensions menu so it stays visible.
+            </li>
+            <li>
+              <strong>Sign in on hihired.org.</strong>{" "}
+              Build or import your resume profile at hihired.org/builder so the Chrome extension has your
+              contact info, work history, education, skills, and common answers.
+            </li>
+            <li>
+              <strong>Use it on a job application.</strong>{" "}
+              Open a Workday, Greenhouse, Lever, LinkedIn Easy Apply, Indeed, Taleo, iCIMS, or other
+              supported application and click Fill Application in the HiHired Chrome extension popup.
+            </li>
+          </ol>
+          <div className="guide-card__links">
+            <a
+              className="guides-primary-btn"
+              href="https://chromewebstore.google.com/detail/hihired-auto-fill/obhbnkbkffabchelgomgbjglhplemidc"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Install the Chrome extension
+            </a>
+            <a className="guides-secondary-btn" href="/builder">
+              Create your HiHired profile
+            </a>
           </div>
         </section>
       ) : null}
