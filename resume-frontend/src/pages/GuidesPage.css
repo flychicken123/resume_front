@@ -318,6 +318,24 @@
   object-fit: cover;
 }
 
+.guide-detail__top-video {
+  margin-bottom: 32px;
+}
+
+.guide-detail__youtube-frame {
+  max-width: 860px;
+  background: #020617;
+}
+
+.guide-detail__youtube-frame iframe {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+  border-radius: 18px;
+  background: #020617;
+}
+
 .guide-detail__not-found {
   text-align: center;
   display: flex;

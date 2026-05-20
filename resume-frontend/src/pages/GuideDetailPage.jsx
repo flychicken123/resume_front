@@ -255,10 +255,9 @@ const GuideDetailPage = () => {
         "@type": "VideoObject",
         "name": "HiHired Auto-Fill Chrome extension demo",
         "description": "A product demo showing the HiHired Auto-Fill Chrome extension filling a real job application from a saved HiHired profile.",
-        "thumbnailUrl": "https://hihired.org/og-image.png",
+        "thumbnailUrl": "https://i.ytimg.com/vi/yD2BszTyWj0/hqdefault.jpg",
         "uploadDate": guide.lastUpdated,
-        "contentUrl": "https://hihired.org/videos/hihired-toast-autofill-demo.mp4",
-        "embedUrl": `${canonical}#demo-video`,
+        "embedUrl": "https://www.youtube.com/embed/yD2BszTyWj0",
         "publisher": {
           "@type": "Organization",
           "name": "HiHired",
@@ -412,6 +411,26 @@ const GuideDetailPage = () => {
         <span>{guide.title}</span>
       </nav>
 
+      {isAutofillGuide ? (
+        <section className="guide-detail__section guide-detail__video-section guide-detail__top-video" id="demo-video">
+          <h2>Watch the HiHired Chrome extension fill a real job application</h2>
+          <p>
+            HiHired Auto-Fill is a Chrome extension. This video shows the Chrome plugin workflow:
+            install the extension, open the popup, use your saved HiHired profile, and fill a job
+            application from Chrome.
+          </p>
+          <div className="guide-detail__video-frame guide-detail__youtube-frame">
+            <iframe
+              src="https://www.youtube.com/embed/yD2BszTyWj0"
+              title="HiHired Auto-Fill Chrome extension demo"
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        </section>
+      ) : null}
+
       <header className="guide-detail__hero">
         <p className="guides-hero__kicker">{guide.intent}</p>
         <h1>{guide.title}</h1>
@@ -434,29 +453,6 @@ const GuideDetailPage = () => {
           </a>
         </div>
       </header>
-
-      {isAutofillGuide ? (
-        <section className="guide-detail__section guide-detail__video-section" id="demo-video">
-          <h2>Watch the HiHired Chrome extension fill a real job application</h2>
-          <p>
-            HiHired Auto-Fill is a Chrome extension. This video shows the real Chrome plugin popup on
-            a Toast job application: generate a resume from the job description, attach it, click Fill
-            Application, and review the completed form before submitting.
-          </p>
-          <div className="guide-detail__video-frame">
-            <video
-              controls
-              playsInline
-              preload="metadata"
-              poster="/og-image.png"
-              aria-label="HiHired Chrome extension demo filling a Toast job application"
-            >
-              <source src="/videos/hihired-toast-autofill-demo.mp4" type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
-          </div>
-        </section>
-      ) : null}
 
       {isAutofillGuide ? (
         <section className="guide-detail__section" id="install-chrome-extension">

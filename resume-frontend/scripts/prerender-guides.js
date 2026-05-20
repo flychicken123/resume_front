@@ -319,17 +319,18 @@ function generateGuideHtml(guide) {
 
   const autofillDemoHtml = guide.slug === 'auto-fill-job-applications-chrome-extension'
     ? `
-      <section id="demo-video" style="background:#fff;border:1px solid #e2e8f0;border-radius:24px;padding:28px;margin-top:20px;">
+      <section id="demo-video" style="background:#fff;border:1px solid #e2e8f0;border-radius:24px;padding:28px;margin:0 0 32px;">
         <h2 style="margin:0 0 16px;font-size:28px;color:#0f172a;">Watch the HiHired Chrome extension fill a real job application</h2>
-        <p style="margin:0 0 18px;color:#475569;line-height:1.8;">HiHired Auto-Fill is a Chrome extension. This video shows the real Chrome plugin popup on a Toast job application: generate a resume from the job description, attach it, click Fill Application, and review the completed form before submitting.</p>
-        <div style="max-width:560px;margin:20px auto 0;padding:12px;border:1px solid #1e3a8a;border-radius:24px;background:#0f172a;box-shadow:0 18px 45px rgba(37,99,235,0.16);">
-          <video controls playsinline preload="metadata" poster="/og-image.png" aria-label="HiHired Chrome extension demo filling a Toast job application" style="display:block;width:100%;aspect-ratio:9 / 16;border-radius:18px;background:#020617;object-fit:cover;">
-            <source src="/videos/hihired-toast-autofill-demo.mp4" type="video/mp4">
-            Your browser does not support the video tag.
-          </video>
+        <p style="margin:0 0 18px;color:#475569;line-height:1.8;">HiHired Auto-Fill is a Chrome extension. This video shows the Chrome plugin workflow: install the extension, open the popup, use your saved HiHired profile, and fill a job application from Chrome.</p>
+        <div style="max-width:860px;margin:20px auto 0;padding:12px;border:1px solid #1e3a8a;border-radius:24px;background:#020617;box-shadow:0 18px 45px rgba(37,99,235,0.16);">
+          <iframe src="https://www.youtube.com/embed/yD2BszTyWj0" title="HiHired Auto-Fill Chrome extension demo" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="display:block;width:100%;aspect-ratio:16 / 9;border:0;border-radius:18px;background:#020617;"></iframe>
         </div>
       </section>
+    `
+    : '';
 
+  const autofillInstallHtml = guide.slug === 'auto-fill-job-applications-chrome-extension'
+    ? `
       <section id="install-chrome-extension" style="background:#fff;border:1px solid #e2e8f0;border-radius:24px;padding:28px;margin-top:20px;">
         <h2 style="margin:0 0 16px;font-size:28px;color:#0f172a;">How to install the HiHired Auto-Fill Chrome extension</h2>
         <ol style="padding-left:20px;margin:0;">
@@ -370,6 +371,8 @@ function generateGuideHtml(guide) {
         <span>${escapeHtml(guide.title)}</span>
       </nav>
 
+      ${autofillDemoHtml}
+
       <section style="background:#fff;border:1px solid #e2e8f0;border-radius:24px;padding:32px;box-shadow:0 12px 32px rgba(15,23,42,0.06);">
         <p style="color:#2563eb;font-size:14px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;margin:0 0 10px;">${escapeHtml(guide.answerQuestion || guide.intent)}</p>
         <h1 style="font-size:38px;line-height:1.15;color:#0f172a;margin:0 0 16px;">${escapeHtml(guide.title)}</h1>
@@ -383,7 +386,7 @@ function generateGuideHtml(guide) {
         </div>
       </section>
 
-      ${autofillDemoHtml}
+      ${autofillInstallHtml}
 
       <section style="background:#fff;border:1px solid #e2e8f0;border-radius:24px;padding:28px;margin-top:20px;">
         <h2 style="margin:0 0 16px;font-size:28px;color:#0f172a;">Step-by-step instructions</h2>
@@ -485,10 +488,9 @@ function generateGuideHtml(guide) {
         '@type': 'VideoObject',
         name: 'HiHired Auto-Fill Chrome extension demo',
         description: 'A product demo showing the HiHired Auto-Fill Chrome extension filling a real job application from a saved HiHired profile.',
-        thumbnailUrl: 'https://hihired.org/og-image.png',
+        thumbnailUrl: 'https://i.ytimg.com/vi/yD2BszTyWj0/hqdefault.jpg',
         uploadDate: guide.lastUpdated,
-        contentUrl: 'https://hihired.org/videos/hihired-toast-autofill-demo.mp4',
-        embedUrl: `${canonical}#demo-video`,
+        embedUrl: 'https://www.youtube.com/embed/yD2BszTyWj0',
         publisher: {
           '@type': 'Organization',
           name: 'HiHired',
