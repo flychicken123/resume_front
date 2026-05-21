@@ -428,6 +428,21 @@ const GuideDetailPage = () => {
               allowFullScreen
             />
           </div>
+          <div className="guide-detail__extension-cta">
+            <p>
+              HiHired Auto-Fill is a Chrome extension. Install it from the Chrome Web Store:
+              <br />
+              <a href="https://chromewebstore.google.com/detail/hihired-auto-fill/obhbnkbkffabchelgomgbjglhplemidc">
+                chromewebstore.google.com/detail/hihired-auto-fill/obhbnkbkffabchelgomgbjglhplemidc
+              </a>
+            </p>
+            <a
+              className="guides-primary-btn"
+              href="https://chromewebstore.google.com/detail/hihired-auto-fill/obhbnkbkffabchelgomgbjglhplemidc"
+            >
+              Install the Chrome extension
+            </a>
+          </div>
         </section>
       ) : null}
 

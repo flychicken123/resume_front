@@ -336,6 +336,30 @@
   background: #020617;
 }
 
+.guide-detail__extension-cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid #bfdbfe;
+  border-radius: 14px;
+  background: #eff6ff;
+}
+
+.guide-detail__extension-cta p {
+  margin: 0;
+  color: #1e293b;
+}
+
+.guide-detail__extension-cta a:not(.guides-primary-btn) {
+  color: #2563eb;
+  overflow-wrap: anywhere;
+  font-weight: 600;
+}
+
 .guide-detail__not-found {
   text-align: center;
   display: flex;
