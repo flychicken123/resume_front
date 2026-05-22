@@ -820,6 +820,7 @@ function BuilderPage() {
   const [customizeActiveJobId, setCustomizeActiveJobId] = useState(null);
   const [customizeNotice, setCustomizeNotice] = useState(null);
   const [customizeError, setCustomizeError] = useState(null);
+  const [previewTailorStatus, setPreviewTailorStatus] = useState(null);
   const [trackedJobIds, setTrackedJobIds] = useState(new Set());
   const [trackingInProgress, setTrackingInProgress] = useState(null);
   const [hoveredMatchKey, setHoveredMatchKey] = useState(null);
@@ -2185,7 +2186,30 @@ function BuilderPage() {
     } finally {
       setCustomizeActiveJobId(null);
     }
-  }, [data, combinedJobDescription, updateData, user]);
+  }, [data, trimmedJobDescription, updateData, user]);
+
+  const handlePreviewTailorToJob = useCallback(async () => {
+    const jobText = trimmedJobDescription;
+    if (!jobText) {
+      setCustomizeError('Add a job description before tailoring the resume.');
+      setStep(STEP_IDS.JOB_DESCRIPTION);
+      scrollBuilderIntoView();
+      return;
+    }
+
+    setPreviewTailorStatus('working');
+    try {
+      await handleAutoCustomizeResume({
+        id: 'manual-job-description',
+        job_title: targetPosition || 'this job',
+        job_description: jobText,
+        matched_skills: [],
+        missing_skills: [],
+      });
+    } finally {
+      setPreviewTailorStatus(null);
+    }
+  }, [trimmedJobDescription, targetPosition, handleAutoCustomizeResume, setStep, scrollBuilderIntoView]);
   useEffect(() => {
     if (step !== STEP_IDS.JOB_MATCHES) {
       return;
@@ -4663,7 +4687,15 @@ function BuilderPage() {
           }}
         >
           {step !== STEP_IDS.COVER_LETTER && step !== STEP_IDS.TRACKING && (
-            <LivePreview onDownload={handleViewResume} downloadNotice={downloadNotice} onSaveForPlugin={handleSaveForPlugin} savePluginStatus={savePluginStatus} />
+            <LivePreview
+              onDownload={handleViewResume}
+              downloadNotice={downloadNotice}
+              onSaveForPlugin={handleSaveForPlugin}
+              savePluginStatus={savePluginStatus}
+              onTailorToJob={handlePreviewTailorToJob}
+              tailorToJobDisabled={!trimmedJobDescription || previewTailorStatus === 'working'}
+              tailorToJobStatus={previewTailorStatus}
+            />
           )}
           {step === STEP_IDS.COVER_LETTER && (
             <div style={{

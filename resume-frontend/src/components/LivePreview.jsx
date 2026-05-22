@@ -3,7 +3,17 @@ import { useResume } from '../context/ResumeContext';
 import { TEMPLATE_SLUGS, DEFAULT_TEMPLATE_ID, normalizeTemplateId } from '../constants/templates';
 import './LivePreview.css';
 const LIVE_PREVIEW_BUILD = '2026-02-14-v3';
-const LivePreview = ({ isVisible = true, onToggle, onDownload, downloadNotice, onSaveForPlugin, savePluginStatus }) => {
+const LivePreview = ({
+  isVisible = true,
+  onToggle,
+  onDownload,
+  downloadNotice,
+  onSaveForPlugin,
+  savePluginStatus,
+  onTailorToJob,
+  tailorToJobDisabled,
+  tailorToJobStatus,
+}) => {
   const isBrowser = typeof window !== 'undefined';
   const DEBUG_PAGINATION = isBrowser && (
     process.env.REACT_APP_DEBUG_PAGINATION === 'true' ||
@@ -3770,6 +3780,27 @@ const renderAttorneySummaryBlock = (summaryValue) => {
             >
               📄 Generate Resume
             </button>
+            {onTailorToJob && (
+              <button
+                onClick={onTailorToJob}
+                disabled={tailorToJobDisabled}
+                title={tailorToJobDisabled ? 'Add a job description first' : 'Rewrite this resume for the saved job description'}
+                style={{
+                  backgroundColor: tailorToJobStatus === 'working' ? '#bae6fd' : '#0ea5e9',
+                  color: tailorToJobStatus === 'working' ? '#0369a1' : 'white',
+                  padding: '12px 20px',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: tailorToJobDisabled ? 'not-allowed' : 'pointer',
+                  fontWeight: 'bold',
+                  fontSize: '15px',
+                  opacity: tailorToJobDisabled ? 0.55 : 1,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {tailorToJobStatus === 'working' ? 'Tailoring…' : '🎯 Tailor to Job Description'}
+              </button>
+            )}
             {onSaveForPlugin && (
               <button
                 onClick={onSaveForPlugin}
