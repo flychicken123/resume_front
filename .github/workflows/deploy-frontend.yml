@@ -136,12 +136,15 @@ jobs:
             docker logs ai-resume-frontend-frontend-1
             exit 1
           fi
+
+          if ! curl -fsS http://localhost:3000 >/dev/null; then
+            echo "❌ Final container is running but localhost:3000 is not serving"
+            docker logs ai-resume-frontend-frontend-1
+            exit 1
+          fi
           
           # Cleanup temporary container
           docker rm "ai-resume-frontend-new-${TIMESTAMP}" 2>/dev/null || echo "Temp container already cleaned"
-          
-          # Skip public endpoint test (it's slow and not critical)
-          echo "🌐 Skipping public endpoint test for speed..."
           
           # Clean up only very old images
           docker image prune -af --filter "until=72h" 2>/dev/null || true
@@ -149,6 +152,14 @@ jobs:
           echo "✅ Frontend deployment completed successfully!"
           echo "🚀 Container is running on port 3000"
           docker ps | grep frontend || true
+
+    - name: Verify public site
+      run: |
+        set -Eeuo pipefail
+        echo "Checking public frontend through Cloudflare..."
+        curl -fsS --retry 6 --retry-delay 10 --retry-connrefused https://hihired.org/ >/dev/null
+        echo "Checking public API health through Cloudflare..."
+        curl -fsS --retry 6 --retry-delay 10 --retry-connrefused https://hihired.org/api/health >/dev/null
           
     - name: Send deployment notification
       if: always()
