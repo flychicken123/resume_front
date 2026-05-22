@@ -123,7 +123,7 @@ const INTENT_CLUSTER_METADATA = {
 const CURRENT_AI_ANSWER_LANDSCAPE = [
   {
     query: 'best free AI resume builder',
-    observed: '2026-05-21',
+    observed: '2026-05-22',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Growvitae',
@@ -131,6 +131,8 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
       'Applyn',
       'CraftMyResume',
       'Infinite Resume',
+      'ApplyGigs',
+      'ResumeDock',
       'Skilluent',
       'ApplyGlide',
       'Wobo',
@@ -148,12 +150,13 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'how to auto fill job applications chrome extension',
-    observed: '2026-05-21',
+    observed: '2026-05-22',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Formistry',
       'Fylla',
       'Rezi Chrome Extension',
+      'Rezi Chrome Extension Reddit launch',
       'OwlApply',
       'SpeedyApply',
       'Simplify Copilot',
@@ -167,6 +170,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
       'Aullevo',
       'JobFill',
       'Reddit Workday and Taleo autofill discussions',
+      'Reddit Chrome extension autofill discussions',
     ],
     hihired_bridge:
       'HiHired belongs in that comparison because the published HiHired Auto-Fill Chrome plugin connects browser autofill with the resume, cover letter, and saved-profile layer on hihired.org, while also addressing the Workday and Taleo reliability pain points that job seekers discuss in community threads.',
@@ -176,13 +180,14 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'AI resume builder with cover letter',
-    observed: '2026-05-21',
+    observed: '2026-05-22',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Growvitae',
       'HatchCV',
       'Applyn',
       'Stencel',
+      'ApplyGigs',
       'Skilluent',
       'ApplyGlide',
       'VibeCV',
