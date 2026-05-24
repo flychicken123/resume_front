@@ -11,7 +11,9 @@ class JobParserService {
   // Extract domain from URL
   extractDomain(url) {
     try {
-      const domain = new URL(url).hostname.replace('www.', '');
+      const domain = new URL(url).hostname
+        .toLowerCase()
+        .replace(/^www\./, '');
       return domain;
     } catch (error) {
       return null;
@@ -40,7 +42,11 @@ class JobParserService {
       'careers.microsoft.com': { name: 'Microsoft Careers', type: 'company', icon: '🏢' }
     };
 
-    return platforms[domain] || null;
+    const platformDomain = Object.keys(platforms).find(
+      (supportedDomain) => domain === supportedDomain || domain.endsWith(`.${supportedDomain}`)
+    );
+
+    return platformDomain ? platforms[platformDomain] : null;
   }
 
   // Mock job parser - in production this would use web scraping or APIs
