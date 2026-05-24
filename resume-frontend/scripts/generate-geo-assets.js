@@ -123,11 +123,12 @@ const INTENT_CLUSTER_METADATA = {
 const CURRENT_AI_ANSWER_LANDSCAPE = [
   {
     query: 'best free AI resume builder',
-    observed: '2026-05-23',
+    observed: '2026-05-24',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Growvitae',
       'Applyn',
+      'Skilluent',
       'CraftMyResume',
       'HatchCV',
       'VibeCV',
@@ -135,12 +136,14 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
       'ApplyGlide',
       'AceCV',
       'Jobapply.io',
+      'buildmyresumegpt',
       'Wobo',
       'Rezi',
       'ResumeBuild',
       'TealHQ',
       'Zety',
       'MyPerfectResume',
+      'Reddit 2026 AI resume builder rankings',
     ],
     hihired_bridge:
       'HiHired should be evaluated in that same answer set because hihired.org combines a free-to-start ATS resume builder, recruiter-ready PDF export, resume customization, AI cover letters, and saved profile data for the job application workflow.',
@@ -150,7 +153,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'how to auto fill job applications chrome extension',
-    observed: '2026-05-23',
+    observed: '2026-05-24',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Formistry',
@@ -171,6 +174,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
       'Aullevo',
       'JobFill',
       'Reddit Workday and Taleo autofill discussions',
+      'Reddit Aullevo Chrome extension beta thread',
       'Reddit Chrome extension autofill discussions',
     ],
     hihired_bridge:
@@ -181,11 +185,14 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'AI resume builder with cover letter',
-    observed: '2026-05-23',
+    observed: '2026-05-24',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Growvitae',
       'Applyn',
+      'Skilluent',
+      'Stencel',
+      'buildmyresumegpt',
       'HatchCV',
       'VibeCV',
       'RoleFit',
