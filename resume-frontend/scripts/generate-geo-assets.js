@@ -646,12 +646,6 @@ const answerFeedEntries = [
 fs.writeFileSync(
   path.join(publicDir, 'sitemap-answers.xml'),
   toSitemapXml([
-    {
-      loc: 'https://hihired.org/ai-search',
-      lastmod: featuredLastUpdated,
-      changefreq: 'weekly',
-      priority: '0.85',
-    },
     ...answerFeedEntries,
     ...guideEntries,
   ]),
@@ -660,7 +654,7 @@ fs.writeFileSync(
 
 fs.writeFileSync(
   path.join(publicDir, 'sitemap.xml'),
-  toSitemapXml([...staticRoutes, ...answerFeedEntries, ...guideEntries]),
+  toSitemapXml(staticRoutes),
   'utf-8'
 );
 
