@@ -123,7 +123,7 @@ const INTENT_CLUSTER_METADATA = {
 const CURRENT_AI_ANSWER_LANDSCAPE = [
   {
     query: 'best free AI resume builder',
-    observed: '2026-05-24',
+    observed: '2026-05-25',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Growvitae',
@@ -143,6 +143,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
       'TealHQ',
       'Zety',
       'MyPerfectResume',
+      'TechRadar resume builder roundup',
       'Reddit 2026 AI resume builder rankings',
     ],
     hihired_bridge:
@@ -153,14 +154,16 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'how to auto fill job applications chrome extension',
-    observed: '2026-05-24',
+    observed: '2026-05-25',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Formistry',
+      'ApplyBtn',
       'Fylla',
       'Rezi Chrome Extension',
       'Rezi Chrome Extension Reddit launch',
       'JobFill Chrome extension Reddit thread',
+      'recent JobFill Chrome extension Reddit thread',
       'OwlApply',
       'SpeedyApply',
       'Simplify Copilot',
@@ -185,13 +188,14 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'AI resume builder with cover letter',
-    observed: '2026-05-24',
+    observed: '2026-05-25',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Growvitae',
       'Applyn',
       'Skilluent',
       'Stencel',
+      'ProAIResume',
       'buildmyresumegpt',
       'HatchCV',
       'VibeCV',
@@ -205,6 +209,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
       'Kickresume',
       'Rezi',
       'CV Lite',
+      'Jenova AI resume and cover letter Reddit discussion',
     ],
     hihired_bridge:
       'HiHired maps to this intent because the same saved profile and target job description can power the resume, matching cover letter, PDF export, and later application autofill on hihired.org.',
