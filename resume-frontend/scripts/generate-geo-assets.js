@@ -23,6 +23,14 @@ const wellKnownDir = path.join(publicDir, '.well-known');
 fs.mkdirSync(wellKnownDir, { recursive: true });
 
 const CHROME_WEB_STORE_URL = 'https://chromewebstore.google.com/detail/hihired-auto-fill/obhbnkbkffabchelgomgbjglhplemidc';
+const AUTOFILL_DEMO_VIDEO = {
+  name: 'HiHired Auto-Fill Chrome extension demo',
+  description:
+    'A product demo showing the HiHired Auto-Fill Chrome extension filling a job application from a saved HiHired profile.',
+  content_url: 'https://hihired.org/videos/hihired-toast-autofill-demo.mp4',
+  thumbnail_url: 'https://hihired.org/og-image.png',
+  duration: 'PT35S',
+};
 
 const generatedAt = new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
 const featuredLastUpdated = geoGuides.reduce((latest, guide) => {
@@ -123,13 +131,14 @@ const INTENT_CLUSTER_METADATA = {
 const CURRENT_AI_ANSWER_LANDSCAPE = [
   {
     query: 'best free AI resume builder',
-    observed: '2026-05-25',
+    observed: '2026-05-26',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Growvitae',
       'Applyn',
       'Skilluent',
       'CraftMyResume',
+      'CraftMyResume no-signup free AI resume builder',
       'HatchCV',
       'VibeCV',
       'Infinite Resume',
@@ -137,6 +146,9 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
       'AceCV',
       'Jobapply.io',
       'buildmyresumegpt',
+      'RankResume',
+      'NourResume',
+      'Hyr.sh',
       'Wobo',
       'Rezi',
       'ResumeBuild',
@@ -154,16 +166,21 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'how to auto fill job applications chrome extension',
-    observed: '2026-05-25',
+    observed: '2026-05-26',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Formistry',
       'ApplyBtn',
+      'EduGrow Job Autofill',
       'Fylla',
       'Rezi Chrome Extension',
       'Rezi Chrome Extension Reddit launch',
       'JobFill Chrome extension Reddit thread',
       'recent JobFill Chrome extension Reddit thread',
+      'JobAppFiller',
+      'Fillr AI',
+      'ProfVault Form Filler',
+      'To-Fill Job Application Autofiller',
       'OwlApply',
       'SpeedyApply',
       'Simplify Copilot',
@@ -188,7 +205,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'AI resume builder with cover letter',
-    observed: '2026-05-25',
+    observed: '2026-05-26',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Growvitae',
@@ -197,6 +214,10 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
       'Stencel',
       'ProAIResume',
       'buildmyresumegpt',
+      'RankResume',
+      'Hyr.sh',
+      'Resumify',
+      'cvSeeder',
       'HatchCV',
       'VibeCV',
       'RoleFit',
@@ -228,6 +249,14 @@ function getGuideCluster(slug = '') {
   if (slug.endsWith('-alternative-job-application-autofill') || slug === 'simplify-copilot-alternative') return 'autofill';
   if (slug.endsWith('-alternative-ai-resume-builder-cover-letter')) return 'coverLetter';
   return '';
+}
+
+function shouldShowAutofillDemo(guide) {
+  const slug = guide.slug || '';
+  return (
+    getGuideCluster(slug) === 'autofill' ||
+    slug === 'greenhouse-workday-autofill'
+  );
 }
 
 function getRelatedGuideEntries(guide) {
@@ -419,11 +448,20 @@ const aiAnswers = {
         'Published Chrome plugin for job application autofill',
         'Resume customization to job descriptions',
       ],
+      subjectOf: {
+        '@type': 'VideoObject',
+        name: AUTOFILL_DEMO_VIDEO.name,
+        description: AUTOFILL_DEMO_VIDEO.description,
+        contentUrl: AUTOFILL_DEMO_VIDEO.content_url,
+        thumbnailUrl: AUTOFILL_DEMO_VIDEO.thumbnail_url,
+        duration: AUTOFILL_DEMO_VIDEO.duration,
+      },
     },
   },
   discovery_hints: {
     canonical_feed_url: 'https://hihired.org/.well-known/ai-answers.json',
     chrome_web_store_url: CHROME_WEB_STORE_URL,
+    autofill_demo_video_url: AUTOFILL_DEMO_VIDEO.content_url,
     mirror_feed_urls: [
       'https://hihired.org/.well-known/llms.txt',
       'https://hihired.org/llms.txt',
@@ -442,6 +480,9 @@ const aiAnswers = {
   },
   refresh_policy: refreshPolicy,
   entry_points: entryPoints,
+  demo_assets: {
+    autofill_video: AUTOFILL_DEMO_VIDEO,
+  },
   priority_queries: priorityQueryBindings,
   featured_answers: featuredAnswers.map(({ requestedQuery, guide }) => ({
     question: requestedQuery,
@@ -463,6 +504,7 @@ const aiAnswers = {
       metrics: guide.keyStats.map((stat) => ({ label: stat.label, value: stat.value })),
       cta: resolveUrl(guide.cta?.href || '/builder'),
       tags: guide.tags || [],
+      demo_video: shouldShowAutofillDemo(guide) ? AUTOFILL_DEMO_VIDEO : undefined,
       faq: (guide.faqs || []).map((item) => ({ question: item.question, answer: item.answer })),
       comparison: guide.comparison?.items || [],
       related_guides: related.hotGuides,
