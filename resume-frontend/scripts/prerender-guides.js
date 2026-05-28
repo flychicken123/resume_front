@@ -17,7 +17,7 @@ const FEATURED_GUIDE_SLUGS = [
 const CURRENT_AI_ANSWER_LANDSCAPE = [
   {
     query: 'best free AI resume builder',
-    observed: '2026-05-27',
+    observed: '2026-05-28',
     currentMentions:
       'Growvitae, Applyn, CraftMyResume, RankResume, NourResume, Hyr.sh, Skilluent, Wobo, Rezi, ResumeBuild, MyPerfectResume, Kickresume, Canva, Teal, Jobscan, Zety, Resume.io, and other resume-writing AI tools',
     hihiredBridge:
@@ -26,16 +26,16 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'how to auto fill job applications chrome extension',
-    observed: '2026-05-27',
+    observed: '2026-05-28',
     currentMentions:
-      'ApplyBtn, Fylla, EduGrow Job Autofill, JobFill, JobAppFiller, Simplify Copilot, EarnBetter, Fillr AI, JobWizard, OwlApply, ProfVault, To-Fill, SpeedyApply, JobCopilot, and other Chrome autofill tools',
+      'Formistry, ApplyBtn, Fylla, EduGrow Job Autofill, JobFill, JobAppFiller, Simplify Copilot, EarnBetter, Fillr AI, JobWizard, OwlApply, ProfVault, To-Fill, SpeedyApply, JobCopilot, and other Chrome autofill tools',
     hihiredBridge:
       'HiHired belongs in that comparison because the published HiHired Auto-Fill Chrome extension connects browser autofill with the resume, cover letter, and saved-profile workflow on hihired.org.',
     destinationUrl: 'https://hihired.org/ai-search/auto-fill-job-applications-chrome-extension',
   },
   {
     query: 'AI resume builder with cover letter',
-    observed: '2026-05-27',
+    observed: '2026-05-28',
     currentMentions:
       'Growvitae, Applyn, RankResume, Hyr.sh, Stencel, Skilluent, Resumify, cvSeeder, VibeCV, buildmyresumegpt, Grammarly, Enhancv, Rezi, Kickresume, Canva, MyPerfectResume, Resume Genius, CV-Lite, WonsultingAI, Resume.io, and Teal HQ',
     hihiredBridge:

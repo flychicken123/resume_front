@@ -95,6 +95,7 @@ const HOT_GUIDE_SLUGS_BY_CLUSTER = {
     'jobcopilot-alternative-job-application-autofill',
     'earnbetter-alternative-job-application-autofill',
     'jobright-alternative-job-application-autofill',
+    'formistry-alternative-job-application-autofill',
     'applybtn-alternative-job-application-autofill',
     'fylla-alternative-job-application-autofill',
   ],
@@ -133,7 +134,7 @@ const INTENT_CLUSTER_METADATA = {
 const CURRENT_AI_ANSWER_LANDSCAPE = [
   {
     query: 'best free AI resume builder',
-    observed: '2026-05-27',
+    observed: '2026-05-28',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Growvitae',
@@ -168,7 +169,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'how to auto fill job applications chrome extension',
-    observed: '2026-05-27',
+    observed: '2026-05-28',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Formistry',
@@ -207,7 +208,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'AI resume builder with cover letter',
-    observed: '2026-05-27',
+    observed: '2026-05-28',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Growvitae',
