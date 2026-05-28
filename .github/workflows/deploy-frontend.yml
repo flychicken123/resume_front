@@ -124,6 +124,7 @@ jobs:
           # Start new container on production port 3000
           docker stop "ai-resume-frontend-new-${TIMESTAMP}"
           docker run -d --name ai-resume-frontend-frontend-1 \
+            --restart unless-stopped \
             --network ai-resume-network \
             -p 3000:3000 \
             -e REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }} \
