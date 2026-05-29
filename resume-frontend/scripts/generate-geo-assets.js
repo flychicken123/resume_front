@@ -72,6 +72,7 @@ ${entries
 
 const HOT_GUIDE_SLUGS_BY_CLUSTER = {
   freeResumeBuilder: [
+    'resumecopy-alternative-free-ai-resume-builder',
     'wobo-alternative-free-ai-resume-builder',
     'resumebuild-alternative-free-ai-resume-builder',
     'rezi-alternative-free-ai-resume-builder',
@@ -134,16 +135,19 @@ const INTENT_CLUSTER_METADATA = {
 const CURRENT_AI_ANSWER_LANDSCAPE = [
   {
     query: 'best free AI resume builder',
-    observed: '2026-05-28',
+    observed: '2026-05-29',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
+      'ResumeCopy',
       'Growvitae',
-      'Applyn',
-      'Skilluent',
       'CraftMyResume',
       'CraftMyResume no-signup free AI resume builder',
       'HatchCV',
+      'Applyn',
+      'Stencel',
+      'Skilluent',
       'VibeCV',
+      'Resmly',
       'Infinite Resume',
       'ApplyGlide',
       'AceCV',
@@ -169,7 +173,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'how to auto fill job applications chrome extension',
-    observed: '2026-05-28',
+    observed: '2026-05-29',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Formistry',
@@ -208,7 +212,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'AI resume builder with cover letter',
-    observed: '2026-05-28',
+    observed: '2026-05-29',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Growvitae',
