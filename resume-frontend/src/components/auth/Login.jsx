@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
 import { Link } from 'react-router-dom';
 import { trackUserLogin, trackGoogleUserRegistration } from '../Analytics';
+import { getAPIBaseURL } from '../../api';
 
 const Login = ({ onLogin, onClose, contextMessage }) => {
   const [email, setEmail] = useState('');
@@ -47,14 +48,7 @@ const Login = ({ onLogin, onClose, contextMessage }) => {
       // Decode the Google token to get user information
       const decodedToken = decodeJwt(googleToken);
       
-      const getApiUrl = () => {
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-          return 'http://localhost:8081';
-        }
-        return process.env.REACT_APP_API_URL || 'http://localhost:8081';
-      };
-      
-      const API_BASE_URL = getApiUrl();
+      const API_BASE_URL = getAPIBaseURL();
       console.log('Making Google login request to:', `${API_BASE_URL}/api/auth/google`);
       
       const response = await fetch(`${API_BASE_URL}/api/auth/google`, {
@@ -133,15 +127,7 @@ const Login = ({ onLogin, onClose, contextMessage }) => {
     try {
       const endpoint = mode === 'signup' ? '/api/auth/register' : '/api/auth/login';
       
-      // Use same API_BASE_URL logic as other files
-      const getApiUrl = () => {
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-          return 'http://localhost:8081';
-        }
-        return process.env.REACT_APP_API_URL || 'http://localhost:8081';
-      };
-      
-      const API_BASE_URL = getApiUrl();
+      const API_BASE_URL = getAPIBaseURL();
       const payload = {
         email: email,
         password: password,
