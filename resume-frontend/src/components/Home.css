@@ -723,6 +723,15 @@
   .mobile-menu {
     width: 100vw;
   }
+
+  .launch-bar {
+    padding: 8px 14px;
+  }
+
+  .launch-bar-inner {
+    gap: 6px 8px;
+    font-size: 0.86rem;
+  }
 }
 
 .home-navbar-left {
@@ -735,7 +744,7 @@
   font-size: 1.5rem;
   font-weight: 800;
   color: #2563eb;
-  letter-spacing: -1px;
+  letter-spacing: 0;
 }
 
 .home-navbar-center {
@@ -794,6 +803,42 @@
   gap: 20px;
   min-width: 0;
   position: relative;
+}
+
+.launch-bar {
+  margin: 0 auto;
+  padding: 10px 20px;
+  background: linear-gradient(90deg, #eff6ff 0%, #f8fafc 58%, #ecfeff 100%);
+  border-bottom: 1px solid #dbeafe;
+}
+
+.launch-bar-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  text-align: center;
+  color: #0f172a;
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+.launch-bar-inner strong {
+  color: #1d4ed8;
+  font-weight: 750;
+}
+
+.launch-bar-inner a {
+  color: #1d4ed8;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.launch-bar-inner a:hover {
+  text-decoration: underline;
 }
 
 .home-account-menu {

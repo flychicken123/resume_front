@@ -375,13 +375,6 @@ const Home = () => {
 
         <div className="home-navbar-center desktop-nav">
           <button
-            className="home-nav-link"
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            style={{ background: "none", border: "none", cursor: "pointer", font: "inherit" }}
-          >
-            Home
-          </button>
-          <button
             type="button"
             className="home-nav-link"
             onClick={handleNavbarJobs}
@@ -412,14 +405,14 @@ const Home = () => {
           <Link to="/how-to-use-hihired" className="home-nav-link">
             How to use
           </Link>
-          <Link to="/contact" className="home-nav-link">
-            Contact
-          </Link>
-          <Link to="/press" className="home-nav-link">
-            Press
-          </Link>
-          <a href="/contact#about-us" className="home-nav-link">
-            About Us
+          <a
+            href="https://chromewebstore.google.com/detail/hihired-auto-fill/obhbnkbkffabchelgomgbjglhplemidc"
+            className="home-nav-link"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => trackCTAClick("home_nav_chrome_extension", { page: window.location.pathname })}
+          >
+            Chrome extension
           </a>
         </div>
 
@@ -512,9 +505,6 @@ const Home = () => {
             <button className="mobile-nav-cta" onClick={() => { handleNavbarStart(); setShowMobileMenu(false); }}>
               Start Free
             </button>
-            <button className="mobile-nav-link" onClick={() => { window.scrollTo({ top: 0, behavior: "smooth" }); setShowMobileMenu(false); }}>
-              Home
-            </button>
             <button className="mobile-nav-link" onClick={() => { handleNavbarJobs(); setShowMobileMenu(false); }}>
               Jobs
             </button>
@@ -527,6 +517,18 @@ const Home = () => {
             <Link to="/how-to-use-hihired" className="mobile-nav-link" onClick={() => setShowMobileMenu(false)}>
               How to use
             </Link>
+            <a
+              href="https://chromewebstore.google.com/detail/hihired-auto-fill/obhbnkbkffabchelgomgbjglhplemidc"
+              className="mobile-nav-link"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => {
+                trackCTAClick("home_mobile_nav_chrome_extension", { page: window.location.pathname });
+                setShowMobileMenu(false);
+              }}
+            >
+              Chrome extension
+            </a>
             {user && (
               <button
                 className="mobile-nav-link"
@@ -544,49 +546,24 @@ const Home = () => {
                 Membership
               </Link>
             )}
-            <Link to="/contact" className="mobile-nav-link" onClick={() => setShowMobileMenu(false)}>
-              Contact
-            </Link>
-            <a href="/contact#about-us" className="mobile-nav-link" onClick={() => setShowMobileMenu(false)}>
-              About Us
-            </a>
           </div>
         </div>
       )}
 
       <section
         aria-label="Chrome extension launch announcement"
-        style={{
-          margin: "0 auto",
-          padding: "12px 20px",
-          background: "linear-gradient(90deg, #eff6ff 0%, #f8fafc 55%, #ecfeff 100%)",
-          borderBottom: "1px solid #dbeafe",
-        }}
+        className="launch-bar"
       >
-        <div
-          style={{
-            maxWidth: "1120px",
-            margin: "0 auto",
-            display: "flex",
-            gap: "12px",
-            alignItems: "center",
-            justifyContent: "center",
-            flexWrap: "wrap",
-            textAlign: "center",
-            color: "#0f172a",
-            fontSize: "0.95rem",
-          }}
-        >
-          <strong style={{ color: "#1d4ed8" }}>New:</strong>
-          <span>HiHired Auto-Fill is live on the Chrome Web Store — turn your resume profile into faster job applications.</span>
+        <div className="launch-bar-inner">
+          <strong>Chrome extension live:</strong>
+          <span>Autofill Workday, Greenhouse, Lever, and LinkedIn from one saved HiHired profile.</span>
           <a
             href="https://chromewebstore.google.com/detail/hihired-auto-fill/obhbnkbkffabchelgomgbjglhplemidc"
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => trackCTAClick("home_launch_bar_chrome_install", { page: window.location.pathname })}
-            style={{ color: "#1d4ed8", fontWeight: 700, textDecoration: "none" }}
           >
-            Install free →
+            Install free
           </a>
         </div>
       </section>

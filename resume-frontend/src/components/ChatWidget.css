@@ -93,6 +93,27 @@
   }
 }
 
+@media (max-width: 640px) {
+  .chat-widget {
+    right: 16px;
+    bottom: 16px;
+  }
+
+  .chat-intro-tooltip {
+    display: none;
+  }
+
+  .chat-toggle {
+    width: 48px;
+    height: 48px;
+  }
+
+  .chat-toggle svg {
+    width: 34px;
+    height: 34px;
+  }
+}
+
 .chat-panel {
   position: fixed;
   top: 0;

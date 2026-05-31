@@ -3,23 +3,9 @@ import './SimpleHero.css';
 import { setLastStep } from '../utils/exitTracking';
 import { trackCTAClick } from './Analytics';
 
-import googleLogo from '../assets/logos/google.png';
-import amazonLogo from '../assets/logos/amazon.png';
-import microsoftLogo from '../assets/logos/microsoft.png';
-import netflixLogo from '../assets/logos/netflix.png';
-import salesforceLogo from '../assets/logos/salesforce.png';
-import stripeLogo from '../assets/logos/stripe.png';
-
 const resumePreviewSrc = '/templates/modern.png';
 
-const LOGO_COMPANIES = [
-  { name: 'Google', logo: googleLogo },
-  { name: 'Amazon', logo: amazonLogo },
-  { name: 'Microsoft', logo: microsoftLogo },
-  { name: 'Netflix', logo: netflixLogo },
-  { name: 'Salesforce', logo: salesforceLogo },
-  { name: 'Stripe', logo: stripeLogo },
-];
+const APPLICATION_PLATFORMS = ['Workday', 'Greenhouse', 'Lever', 'LinkedIn', 'Indeed', 'iCIMS'];
 
 const SimpleHero = ({ onCreateClick }) => {
   const handleCreate = () => {
@@ -33,17 +19,17 @@ const SimpleHero = ({ onCreateClick }) => {
       <div className="hero-container">
         <div className="hero-left">
           <h1 className="hero-headline">
-            Land more interviews with a resume customized to each job
+            Build a tailored resume, then autofill the application
           </h1>
           <p className="hero-description">
-            Stop juggling 10 tabs to job hunt. Build your resume, match with jobs,
-            auto-fill applications, and track everything — powered by AI, free to start.
+            HiHired turns one saved profile into job-specific resumes, cover letters,
+            and faster applications across the job sites you already use.
           </p>
 
           <div className="hero-primary-cta">
             <div className="hero-cta-buttons">
               <button className="btn-create" onClick={handleCreate}>
-                Build Resume
+                Build my resume free
               </button>
               <a
                 className="btn-create hero-extension-link"
@@ -52,40 +38,49 @@ const SimpleHero = ({ onCreateClick }) => {
                 rel="noopener noreferrer"
                 onClick={() => trackCTAClick('hero_chrome_extension_cta', { page: window.location.pathname })}
               >
-                Install application autofill plugin
+                Install Chrome extension
               </a>
             </div>
-            <span className="hero-cta-note">No credit card required</span>
+            <span className="hero-cta-note">No credit card required. Free PDF export.</span>
           </div>
 
           <div className="hero-logos">
             <span className="hero-logos-label">
-              Trusted by professionals hired at
+              Autofill-ready for common application platforms
             </span>
             <div className="hero-logos-row" role="list">
-              {LOGO_COMPANIES.map(({ name, logo }) => (
-                <img
+              {APPLICATION_PLATFORMS.map((name) => (
+                <span
                   key={name}
-                  src={logo}
-                  alt={name}
-                  className="hero-logo-img"
-                  loading="lazy"
+                  className="hero-platform-chip"
                   role="listitem"
-                />
+                >
+                  {name}
+                </span>
               ))}
             </div>
           </div>
         </div>
 
         <div className="hero-right">
-          <div className="resume-preview">
-            <img
-              src={resumePreviewSrc}
-              alt="HiHired resume preview"
-              className="hero-preview-image"
-            />
-            <div className="hero-preview-badge">
-              Live preview as you type
+          <div className="hero-product-visual" aria-label="HiHired resume builder preview">
+            <div className="resume-preview">
+              <img
+                src={resumePreviewSrc}
+                alt="HiHired tailored resume preview"
+                className="hero-preview-image"
+              />
+              <div className="hero-preview-badge">
+                Tailored resume preview
+              </div>
+            </div>
+
+            <div className="workflow-strip" aria-hidden="true">
+              <span>Import resume</span>
+              <span className="workflow-arrow">-&gt;</span>
+              <span>Customize</span>
+              <span className="workflow-arrow">-&gt;</span>
+              <span>Export PDF</span>
             </div>
           </div>
         </div>

@@ -1,12 +1,12 @@
 .simple-hero {
-  padding: 80px 24px 60px;
-  max-width: 1200px;
+  padding: 64px 24px 58px;
+  max-width: 1240px;
   margin: 0 auto;
 }
 
 .hero-container {
   display: flex;
-  gap: 64px;
+  gap: 72px;
   align-items: center;
 }
 
@@ -17,17 +17,17 @@
 }
 
 .hero-headline {
-  font-size: 44px;
+  font-size: 48px;
   font-weight: 800;
-  line-height: 1.15;
+  line-height: 1.08;
   margin: 0 0 20px;
   color: #0f172a;
-  letter-spacing: -0.5px;
+  letter-spacing: 0;
 }
 
 .hero-description {
   font-size: 18px;
-  line-height: 1.7;
+  line-height: 1.65;
   color: #475569;
   margin: 0 0 32px;
 }
@@ -96,17 +96,17 @@
   font-weight: 500;
 }
 
-/* Company Logos */
+/* Platform proof */
 .hero-logos {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 
 .hero-logos-label {
   font-size: 13px;
   font-weight: 600;
-  letter-spacing: 0.05em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: #94a3b8;
 }
@@ -114,30 +114,37 @@
 .hero-logos-row {
   display: flex;
   align-items: center;
-  gap: 28px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
-.hero-logo-img {
-  height: 22px;
-  width: auto;
-  opacity: 0.45;
-  filter: grayscale(100%);
-  transition: opacity 0.2s ease, filter 0.2s ease;
+.hero-platform-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 13px;
+  border: 1px solid #dbeafe;
+  border-radius: 999px;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 650;
 }
 
-.hero-logo-img:hover {
-  opacity: 0.8;
-  filter: grayscale(0%);
-}
-
-/* Right Side - Resume Preview */
+/* Right Side - Product Workflow Preview */
 .hero-right {
-  flex: 0 0 420px;
+  flex: 0 0 500px;
+}
+
+.hero-product-visual {
+  position: relative;
+  min-height: 560px;
+  padding: 32px 0 18px 44px;
 }
 
 .resume-preview {
   position: relative;
+  width: 410px;
   border-radius: 16px;
   box-shadow: 0 24px 48px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(15, 23, 42, 0.05);
   overflow: hidden;
@@ -162,10 +169,31 @@
   box-shadow: 0 4px 12px rgba(15, 23, 42, 0.1);
 }
 
+.workflow-strip {
+  position: absolute;
+  left: 22px;
+  bottom: 28px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  color: #334155;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.12);
+}
+
+.workflow-arrow {
+  color: #2563eb;
+}
+
 /* Responsive */
 @media (max-width: 968px) {
   .simple-hero {
-    padding: 48px 20px 40px;
+    padding: 44px 20px 40px;
   }
 
   .hero-container {
@@ -180,14 +208,14 @@
 
   .hero-right {
     flex: 1;
-    max-width: 400px;
+    max-width: 500px;
     width: 100%;
     margin: 0 auto;
   }
 
 
   .hero-headline {
-    font-size: 36px;
+    font-size: 38px;
   }
 
   .hero-primary-cta {
@@ -205,15 +233,21 @@
   .hero-logos-row {
     justify-content: center;
   }
+
+  .hero-product-visual {
+    min-height: 520px;
+    padding-left: 24px;
+  }
 }
 
 @media (max-width: 640px) {
   .simple-hero {
-    padding: 32px 16px 24px;
+    padding: 30px 16px 22px;
   }
 
   .hero-headline {
-    font-size: 28px;
+    font-size: 30px;
+    line-height: 1.12;
   }
 
   .hero-description {
@@ -237,10 +271,33 @@
   }
 
   .hero-logos-row {
-    gap: 20px;
+    gap: 8px;
+    max-width: 340px;
   }
 
-  .hero-logo-img {
-    height: 18px;
+  .hero-platform-chip {
+    min-height: 30px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
+
+  .hero-product-visual {
+    min-height: auto;
+    padding: 0;
+  }
+
+  .resume-preview {
+    width: 100%;
+  }
+
+  .workflow-strip {
+    position: relative;
+    left: auto;
+    bottom: auto;
+    margin: 14px auto 0;
+    width: fit-content;
+    max-width: 100%;
+    flex-wrap: wrap;
+    justify-content: center;
   }
 }
