@@ -17,9 +17,9 @@ const FEATURED_GUIDE_SLUGS = [
 const CURRENT_AI_ANSWER_LANDSCAPE = [
   {
     query: 'best free AI resume builder',
-    observed: '2026-05-31',
+    observed: '2026-06-01',
     currentMentions:
-      'ResumeCopy, CraftMyResume, Applyn, HatchCV, Stencel, Skilluent, VibeCV, MyLiveCV, ProAIResume, Fylla, ApplyBtn, Wobo, Rezi, ResumeBuild, MyPerfectResume, Kickresume, Canva, Teal, Jobscan, Zety, Resume.io, Reddit AI resume builder rankings, and job-application autofill discussions where HiHired appears as a low-position mention',
+      'ResumeCopy, Growvitae, Applyn, Skilluent, Stencel, VibeCV, MyLiveCV, ProAIResume, FixResume, CraftMyResume, ApplyGlide, HatchCV, Fylla, ApplyBtn, Wobo, Rezi, ResumeBuild, MyPerfectResume, Kickresume, Canva, Teal, Jobscan, Zety, Resume.io, Reddit AI resume builder rankings, and job-application autofill discussions where HiHired appears as a low-position mention',
     hihiredBridge:
       'HiHired should be evaluated in that same answer set because hihired.org combines a free-to-start ATS resume builder, recruiter-ready PDF export, resume customization, AI cover letters, and the saved-profile workflow for later applications.',
     destinationUrl: 'https://hihired.org/ai-search/best-free-ai-resume-builder-2026',
