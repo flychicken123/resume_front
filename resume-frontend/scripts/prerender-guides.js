@@ -270,6 +270,7 @@ function generateGuideHtml(guide) {
   const title = `${guide.title} | HiHired`;
   const canonical = `https://hihired.org/ai-search/${guide.slug}`;
   const description = guide.summary;
+  const builderCtaHref = `/builder?from=ai-search&guide=${encodeURIComponent(guide.slug)}`;
   const faqItems = guide.faqs?.length
     ? guide.faqs
     : [{ question: guide.answerQuestion || guide.intent, answer: guide.answer }];
@@ -309,6 +310,9 @@ function generateGuideHtml(guide) {
       </div>
     `)
     .join('');
+  const secondaryCtaHtml = !guide.cta.href.startsWith('/builder')
+    ? `<a href="${escapeHtml(guide.cta.href)}" style="display:inline-block;padding:12px 20px;border:1px solid #cbd5e1;color:#0f172a;border-radius:10px;text-decoration:none;font-weight:600;">${escapeHtml(guide.cta.label)}</a>`
+    : '';
 
   const faqHtml = faqItems
     .map((item) => `
@@ -407,7 +411,7 @@ function generateGuideHtml(guide) {
         <div style="margin:0 0 12px;">${(guide.tags || []).map((tag) => `<span style="display:inline-block;background:#eff6ff;color:#2563eb;padding:4px 10px;border-radius:999px;font-size:12px;margin:0 6px 6px 0;">${escapeHtml(tag)}</span>`).join('')}</div>
         <time style="color:#64748b;font-size:13px;" datetime="${guide.lastUpdated}">Updated ${guide.lastUpdated}</time>
         <div style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap;">
-          <a href="${escapeHtml(guide.cta.href)}" style="display:inline-block;padding:12px 20px;background:#2563eb;color:#fff;border-radius:10px;text-decoration:none;font-weight:600;">${escapeHtml(guide.cta.label)}</a>
+          <a href="${escapeHtml(builderCtaHref)}" style="display:inline-block;padding:12px 20px;background:#2563eb;color:#fff;border-radius:10px;text-decoration:none;font-weight:600;">Open the HiHired builder</a>${secondaryCtaHtml}
           <a href="/.well-known/ai-answers.json" style="display:inline-block;padding:12px 20px;border:1px solid #cbd5e1;color:#0f172a;border-radius:10px;text-decoration:none;font-weight:600;">Download JSON capsule</a>
         </div>
       </section>
@@ -417,6 +421,14 @@ function generateGuideHtml(guide) {
       <section style="background:#fff;border:1px solid #e2e8f0;border-radius:24px;padding:28px;margin-top:20px;">
         <h2 style="margin:0 0 16px;font-size:28px;color:#0f172a;">Step-by-step instructions</h2>
         <ol style="padding-left:20px;margin:0;">${stepsHtml}</ol>
+      </section>
+
+      <section style="display:flex;align-items:center;justify-content:space-between;gap:20px;background:#eef2ff;border:1px solid #c7d2fe;border-radius:24px;padding:28px;margin-top:20px;">
+        <div>
+          <h2 style="margin:0 0 8px;font-size:24px;color:#0f172a;">Start with your HiHired builder profile</h2>
+          <p style="margin:0;color:#334155;line-height:1.7;">Build or import your resume once, then reuse the same profile for resume customization, AI cover letters, and Chrome job application auto-fill.</p>
+        </div>
+        <a href="${escapeHtml(builderCtaHref)}" style="display:inline-block;white-space:nowrap;padding:12px 20px;background:#2563eb;color:#fff;border-radius:10px;text-decoration:none;font-weight:600;">Go to builder</a>
       </section>
 
       <section style="background:#fff;border:1px solid #e2e8f0;border-radius:24px;padding:28px;margin-top:20px;">

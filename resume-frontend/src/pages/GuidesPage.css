@@ -253,6 +253,33 @@
   margin-top: 0;
 }
 
+.guide-detail__builder-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 32px;
+  border: 1px solid #c7d2fe;
+  border-radius: 18px;
+  padding: 24px;
+  background: #eef2ff;
+}
+
+.guide-detail__builder-cta h2 {
+  margin: 0 0 8px;
+  font-size: 1.25rem;
+}
+
+.guide-detail__builder-cta p {
+  margin: 0;
+  color: #334155;
+  line-height: 1.6;
+}
+
+.guide-detail__builder-cta .guides-primary-btn {
+  flex: 0 0 auto;
+}
+
 .guide-detail__steps {
   margin: 0;
   padding-left: 20px;
@@ -366,6 +393,13 @@
   flex-direction: column;
   gap: 16px;
   align-items: center;
+}
+
+@media (max-width: 640px) {
+  .guide-detail__builder-cta {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }
 
 .how-to-guide .guide-detail__hero p {

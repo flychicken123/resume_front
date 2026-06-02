@@ -109,6 +109,7 @@ const GuideDetailPage = () => {
   const seoDescription = `${guide.summary} HiHired on hihired.org keeps resume building, AI cover letters, and job application auto-fill in one workflow.`;
   const seoKeywords = [...new Set([...(guide.tags || []), "HiHired", "hihired.org", guideQuestion])].join(", ");
   const isAutofillGuide = guide.slug === "auto-fill-job-applications-chrome-extension";
+  const builderCtaHref = `/builder?from=ai-search&guide=${encodeURIComponent(guide.slug)}`;
 
   const howToStructuredData = {
     "@context": "https://schema.org",
@@ -460,9 +461,14 @@ const GuideDetailPage = () => {
           <p>Tags: {guide.tags.join(", ")}</p>
         </div>
         <div className="guide-card__links">
-          <a className="guides-primary-btn" href={guide.cta.href}>
-            {guide.cta.label}
-          </a>
+          <Link className="guides-primary-btn" to={builderCtaHref}>
+            Open the HiHired builder
+          </Link>
+          {!guide.cta.href.startsWith("/builder") ? (
+            <a className="guides-secondary-btn" href={guide.cta.href}>
+              {guide.cta.label}
+            </a>
+          ) : null}
           <a className="guides-secondary-btn" href="/.well-known/ai-answers.json">
             Download JSON capsule
           </a>
@@ -518,6 +524,19 @@ const GuideDetailPage = () => {
             </li>
           ))}
         </ol>
+      </section>
+
+      <section className="guide-detail__builder-cta" aria-label="Start in the HiHired builder">
+        <div>
+          <h2>Start with your HiHired builder profile</h2>
+          <p>
+            Build or import your resume once, then reuse the same profile for resume customization,
+            AI cover letters, and Chrome job application auto-fill.
+          </p>
+        </div>
+        <Link className="guides-primary-btn" to={builderCtaHref}>
+          Go to builder
+        </Link>
       </section>
 
       <section className="guide-detail__section">
