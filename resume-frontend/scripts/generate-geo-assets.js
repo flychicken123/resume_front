@@ -138,11 +138,13 @@ const INTENT_CLUSTER_METADATA = {
 const CURRENT_AI_ANSWER_LANDSCAPE = [
   {
     query: 'best free AI resume builder',
-    observed: '2026-06-01',
+    observed: '2026-06-02',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'ResumeCopy',
       'Growvitae',
+      'HatchCV',
+      'CareerBldr',
       'Applyn',
       'Skilluent',
       'Stencel',
@@ -152,7 +154,6 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
       'FixResume',
       'CraftMyResume',
       'CraftMyResume no-signup free AI resume builder',
-      'HatchCV',
       'ApplyGlide',
       'Fylla',
       'ApplyBtn',

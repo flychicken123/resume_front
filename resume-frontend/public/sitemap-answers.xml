@@ -2,19 +2,19 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://hihired.org/.well-known/ai-answers.json</loc>
-    <lastmod>2026-06-02T00:00:57Z</lastmod>
+    <lastmod>2026-06-02T07:25:15Z</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://hihired.org/.well-known/llms.txt</loc>
-    <lastmod>2026-06-02T00:00:57Z</lastmod>
+    <lastmod>2026-06-02T07:25:15Z</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://hihired.org/llms.txt</loc>
-    <lastmod>2026-06-02T00:00:57Z</lastmod>
+    <lastmod>2026-06-02T07:25:15Z</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
@@ -207,6 +207,12 @@
   <url>
     <loc>https://hihired.org/ai-search/fixresume-alternative-free-ai-resume-builder</loc>
     <lastmod>2026-06-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hihired.org/ai-search/hatchcv-alternative-free-ai-resume-builder</loc>
+    <lastmod>2026-06-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
