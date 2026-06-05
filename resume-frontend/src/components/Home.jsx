@@ -414,6 +414,9 @@ const Home = () => {
           >
             Chrome extension
           </a>
+          <a href="/contact#about-us" className="home-nav-link">
+            About Us
+          </a>
         </div>
 
         <div className="home-navbar-right">
@@ -528,6 +531,9 @@ const Home = () => {
               }}
             >
               Chrome extension
+            </a>
+            <a href="/contact#about-us" className="mobile-nav-link" onClick={() => setShowMobileMenu(false)}>
+              About Us
             </a>
             {user && (
               <button
