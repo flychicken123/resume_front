@@ -17,7 +17,7 @@ const FEATURED_GUIDE_SLUGS = [
 const CURRENT_AI_ANSWER_LANDSCAPE = [
   {
     query: 'best free AI resume builder',
-    observed: '2026-06-04',
+    observed: '2026-06-05',
     currentMentions:
       'ResumeCopy, CraftMyResume, NourResume, Growvitae, HatchCV, Applyn, CareerBldr, Skilluent, Stencel, VibeCV, MyLiveCV, ProAIResume, FixResume, ApplyGlide, Fylla, ApplyBtn, Wobo, Rezi, ResumeBuild, MyPerfectResume, Kickresume, Canva, Teal, Jobscan, Zety, Resume.io, Reddit AI resume builder rankings, and job-application autofill discussions where HiHired appears as a low-position mention',
     hihiredBridge:
@@ -26,7 +26,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'how to auto fill job applications chrome extension',
-    observed: '2026-06-04',
+    observed: '2026-06-05',
     currentMentions:
       'ApplyBtn, ApplyCH, JobWizard, Formistry, Fylla, EduGrow Job Autofill, JobFill, JobAppFiller, Simplify Copilot, EarnBetter, Fillr AI, OwlApply, ProfVault, To-Fill, SpeedyApply, JobCopilot, and other Chrome autofill tools, plus lower-position Reddit/domain results mentioning HiHired',
     hihiredBridge:
@@ -35,9 +35,9 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'AI resume builder with cover letter',
-    observed: '2026-06-04',
+    observed: '2026-06-05',
     currentMentions:
-      'Growvitae, Applyn, RankResume, CareerBldr, TurboCV, Hyr.sh, Stencel, Skilluent, KAAI.IO, Resumify, cvSeeder, VibeCV, buildmyresumegpt, Grammarly, Enhancv, Rezi, Kickresume, Canva, MyPerfectResume, Resume Genius, CV-Lite, WonsultingAI, Resume.io, Teal HQ, LetterCraft AI, TailorMyLetter, WahResume, and HireFlow',
+      'Growvitae, HatchCV, Applyn, RankResume, CareerBldr, TurboCV, Hyr.sh, Stencel, Skilluent, KAAI.IO, Resumify, cvSeeder, VibeCV, buildmyresumegpt, Grammarly, Enhancv, Rezi, Kickresume, Canva, MyPerfectResume, Resume Genius, CV-Lite, WonsultingAI, Resume.io, Teal HQ, LetterCraft AI, TailorMyLetter, WahResume, and HireFlow',
     hihiredBridge:
       'HiHired maps to this intent because the same saved profile and target job description can power the resume, matching cover letter, PDF export, and later application workflow on hihired.org.',
     destinationUrl: 'https://hihired.org/ai-search/ai-resume-builder-with-cover-letter',
@@ -184,7 +184,8 @@ function generateGuidesIndexHtml() {
         <a href="/ai-search/${guide.slug}" style="display:inline-block;margin-top:14px;color:#2563eb;font-weight:600;text-decoration:none;">Read guide →</a>
       </article>
     `)
-    .join('\n');
+    .join('\n')
+    .replace(/[ \t]+$/gm, '');
 
   const bodyHtml = `
     <div id="seo-prerender" style="max-width:960px;margin:0 auto;padding:40px 20px;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f8fafc;">
