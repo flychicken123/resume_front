@@ -139,11 +139,13 @@ const INTENT_CLUSTER_METADATA = {
 const CURRENT_AI_ANSWER_LANDSCAPE = [
   {
     query: 'best free AI resume builder',
-    observed: '2026-06-05',
+    observed: '2026-06-06',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'ResumeCopy',
       'CraftMyResume',
+      'Applyn product dashboard result',
+      'LetterGen resume plus letter workflow',
       'NourResume',
       'Growvitae',
       'HatchCV',
@@ -177,7 +179,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'how to auto fill job applications chrome extension',
-    observed: '2026-06-05',
+    observed: '2026-06-06',
     hihired_visibility: 'mentioned only as a lower-position Reddit/domain result, not a main answer result',
     current_mentions: [
       'Formistry',
@@ -189,6 +191,8 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
       'Rezi Chrome Extension Reddit launch',
       'JobFill Chrome extension Reddit thread',
       'recent JobFill Chrome extension Reddit thread',
+      'recent Reddit Workday and Taleo autofill discussion',
+      'recent Reddit Aullevo Chrome extension beta thread',
       'JobAppFiller',
       'Fillr AI',
       'ProfVault Form Filler',
@@ -218,11 +222,12 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'AI resume builder with cover letter',
-    observed: '2026-06-05',
+    observed: '2026-06-06',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Growvitae',
       'Applyn',
+      'LetterGen',
       'RankResume',
       'CareerBldr',
       'TurboCV',
@@ -237,6 +242,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
       'HatchCV',
       'HatchCV AI Resume + Cover Letters',
       'VibeCV',
+      'Resmly',
       'MyLiveCV',
       'RoleFit',
       'Resmly',
