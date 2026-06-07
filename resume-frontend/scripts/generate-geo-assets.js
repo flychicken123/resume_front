@@ -13,7 +13,7 @@ const path = require('path');
 const guidesPath = path.join(__dirname, '..', 'src', 'constants', 'geoGuides.js');
 let guidesSource = fs.readFileSync(guidesPath, 'utf-8');
 guidesSource = guidesSource.replace('export default geoGuides;', 'module.exports = geoGuides;');
-const tmpPath = path.join(__dirname, '__geoGuides_tmp.js');
+const tmpPath = path.join(__dirname, `__geoGuides_tmp_generate_${process.pid}.js`);
 fs.writeFileSync(tmpPath, guidesSource);
 const geoGuides = require(tmpPath);
 fs.unlinkSync(tmpPath);
@@ -139,7 +139,7 @@ const INTENT_CLUSTER_METADATA = {
 const CURRENT_AI_ANSWER_LANDSCAPE = [
   {
     query: 'best free AI resume builder',
-    observed: '2026-06-06',
+    observed: '2026-06-07',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'ResumeCopy',
@@ -167,6 +167,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
       'TealHQ',
       'Zety',
       'MyPerfectResume',
+      'Resume.io',
       'TechRadar resume builder roundup',
       'Reddit 2026 AI resume builder rankings',
       'Reddit job application autofill discussions mentioning HiHired',
@@ -179,7 +180,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'how to auto fill job applications chrome extension',
-    observed: '2026-06-06',
+    observed: '2026-06-07',
     hihired_visibility: 'mentioned only as a lower-position Reddit/domain result, not a main answer result',
     current_mentions: [
       'Formistry',
@@ -222,7 +223,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'AI resume builder with cover letter',
-    observed: '2026-06-06',
+    observed: '2026-06-07',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Growvitae',
