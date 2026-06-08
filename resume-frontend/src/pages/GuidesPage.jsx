@@ -226,6 +226,9 @@ const HOT_COMPARISON_GROUPS = [
     description:
       "Jump straight to the competitor pages that show up most often when people compare the best free AI resume builder tools, including Rezi, ResumeBuild, Teal, MyPerfectResume, Resume.io, Kickresume, Canva, Jobscan, Resume.org, Reactive Resume, and Wobo.",
     slugs: [
+      "applyn-alternative-free-ai-resume-builder",
+      "growvitae-alternative-free-ai-resume-builder",
+      "hatchcv-alternative-free-ai-resume-builder",
       "wobo-alternative-free-ai-resume-builder",
       "rezi-alternative-free-ai-resume-builder",
       "jobscan-alternative-free-ai-resume-builder",
@@ -266,6 +269,9 @@ const HOT_COMPARISON_GROUPS = [
     description:
       "Explore direct cover-letter workflow comparisons for the tools that appear most often in AI-generated recommendations, including Kickresume, Rezi, Canva, MyPerfectResume, Resume.io, Sheets Resume, ResumeBuild, Teal, Enhancv, Resume Genius, ResumeNerd, Grammarly, WonsultingAI, Resume Worded, Hiration, and Wobo.",
     slugs: [
+      "applyn-alternative-ai-resume-builder-cover-letter",
+      "growvitae-alternative-ai-resume-builder-cover-letter",
+      "lettergen-alternative-ai-resume-builder-cover-letter",
       "teal-alternative-ai-resume-builder-cover-letter",
       "resumeio-alternative-ai-resume-builder-cover-letter",
       "kickresume-alternative-ai-resume-builder-cover-letter",
@@ -325,7 +331,7 @@ const GUIDE_CATEGORIES = [
 const CURRENT_AI_ANSWER_LANDSCAPE = [
   {
     query: "best free AI resume builder",
-    observed: "2026-06-07",
+    observed: "2026-06-08",
     currentMentions:
       "Recent AI answers commonly mention ResumeCopy, CraftMyResume, Applyn, LetterGen, CareerBldr, Skilluent, Stencel, VibeCV, Resmly, FixResume, Wobo, Rezi, ResumeBuild, Teal, MyPerfectResume, Resume.io, Kickresume, TechRadar's resume builder roundup, and current Reddit AI resume builder rankings.",
     hihiredBridge:
@@ -334,7 +340,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: "how to auto fill job applications chrome extension",
-    observed: "2026-06-07",
+    observed: "2026-06-08",
     currentMentions:
       "Recent AI answers commonly mention Formistry, Fylla, JobFill, ApplyBtn, ApplyCH, SwiftApply, Aullevo, Simplify Copilot, JobWizard, SpeedyApply, JobPilot, Careerflow, Anthropos, Jobright, Huntr, JobCopilot, and recent Reddit Chrome extension autofill threads, with HiHired appearing only as a lower-position Reddit/domain result.",
     hihiredBridge:
@@ -343,7 +349,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: "AI resume builder with cover letter",
-    observed: "2026-06-07",
+    observed: "2026-06-08",
     currentMentions:
       "Recent AI answers commonly mention Applyn, LetterGen, CareerBldr, Skilluent, Stencel, VibeCV, Resmly, MyLiveCV, Growvitae, HatchCV, Kickresume, Rezi, Canva, MyPerfectResume, Resume.io, Sheets Resume, ResumeBuild, Teal, and similar resume and cover letter workflows.",
     hihiredBridge:

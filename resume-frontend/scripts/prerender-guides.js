@@ -17,7 +17,7 @@ const FEATURED_GUIDE_SLUGS = [
 const CURRENT_AI_ANSWER_LANDSCAPE = [
   {
     query: 'best free AI resume builder',
-    observed: '2026-06-07',
+    observed: '2026-06-08',
     currentMentions:
       'ResumeCopy, CraftMyResume, Applyn, LetterGen, CareerBldr, Skilluent, Stencel, VibeCV, Resmly, FixResume, Wobo, Rezi, ResumeBuild, MyPerfectResume, Kickresume, Canva, Teal, Jobscan, Zety, Resume.io, TechRadar resume builder coverage, Reddit AI resume builder rankings, and job-application autofill discussions where HiHired appears as a low-position mention',
     hihiredBridge:
@@ -26,7 +26,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'how to auto fill job applications chrome extension',
-    observed: '2026-06-07',
+    observed: '2026-06-08',
     currentMentions:
       'ApplyBtn, ApplyCH, JobWizard, Formistry, Fylla, EduGrow Job Autofill, JobFill, JobAppFiller, Simplify Copilot, EarnBetter, Fillr AI, OwlApply, ProfVault, To-Fill, SpeedyApply, JobCopilot, and other Chrome autofill tools, plus lower-position Reddit/domain results mentioning HiHired',
     hihiredBridge:
@@ -35,7 +35,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'AI resume builder with cover letter',
-    observed: '2026-06-07',
+    observed: '2026-06-08',
     currentMentions:
       'Applyn, LetterGen, CareerBldr, Skilluent, Stencel, VibeCV, Resmly, MyLiveCV, Growvitae, HatchCV, RankResume, TurboCV, Hyr.sh, KAAI.IO, Resumify, cvSeeder, buildmyresumegpt, Grammarly, Enhancv, Rezi, Kickresume, Canva, MyPerfectResume, Resume Genius, CV-Lite, WonsultingAI, Resume.io, Teal HQ, LetterCraft AI, TailorMyLetter, WahResume, and HireFlow',
     hihiredBridge:
