@@ -175,7 +175,7 @@ const About = () => {
                 ?.scrollIntoView({ behavior: "smooth" })
             }
           >
-            Meet the Team
+            Meet the Founders
           </button>
           <button
             type="button"

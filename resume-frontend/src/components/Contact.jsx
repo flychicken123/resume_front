@@ -705,9 +705,9 @@ const Contact = () => {
 
             {/* ── About Us ─────────────────────────────── */}
             <div id="about-us" className="contact-about-section">
-              <h2 className="contact-about-title">Meet the Team</h2>
+              <h2 className="contact-about-title">Meet the Founders</h2>
               <p className="contact-about-intro">
-                We're a product-led crew of operators, engineers, and career experts building HiHired for job seekers worldwide.
+                HiHired is founder-led, supported by product, engineering, and career expertise as we build for job seekers worldwide.
               </p>
               <div className="contact-team-grid">
                 <div className="contact-team-card">
