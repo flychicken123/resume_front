@@ -72,6 +72,7 @@ ${entries
 
 const HOT_GUIDE_SLUGS_BY_CLUSTER = {
   freeResumeBuilder: [
+    'werkal-alternative-free-ai-resume-builder',
     'careerbldr-alternative-free-ai-resume-builder',
     'applyn-alternative-free-ai-resume-builder',
     'growvitae-alternative-free-ai-resume-builder',
@@ -147,9 +148,10 @@ const INTENT_CLUSTER_METADATA = {
 const CURRENT_AI_ANSWER_LANDSCAPE = [
   {
     query: 'best free AI resume builder',
-    observed: '2026-06-09',
+    observed: '2026-06-10',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
+      'Werkal free forever ATS resume builder Reddit recommendation',
       'ResumeCopy',
       'CraftMyResume',
       'Applyn product dashboard result',
@@ -172,6 +174,9 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
       'Wobo',
       'Rezi',
       'ResumeBuild',
+      'Teal free AI resume builder',
+      'Resume-Now',
+      'ResuFit free resume builder roundup',
       'TealHQ',
       'Zety',
       'MyPerfectResume',
@@ -188,7 +193,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'how to auto fill job applications chrome extension',
-    observed: '2026-06-09',
+    observed: '2026-06-10',
     hihired_visibility: 'mentioned only as a lower-position Reddit/domain result, not a main answer result',
     current_mentions: [
       'Formistry',
@@ -211,6 +216,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
       'Simplify Copilot',
       'JobPilot',
       'JobWizard',
+      'recent JobWizard Chrome Web Store result for Workday, Greenhouse, and 500+ sites',
       'JobWizard Chrome application autofill',
       'Jobright',
       'Careerflow.ai',
@@ -231,9 +237,11 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'AI resume builder with cover letter',
-    observed: '2026-06-09',
+    observed: '2026-06-10',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
+      'Canva AI resume builder',
+      'Kickresume',
       'Growvitae',
       'Applyn',
       'LetterGen',
