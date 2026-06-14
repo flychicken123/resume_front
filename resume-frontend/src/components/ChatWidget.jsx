@@ -510,6 +510,40 @@ const ChatWidgetInner = () => {
     pendingText: '',
   });
 
+  const applyAssistantResumeData = (updatedResumeData) => {
+    if (!updatedResumeData || typeof updatedResumeData !== 'object' || Array.isArray(updatedResumeData)) {
+      return;
+    }
+
+    updateResume((prev) => ({
+      ...prev,
+      ...updatedResumeData,
+    }));
+
+    setResumeFlowState((prev) => {
+      if (!prev?.data) {
+        return prev;
+      }
+
+      const nextData = { ...prev.data };
+      let changed = false;
+      const syncField = (sourceKey, targetKey = sourceKey) => {
+        if (Object.prototype.hasOwnProperty.call(updatedResumeData, sourceKey)) {
+          nextData[targetKey] = updatedResumeData[sourceKey] ?? '';
+          changed = true;
+        }
+      };
+
+      syncField('summary');
+      syncField('skills');
+      syncField('jobDescription');
+      syncField('selectedFormat', 'templateId');
+      syncField('templateId');
+
+      return changed ? { ...prev, data: nextData } : prev;
+    });
+  };
+
   // Load chat messages from localStorage on mount
   const CHAT_STORAGE_KEY = 'chatMessages';
   useEffect(() => {
@@ -2901,8 +2935,7 @@ const buildSectionResponse = (sectionKey) => {
                 // Replace streamed text with final cleaned version
                 let reply = (eventData.reply || streamedText || '').trim() || FALLBACK_REPLY;
 
-                if (eventData.isPolishAction && eventData.updatedResumeData) {
-                  updateResume(eventData.updatedResumeData);
+                if (eventData.isPolishAction) {
                   const polishedPreview = formatPolishedContent(eventData.polishedContent, eventData.section);
                   if (polishedPreview) {
                     reply = `${reply}\n\n**Polished Content:**\n${polishedPreview}`;
@@ -2915,9 +2948,10 @@ const buildSectionResponse = (sectionKey) => {
                   if (formattedResult) {
                     reply = `${reply}\n\n${formattedResult}`;
                   }
-                  if (eventData.updatedResumeData) {
-                    updateResume(eventData.updatedResumeData);
-                  }
+                }
+
+                if (eventData.updatedResumeData) {
+                  applyAssistantResumeData(eventData.updatedResumeData);
                 }
 
                 // Log tool debug info to console
@@ -2949,8 +2983,7 @@ const buildSectionResponse = (sectionKey) => {
         const data = await response.json();
         let reply = (data.reply || '').trim() || FALLBACK_REPLY;
 
-        if (data.isPolishAction && data.updatedResumeData) {
-          updateResume(data.updatedResumeData);
+        if (data.isPolishAction) {
           const polishedPreview = formatPolishedContent(data.polishedContent, data.section);
           if (polishedPreview) {
             reply = `${reply}\n\n**Polished Content:**\n${polishedPreview}`;
@@ -2963,9 +2996,10 @@ const buildSectionResponse = (sectionKey) => {
           if (formattedResult) {
             reply = `${reply}\n\n${formattedResult}`;
           }
-          if (data.updatedResumeData) {
-            updateResume(data.updatedResumeData);
-          }
+        }
+
+        if (data.updatedResumeData) {
+          applyAssistantResumeData(data.updatedResumeData);
         }
 
         // Log tool debug info to console

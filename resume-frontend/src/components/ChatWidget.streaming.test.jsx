@@ -5,7 +5,7 @@ import { ReadableStream } from 'stream/web';
 import { TextDecoder, TextEncoder } from 'util';
 import ChatWidget from './ChatWidget';
 import { AuthProvider } from '../context/AuthContext';
-import { ResumeProvider } from '../context/ResumeContext';
+import { ResumeProvider, useResume } from '../context/ResumeContext';
 
 jest.mock('../api', () => ({
   getAPIBaseURL: () => 'http://api.test',
@@ -48,10 +48,21 @@ const makeSSEFetchResponse = (events) => ({
   }),
 });
 
-const renderChatWidget = () => render(
+const ResumeStateProbe = () => {
+  const { data } = useResume();
+  return (
+    <div>
+      <output aria-label="resume-name">{data.name || ''}</output>
+      <output aria-label="resume-summary">{data.summary || ''}</output>
+    </div>
+  );
+};
+
+const renderChatWidget = ({ showResumeProbe = false } = {}) => render(
   <MemoryRouter>
     <AuthProvider>
       <ResumeProvider>
+        {showResumeProbe && <ResumeStateProbe />}
         <ChatWidget />
       </ResumeProvider>
     </AuthProvider>
@@ -119,5 +130,53 @@ describe('ChatWidget streaming', () => {
 
     const persistedValues = setItemSpy.mock.calls.map(([, value]) => String(value));
     expect(persistedValues.some((value) => value.includes('"streaming":true'))).toBe(false);
+  });
+
+  it('applies assistant resume updates as patches and preserves existing fields', async () => {
+    window.localStorage.getItem.mockImplementation((key) => {
+      if (key === 'resumeUser') {
+        return JSON.stringify({ email: 'harvey@example.com', name: 'Harvey' });
+      }
+      if (key === 'resumeToken') {
+        return 'test-token';
+      }
+      if (key === 'resumeData_harvey@example.com') {
+        return JSON.stringify({
+          name: 'Xuan Wu',
+          email: 'harwtalk@gmail.com',
+          summary: '',
+          skills: 'Go, React',
+        });
+      }
+      return null;
+    });
+
+    global.fetch.mockImplementation((url) => {
+      if (String(url).includes('/api/assistant/chat')) {
+        return Promise.resolve(makeSSEFetchResponse([
+          { data: 'data: {"ready":true}\n\n' },
+          {
+            data:
+              'data: {"done":true,"reply":"I added the generated summary.","updatedResumeData":{"summary":"Generated professional summary"},"proactiveSuggestions":[]}\n\n',
+          },
+        ]));
+      }
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ data: null }),
+      });
+    });
+
+    renderChatWidget({ showResumeProbe: true });
+
+    fireEvent.click(screen.getByLabelText('Chat with HiHired bot'));
+    const input = await screen.findByLabelText('Type your message');
+    fireEvent.change(input, { target: { value: 'generate one for me' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Send' }));
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('resume-summary')).toHaveTextContent('Generated professional summary');
+    });
+    expect(screen.getByLabelText('resume-name')).toHaveTextContent('Xuan Wu');
   });
 });
