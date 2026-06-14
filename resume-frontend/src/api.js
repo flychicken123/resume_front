@@ -384,6 +384,53 @@ export async function generateExperienceAI(
   return normalizeAITextResponse(result.optimizedExperience);
 }
 
+export async function optimizeExperiencesBatchAI({
+  experiences = [],
+  jobDescription = '',
+  matchedSkills = [],
+  missingSkills = [],
+} = {}) {
+  const payload = {
+    experiences,
+  };
+
+  if (jobDescription) {
+    payload.jobDescription = jobDescription;
+  }
+  if (matchedSkills && matchedSkills.length > 0) {
+    payload.matchedSkills = matchedSkills;
+  }
+  if (missingSkills && missingSkills.length > 0) {
+    payload.missingSkills = missingSkills;
+  }
+
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/experience/optimize-batch`, {
+    method: "POST",
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error || "AI batch experience optimization failed.");
+  }
+
+  const data = await res.json();
+  const result = data && typeof data === "object" ? (data.data || data) : {};
+  const results = Array.isArray(result.results)
+    ? result.results.map((item) => ({
+        ...item,
+        optimizedExperience: normalizeAITextResponse(item.optimizedExperience),
+      }))
+    : [];
+
+  return {
+    ...result,
+    results,
+  };
+}
+
 export async function generateEducationAI(education, existingEducation = null) {
   const payload = { education };
 

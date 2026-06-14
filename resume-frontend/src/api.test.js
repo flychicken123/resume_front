@@ -1,6 +1,7 @@
 import {
   generateResume,
   generateExperienceAI,
+  optimizeExperiencesBatchAI,
   generateEducationAI,
   generateSummaryAI,
   optimizeProjectAI,
@@ -22,6 +23,7 @@ describe('API Functions', () => {
   it('should export all required functions', () => {
     expect(typeof generateResume).toBe('function');
     expect(typeof generateExperienceAI).toBe('function');
+    expect(typeof optimizeExperiencesBatchAI).toBe('function');
     expect(typeof generateEducationAI).toBe('function');
     expect(typeof generateSummaryAI).toBe('function');
     expect(typeof optimizeProjectAI).toBe('function');
@@ -186,6 +188,75 @@ describe('API Functions', () => {
         company: 'Acme',
         resumeSkills: ['Go'],
       },
+    });
+  });
+
+  it('sends batch experience optimization payload and normalizes results', async () => {
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        data: {
+          results: [
+            {
+              index: 0,
+              status: 'optimized',
+              optimizedExperience: JSON.stringify([
+                'Built reliable Go APIs',
+                'Improved deployment reliability',
+              ]),
+            },
+            {
+              index: 1,
+              status: 'failed',
+              error: 'reviewer rejected the rewritten experience',
+            },
+          ],
+        },
+      }),
+    });
+
+    const result = await optimizeExperiencesBatchAI({
+      jobDescription: 'backend engineer role',
+      matchedSkills: ['Go'],
+      missingSkills: ['Kubernetes'],
+      experiences: [
+        {
+          index: 0,
+          userExperience: 'built APIs',
+          experienceContext: {
+            jobTitle: 'Software Engineer',
+            company: 'Acme',
+          },
+        },
+      ],
+    });
+
+    const [url, options] = global.fetch.mock.calls[0];
+    expect(url).toContain('/api/experience/optimize-batch');
+    const body = JSON.parse(options.body);
+    expect(body).toMatchObject({
+      jobDescription: 'backend engineer role',
+      matchedSkills: ['Go'],
+      missingSkills: ['Kubernetes'],
+      experiences: [
+        {
+          index: 0,
+          userExperience: 'built APIs',
+          experienceContext: {
+            jobTitle: 'Software Engineer',
+            company: 'Acme',
+          },
+        },
+      ],
+    });
+    expect(result.results[0].optimizedExperience).toBe(
+      'Built reliable Go APIs\n\nImproved deployment reliability'
+    );
+    expect(result.results[1]).toMatchObject({
+      index: 1,
+      status: 'failed',
+      error: 'reviewer rejected the rewritten experience',
     });
   });
 

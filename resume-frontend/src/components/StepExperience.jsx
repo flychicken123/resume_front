@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useResume } from '../context/ResumeContext';
 import {
   generateExperienceAI,
+  optimizeExperiencesBatchAI,
   improveExperienceGrammarAI,
   extractImpactKeywordsAI,
 } from '../api';
@@ -336,16 +337,75 @@ const StepExperience = () => {
 
     try {
       setBulkLoading(true);
-      for (let idx = 0; idx < experiences.length; idx += 1) {
-        const experience = experiences[idx];
-        if (!experience) {
-          continue;
-        }
-        // Check experience description if present
-        if ((experience.description || '').trim()) {
-          await checkWithAI(idx);
-        }
+      const batchItems = experiences
+        .map((experience, idx) => {
+          const desc = (experience?.description || '').trim();
+          if (!experience || !desc) {
+            return null;
+          }
+          return {
+            index: idx,
+            userExperience: desc,
+            experienceContext: buildExperienceAIContext(experience, data),
+          };
+        })
+        .filter(Boolean);
+
+      if (batchItems.length === 0) {
+        alert('Add descriptions to your experiences before running an AI check.');
+        return;
       }
+
+      const response = await optimizeExperiencesBatchAI({
+        experiences: batchItems,
+        jobDescription: getJobDescription(),
+      });
+      const results = Array.isArray(response?.results) ? response.results : [];
+      const updates = new Map();
+      const failedIndexes = new Set(batchItems.map((item) => item.index));
+
+      results.forEach((result) => {
+        const idx = Number(result?.index);
+        const improvedText = typeof result?.optimizedExperience === 'string'
+          ? result.optimizedExperience.trim()
+          : '';
+        if (Number.isInteger(idx) && improvedText && result.status !== 'failed' && result.status !== 'skipped') {
+          updates.set(idx, result.optimizedExperience);
+          failedIndexes.delete(idx);
+        }
+      });
+
+      if (updates.size > 0) {
+        updateExperiences((current) => {
+          const next = [...current];
+          updates.forEach((description, idx) => {
+            if (!next[idx]) {
+              next[idx] = createEmptyExperience();
+            }
+            next[idx] = { ...next[idx], description };
+          });
+          return next;
+        });
+        setAiMode((prev) => {
+          const next = { ...prev };
+          updates.forEach((_, idx) => {
+            next[idx] = true;
+          });
+          return next;
+        });
+      }
+
+      if (failedIndexes.size > 0) {
+        const failedCount = failedIndexes.size;
+        alert(
+          updates.size > 0
+            ? `${failedCount} experience${failedCount === 1 ? '' : 's'} could not be checked with AI. Please retry those individually.`
+            : 'Failed to check experiences with AI. Please try again.'
+        );
+      }
+    } catch (err) {
+      console.error('Bulk AI experience enhancement failed', err);
+      alert('Failed to check experiences with AI. Please try again.');
     } finally {
       setBulkLoading(false);
       setLoadingIndex(null);
