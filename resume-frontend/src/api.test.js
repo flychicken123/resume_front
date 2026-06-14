@@ -4,6 +4,7 @@ import {
   generateEducationAI,
   generateSummaryAI,
   optimizeProjectAI,
+  improveExperienceGrammarAI,
   improveProjectGrammarAI,
   parseResumeFile
 } from './api';
@@ -119,6 +120,73 @@ describe('API Functions', () => {
       'Architected and launched an AI resume platform.\nDeveloped evaluation workflows.'
     );
     expect(result).not.toContain('"');
+  });
+
+  it('sends optional experience context for experience optimization', async () => {
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        data: {
+          optimizedExperience: 'Built reliable Go APIs.',
+        },
+      }),
+    });
+
+    await generateExperienceAI(
+      'built APIs',
+      'backend engineer role',
+      ['Go'],
+      ['Kubernetes'],
+      {
+        jobTitle: 'Software Engineer',
+        company: 'Acme',
+        resumeSkills: ['Go', 'React'],
+        targetRole: 'Backend Engineer',
+      }
+    );
+
+    const [, options] = global.fetch.mock.calls[0];
+    const body = JSON.parse(options.body);
+    expect(body).toMatchObject({
+      userExperience: 'built APIs',
+      jobDescription: 'backend engineer role',
+      matchedSkills: ['Go'],
+      missingSkills: ['Kubernetes'],
+      experienceContext: {
+        jobTitle: 'Software Engineer',
+        company: 'Acme',
+        resumeSkills: ['Go', 'React'],
+        targetRole: 'Backend Engineer',
+      },
+    });
+  });
+
+  it('sends optional experience context for grammar improvement', async () => {
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        improvedExperience: 'Built reliable APIs.',
+      }),
+    });
+
+    await improveExperienceGrammarAI('built APIs', {
+      jobTitle: 'Software Engineer',
+      company: 'Acme',
+      resumeSkills: ['Go'],
+    });
+
+    const [, options] = global.fetch.mock.calls[0];
+    const body = JSON.parse(options.body);
+    expect(body).toMatchObject({
+      userExperience: 'built APIs',
+      experienceContext: {
+        jobTitle: 'Software Engineer',
+        company: 'Acme',
+        resumeSkills: ['Go'],
+      },
+    });
   });
 
   it('normalizes JSON array text from project optimization', async () => {

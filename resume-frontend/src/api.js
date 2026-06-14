@@ -345,10 +345,16 @@ function normalizeAITextResponse(value) {
   return trimmed;
 }
 
-export async function generateExperienceAI(experience, jobDescription = '', matchedSkills = [], missingSkills = []) {
-  const payload = { 
+export async function generateExperienceAI(
+  experience,
+  jobDescription = '',
+  matchedSkills = [],
+  missingSkills = [],
+  experienceContext = null
+) {
+  const payload = {
     userExperience: experience,
-    jobDescription: jobDescription 
+    jobDescription: jobDescription
   };
   
   // Include skill gaps for better context
@@ -358,7 +364,10 @@ export async function generateExperienceAI(experience, jobDescription = '', matc
   if (missingSkills && missingSkills.length > 0) {
     payload.missingSkills = missingSkills;
   }
-  
+  if (experienceContext && typeof experienceContext === 'object' && Object.keys(experienceContext).length > 0) {
+    payload.experienceContext = experienceContext;
+  }
+
   const res = await fetchWithAuth(`${API_BASE_URL}/api/experience/optimize`, {
     method: "POST",
     headers: {
@@ -548,23 +557,28 @@ export async function inferJobIntent(text) {
 }
 
 // AI Grammar/Refactor functions - always available
-export async function improveExperienceGrammarAI(experience) {
+export async function improveExperienceGrammarAI(experience, experienceContext = null) {
+  const requestPayload = {
+    userExperience: experience
+  };
+  if (experienceContext && typeof experienceContext === 'object' && Object.keys(experienceContext).length > 0) {
+    requestPayload.experienceContext = experienceContext;
+  }
+
   const res = await fetchWithAuth(`${API_BASE_URL}/api/experience/improve-grammar`, {
     method: "POST",
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ 
-      userExperience: experience
-    }),
+    body: JSON.stringify(requestPayload),
   });
   if (!res.ok) {
     const err = await res.json();
     throw new Error(err.error || "AI grammar improvement failed.");
   }
   const data = await res.json();
-  const payload = data && typeof data === "object" ? (data.data || data) : {};
-  return normalizeAITextResponse(payload.improvedExperience);
+  const responsePayload = data && typeof data === "object" ? (data.data || data) : {};
+  return normalizeAITextResponse(responsePayload.improvedExperience);
 }
 
 export async function optimizeProjectAI(projectData, jobDescription = '', existingProject = null, matchedSkills = [], missingSkills = []) {

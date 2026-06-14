@@ -7,6 +7,7 @@ import {
   extractImpactKeywordsAI,
 } from '../api';
 import { useLocation } from 'react-router-dom';
+import { buildExperienceAIContext } from '../utils/experienceAIContext';
 
 const createEmptyExperience = () => ({
   jobTitle: '',
@@ -296,9 +297,16 @@ const StepExperience = () => {
       }
 
       const jobDesc = getJobDescription();
+      const experienceContext = buildExperienceAIContext(experience, data);
       const improvedText = jobDesc
-        ? await generateExperienceAI(desc, jobDesc)
-        : await improveExperienceGrammarAI(desc);
+        ? await generateExperienceAI(
+            desc,
+            jobDesc,
+            [],
+            [],
+            experienceContext
+          )
+        : await improveExperienceGrammarAI(desc, experienceContext);
 
       updateExperiences((current) => {
         const next = [...current];

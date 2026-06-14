@@ -20,6 +20,7 @@ import {
   combineJobDescriptions,
   prepareJobDescriptionsForStorage,
 } from '../utils/jobDescriptions';
+import { buildExperienceAIContext } from '../utils/experienceAIContext';
 import { TEMPLATE_SLUGS, DEFAULT_TEMPLATE_ID, normalizeTemplateId } from '../constants/templates';
 import Stepper from '../components/Stepper';
 import ResumeProgressBar from '../components/ResumeProgressBar';
@@ -2080,7 +2081,12 @@ function BuilderPage() {
               exp.description,
               jobDescriptionSource,
               match.matched_skills || [],
-              match.missing_skills || []
+              match.missing_skills || [],
+              buildExperienceAIContext(exp, data, {
+                resumeSkills,
+                targetRole: match.job_title || targetPosition,
+                targetCompany: match.company_name || '',
+              })
             );
             const cleanedDescription = typeof optimizedDescription === 'string' ? optimizedDescription.trim() : '';
             if (cleanedDescription) {
