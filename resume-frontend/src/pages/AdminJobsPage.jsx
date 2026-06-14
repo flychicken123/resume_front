@@ -24,6 +24,7 @@ import {
   updateKnowledge,
   deleteKnowledge,
   backfillKnowledgeEmbeddings,
+  getAPIBaseURL,
 } from "../api";
 
 const PAGE_SIZE = 25;
@@ -732,7 +733,7 @@ export default function AdminJobsPage() {
   const loadCompanies = useCallback(async () => {
     try {
       const token = localStorage.getItem("resumeToken");
-      const API_BASE_URL = window.location.hostname === "localhost" ? "http://localhost:8081" : "";
+      const API_BASE_URL = getAPIBaseURL();
       const res = await fetch(`${API_BASE_URL}/api/admin/jobs/companies?page_size=100`, {
         headers: { Authorization: `Bearer ${token}` },
       });
