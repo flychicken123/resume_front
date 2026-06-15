@@ -132,6 +132,36 @@ describe('ChatWidget streaming', () => {
     expect(persistedValues.some((value) => value.includes('"streaming":true'))).toBe(false);
   });
 
+  it('renders markdown structure in assistant messages', async () => {
+    global.fetch.mockImplementation((url) => {
+      if (String(url).includes('/api/assistant/chat')) {
+        return Promise.resolve(makeSSEFetchResponse([
+          { data: 'data: {"ready":true}\n\n' },
+          {
+            data:
+              'data: {"done":true,"reply":"### Priority fixes\\n1. **High:** Missing dates\\n- **Evidence:** experience 1 has no date range","proactiveSuggestions":[]}\n\n',
+          },
+        ]));
+      }
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ data: null }),
+      });
+    });
+
+    renderChatWidget();
+
+    fireEvent.click(screen.getByLabelText('Chat with HiHired bot'));
+    expect(await screen.findByText('Analyze my resume')).toBeInTheDocument();
+    const input = await screen.findByLabelText('Type your message');
+    fireEvent.change(input, { target: { value: 'review details' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Send' }));
+
+    expect(await screen.findByRole('heading', { name: 'Priority fixes' })).toBeInTheDocument();
+    expect(screen.getByText('High:')).toBeInTheDocument();
+    expect(screen.getByText(/experience 1 has no date range/i)).toBeInTheDocument();
+  });
+
   it('applies assistant resume updates as patches and preserves existing fields', async () => {
     window.localStorage.getItem.mockImplementation((key) => {
       if (key === 'resumeUser') {

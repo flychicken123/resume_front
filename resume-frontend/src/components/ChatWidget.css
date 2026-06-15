@@ -329,6 +329,42 @@
   white-space: pre-wrap;
 }
 
+.chat-rich-text {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  white-space: normal;
+}
+
+.chat-rich-text p,
+.chat-rich-text h4,
+.chat-rich-text ul,
+.chat-rich-text ol {
+  margin: 0;
+}
+
+.chat-rich-text h4 {
+  color: #111827;
+  font-size: 0.98rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.chat-rich-text ul,
+.chat-rich-text ol {
+  padding-left: 1.15rem;
+}
+
+.chat-rich-text li {
+  margin: 4px 0;
+  padding-left: 2px;
+}
+
+.chat-rich-text strong {
+  color: #111827;
+  font-weight: 700;
+}
+
 .chat-progress {
   display: flex;
   flex-direction: column;

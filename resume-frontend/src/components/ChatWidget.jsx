@@ -41,14 +41,91 @@ const INITIAL_MESSAGES = [
       { label: 'Download Resume', value: 'download resume' },
       { label: 'Job Matches', value: 'job matches' },
       { label: 'Track Applications', value: 'track_applications' },
-      { label: 'Analysis my resume', value: 'analysis my resume' },
+      { label: 'Analyze my resume', value: 'analysis my resume' },
       { label: 'Emotional Support', value: 'I\'m feeling stressed about my job search. Can you give me some encouragement and emotional support?' },
     ],
   },
 ];
-
 const FALLBACK_REPLY =
   "I'm having trouble reaching our AI right now. Please use the Help bubble or contact us at hihired.org/contact and we'll help right away.";
+
+const renderInlineChatMarkdown = (text, keyPrefix) => {
+  const parts = String(text || '').split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((part, idx) => {
+    const key = `${keyPrefix}-${idx}`;
+    if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
+      return <strong key={key}>{part.slice(2, -2)}</strong>;
+    }
+    return <React.Fragment key={key}>{part}</React.Fragment>;
+  });
+};
+
+const renderChatText = (text) => {
+  const lines = String(text || '').split(/\r?\n/);
+  const elements = [];
+  let listItems = [];
+  let listType = null;
+
+  const flushList = () => {
+    if (listItems.length === 0) return;
+    const ListTag = listType === 'ordered' ? 'ol' : 'ul';
+    const key = `list-${elements.length}`;
+    elements.push(
+      <ListTag key={key}>
+        {listItems.map((item, idx) => (
+          <li key={`${key}-${idx}`}>{renderInlineChatMarkdown(item, `${key}-item-${idx}`)}</li>
+        ))}
+      </ListTag>
+    );
+    listItems = [];
+    listType = null;
+  };
+
+  lines.forEach((line, idx) => {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      flushList();
+      return;
+    }
+
+    const heading = trimmed.match(/^#{1,4}\s+(.+)$/);
+    if (heading) {
+      flushList();
+      elements.push(
+        <h4 key={`heading-${idx}`}>{renderInlineChatMarkdown(heading[1], `heading-${idx}`)}</h4>
+      );
+      return;
+    }
+
+    const ordered = trimmed.match(/^\d+\.\s+(.+)$/);
+    if (ordered) {
+      if (listType !== 'ordered') {
+        flushList();
+        listType = 'ordered';
+      }
+      listItems.push(ordered[1]);
+      return;
+    }
+
+    const bullet = trimmed.match(/^[-*]\s+(.+)$/);
+    if (bullet) {
+      if (listType !== 'unordered') {
+        flushList();
+        listType = 'unordered';
+      }
+      listItems.push(bullet[1]);
+      return;
+    }
+
+    flushList();
+    elements.push(
+      <p key={`paragraph-${idx}`}>{renderInlineChatMarkdown(trimmed, `paragraph-${idx}`)}</p>
+    );
+  });
+
+  flushList();
+  return <div className="chat-rich-text">{elements}</div>;
+};
 
 const RESUME_FLOW_SEQUENCE = [
   'importChoice',
@@ -3213,7 +3290,11 @@ const buildSectionResponse = (sectionKey) => {
                       <div className="chat-progress-label">{`Step ${progressInfo.current} of ${progressInfo.total}`}</div>
                     </div>
                   )}
-                {message.text && <span>{message.text}</span>}
+                {message.text && (
+                  message.sender === 'bot'
+                    ? renderChatText(message.text)
+                    : <span>{message.text}</span>
+                )}
                 {message.linkUrl && (
                   <a
                     className="chat-link"
