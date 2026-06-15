@@ -258,10 +258,11 @@ describe('ChatWidget streaming', () => {
     fireEvent.change(input, { target: { value: 'update dates' } });
     fireEvent.click(screen.getByRole('button', { name: 'Send' }));
 
+    let experiences = [];
     await waitFor(() => {
-      const experiences = JSON.parse(screen.getByLabelText('resume-experiences').textContent);
+      experiences = JSON.parse(screen.getByLabelText('resume-experiences').textContent);
       expect(experiences[0].startDate).toBe('2013-08');
-      expect(experiences[0].endDate).toBe('2015-06');
     });
+    expect(experiences[0].endDate).toBe('2015-06');
   });
 });
