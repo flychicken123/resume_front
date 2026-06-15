@@ -9,6 +9,7 @@ import {
 } from '../api';
 import { useLocation } from 'react-router-dom';
 import { buildExperienceAIContext } from '../utils/experienceAIContext';
+import { coerceDate, normalizeDateValue, normalizeExperienceDates, formatMonthYear } from '../utils/resumeDateUtils';
 
 const createEmptyExperience = () => ({
   jobTitle: '',
@@ -22,148 +23,26 @@ const createEmptyExperience = () => ({
   description: ''
 });
 
-const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
-
-const coerceDate = (value) => {
-  if (value === null || value === undefined || value === '') {
-    return null;
-  }
-
-  if (value instanceof Date) {
-    return Number.isNaN(value.getTime()) ? null : value;
-  }
-
-  if (typeof value === 'number' && Number.isFinite(value)) {
-    const timestampDate = new Date(value);
-    return Number.isNaN(timestampDate.getTime()) ? null : timestampDate;
-  }
-
-  const str = String(value).trim();
-  if (!str || /^present$/i.test(str)) {
-    return null;
-  }
-
-  if (ISO_DATE_REGEX.test(str)) {
-    const [yearStr, monthStr, dayStr] = str.split('-');
-    const year = Number(yearStr);
-    const month = Number(monthStr);
-    const day = Number(dayStr);
-    if (!Number.isNaN(year) && !Number.isNaN(month) && !Number.isNaN(day)) {
-      return new Date(Date.UTC(year, month - 1, day));
-    }
-  }
-
-  if (/^\d{8}$/.test(str)) {
-    const year = Number(str.slice(0, 4));
-    const month = Number(str.slice(4, 6));
-    const day = Number(str.slice(6, 8));
-    return new Date(Date.UTC(year, month - 1, day));
-  }
-
-  if (/^\d{6}$/.test(str)) {
-    const year = Number(str.slice(0, 4));
-    const month = Number(str.slice(4, 6));
-    return new Date(Date.UTC(year, month - 1, 1));
-  }
-
-  const normalized = str.replace(/[.]/g, '-').replace(/\//g, '-');
-
-  let match = normalized.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
-  if (match) {
-    const year = Number(match[1]);
-    const month = Number(match[2]);
-    const day = Number(match[3]);
-    return new Date(Date.UTC(year, month - 1, day));
-  }
-
-  match = normalized.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
-  if (match) {
-    const month = Number(match[1]);
-    const day = Number(match[2]);
-    const year = Number(match[3]);
-    return new Date(Date.UTC(year, month - 1, day));
-  }
-
-  match = normalized.match(/^(\d{4})-(\d{1,2})$/);
-  if (match) {
-    const year = Number(match[1]);
-    const month = Number(match[2]);
-    return new Date(Date.UTC(year, month - 1, 1));
-  }
-
-  match = normalized.match(/^(\d{1,2})-(\d{4})$/);
-  if (match) {
-    const month = Number(match[1]);
-    const year = Number(match[2]);
-    return new Date(Date.UTC(year, month - 1, 1));
-  }
-
-  if (/^\d{4}$/.test(str)) {
-    const year = Number(str);
-    return new Date(Date.UTC(year, 0, 1));
-  }
-
-  if (/^(\d{10}|\d{13})$/.test(str)) {
-    const unix = Number(str);
-    const millis = str.length === 13 ? unix : unix * 1000;
-    const numericDate = new Date(millis);
-    if (!Number.isNaN(numericDate.getTime())) {
-      return numericDate;
-    }
-  }
-
-  let parsed = new Date(str);
-  if (!Number.isNaN(parsed.getTime())) {
-    return parsed;
-  }
-
-  if (str.includes(' ')) {
-    parsed = new Date(str.replace(' ', 'T'));
-    if (!Number.isNaN(parsed.getTime())) {
-      return parsed;
-    }
-  }
-
-  return null;
-};
-
-const normalizeDateValue = (value) => {
-  const parsed = coerceDate(value);
-  if (!parsed) {
-    return '';
-  }
-
-  const year = parsed.getUTCFullYear();
-  const month = `${parsed.getUTCMonth() + 1}`.padStart(2, '0');
-  return `${year}-${month}`;
-};
-
 const formatDateRange = (exp) => {
   if (!exp) return '';
-
-  const formatter = new Intl.DateTimeFormat('en-US', {
-    month: 'short',
-    year: 'numeric',
-    timeZone: 'UTC',
-  });
 
   const start = coerceDate(exp.startDate);
   const end = coerceDate(exp.endDate);
 
   if (start && exp.currentlyWorking) {
-    return `${formatter.format(start)} - Present`;
+    return `${formatMonthYear(exp.startDate)} - Present`;
   }
 
   if (start && end) {
-    return `${formatter.format(start)} - ${formatter.format(end)}`;
+    return `${formatMonthYear(exp.startDate)} - ${formatMonthYear(exp.endDate)}`;
   }
 
   if (start) {
-    return formatter.format(start);
+    return formatMonthYear(exp.startDate);
   }
 
   if (!exp.currentlyWorking && end) {
-    return formatter.format(end);
+    return formatMonthYear(exp.endDate);
   }
 
   return '';
@@ -200,19 +79,9 @@ const StepExperience = () => {
       return;
     }
 
-    const normalized = data.experiences.map((exp) => {
-      if (!exp) return createEmptyExperience();
-      const normalizedStart = normalizeDateValue(exp.startDate);
-      const normalizedEnd = normalizeDateValue(exp.endDate);
-      if (normalizedStart === exp.startDate && normalizedEnd === exp.endDate) {
-        return exp;
-      }
-      return {
-        ...exp,
-        startDate: normalizedStart,
-        endDate: normalizedEnd,
-      };
-    });
+    const normalized = data.experiences.map((exp) => (
+      exp ? normalizeExperienceDates(exp) : createEmptyExperience()
+    ));
 
     const hasChanges = normalized.some((exp, idx) => exp !== data.experiences[idx]);
     if (hasChanges) {

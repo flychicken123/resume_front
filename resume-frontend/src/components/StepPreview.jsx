@@ -1,6 +1,7 @@
 import React, { useEffect, Fragment } from 'react';
 import { useResume } from '../context/ResumeContext';
 import { TEMPLATE_SLUGS, DEFAULT_TEMPLATE_ID, normalizeTemplateId } from '../constants/templates';
+import { formatMonthYear as formatResumeMonthYear } from '../utils/resumeDateUtils';
 
 const StepPreview = ({ onDownload, hideActions = false, dataOverride }) => {
   const resumeContext = useResume();
@@ -186,14 +187,10 @@ const isAttorneyTemplate = normalizedFormat === TEMPLATE_SLUGS.ATTORNEY_TEMPLATE
       .map((exp, idx) => {
         if (!exp.jobTitle && !exp.company) return null;
 
-        const startDate = exp.startDate
-          ? new Date(exp.startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' })
-          : '';
+        const startDate = formatResumeMonthYear(exp.startDate);
         const endDate = exp.currentlyWorking
           ? 'Present'
-          : exp.endDate
-          ? new Date(exp.endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' })
-          : '';
+          : formatResumeMonthYear(exp.endDate);
         const dateRange = startDate || endDate
           ? (startDate ? `${startDate}${dash}${endDate || 'Present'}` : endDate)
           : '';
@@ -717,12 +714,7 @@ const isAttorneyTemplate = normalizedFormat === TEMPLATE_SLUGS.ATTORNEY_TEMPLATE
     };
 
     const formatDate = (value) => {
-      if (!value) return '';
-      const parsed = new Date(value);
-        if (!Number.isNaN(parsed.valueOf())) {
-          return parsed.toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
-      }
-      return toText(value);
+      return formatResumeMonthYear(value);
     };
 
     const name = toText(data.name) || 'Your Name';

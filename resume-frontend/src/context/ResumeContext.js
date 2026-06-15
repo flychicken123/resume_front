@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import { useAuth } from './AuthContext';
 import { DEFAULT_TEMPLATE_ID, normalizeTemplateId, getTemplateMetaById } from '../constants/templates';
 import { getAPIBaseURL } from '../api';
+import { normalizeExperienceDates } from '../utils/resumeDateUtils';
 
 const API_BASE_URL = getAPIBaseURL();
 
@@ -58,6 +59,15 @@ const normalizeResumeData = (resume) => {
     ...resume,
     selectedFormat: nextFormat,
   };
+
+  const sourceExperiences = Array.isArray(next.experiences)
+    ? next.experiences
+    : Array.isArray(next.experience)
+      ? next.experience
+      : null;
+  if (sourceExperiences) {
+    next.experiences = sourceExperiences.map((exp) => normalizeExperienceDates(exp));
+  }
 
   if (typeof next.skillsCategorized !== 'string') {
     next.skillsCategorized = "";

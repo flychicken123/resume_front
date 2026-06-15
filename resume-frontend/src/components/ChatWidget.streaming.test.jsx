@@ -54,6 +54,7 @@ const ResumeStateProbe = () => {
     <div>
       <output aria-label="resume-name">{data.name || ''}</output>
       <output aria-label="resume-summary">{data.summary || ''}</output>
+      <output aria-label="resume-experiences">{JSON.stringify(data.experiences || [])}</output>
     </div>
   );
 };
@@ -208,5 +209,59 @@ describe('ChatWidget streaming', () => {
       expect(screen.getByLabelText('resume-summary')).toHaveTextContent('Generated professional summary');
     });
     expect(screen.getByLabelText('resume-name')).toHaveTextContent('Xuan Wu');
+  });
+
+  it('normalizes assistant-updated experience date ranges for month inputs', async () => {
+    window.localStorage.getItem.mockImplementation((key) => {
+      if (key === 'resumeUser') {
+        return JSON.stringify({ email: 'harvey@example.com', name: 'Harvey' });
+      }
+      if (key === 'resumeToken') {
+        return 'test-token';
+      }
+      if (key === 'resumeData_harvey@example.com') {
+        return JSON.stringify({
+          experiences: [
+            {
+              jobTitle: 'Project Leader',
+              company: 'Nanjing Inforich Technology',
+              startDate: '',
+              endDate: '',
+              currentlyWorking: false,
+            },
+          ],
+        });
+      }
+      return null;
+    });
+
+    global.fetch.mockImplementation((url) => {
+      if (String(url).includes('/api/assistant/chat')) {
+        return Promise.resolve(makeSSEFetchResponse([
+          { data: 'data: {"ready":true}\n\n' },
+          {
+            data:
+              'data: {"done":true,"reply":"I updated the dates.","updatedResumeData":{"experiences":[{"jobTitle":"Project Leader","company":"Nanjing Inforich Technology","startDate":"Aug 2013 - June 2015","endDate":"","currentlyWorking":false}]},"proactiveSuggestions":[]}\n\n',
+          },
+        ]));
+      }
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ data: null }),
+      });
+    });
+
+    renderChatWidget({ showResumeProbe: true });
+
+    fireEvent.click(screen.getByLabelText('Chat with HiHired bot'));
+    const input = await screen.findByLabelText('Type your message');
+    fireEvent.change(input, { target: { value: 'update dates' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Send' }));
+
+    await waitFor(() => {
+      const experiences = JSON.parse(screen.getByLabelText('resume-experiences').textContent);
+      expect(experiences[0].startDate).toBe('2013-08');
+      expect(experiences[0].endDate).toBe('2015-06');
+    });
   });
 });

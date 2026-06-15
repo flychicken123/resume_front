@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, Fragment } from 'react';
 import { useResume } from '../context/ResumeContext';
 import { TEMPLATE_SLUGS, DEFAULT_TEMPLATE_ID, normalizeTemplateId } from '../constants/templates';
+import { formatMonthYear as formatResumeMonthYear } from '../utils/resumeDateUtils';
 import './LivePreview.css';
 const LIVE_PREVIEW_BUILD = '2026-02-14-v3';
 const LivePreview = ({
@@ -2687,16 +2688,8 @@ const renderExperiences = (experiences, styles) => {
         const explicitLocation = toText(exp.location);
         const combinedCityState = cityText && stateText ? `${cityText}, ${stateText}` : (cityText || stateText || '');
         const location = combinedCityState || explicitLocation;
-        let startDate = '';
-        let endDate = '';
-        if (exp.startDate) {
-          const startDateObj = new Date(exp.startDate);
-          startDate = startDateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'short', timeZone: 'UTC' });
-        }
-        if (exp.endDate && !exp.currentlyWorking) {
-          const endDateObj = new Date(exp.endDate);
-          endDate = endDateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'short', timeZone: 'UTC' });
-        }
+        const startDate = formatResumeMonthYear(exp.startDate);
+        const endDate = exp.currentlyWorking ? '' : formatResumeMonthYear(exp.endDate);
         const dateRange = normalizeRange(startDate, endDate, exp.currentlyWorking);
         const startLabel = startDate;
         const endLabel = exp.currentlyWorking ? 'Present' : endDate;
