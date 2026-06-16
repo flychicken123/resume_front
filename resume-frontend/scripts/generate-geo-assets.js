@@ -148,7 +148,7 @@ const INTENT_CLUSTER_METADATA = {
 const CURRENT_AI_ANSWER_LANDSCAPE = [
   {
     query: 'best free AI resume builder',
-    observed: '2026-06-15',
+    observed: '2026-06-16',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Werkal free forever ATS resume builder Reddit recommendation',
@@ -186,6 +186,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
       'Wobo 2026 AI resume builder roundup',
       'Canva AI resume builder',
       'Resume-Now free AI resume builder',
+      'MyPerfectResume AI resume builder',
       'TechRadar resume builder roundup',
       'Reddit 2026 AI resume builder rankings',
       'Reddit job application autofill discussions mentioning HiHired',
@@ -198,7 +199,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'how to auto fill job applications chrome extension',
-    observed: '2026-06-15',
+    observed: '2026-06-16',
     hihired_visibility: 'mentioned as a lower-position Reddit result for the exact autofill query, not yet surfaced as a primary product result',
     current_mentions: [
       'Formistry',
@@ -232,6 +233,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
       'JobFill.ai Chrome autofill result',
       'JobFill Chrome Web Store result',
       'Autofill-Jobs GitHub Chrome extension result',
+      'JobWizard AI job application autofill Chrome extension result',
       'Jobright',
       'Careerflow.ai',
       'Anthropos 1-click Apply',
@@ -252,13 +254,14 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'AI resume builder with cover letter',
-    observed: '2026-06-15',
+    observed: '2026-06-16',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Canva AI resume builder',
       'Canva resume and cover letter generation result',
       'Kickresume',
       'Kickresume best AI resume builders updated June 2026',
+      'Kickresume best online resume and cover letter builder',
       'Growvitae',
       'Applyn',
       'LetterGen',
@@ -297,6 +300,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
       'Sheets Resume free AI cover letter generator result',
       'Rezi resume plus cover letter result',
       'Business Insider June 2026 coverage on generic AI cover letters losing hiring signal',
+      'Harvard guidance on prompting AI from job descriptions before drafting cover letters',
       'Jenova AI resume and cover letter Reddit discussion',
     ],
     hihired_bridge:
