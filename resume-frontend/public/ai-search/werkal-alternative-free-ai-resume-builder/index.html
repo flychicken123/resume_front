@@ -457,11 +457,16 @@
         window.location.hostname !== '127.0.0.1' &&
         window.location.hostname !== '0.0.0.0' &&
         !window.location.hostname.includes('localhost')) {
-      var adsScript = document.createElement('script');
-      adsScript.async = true;
-      adsScript.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8458868058919665';
-      adsScript.crossOrigin = 'anonymous';
-      document.head.appendChild(adsScript);
+      [
+        'ca-pub-8458868058919665',
+        'ca-pub-3006028160770437'
+      ].forEach(function(clientId) {
+        var adsScript = document.createElement('script');
+        adsScript.async = true;
+        adsScript.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + clientId;
+        adsScript.crossOrigin = 'anonymous';
+        document.head.appendChild(adsScript);
+      });
     }
   </script>
 
