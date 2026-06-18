@@ -148,7 +148,7 @@ const INTENT_CLUSTER_METADATA = {
 const CURRENT_AI_ANSWER_LANDSCAPE = [
   {
     query: 'best free AI resume builder',
-    observed: '2026-06-16',
+    observed: '2026-06-17',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Werkal free forever ATS resume builder Reddit recommendation',
@@ -174,6 +174,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
       'Wobo',
       'Rezi',
       'ResumeBuild',
+      'ResumeBuild AI resume builder',
       'Teal free AI resume builder',
       'Resume-Now',
       'ResuFit free resume builder roundup',
@@ -185,6 +186,8 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
       'Kickresume best online resume and cover letter builder',
       'Wobo 2026 AI resume builder roundup',
       'Canva AI resume builder',
+      'Google Gemini career coach',
+      'JobSprout AI CV builder and cover letter generator',
       'Resume-Now free AI resume builder',
       'MyPerfectResume AI resume builder',
       'TechRadar resume builder roundup',
@@ -199,8 +202,8 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'how to auto fill job applications chrome extension',
-    observed: '2026-06-16',
-    hihired_visibility: 'mentioned as a lower-position Reddit result for the exact autofill query, not yet surfaced as a primary product result',
+    observed: '2026-06-17',
+    hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Formistry',
       'ApplyBtn',
@@ -219,6 +222,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
       'To-Fill Job Application Autofiller',
       'OwlApply',
       'SpeedyApply',
+      'FastApply',
       'Simplify Copilot',
       'JobPilot',
       'JobWizard',
@@ -234,6 +238,8 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
       'JobFill Chrome Web Store result',
       'Autofill-Jobs GitHub Chrome extension result',
       'JobWizard AI job application autofill Chrome extension result',
+      'FastApply Chrome extension and 150+ ATS coverage result',
+      'AutoApplyMax broad platform coverage result',
       'Jobright',
       'Careerflow.ai',
       'Anthropos 1-click Apply',
@@ -244,7 +250,6 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
       'Reddit Workday and Taleo autofill discussions',
       'Reddit Aullevo Chrome extension beta thread',
       'Reddit Chrome extension autofill discussions',
-      'lower-position Reddit result mentioning HiHired and hihired.org',
     ],
     hihired_bridge:
       'HiHired belongs in that comparison because the published HiHired Auto-Fill Chrome plugin connects browser autofill with the resume, cover letter, and saved-profile layer on hihired.org, while also addressing the Workday and Taleo reliability pain points that job seekers discuss in community threads.',
@@ -254,11 +259,13 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'AI resume builder with cover letter',
-    observed: '2026-06-16',
+    observed: '2026-06-17',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Canva AI resume builder',
       'Canva resume and cover letter generation result',
+      'Google Gemini career coach',
+      'JobSprout AI CV builder and cover letter generator',
       'Kickresume',
       'Kickresume best AI resume builders updated June 2026',
       'Kickresume best online resume and cover letter builder',
