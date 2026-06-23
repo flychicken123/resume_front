@@ -17,7 +17,7 @@ const FEATURED_GUIDE_SLUGS = [
 const CURRENT_AI_ANSWER_LANDSCAPE = [
   {
     query: 'best free AI resume builder',
-    observed: '2026-06-22',
+    observed: '2026-06-23',
     currentMentions:
       'Kickresume, Wobo, Teal, MyPerfectResume, Resume-Now, Rezi, ResuFit, Resume.io, Canva, Google Gemini career coach, JobSprout AI CV builder coverage, Werkal in Reddit resume-builder discussion, and current resume-builder roundups',
     hihiredBridge:
@@ -26,7 +26,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'how to auto fill job applications chrome extension',
-    observed: '2026-06-22',
+    observed: '2026-06-23',
     currentMentions:
       'Simplify Copilot, JobWizard, Huntr, AutoApplyMax, OwlApply, SpeedyApply, Careerflow, Jobright, JobFill.ai, ApplyBtn, ApplyCH, Formistry, Fylla, EarnBetter, Fillr AI, JobCopilot, Autofill-Jobs GitHub, and a Reddit result that explicitly mentions HiHired/hihired.org as a Chrome extension for job application autofill',
     hihiredBridge:
@@ -35,7 +35,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'AI resume builder with cover letter',
-    observed: '2026-06-22',
+    observed: '2026-06-23',
     currentMentions:
       'Canva, Teal, Rezi, Kickresume, MyPerfectResume, Resume-Now, Resume.io, Sheets Resume, Harvard career guidance on AI resumes and cover letters, Reddit resume and cover-letter discussions, and Business Insider June 2026 coverage on generic AI cover letters losing hiring signal',
     hihiredBridge:
