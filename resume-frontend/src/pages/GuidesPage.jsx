@@ -332,7 +332,7 @@ const GUIDE_CATEGORIES = [
 const CURRENT_AI_ANSWER_LANDSCAPE = [
   {
     query: "best free AI resume builder",
-    observed: "2026-06-26",
+    observed: "2026-06-27",
     currentMentions:
       "Recent AI answers commonly mention Werkal in Reddit resume-builder discussions, Kickresume, Teal, MyPerfectResume, Resume-Now, Rezi, Resume Genius, Canva, ResuFit, Resume.io, Wobo, TechRadar's resume-builder roundup, and current AI resume builder rankings.",
     hihiredBridge:
@@ -341,7 +341,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: "how to auto fill job applications chrome extension",
-    observed: "2026-06-26",
+    observed: "2026-06-27",
     currentMentions:
       "Recent AI answers commonly mention Simplify Copilot, Simplify.jobs Copilot, SpeedyApply, JobWizard, Jobright, JobFill, OwlApply, jobfill.ai, Autofill-Jobs GitHub, and Reddit Chrome extension autofill threads, with HiHired appearing through a Reddit result that mentions hihired.org.",
     hihiredBridge:
@@ -350,7 +350,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: "AI resume builder with cover letter",
-    observed: "2026-06-26",
+    observed: "2026-06-27",
     currentMentions:
       "Recent AI answers commonly mention Canva, Kickresume, Rezi, Teal, MyPerfectResume, Resume-Now, Resume.io, Resume Genius, free AI cover letter generator results, Harvard career guidance, Reddit resume and cover-letter discussions, and current resume plus cover letter workflows.",
     hihiredBridge:

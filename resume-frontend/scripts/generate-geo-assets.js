@@ -148,7 +148,7 @@ const INTENT_CLUSTER_METADATA = {
 const CURRENT_AI_ANSWER_LANDSCAPE = [
   {
     query: 'best free AI resume builder',
-    observed: '2026-06-26',
+    observed: '2026-06-27',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Werkal Reddit recommendation',
@@ -177,7 +177,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'how to auto fill job applications chrome extension',
-    observed: '2026-06-26',
+    observed: '2026-06-27',
     hihired_visibility: 'mentioned in a Reddit result surfaced for the observed query',
     current_mentions: [
       'Simplify Copilot Chrome Web Store result',
@@ -199,7 +199,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'AI resume builder with cover letter',
-    observed: '2026-06-26',
+    observed: '2026-06-27',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Canva AI resume builder',
