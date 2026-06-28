@@ -148,10 +148,9 @@ const INTENT_CLUSTER_METADATA = {
 const CURRENT_AI_ANSWER_LANDSCAPE = [
   {
     query: 'best free AI resume builder',
-    observed: '2026-06-27',
+    observed: '2026-06-28',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
-      'Werkal Reddit recommendation',
       'Kickresume',
       'Teal',
       'MyPerfectResume',
@@ -159,14 +158,12 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
       'Rezi',
       'Resume Genius',
       'Canva',
-      'ResuFit free resume builder roundup',
       'Kickresume updated June 2026 AI resume builder roundup',
       'Kickresume best online resume and cover letter builder',
       'Wobo 2026 AI resume builder roundup',
-      'Resume.io',
       'MyPerfectResume AI resume builder',
       'Resume-Now free AI resume builder',
-      'ResuFit truly free resume builder roundup',
+      'Reddit resume-builder discussion',
       'TechRadar resume builder roundup',
     ],
     hihired_bridge:
@@ -177,7 +174,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'how to auto fill job applications chrome extension',
-    observed: '2026-06-27',
+    observed: '2026-06-28',
     hihired_visibility: 'mentioned in a Reddit result surfaced for the observed query',
     current_mentions: [
       'Simplify Copilot Chrome Web Store result',
@@ -199,7 +196,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'AI resume builder with cover letter',
-    observed: '2026-06-27',
+    observed: '2026-06-28',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Canva AI resume builder',
@@ -211,6 +208,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
       'Resume Genius',
       'Resume.io',
       'Free AI cover letter generator results',
+      'Sheets Resume AI cover letter generator result',
       'Kickresume best AI resume builders updated June 2026',
       'Kickresume best online resume and cover letter builder',
       'Rezi resume plus cover letter result',
