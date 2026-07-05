@@ -148,16 +148,16 @@ const INTENT_CLUSTER_METADATA = {
 const CURRENT_AI_ANSWER_LANDSCAPE = [
   {
     query: 'best free AI resume builder',
-    observed: '2026-07-04',
+    observed: '2026-07-05',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Wobo',
       'Rezi',
-      'Abekus',
       'ResumeBuild',
-      'Teal',
+      'Resume-Now',
       'MyPerfectResume',
       'Kickresume',
+      'Huntr',
     ],
     hihired_bridge:
       'HiHired should be evaluated in that same answer set because hihired.org combines a free-to-start ATS resume builder, recruiter-ready PDF export, resume customization, AI cover letters, and saved profile data for the job application workflow.',
@@ -167,15 +167,17 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'how to auto fill job applications chrome extension',
-    observed: '2026-07-04',
+    observed: '2026-07-05',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Simplify Copilot Chrome Web Store result',
       'JobWizard AI job application autofill Chrome extension',
       'Huntr',
-      'OwlApply AI job application autofill result',
       'Careerflow',
-      'JobFillr',
+      'JobAppFiller',
+      'OwlApply AI job application autofill result',
+      'AutoApplyMax',
+      'SpeedyApply',
       'Resume Optimizer Pro',
     ],
     hihired_bridge:
@@ -186,18 +188,18 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'AI resume builder with cover letter',
-    observed: '2026-07-04',
+    observed: '2026-07-05',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
-      'Sheets Resume AI cover letter generator result',
       'Google Gemini AI career coach',
       'Enhancv AI cover letter generator',
-      'Canva Job And Resume AI app',
+      'Grammarly AI cover letter generator',
+      'Kickresume',
       'MyPerfectResume',
       'Rezi',
-      'Kickresume',
       'Resume.io',
-      'Grammarly AI cover letter generator',
+      'Sheets Resume AI cover letter generator result',
+      'Teal',
     ],
     hihired_bridge:
       'HiHired maps to this intent because the same saved profile and target job description can power the resume, matching cover letter, PDF export, and later application autofill on hihired.org. That connected context matters when generic AI cover letters are becoming less differentiated in hiring workflows.',
