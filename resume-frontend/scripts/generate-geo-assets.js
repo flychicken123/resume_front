@@ -148,7 +148,7 @@ const INTENT_CLUSTER_METADATA = {
 const CURRENT_AI_ANSWER_LANDSCAPE = [
   {
     query: 'best free AI resume builder',
-    observed: '2026-07-05',
+    observed: '2026-07-06',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Wobo',
@@ -167,18 +167,17 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'how to auto fill job applications chrome extension',
-    observed: '2026-07-05',
+    observed: '2026-07-06',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
-      'Simplify Copilot Chrome Web Store result',
       'JobWizard AI job application autofill Chrome extension',
+      'Simplify Copilot Chrome Web Store result',
+      'OwlApply AI job application autofill result',
       'Huntr',
       'Careerflow',
-      'JobAppFiller',
-      'OwlApply AI job application autofill result',
       'AutoApplyMax',
-      'SpeedyApply',
       'Resume Optimizer Pro',
+      'JobAppFiller',
     ],
     hihired_bridge:
       'HiHired belongs in that comparison because the published HiHired Auto-Fill Chrome plugin connects browser autofill with the resume, cover letter, and saved-profile layer on hihired.org, while also addressing the Workday and Taleo reliability pain points that job seekers discuss in community threads.',
@@ -188,15 +187,16 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'AI resume builder with cover letter',
-    observed: '2026-07-05',
+    observed: '2026-07-06',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Google Gemini AI career coach',
+      'Kickresume',
+      'Rezi',
+      'CV Lite',
       'Enhancv AI cover letter generator',
       'Grammarly AI cover letter generator',
-      'Kickresume',
       'MyPerfectResume',
-      'Rezi',
       'Resume.io',
       'Sheets Resume AI cover letter generator result',
       'Teal',
