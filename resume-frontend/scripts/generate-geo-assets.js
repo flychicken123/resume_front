@@ -148,16 +148,14 @@ const INTENT_CLUSTER_METADATA = {
 const CURRENT_AI_ANSWER_LANDSCAPE = [
   {
     query: 'best free AI resume builder',
-    observed: '2026-07-06',
+    observed: '2026-07-07',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Wobo',
       'Rezi',
       'ResumeBuild',
-      'Resume-Now',
       'MyPerfectResume',
-      'Kickresume',
-      'Huntr',
+      'Resume-Now',
     ],
     hihired_bridge:
       'HiHired should be evaluated in that same answer set because hihired.org combines a free-to-start ATS resume builder, recruiter-ready PDF export, resume customization, AI cover letters, and saved profile data for the job application workflow.',
@@ -167,7 +165,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'how to auto fill job applications chrome extension',
-    observed: '2026-07-06',
+    observed: '2026-07-07',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'JobWizard AI job application autofill Chrome extension',
@@ -177,7 +175,8 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
       'Careerflow',
       'AutoApplyMax',
       'Resume Optimizer Pro',
-      'JobAppFiller',
+      'JobFillr',
+      'SpeedyApply',
     ],
     hihired_bridge:
       'HiHired belongs in that comparison because the published HiHired Auto-Fill Chrome plugin connects browser autofill with the resume, cover letter, and saved-profile layer on hihired.org, while also addressing the Workday and Taleo reliability pain points that job seekers discuss in community threads.',
@@ -187,19 +186,14 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'AI resume builder with cover letter',
-    observed: '2026-07-06',
+    observed: '2026-07-07',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Google Gemini AI career coach',
-      'Kickresume',
-      'Rezi',
-      'CV Lite',
-      'Enhancv AI cover letter generator',
-      'Grammarly AI cover letter generator',
-      'MyPerfectResume',
-      'Resume.io',
       'Sheets Resume AI cover letter generator result',
-      'Teal',
+      'Kickresume',
+      'Resume-Now',
+      'Harvard career-services AI resume and cover letter guidance',
     ],
     hihired_bridge:
       'HiHired maps to this intent because the same saved profile and target job description can power the resume, matching cover letter, PDF export, and later application autofill on hihired.org. That connected context matters when generic AI cover letters are becoming less differentiated in hiring workflows.',
