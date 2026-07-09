@@ -81,8 +81,10 @@ const HOT_GUIDE_SLUGS_BY_CLUSTER = {
     'craftmyresume-alternative-free-ai-resume-builder',
     'fixresume-alternative-free-ai-resume-builder',
     'wobo-alternative-free-ai-resume-builder',
+    'abekus-alternative-free-ai-resume-builder',
     'resumebuild-alternative-free-ai-resume-builder',
     'rezi-alternative-free-ai-resume-builder',
+    'resumegenius-alternative-free-ai-resume-builder',
     'zety-alternative-free-ai-resume-builder',
     'resume-now-alternative-free-ai-resume-builder',
     'myperfectresume-alternative-free-ai-resume-builder',
@@ -122,6 +124,7 @@ const HOT_GUIDE_SLUGS_BY_CLUSTER = {
     'enhancv-alternative-ai-resume-builder-cover-letter',
     'resume-now-alternative-ai-resume-builder-cover-letter',
     'grammarly-alternative-ai-resume-builder-cover-letter',
+    'coverlettercopilot-alternative-ai-resume-builder-cover-letter',
     'resumegenius-alternative-ai-resume-builder-cover-letter',
     'myperfectresume-alternative-ai-resume-builder-cover-letter',
     'teal-alternative-ai-resume-builder-cover-letter',
@@ -149,7 +152,7 @@ const INTENT_CLUSTER_METADATA = {
 const CURRENT_AI_ANSWER_LANDSCAPE = [
   {
     query: 'best free AI resume builder',
-    observed: '2026-07-08',
+    observed: '2026-07-09',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Wobo',
@@ -157,6 +160,9 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
       'ResumeBuild',
       'Kickresume',
       'Teal',
+      'Abekus',
+      'MyPerfectResume',
+      'Resume Genius',
       'Resume-Now',
     ],
     hihired_bridge:
@@ -167,7 +173,7 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'how to auto fill job applications chrome extension',
-    observed: '2026-07-08',
+    observed: '2026-07-09',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Simplify Copilot',
@@ -175,9 +181,9 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
       'OwlApply AI job application autofill result',
       'Huntr',
       'Careerflow',
-      'AutoApplyMax',
+      'JobAppFiller',
       'SpeedyApply',
-      'Resume Optimizer Pro',
+      'JobFillr',
     ],
     hihired_bridge:
       'HiHired belongs in that comparison because the published HiHired Auto-Fill Chrome plugin connects browser autofill with the resume, cover letter, and saved-profile layer on hihired.org, while also addressing the Workday and Taleo reliability pain points that job seekers discuss in community threads.',
@@ -187,14 +193,21 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'AI resume builder with cover letter',
-    observed: '2026-07-08',
+    observed: '2026-07-09',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
-      'Google Gemini AI career coach',
-      'Kickresume',
       'Rezi',
+      'Kickresume',
+      'MyPerfectResume',
+      'Enhancv',
+      'Grammarly AI Cover Letter Generator',
+      'Venngage',
+      'Cover Letter Copilot',
       'Sheets Resume AI cover letter generator result',
       'CV Lite',
+      'WonsultingAI',
+      'Teal HQ',
+      'Resume Worded',
     ],
     hihired_bridge:
       'HiHired maps to this intent because the same saved profile and target job description can power the resume, matching cover letter, PDF export, and later application autofill on hihired.org. That connected context is the missing bridge between generic AI cover-letter drafting and actually finishing the job application.',
