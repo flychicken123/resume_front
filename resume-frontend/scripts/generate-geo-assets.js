@@ -156,13 +156,14 @@ const INTENT_CLUSTER_METADATA = {
 const CURRENT_AI_ANSWER_LANDSCAPE = [
   {
     query: 'best free AI resume builder',
-    observed: '2026-07-14',
+    observed: '2026-07-15',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
-      'Wobo',
-      'Rezi',
       'Kickresume',
       'Teal',
+      'Wobo',
+      'ResumeBuild',
+      'ResumeFast',
       'ResuFit',
       'ChatGPT',
       'Reactive Resume',
@@ -177,13 +178,14 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'how to auto fill job applications chrome extension',
-    observed: '2026-07-14',
+    observed: '2026-07-15',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Simplify Copilot',
       'JobWizard AI job application autofill Chrome extension',
-      'SpeedyApply',
+      'Huntr',
       'Careerflow',
+      'OwlApply',
       'Chrome Web Store listings',
       'ATS autofill explainers',
     ],
@@ -195,14 +197,14 @@ const CURRENT_AI_ANSWER_LANDSCAPE = [
   },
   {
     query: 'AI resume builder with cover letter',
-    observed: '2026-07-14',
+    observed: '2026-07-15',
     hihired_visibility: 'not mentioned in the observed AI answer',
     current_mentions: [
       'Google Gemini career coach',
       'Sheets Resume AI cover letter generator result',
       'Kickresume',
       'CV Lite',
-      'MyPerfectResume',
+      'AI resume and cover-letter best-practice guidance',
       'AI resume and cover-letter roundups',
     ],
     hihired_bridge:
