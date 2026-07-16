@@ -7,6 +7,7 @@ import {
   optimizeProjectAI,
   improveExperienceGrammarAI,
   improveProjectGrammarAI,
+  parseProjectsAI,
   parseResumeFile
 } from './api';
 
@@ -209,6 +210,27 @@ describe('API Functions', () => {
         company: 'Acme',
         resumeSkills: ['Go'],
       },
+    });
+  });
+
+  it('adds the saved auth token to assistant parsing requests', async () => {
+    localStorage.setItem('resumeToken', 'test-token');
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        data: {
+          projects: [],
+        },
+      }),
+    });
+
+    await parseProjectsAI('Built a resume parser.');
+
+    const [, options] = global.fetch.mock.calls[0];
+    expect(options.headers).toMatchObject({
+      Authorization: 'Bearer test-token',
+      'Content-Type': 'application/json',
     });
   });
 

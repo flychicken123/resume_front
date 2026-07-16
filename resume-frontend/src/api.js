@@ -575,7 +575,7 @@ export async function parsePersonalDetailsAI(text, existingData = null) {
     };
   }
 
-  const res = await fetch(`${API_BASE_URL}/api/assistant/personal-info`, {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/assistant/personal-info`, {
     method: "POST",
     headers: {
       'Content-Type': 'application/json',
@@ -591,7 +591,7 @@ export async function parsePersonalDetailsAI(text, existingData = null) {
 
 // Job description intent (URL + text) via LangChain backend
 export async function inferJobIntent(text) {
-  const res = await fetch(`${API_BASE_URL}/api/assistant/job-intent`, {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/assistant/job-intent`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -763,7 +763,7 @@ export async function parseProjectsAI(text, existingData = null) {
     };
   }
 
-  const res = await fetch(`${API_BASE_URL}/api/assistant/projects`, {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/assistant/projects`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -791,7 +791,7 @@ export async function parseEducationAI(text, existingData = null) {
     };
   }
 
-  const res = await fetch(`${API_BASE_URL}/api/assistant/education`, {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/assistant/education`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -817,7 +817,7 @@ export async function parseJobDescriptionAI(text, existingEntries = []) {
     payload.existing = existingEntries;
   }
 
-  const res = await fetch(`${API_BASE_URL}/api/assistant/job-description`, {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/assistant/job-description`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -842,7 +842,7 @@ export async function parseSkillsAI(text, existingSkills = []) {
     payload.existing = existingSkills;
   }
 
-  const res = await fetch(`${API_BASE_URL}/api/assistant/skills`, {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/assistant/skills`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -892,7 +892,7 @@ export async function generateSkillsAI(resumeData, existingSkills = []) {
     }));
   }
 
-  const res = await fetch(`${API_BASE_URL}/api/assistant/skills/generate`, {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/assistant/skills/generate`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -910,7 +910,7 @@ export async function generateSkillsAI(resumeData, existingSkills = []) {
 }
 
 export async function analyzeResumeModification(text, existingData = {}) {
-  const res = await fetch(`${API_BASE_URL}/api/assistant/resume/modify`, {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/assistant/resume/modify`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -935,7 +935,7 @@ export async function transcribeVoiceAI(audioBlob) {
   formData.append('audio', audioBlob, 'recording.webm');
   formData.append('mimeType', audioBlob.type || 'audio/webm');
 
-  const res = await fetch(`${API_BASE_URL}/api/assistant/voice/transcribe`, {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/assistant/voice/transcribe`, {
     method: 'POST',
     body: formData,
   });
@@ -1551,7 +1551,7 @@ export async function extractImpactKeywordsAI(experiences) {
     })),
   };
 
-  const res = await fetch(`${API_BASE_URL}/api/impact-keywords/extract`, {
+  const res = await fetchWithAuth(`${API_BASE_URL}/api/impact-keywords/extract`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
