@@ -82,6 +82,27 @@ describe('API Functions', () => {
     expect(result).not.toContain('"');
   });
 
+  it('adds the saved auth token to experience AI requests', async () => {
+    localStorage.setItem('resumeToken', 'test-token');
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        data: {
+          optimizedExperience: 'Built reliable APIs.',
+        },
+      }),
+    });
+
+    await generateExperienceAI('built APIs', 'backend role');
+
+    const [, options] = global.fetch.mock.calls[0];
+    expect(options.headers).toMatchObject({
+      Authorization: 'Bearer test-token',
+      'Content-Type': 'application/json',
+    });
+  });
+
   it('normalizes quoted JSON string text from experience optimization', async () => {
     global.fetch.mockResolvedValueOnce({
       ok: true,

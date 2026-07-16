@@ -73,8 +73,10 @@ const handleUnauthorized = () => {
 
 // Helper function to make fetch requests with automatic 401 handling
 const fetchWithAuth = async (url, options = {}) => {
+  const token = localStorage.getItem('resumeToken');
   const mergedHeaders = {
     ...getExperimentHeaders(),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(options.headers || {}),
   };
   const response = await fetch(url, {
